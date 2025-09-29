@@ -55,21 +55,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for current active task
+    // Calculate task eligibility
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // First, expire any old tasks from previous days
+    await prisma.nPCTask.updateMany({
+      where: {
+        npcId: npc.id,
+        userId: user.id,
+        status: 'ASSIGNED',
+        assignedAt: {
+          lt: todayStart // Tasks assigned before today
+        }
+      },
+      data: {
+        status: 'EXPIRED'
+      }
+    });
+
+    // Check for current active task (only today's tasks)
     const currentTask = await prisma.nPCTask.findFirst({
       where: {
         npcId: npc.id,
         userId: user.id,
-        status: 'ASSIGNED'
+        status: 'ASSIGNED',
+        assignedAt: {
+          gte: todayStart // Only today's tasks
+        }
       },
       orderBy: {
         assignedAt: 'desc'
       }
     });
-
-    // Calculate task eligibility
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // Count tasks assigned today for this player from this NPC
     const todaysTasks = await prisma.nPCTask.count({

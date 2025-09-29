@@ -569,5 +569,223 @@ describe('/api/npc/task/complete', () => {
       expect(data.data.payment).toBeDefined();
       expect(data.data.inventoryChange).toBeDefined();
     });
+
+    it('should reject completion of expired task from previous day', async () => {
+      // Use the existing test user and NPC with quest items
+
+      // Create a task from yesterday that's still assigned
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const oldTask = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Iron Sword',
+          itemShortName: 'iron_sword',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: yesterday,
+          dailyCount: 1
+        }
+      });
+
+      // Add the required item to user's inventory
+      const ironSwordItem = await prisma.rpItem.findUnique({
+        where: { shortName_universe: { shortName: 'iron_sword', universe: 'Gor' } }
+      });
+
+      await prisma.userInventory.upsert({
+        where: {
+          userId_rpItemId: {
+            userId: testUser.id,
+            rpItemId: ironSwordItem!.id
+          }
+        },
+        update: {
+          quantity: 1
+        },
+        create: {
+          userId: testUser.id,
+          rpItemId: ironSwordItem!.id,
+          quantity: 1
+        }
+      });
+
+      // Attempt to complete the old task - this should fail
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        taskId: oldTask.id,
+        playerUuid: testUser.slUuid,
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('Task has expired and cannot be completed');
+
+      // Verify the old task was marked as expired
+      const expiredTask = await prisma.nPCTask.findUnique({
+        where: { id: oldTask.id }
+      });
+      expect(expiredTask?.status).toBe('EXPIRED');
+    });
+
+    it('should allow completion of task assigned today', async () => {
+      // Use the existing test user and NPC with quest items
+
+      // Create a task from today that's still assigned
+      const todayTask = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Iron Sword',
+          itemShortName: 'iron_sword',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: new Date(),
+          dailyCount: 1
+        }
+      });
+
+      // Add the required item to user's inventory
+      const ironSwordItem = await prisma.rpItem.findUnique({
+        where: { shortName_universe: { shortName: 'iron_sword', universe: 'Gor' } }
+      });
+
+      await prisma.userInventory.upsert({
+        where: {
+          userId_rpItemId: {
+            userId: testUser.id,
+            rpItemId: ironSwordItem!.id
+          }
+        },
+        update: {
+          quantity: 1
+        },
+        create: {
+          userId: testUser.id,
+          rpItemId: ironSwordItem!.id,
+          quantity: 1
+        }
+      });
+
+      // Attempt to complete today's task - this should succeed
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        taskId: todayTask.id,
+        playerUuid: testUser.slUuid,
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.task.id).toBe(todayTask.id);
+
+      // Verify today's task was marked as completed
+      const completedTask = await prisma.nPCTask.findUnique({
+        where: { id: todayTask.id }
+      });
+      expect(completedTask?.status).toBe('COMPLETED');
+    });
+
+    it('should handle edge case of task assigned at midnight boundary', async () => {
+      // Use the existing test user and NPC with quest items
+
+      // Create a task assigned just after midnight today (should be valid)
+      const todayMidnight = new Date();
+      todayMidnight.setHours(0, 0, 1, 0); // 1 second after midnight today
+
+      const midnightTask = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Iron Sword',
+          itemShortName: 'iron_sword',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: todayMidnight,
+          dailyCount: 1
+        }
+      });
+
+      // Add the required item to user's inventory
+      const ironSwordItem = await prisma.rpItem.findUnique({
+        where: { shortName_universe: { shortName: 'iron_sword', universe: 'Gor' } }
+      });
+
+      await prisma.userInventory.upsert({
+        where: {
+          userId_rpItemId: {
+            userId: testUser.id,
+            rpItemId: ironSwordItem!.id
+          }
+        },
+        update: {
+          quantity: 1
+        },
+        create: {
+          userId: testUser.id,
+          rpItemId: ironSwordItem!.id,
+          quantity: 1
+        }
+      });
+
+      // Attempt to complete the task - this should succeed as it's from today
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        taskId: midnightTask.id,
+        playerUuid: testUser.slUuid,
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+
+      // Verify the task was completed (not expired)
+      const completedTask = await prisma.nPCTask.findUnique({
+        where: { id: midnightTask.id }
+      });
+      expect(completedTask?.status).toBe('COMPLETED');
+    });
   });
 });

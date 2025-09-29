@@ -507,5 +507,184 @@ describe('/api/npc/task/check', () => {
       expect(data.data.npcInfo.maxDailyTasks).toBe(3);
       expect(data.data.npcInfo.taskInterval).toBe(300);
     });
+
+    it('should expire old assigned tasks from previous days', async () => {
+      // Use the existing test user and NPC
+
+      // Create a task from yesterday that's still assigned
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const oldTask = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Old Task',
+          itemShortName: 'old_task',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: yesterday,
+          dailyCount: 1
+        }
+      });
+
+      // Check task status - this should expire the old task
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        npcId: testNpc.npcId,
+        playerUuid: testUser.slUuid,
+        universe: 'Gor',
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.playerStatus.hasActiveTask).toBe(false);
+      expect(data.data.currentTask).toBeNull();
+
+      // Verify the old task was marked as expired
+      const expiredTask = await prisma.nPCTask.findUnique({
+        where: { id: oldTask.id }
+      });
+      expect(expiredTask?.status).toBe('EXPIRED');
+    });
+
+    it('should not expire tasks assigned today', async () => {
+      // Use the existing test user and NPC
+
+      // Create a task from today
+      const todayTask = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Today Task',
+          itemShortName: 'today_task',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: new Date(),
+          dailyCount: 1
+        }
+      });
+
+      // Check task status - this should NOT expire today's task
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        npcId: testNpc.npcId,
+        playerUuid: testUser.slUuid,
+        universe: 'Gor',
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.playerStatus.hasActiveTask).toBe(true);
+      expect(data.data.currentTask).toBeDefined();
+      expect(data.data.currentTask.id).toBe(todayTask.id);
+
+      // Verify today's task is still assigned
+      const currentTask = await prisma.nPCTask.findUnique({
+        where: { id: todayTask.id }
+      });
+      expect(currentTask?.status).toBe('ASSIGNED');
+    });
+
+    it('should handle multiple old tasks and expire all of them', async () => {
+      // Use the existing test user and NPC
+
+      // Create multiple old tasks from different previous days
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      const oldTask1 = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Old Task 1',
+          itemShortName: 'old_task_1',
+          quantity: 1,
+          rewardCopper: 100,
+          status: 'ASSIGNED',
+          assignedAt: twoDaysAgo,
+          dailyCount: 1
+        }
+      });
+
+      const oldTask2 = await prisma.nPCTask.create({
+        data: {
+          npcId: testNpc.id,
+          userId: testUser.id,
+          itemName: 'Old Task 2',
+          itemShortName: 'old_task_2',
+          quantity: 1,
+          rewardCopper: 150,
+          status: 'ASSIGNED',
+          assignedAt: yesterday,
+          dailyCount: 1
+        }
+      });
+
+      // Check task status - this should expire both old tasks
+      const timestamp = new Date().toISOString();
+      const signature = createTestSignature(timestamp);
+
+      const requestData = {
+        npcId: testNpc.npcId,
+        playerUuid: testUser.slUuid,
+        universe: 'Gor',
+        timestamp,
+        signature
+      };
+
+      const request = new NextRequest('http://localhost:3000/api/npc/task/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData)
+      });
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data.playerStatus.hasActiveTask).toBe(false);
+
+      // Verify both old tasks were marked as expired
+      const expiredTask1 = await prisma.nPCTask.findUnique({
+        where: { id: oldTask1.id }
+      });
+      const expiredTask2 = await prisma.nPCTask.findUnique({
+        where: { id: oldTask2.id }
+      });
+
+      expect(expiredTask1?.status).toBe('EXPIRED');
+      expect(expiredTask2?.status).toBe('EXPIRED');
+    });
   });
 });

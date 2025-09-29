@@ -60,6 +60,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if task is expired (assigned before today)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    if (task.assignedAt < todayStart) {
+      // Mark as expired and return error
+      await prisma.nPCTask.update({
+        where: { id: taskId },
+        data: { status: 'EXPIRED' }
+      });
+
+      return NextResponse.json(
+        { success: false, error: 'Task has expired and cannot be completed' },
+        { status: 400 }
+      );
+    }
+
     // Start a transaction to handle inventory removal and task completion
     const result = await prisma.$transaction(async (tx) => {
       // 1. Check if player has the required item in inventory
