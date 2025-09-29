@@ -1,5 +1,6 @@
-import { POST } from '../route';
+import { GET, POST } from '../route';
 import {
+  createMockGetRequest,
   createMockPostRequest,
   createApiBody,
   createTestUser,
@@ -11,7 +12,7 @@ import {
 import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-setup';
 import { prisma } from '@/lib/prisma';
 
-describe('POST /api/arkana/users/stats', () => {
+describe('/api/arkana/users/stats', () => {
   beforeAll(async () => {
     await setupTestDatabase();
   });
@@ -24,143 +25,144 @@ describe('POST /api/arkana/users/stats', () => {
     await cleanupDatabase();
   });
 
-  it('should retrieve user stats with Arkana character data', async () => {
-    const { user } = await createTestUser('arkana');
+  describe('GET', () => {
+    it('should retrieve user stats with Arkana character data', async () => {
+      const { user } = await createTestUser('arkana');
 
-    // Create Arkana character for the user
-    await prisma.arkanaStats.create({
-      data: {
-        userId: user.id,
-        characterName: 'Test Character',
-        agentName: 'TestAgent',
-        race: 'human',
-        archetype: 'Arcanist',
-        physical: 3,
-        dexterity: 2,
-        mental: 4,
-        perception: 3,
-        hitPoints: 15,
-        statPointsPool: 0,
-        statPointsSpent: 6,
-        flaws: ['flaw_addiction'],
-        flawPointsGranted: 3,
-        powerPointsBudget: 15,
-        powerPointsBonus: 3,
-        powerPointsSpent: 0,
-        credits: 1000,
-        chips: 500,
-        xp: 0,
-        registrationCompleted: true
-      }
+      // Create Arkana character for the user
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 2,
+          mental: 4,
+          perception: 3,
+          hitPoints: 15,
+          statPointsPool: 0,
+          statPointsSpent: 6,
+          flaws: ['flaw_addiction'],
+          flawPointsGranted: 3,
+          powerPointsBudget: 15,
+          powerPointsBonus: 3,
+          powerPointsSpent: 0,
+          credits: 1000,
+          chips: 500,
+          xp: 0,
+          registrationCompleted: true
+        }
+      });
+
+      const params = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana'
+      }, 'arkana');
+
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.user.slUuid).toBe(user.slUuid);
+      expect(data.data.user.universe).toBe('arkana');
+      expect(data.data.arkanaStats).toBeDefined();
+      expect(data.data.arkanaStats.characterName).toBe('Test Character');
+      expect(data.data.arkanaStats.race).toBe('human');
+      expect(data.data.arkanaStats.archetype).toBe('Arcanist');
+      expect(data.data.arkanaStats.hitPoints).toBe(15);
+      expect(data.data.arkanaStats.credits).toBe(1000);
+      expect(data.data.arkanaStats.chips).toBe(500);
+      expect(data.data.hasArkanaCharacter).toBe(true);
     });
 
-    const body = createApiBody({
-      sl_uuid: user.slUuid,
-      universe: 'arkana'
-    }, 'arkana');
+    it('should retrieve user stats without Arkana character data', async () => {
+      const { user } = await createTestUser('arkana');
+      // Don't create arkanaStats - user exists but has no character
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
+      const params = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana'
+      }, 'arkana');
 
-    expectSuccess(data);
-    expect(data.data.user.slUuid).toBe(user.slUuid);
-    expect(data.data.user.universe).toBe('arkana');
-    expect(data.data.arkanaStats).toBeDefined();
-    expect(data.data.arkanaStats.characterName).toBe('Test Character');
-    expect(data.data.arkanaStats.race).toBe('human');
-    expect(data.data.arkanaStats.archetype).toBe('Arcanist');
-    expect(data.data.arkanaStats.hitPoints).toBe(15);
-    expect(data.data.arkanaStats.credits).toBe(1000);
-    expect(data.data.arkanaStats.chips).toBe(500);
-    expect(data.data.hasArkanaCharacter).toBe(true);
-  });
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
 
-  it('should retrieve user stats without Arkana character data', async () => {
-    const { user } = await createTestUser('arkana');
-    // Don't create arkanaStats - user exists but has no character
+      expectSuccess(data);
+      expect(data.data.user.slUuid).toBe(user.slUuid);
+      expect(data.data.user.universe).toBe('arkana');
+      expect(data.data.stats).toBeDefined(); // Basic stats should exist
+      expect(data.data.arkanaStats).toBeNull();
+      expect(data.data.hasArkanaCharacter).toBe(false);
+    });
 
-    const body = createApiBody({
-      sl_uuid: user.slUuid,
-      universe: 'arkana'
-    }, 'arkana');
+    it('should return 404 for user not found in Arkana universe', async () => {
+      const params = createApiBody({
+        sl_uuid: '550e8400-e29b-41d4-a716-446655440999', // Non-existent user
+        universe: 'arkana'
+      }, 'arkana');
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
 
-    expectSuccess(data);
-    expect(data.data.user.slUuid).toBe(user.slUuid);
-    expect(data.data.user.universe).toBe('arkana');
-    expect(data.data.stats).toBeDefined(); // Basic stats should exist
-    expect(data.data.arkanaStats).toBeNull();
-    expect(data.data.hasArkanaCharacter).toBe(false);
-  });
+      expectError(data, 'User not found in Arkana universe');
+      expect(response.status).toBe(404);
+    });
 
-  it('should return 404 for user not found in Arkana universe', async () => {
-    const body = createApiBody({
-      sl_uuid: '550e8400-e29b-41d4-a716-446655440999', // Non-existent user
-      universe: 'arkana'
-    }, 'arkana');
+    it('should return 401 for invalid signature', async () => {
+      const { user } = await createTestUser('arkana');
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
+      const params = {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'invalid-signature'
+      };
 
-    expectError(data, 'User not found in Arkana universe');
-    expect(response.status).toBe(404);
-  });
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
 
-  it('should return 401 for invalid signature', async () => {
-    const { user } = await createTestUser('arkana');
+      expectError(data);
+      // Could be 400 if validation fails first, or 401 if signature validation fails
+      expect([400, 401]).toContain(response.status);
+    });
 
-    const body = {
-      sl_uuid: user.slUuid,
-      universe: 'arkana',
-      timestamp: new Date().toISOString(),
-      signature: 'invalid-signature'
-    };
+    it('should return 400 for invalid universe', async () => {
+      const { user } = await createTestUser('arkana');
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
+      const params = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'gor' // Wrong universe
+      }, 'gor'); // Use gor signature
 
-    expectError(data);
-    // Could be 400 if validation fails first, or 401 if signature validation fails
-    expect([400, 401]).toContain(response.status);
-  });
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
 
-  it('should return 400 for invalid universe', async () => {
-    const { user } = await createTestUser('arkana');
+      expectError(data);
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('must be [arkana]');
+    });
 
-    const body = createApiBody({
-      sl_uuid: user.slUuid,
-      universe: 'gor' // Wrong universe
-    }, 'gor'); // Use gor signature
+    it('should return 400 for invalid UUID format', async () => {
+      const params = createApiBody({
+        sl_uuid: 'invalid-uuid',
+        universe: 'arkana'
+      }, 'arkana');
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
+      const request = createMockGetRequest('/api/arkana/users/stats', params);
+      const response = await GET(request);
+      const data = await parseJsonResponse(response);
 
-    expectError(data);
-    expect(response.status).toBe(400);
-    expect(data.error).toContain('must be [arkana]');
-  });
-
-  it('should return 400 for invalid UUID format', async () => {
-    const body = createApiBody({
-      sl_uuid: 'invalid-uuid',
-      universe: 'arkana'
-    }, 'arkana');
-
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
-    const data = await parseJsonResponse(response);
-
-    expectError(data);
-    expect(response.status).toBe(400);
-    expect(data.error).toContain('must be a valid GUID');
-  });
+      expectError(data);
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('must be a valid GUID');
+    });
 
   it('should return complete arkana character data structure', async () => {
     const { user } = await createTestUser('arkana');
@@ -207,13 +209,13 @@ describe('POST /api/arkana/users/stats', () => {
       }
     });
 
-    const body = createApiBody({
+    const params = createApiBody({
       sl_uuid: user.slUuid,
       universe: 'arkana'
     }, 'arkana');
 
-    const request = createMockPostRequest('/api/arkana/users/stats', body);
-    const response = await POST(request);
+    const request = createMockGetRequest('/api/arkana/users/stats', params);
+    const response = await GET(request);
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
@@ -247,5 +249,235 @@ describe('POST /api/arkana/users/stats', () => {
     expect(arkanaStats.credits).toBe(2500);
     expect(arkanaStats.chips).toBe(750);
     expect(arkanaStats.xp).toBe(100);
+  });
+});
+
+  describe('POST', () => {
+    it('should update user stats and return updated values', async () => {
+      const { user } = await createTestUser('arkana');
+
+      // Create initial stats
+      await prisma.userStats.create({
+        data: {
+          userId: user.id,
+          status: 0,
+          health: 50,
+          hunger: 75,
+          thirst: 80
+        }
+      });
+
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        health: 30,
+        hunger: 60,
+        thirst: 90
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.user.slUuid).toBe(user.slUuid);
+      expect(data.data.stats.health).toBe(30);
+      expect(data.data.stats.hunger).toBe(60);
+      expect(data.data.stats.thirst).toBe(90);
+    });
+
+    it('should create stats if they do not exist', async () => {
+      const { user } = await createTestUser('arkana');
+      // Don't create initial stats - test upsert functionality
+
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        status: 5,
+        health: 85,
+        hunger: 90,
+        thirst: 95
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.stats.status).toBe(5);
+      expect(data.data.stats.health).toBe(85);
+      expect(data.data.stats.hunger).toBe(90);
+      expect(data.data.stats.thirst).toBe(95);
+    });
+
+    it('should update only provided stats fields', async () => {
+      const { user } = await createTestUser('arkana');
+
+      // Create initial stats
+      await prisma.userStats.create({
+        data: {
+          userId: user.id,
+          status: 10,
+          health: 70,
+          hunger: 80,
+          thirst: 90
+        }
+      });
+
+      // Update only health
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        health: 45
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.stats.health).toBe(45);
+      expect(data.data.stats.hunger).toBe(80); // Should remain unchanged
+      expect(data.data.stats.thirst).toBe(90); // Should remain unchanged
+      expect(data.data.stats.status).toBe(10); // Should remain unchanged
+    });
+
+    it('should clamp stats values to valid ranges', async () => {
+      const { user } = await createTestUser('arkana');
+
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        status: -5, // Should be clamped to 0
+        health: 150, // Should be clamped to 100
+        hunger: -10, // Should be clamped to 0
+        thirst: 110  // Should be clamped to 100
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.stats.status).toBe(0);
+      expect(data.data.stats.health).toBe(100);
+      expect(data.data.stats.hunger).toBe(0);
+      expect(data.data.stats.thirst).toBe(100);
+    });
+
+    it('should return arkana character data if present', async () => {
+      const { user } = await createTestUser('arkana');
+
+      // Create Arkana character
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 2,
+          mental: 4,
+          perception: 3,
+          hitPoints: 15,
+          statPointsPool: 0,
+          statPointsSpent: 6,
+          flaws: ['flaw_addiction'],
+          flawPointsGranted: 3,
+          powerPointsBudget: 15,
+          powerPointsBonus: 3,
+          powerPointsSpent: 0,
+          credits: 1000,
+          chips: 500,
+          xp: 0,
+          registrationCompleted: true
+        }
+      });
+
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        health: 75
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.arkanaStats).toBeDefined();
+      expect(data.data.arkanaStats.characterName).toBe('Test Character');
+      expect(data.data.arkanaStats.credits).toBe(1000);
+      expect(data.data.hasArkanaCharacter).toBe(true);
+    });
+
+    it('should return 404 for user not found in Arkana universe', async () => {
+      const body = createApiBody({
+        sl_uuid: '550e8400-e29b-41d4-a716-446655440999', // Non-existent user
+        universe: 'arkana',
+        health: 50
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'User not found in Arkana universe');
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 401 for invalid signature', async () => {
+      const { user } = await createTestUser('arkana');
+
+      const body = {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        health: 50,
+        timestamp: new Date().toISOString(),
+        signature: 'invalid-signature'
+      };
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect([400, 401]).toContain(response.status);
+    });
+
+    it('should return 400 for invalid universe', async () => {
+      const { user } = await createTestUser('arkana');
+
+      const body = createApiBody({
+        sl_uuid: user.slUuid,
+        universe: 'gor', // Wrong universe
+        health: 50
+      }, 'gor'); // Use gor signature
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('must be [arkana]');
+    });
+
+    it('should return 400 for invalid UUID format', async () => {
+      const body = createApiBody({
+        sl_uuid: 'invalid-uuid',
+        universe: 'arkana',
+        health: 50
+      }, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/users/stats', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('must be a valid GUID');
+    });
   });
 });

@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { arkanaStatsSchema } from '@/lib/validation';
+import { arkanaStatsSchema, arkanaUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 
-export async function POST(request: NextRequest) {
+// GET /api/arkana/users/stats - Retrieve Arkana user statistics
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    const sl_uuid = searchParams.get('sl_uuid');
+    const universe = searchParams.get('universe');
+    const timestamp = searchParams.get('timestamp');
+    const signature = searchParams.get('signature');
 
     // Validate input
-    const { error, value } = arkanaStatsSchema.validate(body);
+    const { error, value } = arkanaStatsSchema.validate({ sl_uuid, universe, timestamp, signature });
     if (error) {
       return NextResponse.json(
         { success: false, error: error.details[0].message },
@@ -16,10 +21,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { sl_uuid, universe, timestamp, signature } = value;
+    const validatedParams = value;
 
     // Validate signature for Arkana universe
-    const signatureValidation = validateSignature(timestamp, signature, universe);
+    const signatureValidation = validateSignature(validatedParams.timestamp, validatedParams.signature, validatedParams.universe);
     if (!signatureValidation.valid) {
       return NextResponse.json(
         { success: false, error: signatureValidation.error || 'Unauthorized' },
@@ -29,12 +34,20 @@ export async function POST(request: NextRequest) {
 
     // Find user in Arkana universe with all related data
     const user = await prisma.user.findFirst({
-      where: { slUuid: sl_uuid, universe: universe },
+      where: { slUuid: validatedParams.sl_uuid, universe: validatedParams.universe },
       include: {
         stats: true,
         arkanaStats: true
       }
     });
+
+    // Update last active timestamp
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastActive: new Date() }
+      });
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -113,6 +126,164 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error('Error fetching Arkana user stats:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/arkana/users/stats - Update Arkana user statistics
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate input using our validation schema
+    const { error, value } = arkanaUpdateStatsSchema.validate(body);
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.details[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { sl_uuid, universe, status: userStatus, health, hunger, thirst, timestamp, signature } = value;
+
+    // Validate signature for Arkana universe
+    const signatureValidation = validateSignature(timestamp, signature, universe);
+    if (!signatureValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: signatureValidation.error || 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Prepare update data, only including fields if they're provided
+    const updateData: {
+      status?: number;
+      health?: number;
+      hunger?: number;
+      thirst?: number;
+      lastUpdated: Date;
+    } = {
+      lastUpdated: new Date()
+    };
+
+    // Only update fields if they're provided in the request
+    // Clamp stats values to valid ranges (0-100)
+    if (userStatus !== undefined) updateData.status = Math.max(0, Math.min(100, userStatus));
+    if (health !== undefined) updateData.health = Math.max(0, Math.min(100, health));
+    if (hunger !== undefined) updateData.hunger = Math.max(0, Math.min(100, hunger));
+    if (thirst !== undefined) updateData.thirst = Math.max(0, Math.min(100, thirst));
+
+    // Update user stats using a nested upsert through user relation
+    const updatedUser = await prisma.user.update({
+      where: {
+        slUuid_universe: {
+          slUuid: sl_uuid,
+          universe: universe
+        }
+      },
+      data: {
+        lastActive: new Date(),
+        stats: {
+          upsert: {
+            create: {
+              ...updateData,
+              health: updateData.health ?? 100,
+              hunger: updateData.hunger ?? 100,
+              thirst: updateData.thirst ?? 100,
+              status: updateData.status ?? 0,
+            },
+            update: updateData
+          }
+        }
+      },
+      include: {
+        stats: true,
+        arkanaStats: true
+      }
+    });
+
+    // Return the updated stats in the same format as GET
+    return NextResponse.json({
+      success: true,
+      data: {
+        user: {
+          id: updatedUser.id,
+          slUuid: updatedUser.slUuid,
+          username: updatedUser.username,
+          role: updatedUser.role,
+          universe: updatedUser.universe,
+          title: updatedUser.title,
+          titleColor: updatedUser.titleColor,
+          createdAt: updatedUser.createdAt,
+          lastActive: updatedUser.lastActive
+        },
+        stats: updatedUser.stats ? {
+          status: updatedUser.stats.status,
+          health: updatedUser.stats.health,
+          hunger: updatedUser.stats.hunger,
+          thirst: updatedUser.stats.thirst,
+          goldCoin: updatedUser.stats.goldCoin,
+          silverCoin: updatedUser.stats.silverCoin,
+          copperCoin: updatedUser.stats.copperCoin,
+          lastUpdated: updatedUser.stats.lastUpdated
+        } : null,
+        arkanaStats: updatedUser.arkanaStats ? {
+          id: updatedUser.arkanaStats.id,
+          characterName: updatedUser.arkanaStats.characterName,
+          agentName: updatedUser.arkanaStats.agentName,
+          aliasCallsign: updatedUser.arkanaStats.aliasCallsign,
+          faction: updatedUser.arkanaStats.faction,
+          conceptRole: updatedUser.arkanaStats.conceptRole,
+          job: updatedUser.arkanaStats.job,
+          background: updatedUser.arkanaStats.background,
+          race: updatedUser.arkanaStats.race,
+          subrace: updatedUser.arkanaStats.subrace,
+          archetype: updatedUser.arkanaStats.archetype,
+          physical: updatedUser.arkanaStats.physical,
+          dexterity: updatedUser.arkanaStats.dexterity,
+          mental: updatedUser.arkanaStats.mental,
+          perception: updatedUser.arkanaStats.perception,
+          hitPoints: updatedUser.arkanaStats.hitPoints,
+          statPointsPool: updatedUser.arkanaStats.statPointsPool,
+          statPointsSpent: updatedUser.arkanaStats.statPointsSpent,
+          inherentPowers: updatedUser.arkanaStats.inherentPowers,
+          weaknesses: updatedUser.arkanaStats.weaknesses,
+          flaws: updatedUser.arkanaStats.flaws,
+          flawPointsGranted: updatedUser.arkanaStats.flawPointsGranted,
+          powerPointsBudget: updatedUser.arkanaStats.powerPointsBudget,
+          powerPointsBonus: updatedUser.arkanaStats.powerPointsBonus,
+          powerPointsSpent: updatedUser.arkanaStats.powerPointsSpent,
+          commonPowers: updatedUser.arkanaStats.commonPowers,
+          archetypePowers: updatedUser.arkanaStats.archetypePowers,
+          perks: updatedUser.arkanaStats.perks,
+          magicSchools: updatedUser.arkanaStats.magicSchools,
+          magicWeaves: updatedUser.arkanaStats.magicWeaves,
+          cybernetics: updatedUser.arkanaStats.cybernetics,
+          cyberneticAugments: updatedUser.arkanaStats.cyberneticAugments,
+          credits: updatedUser.arkanaStats.credits,
+          chips: updatedUser.arkanaStats.chips,
+          xp: updatedUser.arkanaStats.xp,
+          createdAt: updatedUser.arkanaStats.createdAt,
+          updatedAt: updatedUser.arkanaStats.updatedAt
+        } : null,
+        hasArkanaCharacter: !!updatedUser.arkanaStats
+      }
+    });
+
+  } catch (error: unknown) {
+    console.error('Error updating Arkana user stats:', error);
+
+    // Handle case where user doesn't exist
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+      return NextResponse.json(
+        { success: false, error: 'User not found in Arkana universe' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -324,6 +324,17 @@ export const arkanaStatsSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const arkanaUpdateStatsSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  status: Joi.number().integer().optional(), // Allow any value for clamping
+  health: Joi.number().integer().optional(), // Allow any value for clamping
+  hunger: Joi.number().integer().optional(), // Allow any value for clamping
+  thirst: Joi.number().integer().optional(), // Allow any value for clamping
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 export const arkanaCharacterCreateSchema = Joi.object({
   // Identity
   characterName: Joi.string().min(1).max(255).required(),
