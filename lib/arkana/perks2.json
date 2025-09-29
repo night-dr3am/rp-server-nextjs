@@ -1,0 +1,365 @@
+[
+ {
+    "id": "vamp_emotional_resonance",
+    "name": "Emotional Resonance",
+    "desc": "When feeding, absorb fragments of emotion; use or manipulate for subtle influence. (+1 to Mental or Perception rolls to influence)",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_unnatural_beauty",
+    "name": "Unnatural Beauty",
+    "desc": "Gifted with unnatural beauty; mortals and supernaturals stare in awe or dread. (+3 Mental in Social Situations or use of Mental Powers)",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_unyielding_will",
+    "name": "Unyielding Will",
+    "desc": "Mind-influencing powers (fear, charms, compulsions) find it harder to affect you. (-2 to Attackers' Roll)",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_shadows_veil",
+    "name": "Shadow’s Veil",
+    "desc": "Blend into darkness comes easy; (+1 to Stealth Rolls)",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_ancient_wisdom",
+    "name": "Ancient Wisdom",
+    "desc": "You speak one additional language and can decipher arcane text. Grants a single starting school of Magic.",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_neural_disruptive_vitae",
+    "name": "Neural Disruptive Vitae",
+    "desc": "Your blood acts as a short-lived poison, disabling cybernetic linkages temporarily.",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_predators_cunning",
+    "name": "Predator’s Cunning",
+    "desc": "Sense violence before it happens; seize the initiative (Go first).",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_pulse_of_ark",
+    "name": "Pulse of the Ark",
+    "desc": "Sense clusters of humanity/life across the Ark’s levels. Helps guide your hunt.",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_blood_economy",
+    "name": "Blood Economy",
+    "desc": "Store blood/Chi more efficiently, reducing need to feed and enhancing resource management.",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_cybernetic_adaptation",
+    "name": "Cybernetic Adaptation",
+    "desc": "Your nature entwines seamlessly with cybernetics, allowing implants and augmentations to shift with your essence.",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "vamp_emotional_resonance",
+    "name": "Emotional Resonance",
+    "desc": "When feeding, absorb fragments of emotion; use or manipulate for subtle influence. (+1 to Mental or Perception rolls to influence)",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_unnatural_beauty",
+    "name": "Unnatural Beauty",
+    "desc": "Gifted with unnatural beauty; mortals and supernaturals stare in awe or dread. (+3 Mental in Social Situations or use of Mental Powers)",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_unyielding_will",
+    "name": "Unyielding Will",
+    "desc": "Mind-influencing powers (fear, charms, compulsions) find it harder to affect you. (-2 to Attackers' Roll)",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_shadows_veil",
+    "name": "Shadow’s Veil",
+    "desc": "Blend into darkness comes easy; (+1 to Stealth Rolls)",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_ancient_wisdom",
+    "name": "Ancient Wisdom",
+    "desc": "You speak one additional language and can decipher arcane text. Grants a single starting school of Magic.",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_neural_disruptive_vitae",
+    "name": "Neural Disruptive Vitae",
+    "desc": "Your blood acts as a short-lived poison, disabling cybernetic linkages temporarily.",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_predators_cunning",
+    "name": "Predator’s Cunning",
+    "desc": "Sense violence before it happens; seize the initiative (Go first).",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_pulse_of_ark",
+    "name": "Pulse of the Ark",
+    "desc": "Sense clusters of humanity/life across the Ark’s levels. Helps guide your hunt.",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_blood_economy",
+    "name": "Blood Economy",
+    "desc": "Store blood/Chi more efficiently, reducing need to feed and enhancing resource management.",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "vamp_cybernetic_adaptation",
+    "name": "Cybernetic Adaptation",
+    "desc": "Your nature entwines seamlessly with cybernetics, allowing implants and augmentations to shift with your essence.",
+    "cost": 3,
+    "species": "strigoi"
+  },
+
+  {
+    "id": "spliced_ssl_hsl",
+    "name": "SSL & HSL",
+    "desc": "Learn Beast and Hybrid Shifter Sign Languages. Communicate silently with other Spliced in shifted forms.",
+    "cost": 3,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_designers_gift",
+    "name": "Designer’s Gift",
+    "desc": "Thrive in hostile environments; +2 Physical or Mental rolls vs hazards. Immune to suffocation/temperature penalties.",
+    "cost": 4,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_mate_bond",
+    "name": "Mate Bond",
+    "desc": "Supernatural/genetic bond with Spliced or human mate. Telepathic/empathic comms; +1 Mental rolls when coordinating.",
+    "cost": 4,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_maximized_shift",
+    "name": "Maximized Shift",
+    "desc": "One shifted form is much larger; +2 Physical in that form at creation. Permanent.",
+    "cost": 4,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_unnatural_weapons",
+    "name": "Unnatural Weapons (Chimerical Only)",
+    "desc": "Manifest two melee weapon equivalents in shifted forms. Attacks deal flat damage (Light/Medium/Heavy). Chimeric only.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_adaptive_biology",
+    "name": "Adaptive Biology",
+    "desc": "Resistant to toxins and hostile environments; resistant to non-magical poisons/diseases.",
+    "cost": 5,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_cybernetic_adaptation",
+    "name": "Cybernetic Adaptation",
+    "desc": "Cybernetic limbs/implants function across all forms; prosthetics retain stats/damage in Hybrid/Chimerical; all combat powers compatible.",
+    "cost": 5,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_bioelectric_resonance",
+    "name": "Bioelectric Resonance",
+    "desc": "Sense/manipulate bioelectric currents; +2 Mental rolls when sensing/manipulating electronics; emit shock (6+Mental) once/scene.",
+    "cost": 5,
+    "species": "spliced"
+  },
+
+  {
+    "id": "veil_pulse_sense",
+    "name": "Pulse Sense",
+    "desc": "Feel the heartbeat of the Ark; sense imbalance, danger, or hidden movement.",
+    "cost": 2,
+    "species": "veilborn",
+    "tier": 1
+  },
+  {
+    "id": "veil_echo_imprint",
+    "name": "Echo Imprint",
+    "desc": "Leave a lingering trace (sound, scent, flicker) in a space, triggers later like a haunting memory.",
+    "cost": 1,
+    "species": "veilborn",
+    "tier": 1
+  },
+  {
+    "id": "veil_emotional_reading",
+    "name": "Emotional Reading",
+    "desc": "Intuitively sense emotional states.",
+    "cost": 1,
+    "species": "veilborn",
+    "tier": 1
+  },
+  {
+    "id": "veil_veil_touched_aura",
+    "name": "Veil-Touched Aura",
+    "desc": "Faint supernatural gravitas. Bonus on first impressions/social rolls with mortals.",
+    "cost": 2,
+    "species": "veilborn",
+    "tier": 1
+  },
+  {
+    "id": "veil_veil_touched_presence",
+    "name": "Veil-Touched Presence",
+    "desc": "Reality bends slightly; advantage on charm, deception, performance with mortals.",
+    "cost": 3,
+    "species": "veilborn",
+    "tier": 2
+  },
+  {
+    "id": "veil_circuit_sympathy",
+    "name": "Circuit Sympathy",
+    "desc": "Intuitively sense/influence minor tech systems: lights, doors, temp, controls.",
+    "cost": 3,
+    "species": "veilborn",
+    "tier": 2
+  },
+  {
+    "id": "veil_memory_echo",
+    "name": "Memory Echo",
+    "desc": "Sense residual emotions/events imprinted in places, objects, or systems.",
+    "cost": 3,
+    "species": "veilborn",
+    "tier": 2
+  },
+  {
+    "id": "veil_unnatural_composure",
+    "name": "Unnatural Composure",
+    "desc": "Resist fear/intimidation/chaos. Bonuses vs fear, social coercion, panic.",
+    "cost": 3,
+    "species": "veilborn",
+    "tier": 2
+  },
+  {
+    "id": "veil_illusion_drift",
+    "name": "Illusion Drift",
+    "desc": "Passive glamours alter appearance based on mood/intent; harder to track unless confronted.",
+    "cost": 3,
+    "species": "veilborn",
+    "tier": 2
+  },
+  {
+    "id": "veil_veils_favor",
+    "name": "Veil’s Favor",
+    "desc": "Once/session, reroll a failed check as if guided by unseen hands.",
+    "cost": 4,
+    "species": "veilborn",
+    "tier": 3
+  },
+  {
+    "id": "veil_ancient_wisdom",
+    "name": "Ancient Wisdom",
+    "desc": "Gleaned ancient secrets; speak one additional language, decipher arcane text; grants starting school of Magic.",
+    "cost": 5,
+    "species": "veilborn",
+    "tier": 3
+  },
+  {
+    "id": "veil_phantom_walk",
+    "name": "Phantom Walk",
+    "desc": "Once/scene, roll to slip partly into the Veil, bypassing barriers or avoiding harm briefly.",
+    "cost": 4,
+    "species": "veilborn",
+    "tier": 3
+  },
+
+  {
+    "id": "human_adaptive_instinct",
+    "name": "Adaptive Instinct",
+    "desc": "Gain +1 to any single Stat roll (Physical, Dex, or Mental) when adjusting to new environments, systems, or social structures.",
+    "cost": 2,
+    "species": "human"
+  },
+  {
+    "id": "human_survival_drive",
+    "name": "Survival Drive",
+    "desc": "+2 HP for scene or +1 to Physical/Mental save in hostile/extreme situations.",
+    "cost": 3,
+    "species": "human"
+  },
+  {
+    "id": "human_alliance_builder",
+    "name": "Alliance Builder",
+    "desc": "+1 to Social/Mental rolls when forming bonds, negotiating, or influencing other factions/gifted beings.",
+    "cost": 2,
+    "species": "human"
+  },
+  {
+    "id": "human_augment_access",
+    "name": "Augment Access",
+    "desc": "Gain 2 free slots in a cybernetic prosthetic and 1 (2pt) augment. Can use more points for higher level augments.",
+    "cost": 4,
+    "species": "human"
+  },
+  {
+    "id": "human_artifact_resonance",
+    "name": "Artifact Resonance",
+    "desc": "Near ancient Earth artifacts or magical relics, gain +2 Mental rolls/insight checks for one scene.",
+    "cost": 3,
+    "species": "human"
+  },
+  {
+    "id": "human_magiventive",
+    "name": "Magiventive",
+    "desc": "(Synthral only) Access 2 extra Magitech blueprints for crafting/effect.",
+    "cost": 3,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_spell_coding",
+    "name": "Spell Coding",
+    "desc": "(Synthral only) Can program a cyber sprite to cast a single spell once/scene.",
+    "cost": 2,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_symbolic_literacy",
+    "name": "Symbolic Literacy",
+    "desc": "(Arcanist only) +2 Mental rolls for deciphering glyphs, runes, or magical symbols.",
+    "cost": 2,
+    "species": "human",
+    "arch": "arcanist"
+  },
+  {
+    "id": "human_cognitive_shielding",
+    "name": "Cognitive Shielding",
+    "desc": "(Psion only) Resistance to manipulation, illusions, or emotional coercion. TN increased by 2 for any such effect.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion"
+  }
+]

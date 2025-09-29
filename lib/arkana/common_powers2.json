@@ -1,0 +1,215 @@
+[
+  {
+    "id": "strigoi_hypnosis",
+    "name": "Hypnosis",
+    "desc": "Implant suggestions and triggers. (MEN)",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_shapeshifting",
+    "name": "Shapeshifting",
+    "desc": "Mist forms, wolf-like attributes, or bat-like wings. (PHYS)",
+    "cost": 2,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_wall_walking",
+    "name": "Wall-Walking",
+    "desc": "Scale sheer surfaces like a spider.",
+    "cost": 1,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_dreamwalking",
+    "name": "Dreamwalking",
+    "desc": "Invade and shape dreams, feed subtly. (MEN)",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_voice_of_command",
+    "name": "Voice of Command",
+    "desc": "Direct orders instantly obeyed by thralls/weaker minds. (MEN)",
+    "cost": 3,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_shadowform",
+    "name": "Shadowform",
+    "desc": "Become a living shadow, slip through cracks/hide. (PHYS)",
+    "cost": 4,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_true_polymorph",
+    "name": "True Polymorph",
+    "desc": "Full animal transformation (wolf or bat). (PHYS)",
+    "cost": 4,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_domination",
+    "name": "Domination",
+    "desc": "Full mental control over mortals; rivals may resist. (MEN)",
+    "cost": 5,
+    "species": "strigoi"
+  },
+  {
+    "id": "strigoi_mist_form",
+    "name": "Mist Form (Full)",
+    "desc": "Dissolve into fog, immune to physical harm for a short time. (PHYS)",
+    "cost": 5,
+    "species": "strigoi"
+  },
+
+  {
+    "id": "gaki_chi_manipulation",
+    "name": "Chi Manipulation",
+    "desc": "Store, transfer, or balance yin/yang chi between beings. (MEN)",
+    "cost": 2,
+    "species": "gaki"
+  },
+  {
+    "id": "gaki_dreamwalking",
+    "name": "Dreamwalking",
+    "desc": "Invade dreams, subtly feed, induce nightmares/ecstasy. (MEN)",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "gaki_chi_step",
+    "name": "Chi Step",
+    "desc": "Short bursts of superhuman speed and agility. (DEX)",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "gaki_yin_shroud",
+    "name": "Yin Shroud",
+    "desc": "Cloak themselves in shadow and silence.",
+    "cost": 3,
+    "species": "gaki"
+  },
+  {
+    "id": "gaki_yang_flame",
+    "name": "Yang Flame",
+    "desc": "Radiate heat, vitality, or raw force outward in an aura.",
+    "cost": 4,
+    "species": "gaki"
+  },
+  {
+    "id": "gaki_spectral_grip",
+    "name": "Spectral Grip",
+    "desc": "Manifest yin chi as chains or claws of shadow; restrain or damage foes. (PHYS)",
+    "cost": 3,
+    "species": "gaki"
+  },
+
+  {
+    "id": "spliced_climbing",
+    "name": "Climbing",
+    "desc": "Climb walls and ceilings.",
+    "cost": 1,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_tail_slap",
+    "name": "Tail Slap",
+    "desc": "Powerful tail attack; Physical roll to hit.",
+    "cost": 2,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_pheromone_cloud",
+    "name": "Pheromone Cloud",
+    "desc": "Arouses/lowers thinking of targets within 5 ft; -1 Mental.",
+    "cost": 3,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_burrow",
+    "name": "Burrow",
+    "desc": "Travel underground in outdoor/city terrain; cannot penetrate ships’ hulls.",
+    "cost": 1,
+    "species": "spliced"
+  },
+  {
+    "id": "spliced_quill_cloud",
+    "name": "Quill Cloud",
+    "desc": "Covered in dangerous spines/quills; attackers take 1 damage; can fire spines.",
+    "cost": 1,
+    "species": "spliced"
+  },
+
+  {
+    "id": "veil_biofusion",
+    "name": "Biofusion",
+    "desc": "Temporarily merge with living systems; heal, communicate, redirect energy; situational utility/healing.",
+    "cost": 4,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_circuit_whisper",
+    "name": "Circuit Whisper",
+    "desc": "Speak directly to Ark’s infrastructure; coax machinery/AI into harmony/repair.",
+    "cost": 3,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_pulse_bloom",
+    "name": "Pulse Bloom",
+    "desc": "Emit radiant pulse affecting flora/nearby minds; accelerate growth, restore morale/clarity.",
+    "cost": 3,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_echo_memory",
+    "name": "Echo Memory",
+    "desc": "Access residual emotional imprints; replay/interpret past events in biodomes/spaces.",
+    "cost": 2,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_sanctuary_field",
+    "name": "Sanctuary Field",
+    "desc": "Generate protective aura; stabilizes temp, oxygen, humidity in 10ft radius.",
+    "cost": 4,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_shadow_archive",
+    "name": "Shadow Archive",
+    "desc": "Absorb/store memories/data fragments; retrieve later for leverage/insight.",
+    "cost": 3,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_glimmerstep",
+    "name": "Glimmerstep",
+    "desc": "Move silently/invisibly; faint shimmer only; stealth mobility.",
+    "cost": 4,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_emotion_theft",
+    "name": "Emotion Theft",
+    "desc": "Siphon dominant emotion; target suffers −1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
+    "cost": 3,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_mask_of_echoes",
+    "name": "Mask of Echoes",
+    "desc": "Mimic voice, appearance, or aura; copy another’s likeness for 1–3 turns.",
+    "cost": 3,
+    "species": "veilborn"
+  },
+  {
+    "id": "veil_entropy_pulse",
+    "name": "Entropy Pulse",
+    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (−1 TN or effect for 1 turn).",
+    "cost": 2,
+    "species": "veilborn"
+  }
+]

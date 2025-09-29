@@ -1,0 +1,362 @@
+// Prisma schema for Gorean RP Server
+// Manages users, stats, and events for Second Life integration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  slUuid       String      @map("sl_uuid") // Second Life UUID
+  universe     String      @default("Gor") @map("universe") // Universe identifier (e.g., "Gor", "Fantasy", etc.)
+  username     String
+  role         Role        @default(FREE)
+  title        String?     @db.VarChar(512) // Optional RP title (max 512 chars)
+  titleColor   String      @default("<1, 1, 1>") @map("title_color") // LSL color vector
+  knownRecipes String[]    @default([]) @map("known_recipes") // Array of recipe shortNames
+  createdAt    DateTime    @default(now()) @map("created_at")
+  lastActive   DateTime    @default(now()) @map("last_active")
+
+  // Relations
+  stats        UserStats?
+  events       Event[]
+  inventories  UserInventory[]
+  profileTokens ProfileToken[]
+  rentingEstates Estate[]    @relation("EstateRenter")
+  tenantEstates Estate[]    @relation("EstateTenants")
+  arkanaStats  ArkanaStats?
+  npcTasks     NPCTask[]
+  craftings    Crafting[]
+
+  @@unique([slUuid, universe]) // Composite unique constraint
+  @@map("users")
+}
+
+model UserStats {
+  id          Int      @id @default(autoincrement())
+  userId      String   @unique @map("user_id")
+  status      Int      @default(0)
+  health      Int      @default(100)
+  hunger      Int      @default(100)
+  thirst      Int      @default(100)
+  goldCoin    Int      @default(0) @map("gold_coin")
+  silverCoin  Int      @default(0) @map("silver_coin")
+  copperCoin  Int      @default(10) @map("copper_coin")
+  lastUpdated DateTime @default(now()) @map("last_updated")
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_stats")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  type      String
+  details   Json
+  timestamp DateTime @default(now())
+  userId    String   @map("user_id")
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("events")
+}
+
+// RP Items registry
+model RpItem {
+  id                      Int              @id @default(autoincrement())
+  name                    String
+  shortName               String           @map("short_name")
+  universe                String           @default("Gor")  // Universe this item belongs to
+  isShortNameDifferent    Boolean          @default(false) @map("is_short_name_different")
+  category                String
+  tags                    String           @default("")
+  hungerValue             Int              @default(0) @map("hunger_value")
+  thirstValue             Int              @default(0) @map("thirst_value")
+  healthValue             Int              @default(0) @map("health_value")
+  edible                  Boolean          @default(false)
+  drinkable               Boolean          @default(false)
+  useCount                Int              @default(0) @map("use_count")
+  priceGold               Int              @default(0) @map("price_gold")
+  priceSilver             Int              @default(0) @map("price_silver")
+  priceCopper             Int              @default(0) @map("price_copper")
+
+  // Relations
+  userInventory           UserInventory[]
+
+  @@unique([shortName, universe])  // Composite unique constraint
+  @@map("rp_items")
+}
+
+// Player inventory items (per user, per rp item)
+model UserInventory {
+  id          Int     @id @default(autoincrement())
+  userId      String  @map("user_id")
+  rpItemId    Int     @map("rpitem_id")
+  quantity    Int     @default(0)
+  useCount    Int     @default(0) @map("use_count")
+  priceGold   Int     @default(0) @map("price_gold")
+  priceSilver Int     @default(0) @map("price_silver")
+  priceCopper Int     @default(0) @map("price_copper")
+
+  // Relations
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item        RpItem  @relation(fields: [rpItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, rpItemId])
+  @@map("user_inventory")
+}
+
+// Profile tokens for secure web access
+model ProfileToken {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  token       String   @unique
+  expiresAt   DateTime @map("expires_at")
+  sessionId   String?  @map("session_id")  // Session ID for browser session tracking
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("profile_tokens")
+}
+
+// Estate rental system
+model Estate {
+  id              Int       @id @default(autoincrement())
+  estateId        String    @map("estate_id")  // Estate identifier from LSL
+  universe        String    @default("Gor")     // Universe this estate belongs to
+  name            String
+  description     String?
+  rentPricePerDay Int       @map("rent_price_per_day")  // Price per day in copper coins
+  rentingUserId   String?   @map("renting_user_id")     // Current renter (optional)
+  location        String?   // Location metadata/description
+  rentStartDate   DateTime? @map("rent_start_date")     // When current rental started
+  rentEndDate     DateTime? @map("rent_end_date")       // When current rental ends
+  totalPaidAmount Int       @default(0) @map("total_paid_amount") // Total copper paid for current rental
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  rentingUser     User?     @relation("EstateRenter", fields: [rentingUserId], references: [id], onDelete: SetNull)
+  tenants         User[]    @relation("EstateTenants")
+
+  @@unique([estateId, universe])  // Composite unique constraint
+  @@map("estates")
+}
+
+// Arkana character creation data
+model ArkanaStats {
+  id                     Int       @id @default(autoincrement())
+  userId                 String    @unique @map("user_id")
+
+  // Step 1: Identity & Fiction
+  characterName          String    @map("character_name")
+  agentName              String    @map("agent_name")  // Second Life name
+  aliasCallsign          String?   @map("alias_callsign")
+  faction                String?
+  conceptRole            String?   @db.VarChar(512) @map("concept_role")
+  job                    String?   @db.VarChar(256)
+  background             String?   @db.Text
+
+  // Step 2: Lineage Path
+  race                   String
+  subrace                String?
+  archetype              String?
+
+  // Step 3: Stats (1-5 range, HP = Physical × 5)
+  physical               Int       @default(1)
+  dexterity              Int       @default(1)
+  mental                 Int       @default(1)
+  perception             Int       @default(1)
+  hitPoints              Int       @default(5) @map("hit_points")
+  statPointsPool         Int       @default(10) @map("stat_points_pool")
+  statPointsSpent        Int       @default(0) @map("stat_points_spent")
+
+  // Step 4: Powers & Weaknesses
+  inherentPowers         String[]  @default([]) @map("inherent_powers")
+  weaknesses             String[]  @default([])
+
+  // Step 5: Flaws (stored as JSON for name+cost pairs)
+  flaws                  Json?     // [{name: "Glass Jaw", cost: 2}]
+  flawPointsGranted      Int       @default(0) @map("flaw_points_granted")
+
+  // Step 6: Purchases & Points
+  powerPointsBudget      Int       @default(15) @map("power_points_budget")
+  powerPointsBonus       Int       @default(0) @map("power_points_bonus")
+  powerPointsSpent       Int       @default(0) @map("power_points_spent")
+
+  commonPowers           String[]  @default([]) @map("common_powers")
+  archetypePowers        String[]  @default([]) @map("archetype_powers")
+  perks                  String[]  @default([])
+
+  // Magic
+  magicSchools           String[]  @default([]) @map("magic_schools")
+  magicWeaves            String[]  @default([]) @map("magic_weaves")
+
+  // Cybernetics (JSON for structured data)
+  cybernetics            Json?     // [{type: "Arm", slots: 2, augments: ["Interface"]}]
+  cyberneticAugments     String[]  @default([]) @map("cybernetic_augments")
+
+  // Game Economy
+  credits                Int       @default(0)
+  chips                  Int       @default(0)
+  xp                     Int       @default(0)
+
+  // Metadata
+  registrationCompleted  Boolean   @default(false) @map("registration_completed")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("arkana_stats")
+}
+
+// NPC management for task givers and other interactive agents
+model NPC {
+  id              Int        @id @default(autoincrement())
+  npcId           String     @map("npc_id")       // Unique identifier from LSL notecard
+  universe        String     @default("Gor")
+  name            String
+  description     String?    @db.Text
+  location        String?
+  maxDailyTasks   Int        @default(3) @map("max_daily_tasks")
+  taskInterval    Int        @default(300) @map("task_interval") // seconds between tasks
+  resetHour       Int        @default(6) @map("reset_hour")       // hour of day to reset
+  minRewardMult   Int        @default(3) @map("min_reward_mult")
+  maxRewardMult   Int        @default(7) @map("max_reward_mult")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  tasks           NPCTask[]
+
+  @@unique([npcId, universe])
+  @@map("npcs")
+}
+
+// Individual task assignments from NPCs to players
+model NPCTask {
+  id              Int        @id @default(autoincrement())
+  npcId           Int        @map("npc_id")
+  userId          String     @map("user_id")
+  itemShortName   String     @map("item_short_name")
+  itemName        String     @map("item_name")
+  quantity        Int        @default(1)
+  rewardCopper    Int        @map("reward_copper")
+  status          TaskStatus @default(ASSIGNED)
+  assignedAt      DateTime   @default(now()) @map("assigned_at")
+  completedAt     DateTime?  @map("completed_at")
+  dailyCount      Int        @default(1) @map("daily_count")
+
+  // Relations
+  npc             NPC        @relation(fields: [npcId], references: [id], onDelete: Cascade)
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([npcId, userId])
+  @@map("npc_tasks")
+}
+
+enum TaskStatus {
+  ASSIGNED
+  COMPLETED
+  DECLINED
+  EXPIRED
+
+  @@map("_task_status")
+}
+
+// Recipe management for crafting system
+model Recipe {
+  id                    Int       @id @default(autoincrement())
+  name                  String    @db.VarChar(255)
+  shortName             String    @map("short_name") @db.VarChar(100)
+  universe              String    @default("Gor")
+  craftingStationType   String    @map("crafting_station_type") @db.VarChar(100)
+  ingredients           Json      // Array of {quantity: number, rpItemShortName: string}
+  craftingTime          Int       @map("crafting_time") // Time in seconds
+  outputItemShortName   String    @map("output_item_short_name") @db.VarChar(100)
+  outputItemQuantity    Int       @default(1) @map("output_item_quantity")
+  knowledge             String?   @db.VarChar(255) // Optional knowledge requirement
+  tool                  String?   @db.VarChar(255) // Optional tool requirement
+  license               String?   @db.VarChar(255) // Optional license requirement
+  category              String    @db.VarChar(100)
+  tags                  String    @default("") @db.VarChar(500)
+  exp                   Int       @default(0) // Experience points awarded
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  craftings             Crafting[]
+
+  @@unique([shortName, universe])
+  @@index([craftingStationType, category])
+  @@index([universe])
+  @@map("recipes")
+}
+
+// Crafting station management
+model CraftingStation {
+  id                    Int       @id @default(autoincrement())
+  stationId             String    @map("station_id") @db.VarChar(100) // Station identifier from LSL
+  universe              String    @default("Gor")
+  name                  String    @db.VarChar(255)
+  type                  String    @db.VarChar(100) // Type of crafting station (cooking, forge, etc.)
+  busy                  Boolean   @default(false)
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  craftings             Crafting[]
+
+  @@unique([stationId, universe])
+  @@index([universe, type])
+  @@map("crafting_stations")
+}
+
+// Individual crafting sessions
+model Crafting {
+  id                    Int       @id @default(autoincrement())
+  universe              String    @default("Gor")
+  userId                String    @map("user_id")
+  craftingStationId     Int       @map("crafting_station_id")
+  recipeShortName       String    @map("recipe_short_name") @db.VarChar(100)
+  startTime             DateTime  @default(now()) @map("start_time")
+  collected             Boolean   @default(false)
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  craftingStation       CraftingStation @relation(fields: [craftingStationId], references: [id], onDelete: Cascade)
+  recipe                Recipe         @relation(fields: [recipeShortName, universe], references: [shortName, universe], onDelete: Cascade)
+
+  @@index([userId, collected])
+  @@index([craftingStationId, collected])
+  @@index([universe])
+  @@map("craftings")
+}
+
+enum Role {
+  FREE      @map("Free")
+  SLAVE     @map("Slave")
+  JARL      @map("Jarl")
+  BONDMAID  @map("Bondmaid")
+  PANTHER   @map("Panther")
+  OUTLAW    @map("Outlaw")
+
+  @@map("_role")
+}

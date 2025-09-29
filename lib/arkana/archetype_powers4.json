@@ -1,0 +1,978 @@
+[
+  {
+    "id": "strigoi_life_crimson_allure",
+    "name": "Crimson Allure",
+    "desc": "Exude an irresistible aura of attraction; mortals drawn like moths to flame.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "life"
+  },
+  {
+    "id": "strigoi_life_sanguine_glamour",
+    "name": "Sanguine Glamour",
+    "desc": "Manipulate appearance subtly, masking pallor, wounds, or hunger to look radiant and alive.",
+    "cost": 2,
+    "species": "strigoi",
+    "arch": "life"
+  },
+  {
+    "id": "strigoi_life_cradle_of_hunger",
+    "name": "Cradle of Hunger",
+    "desc": "Touch can sap energy, leaving mortals weak as if struck by days of exhaustion.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "life"
+  },
+  {
+    "id": "strigoi_life_blood_seed",
+    "name": "Blood Seed",
+    "desc": "Plant a blood seed of desire in a mortal; supernatural yearning until accepted or spurned.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "life"
+  },
+  {
+    "id": "strigoi_death_carrion_call",
+    "name": "Carrion Call",
+    "desc": "Draw vermin and scavengers; influence swarms. Spliced may resist with Mental roll.",
+    "cost": 2,
+    "species": "strigoi",
+    "arch": "death"
+  },
+  {
+    "id": "strigoi_death_bone_whisper",
+    "name": "Bone Whisper",
+    "desc": "Touch a corpse to glean fragments of its memories or final sensations.",
+    "cost": 2,
+    "species": "strigoi",
+    "arch": "death"
+  },
+  {
+    "id": "strigoi_death_rotting_grasp",
+    "name": "Rotting Grasp",
+    "desc": "Corrode wood, cloth, or weak flesh; spoil food, weaken doors, inflict painful wounds.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "death"
+  },
+  {
+    "id": "strigoi_death_echo_of_barrow",
+    "name": "Echo of the Barrow",
+    "desc": "Voice heard as a whisper from a grave, carrying dread into minds.",
+    "cost": 2,
+    "species": "strigoi",
+    "arch": "death"
+  },
+  {
+    "id": "strigoi_warrior_hungering_grip",
+    "name": "Hungering Grip",
+    "desc": "A clutch drains blood and stamina, weakening prey.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "warrior"
+  },
+  {
+    "id": "strigoi_warrior_unholy_endurance",
+    "name": "Unholy Endurance",
+    "desc": "Fight through wounds that would incapacitate mortals; -3 damage reduction for scene.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "warrior"
+  },
+  {
+    "id": "strigoi_warrior_ferine_snarl",
+    "name": "Ferine Snarl",
+    "desc": "Growl startles animals, causes stampedes, or mortals hesitate in fear; -1 to attack rolls.",
+    "cost": 2,
+    "species": "strigoi",
+    "arch": "warrior"
+  },
+  {
+    "id": "strigoi_warrior_crimson_frenzy",
+    "name": "Crimson Frenzy",
+    "desc": "Gain automatic +2 to all attack rolls when activated in battle.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "warrior"
+  },
+  {
+    "id": "strigoi_ruler_pale_host",
+    "name": "Pale Host",
+    "desc": "Gatherings bend to your rhythm; conversations stall, eyes fix, people forget time.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "ruler"
+  },
+  {
+    "id": "strigoi_ruler_oathbreakers_curse",
+    "name": "Oathbreaker’s Curse",
+    "desc": "Curse those who break loyalty/pacts; torments in dreams until reparations.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "ruler"
+  },
+  {
+    "id": "strigoi_ruler_lineages_weight",
+    "name": "Lineage’s Weight",
+    "desc": "Blood carries nobility; mortals treat you as authority.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "ruler"
+  },
+  {
+    "id": "strigoi_ruler_crown_of_silence",
+    "name": "Crown of Silence",
+    "desc": "Silence an individual's voice for minutes.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "ruler"
+  },
+  {
+    "id": "gaki_yin_corpse_flesh",
+    "name": "Corpse Flesh",
+    "desc": "Appear as perfectly lifeless, even to machines.",
+    "cost": 2,
+    "species": "gaki",
+    "arch": "yin"
+  },
+  {
+    "id": "gaki_yin_grave_whisper",
+    "name": "Grave Whisper",
+    "desc": "Command shades and dead memories from the Ark's databanks or ghosts.",
+    "cost": 3,
+    "species": "gaki",
+    "arch": "yin"
+  },
+  {
+    "id": "gaki_yin_void_step",
+    "name": "Void Step",
+    "desc": "Phase into shadows or thin walls like a wraith.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "yin"
+  },
+  {
+    "id": "gaki_yin_soul_extraction",
+    "name": "Soul Extraction",
+    "desc": "Draw hun-fragments or memories from mortals and spirits.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "yin"
+  },
+  {
+    "id": "gaki_hun_aura_of_judgment",
+    "name": "Aura of Judgment",
+    "desc": "Reveal moral/karmic stains in others; relive corruption.",
+    "cost": 3,
+    "species": "gaki",
+    "arch": "hun"
+  },
+  {
+    "id": "gaki_hun_chi_balance",
+    "name": "Chi Balance",
+    "desc": "Restore harmony in mortals/systems disrupted by chi imbalance.",
+    "cost": 2,
+    "species": "gaki",
+    "arch": "hun"
+  },
+  {
+    "id": "gaki_hun_mandate_of_heaven",
+    "name": "Mandate of Heaven",
+    "desc": "Impose commands that compel obedience from mortals/lesser spirits.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "hun"
+  },
+  {
+    "id": "gaki_hun_solar_radiance",
+    "name": "Solar Radiance",
+    "desc": "Channel yang chi into blinding aura of justice that burns corrupt.",
+    "cost": 5,
+    "species": "gaki",
+    "arch": "hun"
+  },
+  {
+    "id": "gaki_yang_life_mask",
+    "name": "Life Mask",
+    "desc": "Pass perfectly for living mortals, radiate body heat.",
+    "cost": 2,
+    "species": "gaki",
+    "arch": "yang"
+  },
+  {
+    "id": "gaki_yang_chi_feast",
+    "name": "Chi Feast",
+    "desc": "Feed on sex, food, or strong emotion as well as blood/breath.",
+    "cost": 2,
+    "species": "gaki",
+    "arch": "yang"
+  },
+  {
+    "id": "gaki_yang_elemental_surge",
+    "name": "Elemental Surge",
+    "desc": "Burst of vital Yang Chi energy: leap, heal, ignite passion; leaves user drained.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "yang"
+  },
+  {
+    "id": "gaki_yang_dance_of_ten_thousand_fires",
+    "name": "Dance of Ten Thousand Fires",
+    "desc": "Explode in brilliant yang energy, burning enemies and invigorating allies.",
+    "cost": 5,
+    "species": "gaki",
+    "arch": "yang"
+  },
+  {
+    "id": "gaki_po_searing_agony",
+    "name": "Searing Agony",
+    "desc": "Inflict agony that transcends physical pain, cutting to the soul.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "po"
+  },
+  {
+    "id": "gaki_po_skinning_self",
+    "name": "Skinning the Self",
+    "desc": "Flay own flesh to gain Yin Chi; wounds take time to heal but never hungry.",
+    "cost": 3,
+    "species": "gaki",
+    "arch": "po"
+  },
+  {
+    "id": "gaki_po_hells_visage",
+    "name": "Hell’s Visage",
+    "desc": "Manifest monstrous, oni-like form that terrifies mortals.",
+    "cost": 3,
+    "species": "gaki",
+    "arch": "po"
+  },
+  {
+    "id": "gaki_po_dharma_crucible",
+    "name": "Dharma Crucible",
+    "desc": "Force an enemy to relive karmic sins and suffer their own torment.",
+    "cost": 5,
+    "species": "gaki",
+    "arch": "po"
+  },
+  {
+    "id": "gaki_chudo_mortal_veil",
+    "name": "Mortal Veil",
+    "desc": "Perfectly mimic mannerisms, accents, and subtle details of mortals.",
+    "cost": 2,
+    "species": "gaki",
+    "arch": "chudo"
+  },
+  {
+    "id": "gaki_chudo_cycle_of_faces",
+    "name": "Cycle of Faces",
+    "desc": "Swap between multiple crafted personas, each with unique resonance.",
+    "cost": 3,
+    "species": "gaki",
+    "arch": "chudo"
+  },
+  {
+    "id": "gaki_chudo_memory_weaving",
+    "name": "Memory Weaving",
+    "desc": "Plant false recollections or alter small pieces of another’s past.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "chudo"
+  },
+  {
+    "id": "gaki_chudo_puppet_master",
+    "name": "Puppet Master",
+    "desc": "Control the physical actions of an individual briefly. The victim is aware of losing control.",
+    "cost": 5,
+    "species": "gaki",
+    "arch": "chudo"
+  },
+  {
+    "id": "spliced_chim_hybrid_senses",
+    "name": "Hybrid Senses",
+    "desc": "Pick one: telescopic vision, echolocation, enhanced smell, or heat sensing. +1 Perception using chosen sense.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_adaptive_morph",
+    "name": "Adaptive Morph",
+    "desc": "Temporarily adapt to the environment, e.g., gills, wings, etc.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_echo_mutation",
+    "name": "Echo Mutation",
+    "desc": "Briefly mimic last observed power of a target creature.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_armored_form",
+    "name": "Armored Form",
+    "desc": "Harden shifted form, granting +4 HP. Can be activated once per scene.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_chimerical_eyes",
+    "name": "Chimerical Eyes",
+    "desc": "Gain additional eyes to detect magical energy and spells.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_mana_claw",
+    "name": "Mana Claw",
+    "desc": "Channel mana into natural weapons; Mental modifier to hit; adds +6 damage to attacks.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_whispling",
+    "name": "Whispling",
+    "desc": "Create mana drones that can speak or channel energy-based powers.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_hungering_maw",
+    "name": "Hungering Maw",
+    "desc": "Grow an additional mouth for one extra bite attack per turn.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_gravity_grasp",
+    "name": "Gravity Grasp",
+    "desc": "Create intense gravity area; Mental vs Physical: fail = grappled & damage, success = damage only.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_out_on_a_limb",
+    "name": "Out on a Limb",
+    "desc": "Grow an extra limb temporarily.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_eldritch_flash",
+    "name": "Eldritch Flash",
+    "desc": "Create a blinding flash of unnatural light; Mental vs Defense (10 + Physical) to blind.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_chim_eldritch_maser",
+    "name": "Eldritch Maser",
+    "desc": "Fire a beam of unstable mana; Mental vs Defense (10 + Dex), 8 + Mental damage.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "chimeric"
+  },
+  {
+    "id": "spliced_insect_web_spinning",
+    "name": "Web Spinning",
+    "desc": "Create restraints or barriers from silk.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_carapace_armor",
+    "name": "Carapace Armor",
+    "desc": "Harden carapace, reducing physical damage by 3 for 2 turns; can only be used once per scene.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_venom_sting",
+    "name": "Venom Sting",
+    "desc": "Inject paralytic or necrotic venom with a successful attack.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_wall_crawl",
+    "name": "Wall-Crawl",
+    "desc": "Scale walls and ceilings effortlessly.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_hive_mind",
+    "name": "Hive Mind",
+    "desc": "Telepathic communication with nearby Insectoids who share this power.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_stink_cloud",
+    "name": "Stink Cloud",
+    "desc": "Emit noxious gas impairing mental stats (-3) in a 5 ft radius for 3 turns.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_buzzing",
+    "name": "Buzzing",
+    "desc": "Create a droning sound that disrupts concentration and actions; can maintain each turn but forbids other actions.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_compound_eyes",
+    "name": "Compound Eyes",
+    "desc": "Grants 360° vision even in human form.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_wasp_sting",
+    "name": "Wasp Sting",
+    "desc": "Paralyzing sting grants an extra attack each turn; target rolls Physical to resist paralysis.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_mana_cocoon",
+    "name": "Mana Cocoon",
+    "desc": "Restrain target with a mana cocoon; target can resist with a Mental roll.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_insect_bugs_might",
+    "name": "Bugs Might",
+    "desc": "Temporarily lift, carry, or throw objects several times their size; +1 Strength.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "insectoid"
+  },
+  {
+    "id": "spliced_reptilian_venom_fang",
+    "name": "Venom Fang",
+    "desc": "Bite delivers poison that slows victim (-1 Dex); resisted by Physical roll.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_scalehide",
+    "name": "Scalehide",
+    "desc": "Natural armor reduces incoming damage by 2 for 3 turns.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_constrictors_coil",
+    "name": "Constrictor’s Coil",
+    "desc": "Grapple target and optionally constrict each turn; target may resist with Physical roll.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_detach",
+    "name": "Detach",
+    "desc": "Detach a limb harmlessly; limb regenerates before reuse.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_shed_skin",
+    "name": "Shed Skin",
+    "desc": "Remove maladies, sickness, or poison; cleanses conditions.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_poison_spit",
+    "name": "Poison Spit",
+    "desc": "Spit poisonous projectile; target rolls Physical to resist poison and damage.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_chameleons_mantle",
+    "name": "Chameleon’s Mantle",
+    "desc": "Blend with surroundings; grants +2 to Hide checks while stationary.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_hypnotizing_gaze",
+    "name": "Hypnotizing Gaze",
+    "desc": "Temporarily trance target; can last one scene. Mental roll to resist every 2 turns.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_reptilian_heat_sense",
+    "name": "Heat Sense",
+    "desc": "Detect heat and thermal differences.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "reptilian"
+  },
+  {
+    "id": "spliced_avian_keen_sight",
+    "name": "Keen Sight",
+    "desc": "Perfect clarity at range and in darkness.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_piercing_cry",
+    "name": "Piercing Cry",
+    "desc": "Disorient/stun targets; Mental roll to resist.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_predatory_dive",
+    "name": "Predatory Dive",
+    "desc": "Strike from above; knock target prone on failed Dex.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_wing_blades",
+    "name": "Wing Blades",
+    "desc": "Reinforce wings with blade structures; add Dex to attack when flying.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_wing_darts",
+    "name": "Wing Darts",
+    "desc": "Fire wing blades as projectiles; requires Wing Blades active.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_conspiracy_to_murder",
+    "name": "Conspiracy to Murder",
+    "desc": "Summon mana spirit flock to scout or attack; see through their eyes.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_voice_mimic",
+    "name": "Voice Mimic",
+    "desc": "Mimic a voice heard in last 24 hours.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_a_little_bird_told_me",
+    "name": "A Little Bird Told Me",
+    "desc": "Send message via summoned spirit to a familiar target.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_moving_at_hyper_squawk",
+    "name": "Moving at Hyper Squawk",
+    "desc": "Enhanced flight speed.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_avian_ripping_pecks",
+    "name": "Ripping Pecks",
+    "desc": "Jagged beak causes bleeding effect; +1 damage per turn.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "avian"
+  },
+  {
+    "id": "spliced_aquatic_abyssal_sense",
+    "name": "Abyssal Sense",
+    "desc": "Echolocation or pressure detection; reveals hidden/invisible creatures, traps, and doors.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_surge_strike",
+    "name": "Surge Strike",
+    "desc": "Burst of speed in water or zero-G.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_crushing_bite",
+    "name": "Crushing Bite",
+    "desc": "Bite that can shear most materials; +3 damage.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_rough_skin",
+    "name": "Rough Skin",
+    "desc": "Damage attackers who strike the Aquatic with claws/flesh; 1 damage per strike.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_aqua_shot",
+    "name": "Aqua Shot",
+    "desc": "Pull water from air to fire as projectile; 3 uses per scene without external water source.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_consume",
+    "name": "Consume",
+    "desc": "Consume inorganic items harmlessly.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_chomp_chomp",
+    "name": "Chomp-Chomp",
+    "desc": "Sharpen teeth in human form to perform bite attacks.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_eels_spite",
+    "name": "Eel’s Spite",
+    "desc": "Conduct electricity through body; shocks target, 2 uses per scene.",
+    "cost": 4,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_still_water",
+    "name": "Still Water",
+    "desc": "Camouflage in water; +2 to Hide checks if perfectly still.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_echo_pulse",
+    "name": "Echo Pulse",
+    "desc": "Sonic ring pushes enemies away; resisted with Physical roll.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_aquatic_death_roll",
+    "name": "Death Roll",
+    "desc": "After successful bite, lock jaws and spin prey; damage + disorient; hold 3 turns or until released.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "aquatic"
+  },
+  {
+    "id": "spliced_predator_savage_rend",
+    "name": "Savage Rend",
+    "desc": "Claws and teeth deal devastating damage.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_alphas_roar",
+    "name": "Alpha’s Roar",
+    "desc": "Creatures within earshot must roll Mental; failure: cannot approach and attack rolls suffer -1.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_unstoppable_charge",
+    "name": "Unstoppable Charge",
+    "desc": "Charge in straight line; deals damage; Dex roll to resist knockdown.",
+    "cost": 2,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_scent_lock",
+    "name": "Scent Lock",
+    "desc": "Track chosen scent; lasts 24 hours or until dispelled.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_cat_scratch_fever",
+    "name": "Cat Scratch Fever",
+    "desc": "Claws may cause sickness/poison; -2 Strength & Fortitude; resisted by Physical roll.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_howling_cannon",
+    "name": "Howling Cannon",
+    "desc": "Cone of force from roar/howl; Physical roll to resist.",
+    "cost": 3,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_cats_eye",
+    "name": "Cat’s Eye",
+    "desc": "See in total darkness; visualize infrared.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "spliced_predator_marking_territory",
+    "name": "Marking Territory",
+    "desc": "Mark area with scent, claws, or other method; supernatural awareness of mark; alerts allies.",
+    "cost": 1,
+    "species": "spliced",
+    "arch": "predators"
+  },
+  {
+    "id": "veil_echo_dream_recall",
+    "name": "Dream Recall",
+    "desc": "Replay memories or dreams as visible illusions.",
+    "cost": 2,
+    "species": "veilborn",
+    "arch": "echoes"
+  },
+  {
+    "id": "veil_echo_archive_walk",
+    "name": "Archive Walk",
+    "desc": "Enter data flows as a ghost; traverse archives, retrieve information, interact remotely.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "echoes"
+  },
+  {
+    "id": "veil_veils_identity_mask",
+    "name": "Identity Mask",
+    "desc": "Cloak oneself in another’s likeness; visual and auditory mimicry.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "veils"
+  },
+  {
+    "id": "veil_veils_whisper_stitch",
+    "name": "Whisper Stitch",
+    "desc": "Hear voices through vents, wires, or channels; gain information remotely.",
+    "cost": 2,
+    "species": "veilborn",
+    "arch": "veils"
+  },
+  {
+    "id": "veil_blossoms_verdant_surge",
+    "name": "Verdant Surge",
+    "desc": "Accelerate plant growth instantly; create cover, obstacles, or effects.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "blossoms"
+  },
+  {
+    "id": "veil_blossoms_charm_of_bloom",
+    "name": "Charm of Bloom",
+    "desc": "Awaken longing, creativity, or passion; influence targets emotionally.",
+    "cost": 2,
+    "species": "veilborn",
+    "arch": "blossoms"
+  },
+  {
+    "id": "veil_glass_starlit_gaze",
+    "name": "Starlit Gaze",
+    "desc": "Overwhelm mortals with cosmic visions; −1 Mental for 1 turn, may dazzle/distract.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "glass"
+  },
+  {
+    "id": "veil_glass_astral_reflection",
+    "name": "Astral Reflection",
+    "desc": "Bend or refract light; become partially transparent or dazzling.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "glass"
+  },
+  {
+    "id": "human_arc_thaumaturgy",
+    "name": "Thaumaturgy",
+    "desc": "Create sensory or physical magical effects (lights, voices, smells, vibrations).",
+    "cost": 1,
+    "species": "human",
+    "arch": "arcanist"
+  },
+  {
+    "id": "human_arc_magic_of_echoes",
+    "name": "Magic of Echoes",
+    "desc": "Recall residual magical effects recently cast in an area.",
+    "cost": 1,
+    "species": "human",
+    "arch": "arcanist"
+  },
+  {
+    "id": "human_arc_ley_pull",
+    "name": "Ley Pull",
+    "desc": "Draw energy from nearby ley lines to enhance a spell; +2 flat bonus to damage or effect.",
+    "cost": 2,
+    "species": "human",
+    "arch": "arcanist"
+  },
+  {
+    "id": "human_arc_ley_mapping",
+    "name": "Ley Mapping",
+    "desc": "Locate magical nodes or high-energy areas; utility/planning.",
+    "cost": 2,
+    "species": "human",
+    "arch": "arcanist"
+  },
+  {
+    "id": "human_synthral_ritual_magitech",
+    "name": "Ritual Magitech",
+    "desc": "Influence devices/systems with technomancy; ritualized activation.",
+    "cost": 1,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_synthral_systemic_runes",
+    "name": "Systemic Runes",
+    "desc": "Cybernetic tattoos act as conduits for technomancy; repeated use reduces TN.",
+    "cost": 2,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_synthral_tecno_manipulation",
+    "name": "Tecno-Manipulation",
+    "desc": "Manipulate technology through will and magic; switch on/off, move, or alter machines.",
+    "cost": 2,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_synthral_cyber_sprites",
+    "name": "Cyber Sprites",
+    "desc": "Create digital/magical servitors; deliver messages, activate devices, distract targets.",
+    "cost": 3,
+    "species": "human",
+    "arch": "synthral"
+  },
+  {
+    "id": "human_psion_mindshatter_pulse",
+    "name": "Mindshatter Pulse",
+    "desc": "Burst of mental energy disrupts thought; confusion, memory loss.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_telekinetic_surge",
+    "name": "Telekinetic Surge",
+    "desc": "Move, lift, hurl, or crush objects with mental force.",
+    "cost": 4,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_cognitive_echo",
+    "name": "Cognitive Echo",
+    "desc": "Read surface thoughts/emotional states; replay memories, sense intentions.",
+    "cost": 2,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_neural_web",
+    "name": "Neural Web",
+    "desc": "Link minds for shared thoughts, sensations, coordinated action.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_flame_of_will",
+    "name": "Flame of Will",
+    "desc": "Generate fire/heat, manipulate thermal energy, create fire bursts.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_eyes_beyond_time",
+    "name": "Eyes Beyond Time",
+    "desc": "Precognition, retrocognition, probability shaping; grants tactical info.",
+    "cost": 5,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_memory_emotion_sculpt",
+    "name": "Memory and Emotion Sculpt",
+    "desc": "Absorb, redirect, or manipulate emotions and memories; −1 Mental for 1–3 turns.",
+    "cost": 4,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_biokinetics",
+    "name": "Biokinetics",
+    "desc": "Enhance body functions temporarily (speed, reflexes, strength); +1 Phys or Dex for 1–3 turns.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion"
+  },
+  {
+    "id": "human_psion_psychokinetics",
+    "name": "Psychokinetics",
+    "desc": "Create/manipulate chaotic psychic energy; 8 + Mental damage.",
+    "cost": 4,
+    "species": "human",
+    "arch": "psion"
+  }
+]

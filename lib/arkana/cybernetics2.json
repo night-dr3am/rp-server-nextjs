@@ -1,0 +1,372 @@
+[
+  {
+    "id": "cyb_spectra_vision",
+    "name": "Spectra-Vision",
+    "desc": "Multi-spectrum sight (infrared, UV, etc.), wide utility.",
+    "cost": 3,
+    "type": "sensory",
+    "section": "Sensory Mods"
+  },
+  {
+    "id": "cyb_echo_sense",
+    "name": "EchoSense",
+    "desc": "Sonar/pulse mapping; excellent for navigation.",
+    "cost": 3,
+    "type": "sensory",
+    "section": "Sensory Mods"
+  },
+  {
+    "id": "cyb_ghostlight_optics",
+    "name": "Ghostlight Optics",
+    "desc": "Low-light / thermal hybrid, strong for night/combat.",
+    "cost": 2,
+    "type": "sensory",
+    "section": "Sensory Mods"
+  },
+  {
+    "id": "cyb_clarity_node",
+    "name": "Clarity Node",
+    "desc": "Anti-glare / image stabilizer; niche defensive utility.",
+    "cost": 1,
+    "type": "sensory",
+    "section": "Sensory Mods"
+  },
+  {
+    "id": "cyb_street_eye_mkiv",
+    "name": "Street-Eye Mk IV",
+    "desc": "Basic starter sensory mod, cheap but common.",
+    "cost": 1,
+    "type": "sensory",
+    "section": "Sensory Mods"
+  },
+  {
+    "id": "cyb_razorjack_interface",
+    "name": "Razorjack Interface",
+    "desc": "Deployable blades or claws; solid melee weapon upgrade.",
+    "cost": 3,
+    "type": "combat",
+    "section": "Combat/Utility Mods"
+  },
+  {
+    "id": "cyb_impact_coil",
+    "name": "Impact Coil",
+    "desc": "Shockwave-enhanced strikes; strong AoE knockback.",
+    "cost": 4,
+    "type": "combat",
+    "section": "Combat/Utility Mods"
+  },
+  {
+    "id": "cyb_grav_lock_anchors",
+    "name": "Grav-Lock Anchors",
+    "desc": "Adhesion to walls/ceilings; great infiltration/mobility.",
+    "cost": 3,
+    "type": "combat",
+    "section": "Combat/Utility Mods"
+  },
+  {
+    "id": "cyb_pulse_injector",
+    "name": "Pulse Injector",
+    "desc": "Short-burst speed enhancer; versatile for Dex rolls/escapes.",
+    "cost": 3,
+    "type": "combat",
+    "section": "Combat/Utility Mods"
+  },
+  {
+    "id": "cyb_wraith_grip",
+    "name": "Wraith Grip",
+    "desc": "Silent, vibration-dampened hands; strong stealth, lower combat.",
+    "cost": 2,
+    "type": "combat",
+    "section": "Combat/Utility Mods"
+  },
+  {
+    "id": "cyb_shadeskin",
+    "name": "ShadeSkin",
+    "desc": "Optical camouflage layer; high-end stealth, nearly invisible.",
+    "cost": 4,
+    "type": "stealth",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "cyb_veil_circuit",
+    "name": "Veil Circuit",
+    "desc": "Sound suppression dampeners; highly useful for stealth.",
+    "cost": 3,
+    "type": "stealth",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "cyb_ghoststep_relay",
+    "name": "Ghoststep Relay",
+    "desc": "Noise-cancelled footfalls; useful but narrower than Veil Circuit.",
+    "cost": 2,
+    "type": "stealth",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "cyb_null_sigil",
+    "name": "Null Sigil",
+    "desc": "Electronic signature masking; counters detection tech.",
+    "cost": 3,
+    "type": "stealth",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "cyb_cold_veins",
+    "name": "Cold Veins",
+    "desc": "Thermal suppression mod; valuable for surveillance-heavy zones.",
+    "cost": 2,
+    "type": "stealth",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "cyb_titan_frame",
+    "name": "Titan Frame",
+    "desc": "Reinforced bone plating; strong defense/durability.",
+    "cost": 4,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_servocore_overdrive",
+    "name": "ServoCore Overdrive",
+    "desc": "Strength amplifier; huge melee upgrade.",
+    "cost": 4,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_ironlung_node",
+    "name": "Ironlung Node",
+    "desc": "Respiratory boost / toxic filter; environmental survival.",
+    "cost": 2,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_shock_spine",
+    "name": "Shock-Spine",
+    "desc": "Electrical discharge defense; strong deterrent/reactive damage.",
+    "cost": 3,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_grinder_arm",
+    "name": "Grinder Arm",
+    "desc": "Industrial-grade crushing tool; brutal melee, bulky.",
+    "cost": 4,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_carapace_full",
+    "name": "Carapace (full)",
+    "desc": "Full-body reinforcement; reduces damage by -3 points.",
+    "cost": 5,
+    "type": "durability",
+    "section": "Augmented Strength/Durability"
+  },
+  {
+    "id": "cyb_meatjackers",
+    "name": "Meatjackers",
+    "desc": "Combat prosthetic arms; common street-tier melee enhancement.",
+    "cost": 2,
+    "type": "street",
+    "section": "Street-Level Popular Mods"
+  },
+  {
+    "id": "cyb_glowsticks",
+    "name": "Glowsticks",
+    "desc": "Cheap neon-lit limbs; cosmetic/intimidation, minimal combat use.",
+    "cost": 1,
+    "type": "street",
+    "section": "Street-Level Popular Mods"
+  },
+  {
+    "id": "cyb_bonecrackers",
+    "name": "Bonecrackers",
+    "desc": "Overclocked hand mods; short-term melee buff, unstable.",
+    "cost": 2,
+    "type": "street",
+    "section": "Street-Level Popular Mods"
+  },
+  {
+    "id": "cyb_spiderjoints",
+    "name": "Spiderjoints",
+    "desc": "Multi-angle bending prosthetics; useful for odd escapes/infiltration.",
+    "cost": 2,
+    "type": "street",
+    "section": "Street-Level Popular Mods"
+  },
+  {
+    "id": "hack_silkveil",
+    "name": "Silkveil",
+    "desc": "Ghostly cloaking routine for system monitors. Reliable, broad use stealth.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "I",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_shadowstep",
+    "name": "Shadowstep",
+    "desc": "Short-burst stealth injector; quick escape/bypass tool.",
+    "cost": 1,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "I",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_nightloom",
+    "name": "Nightloom",
+    "desc": "Weaves background noise into a silent corridor for your trace.",
+    "cost": 1,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "I",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_mutepatch",
+    "name": "MutePatch",
+    "desc": "Temporary logging blind; leaves little more than a whisper.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "II",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_glasscloak",
+    "name": "Glasscloak",
+    "desc": "Reflection-layer that distorts how the system sees you.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "II",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_hushkit",
+    "name": "Hushkit",
+    "desc": "Suppresses alerting chirps and heartbeat tracers.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "III",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_fogline",
+    "name": "Fogline",
+    "desc": "Generates transient decoys to confuse time-based scans.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "stealth",
+    "mk": "III",
+    "section": "Stealth/Infiltration - Hacking"
+  },
+  {
+    "id": "hack_wardhalo",
+    "name": "WardHalo",
+    "desc": "Defensive shell that repels basic scanning heuristics.",
+    "cost": 1,
+    "type": "hacking",
+    "category": "defense",
+    "mk": "I",
+    "section": "Defensive/Countermeasures - Hacking"
+  },
+  {
+    "id": "hack_glassguard",
+    "name": "GlassGuard",
+    "desc": "Brittle shield that breaks to protect a deeper secret.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "defense",
+    "mk": "II",
+    "section": "Defensive/Countermeasures - Hacking"
+  },
+  {
+    "id": "hack_mistscreen",
+    "name": "MistScreen",
+    "desc": "Routes attention away from true assets with fog.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "defense",
+    "mk": "II",
+    "section": "Defensive/Countermeasures - Hacking"
+  },
+  {
+    "id": "hack_pulsefence",
+    "name": "PulseFence",
+    "desc": "Short-lived perimeter push that confuses automated hunters.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "defense",
+    "mk": "III",
+    "section": "Defensive/Countermeasures - Hacking"
+  },
+  {
+    "id": "hack_brickwave",
+    "name": "Brickwave",
+    "desc": "Creates a blunt shock to overwhelm simple defenses.",
+    "cost": 1,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "I",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  },
+  {
+    "id": "hack_glassrend",
+    "name": "GlassRend",
+    "desc": "Shatters brittle protocols with surgical force.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "I",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  },
+  {
+    "id": "hack_thunderclasp",
+    "name": "Thunderclasp",
+    "desc": "High-impact entry that forces doors open; strong, aggressive breach.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "II",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  },
+  {
+    "id": "hack_clockmender",
+    "name": "Clockmender",
+    "desc": "Falsifies timestamps for short, plausible windows.",
+    "cost": 2,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "II",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  },
+  {
+    "id": "hack_signalsmith",
+    "name": "SignalSmith",
+    "desc": "Sculpts traffic patterns into believable flows; hides activity.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "III",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  },
+  {
+    "id": "hack_wreckline",
+    "name": "Wreckline",
+    "desc": "Loud, chaotic breaching routine that creates exploitable openings.",
+    "cost": 3,
+    "type": "hacking",
+    "category": "breach",
+    "mk": "III",
+    "section": "Breaching/Intrusion Protocols - Hacking"
+  }
+]

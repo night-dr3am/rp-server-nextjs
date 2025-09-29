@@ -1,0 +1,362 @@
+[
+ {
+    "id": "hum_stasis_degradation_hnp",
+    "name": "Stasis Degradation",
+    "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
+    "cost": 3,
+    "tags": ["species:human_without_power"]
+  },
+  {
+    "id": "hum_stasis_degradation_arc",
+    "name": "Stasis Degradation",
+    "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
+    "cost": 3,
+    "tags": ["species:arcanist"]
+  },
+  {
+    "id": "hum_stasis_degradation_syn",
+    "name": "Stasis Degradation",
+    "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
+    "cost": 3,
+    "tags": ["species:synthral"]
+  },
+  {
+    "id": "hum_stasis_degradation_psion",
+    "name": "Stasis Degradation",
+    "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
+    "cost": 3,
+    "tags": ["species:psion"]
+  },
+
+  {
+    "id": "hum_system_vulnerability",
+    "name": "System Vulnerability",
+    "desc": "Neural link to the Ark can be hijacked; failed TN 12 Mental roll may allow rogue code or AI to manipulate the Synthral.",
+    "cost": 4,
+    "tags": ["species:synthral"]
+  },
+
+  {
+    "id": "hum_cognitive_drift_hnp",
+    "name": "Cognitive Drift",
+    "desc": "Exposure to Ark anomalies or magic causes –1 to Mental rolls and occasional confusion (DM discretion).",
+    "cost": 2,
+    "tags": ["species:human_without_power"]
+  },
+  {
+    "id": "hum_cognitive_drift_arc",
+    "name": "Cognitive Drift",
+    "desc": "Exposure to Ark anomalies or magic causes –1 to Mental rolls and occasional confusion (DM discretion).",
+    "cost": 2,
+    "tags": ["species:arcanist"]
+  },
+  {
+    "id": "hum_cognitive_drift_syn",
+    "name": "Cognitive Drift",
+    "desc": "Exposure to Ark anomalies or magic causes –1 to Mental rolls and occasional confusion (DM discretion).",
+    "cost": 2,
+    "tags": ["species:synthral"]
+  },
+  {
+    "id": "hum_cognitive_drift_psion",
+    "name": "Cognitive Drift",
+    "desc": "Exposure to Ark anomalies or magic causes –1 to Mental rolls and occasional confusion (DM discretion).",
+    "cost": 2,
+    "tags": ["species:psion"]
+  },
+
+  {
+    "id": "hum_temporal_dislocation",
+    "name": "Temporal Dislocation",
+    "desc": "(Psion only) Precognition may leave character distracted; –1 to Physical and Dex rolls during or immediately after visions.",
+    "cost": 3,
+    "tags": ["species:psion"]
+  },
+  {
+    "id": "hum_psychic_overload",
+    "name": "Psychic Overload",
+    "desc": "(Psion only) Crowds or emotional intensity impose –1 Mental while active; may skip one action per scene if overloaded.",
+    "cost": 2,
+    "tags": ["species:psion"]
+  },
+  {
+    "id": "hum_cult_stigma_hnp",
+    "name": "Cult Stigma",
+    "desc": "Viewed with suspicion by other factions; –1 Social roll in interactions with non-allied factions.",
+    "cost": 2,
+    "tags": ["species:human_without_power"]
+  },
+  {
+    "id": "hum_cult_stigma_arc",
+    "name": "Cult Stigma",
+    "desc": "Viewed with suspicion by other factions; –1 Social roll in interactions with non-allied factions.",
+    "cost": 2,
+    "tags": ["species:arcanist"]
+  },
+  {
+    "id": "hum_cult_stigma_syn",
+    "name": "Cult Stigma",
+    "desc": "Viewed with suspicion by other factions; –1 Social roll in interactions with non-allied factions.",
+    "cost": 2,
+    "tags": ["species:synthral"]
+  },
+  {
+    "id": "hum_cult_stigma_psion",
+    "name": "Cult Stigma",
+    "desc": "Viewed with suspicion by other factions; –1 Social roll in interactions with non-allied factions.",
+    "cost": 2,
+    "tags": ["species:psion"]
+  },
+  {
+    "id": "hum_tech_obsession_hnp",
+    "name": "Tech-obsession",
+    "desc": "Obsessed with tech; –1 Perception while interacting with environment or non-tech scenarios.",
+    "cost": 2,
+    "tags": ["species:human_without_power"]
+  },
+  {
+    "id": "hum_tech_obsession_arc",
+    "name": "Tech-obsession",
+    "desc": "Obsessed with tech; –1 Perception while interacting with environment or non-tech scenarios.",
+    "cost": 2,
+    "tags": ["species:arcanist"]
+  },
+  {
+    "id": "hum_tech_obsession_syn",
+    "name": "Tech-obsession",
+    "desc": "Obsessed with tech; –1 Perception while interacting with environment or non-tech scenarios.",
+    "cost": 2,
+    "tags": ["species:synthral"]
+  },
+  {
+    "id": "hum_tech_obsession_psion",
+    "name": "Tech-obsession",
+    "desc": "Obsessed with tech; –1 Perception while interacting with environment or non-tech scenarios.",
+    "cost": 2,
+    "tags": ["species:psion"]
+  },
+  {
+    "id": "hum_arcane_isolation",
+    "name": "Arcane Isolation",
+    "desc": "(Arcanist only) Withdrawal from non-magical beings; –1 Social rolls outside magical/familiar company.",
+    "cost": 2,
+    "tags": ["species:arcanist"]
+  },
+  {
+    "id": "hum_mental_contagion",
+    "name": "Mental Contagion",
+    "desc": "(Psion only) Exposure to unstable minds or corrupted systems risks memory lapses; –1 Mental rolls during prolonged exposure.",
+    "cost": 3,
+    "tags": ["species:psion"]
+  },
+  {
+    "id": "veil_identity_drift",
+    "name": "Identity Drift",
+    "desc": "Mutable nature makes it hard for Veilborn to maintain a consistent sense of self.",
+    "cost": 2,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_aura_bleed",
+    "name": "Aura Bleed",
+    "desc": "Emotions and intentions unconsciously leak into surroundings.",
+    "cost": 1,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_phantom_echo",
+    "name": "Phantom Echo",
+    "desc": "Sometimes phase in sleep or exhaustion, waking in strange places or drained.",
+    "cost": 1,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_shadowed_whispers",
+    "name": "Shadowed Whispers",
+    "desc": "Occasionally murmur to unseen voices, unnerving others.",
+    "cost": 1,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_oath_entanglement",
+    "name": "Oath Entanglement",
+    "desc": "Made a casual promise or accidental oath and are now bound to it.",
+    "cost": 3,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_mythic_magnetism",
+    "name": "Mythic Magnetism",
+    "desc": "Mythic aura attracts phenomena: signals, dream intrusions, forgotten AI routines.",
+    "cost": 3,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_sensory_overload",
+    "name": "Sensory Overload",
+    "desc": "Heightened perception makes you vulnerable to chaotic environments.",
+    "cost": 3,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_veil_sickness",
+    "name": "Veil Sickness",
+    "desc": "Long absence from spiritual places or communion with the Veil drains you.",
+    "cost": 3,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_legacy_conflict",
+    "name": "Legacy Conflict",
+    "desc": "Conflicting genetic and mythic imprints may clash in moments of crisis.",
+    "cost": 4,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_unstable_morality",
+    "name": "Unstable Morality",
+    "desc": "May act against allies if personal gain outweighs loyalty.",
+    "cost": 4,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_veils_price",
+    "name": "Veil’s Price",
+    "desc": "Powers demand a toll: physical deterioration, bleeding, or loss of vitality.",
+    "cost": 5,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "veil_hollow_pulse",
+    "name": "Hollow Pulse",
+    "desc": "“Heartbeat” is faint and irregular, tied to the Veil rather than life.",
+    "cost": 5,
+    "tags": ["race:veilborn"]
+  },
+  {
+    "id": "sp_humanitys_blight",
+    "name": "Humanity’s Blight",
+    "desc": "Appearance is unsettling. –2 to Persuasion/Social rolls.",
+    "cost": 2,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_sterility_risk",
+    "name": "Sterility Risk",
+    "desc": "Cannot reproduce naturally. Narratively impactful.",
+    "cost": 1,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_savage_flow",
+    "name": "Savage Flow",
+    "desc": "Animal instincts rise to the surface. –1 Mental to resist urges.",
+    "cost": 3,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_flawed_splice",
+    "name": "Flawed Splice",
+    "desc": "Transformation is incomplete or defective.",
+    "cost": 3,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_unshifting",
+    "name": "Unshifting",
+    "desc": "Hybrid or shifted form is permanent.",
+    "cost": 3,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_genetic_instability",
+    "name": "Genetic Instability",
+    "desc": "Unstable DNA causes degeneration. Chronic pain –1 to rolls during stress.",
+    "cost": 4,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_kill_switch",
+    "name": "Kill Switch",
+    "desc": "Hidden programming can override or kill you.",
+    "cost": 5,
+    "tags": ["race:spliced"]
+  },
+  {
+    "id": "sp_unstable_form",
+    "name": "Unstable Form",
+    "desc": "Each shift roll 1d20. Mutation penalty/boon possible.",
+    "cost": 2,
+    "tags": ["race:spliced","arch:chimeric"]
+  },
+  {
+    "id": "v_feed_addiction",
+    "name": "Feeding Addiction",
+    "desc": "Feeding thrills you beyond reason. Limits control.",
+    "cost": 2,
+    "tags": ["race:strigoi"]
+  },
+  {
+    "id": "v_blood_madness",
+    "name": "Blood Madness",
+    "desc": "Starvation drives you toward frenzy.",
+    "cost": 3,
+    "tags": ["race:strigoi"]
+  },
+  {
+    "id": "v_shameful_hunger",
+    "name": "Shameful Hunger",
+    "desc": "Recoil at feeding on living. May abstain.",
+    "cost": 2,
+    "tags": ["race:strigoi"]
+  },
+  {
+    "id": "v_parasitic_reputation_strigoi",
+    "name": "Parasitic Reputation",
+    "desc": "Seen as parasitic predators, alliances suffer suspicion.",
+    "cost": 1,
+    "tags": ["race:strigoi"]
+  },
+  {
+    "id": "v_lustful_feeding_strigoi",
+    "name": "Lustful Feeding",
+    "desc": "Cannot drink blood. Feed on sexual energy and lust.",
+    "cost": 2,
+    "tags": ["race:strigoi"]
+  },
+    {
+    "id": "v_feed_addiction",
+    "name": "Feeding Addiction",
+    "desc": "Feeding thrills you beyond reason. Limits control.",
+    "cost": 2,
+    "tags": ["race:gaki"]
+  },
+  {
+    "id": "v_blood_madness",
+    "name": "Blood Madness",
+    "desc": "Starvation drives you toward frenzy.",
+    "cost": 3,
+    "tags": ["race:gaki"]
+  },
+  {
+    "id": "v_shameful_hunger",
+    "name": "Shameful Hunger",
+    "desc": "Recoil at feeding on living. May abstain.",
+    "cost": 2,
+    "tags": ["race:gaki"]
+  },
+   {
+    "id": "v_resonance_conflict_gaki",
+    "name": "Resonance Conflict",
+    "desc": "Feeding from Supernaturals risks corruption and madness.",
+    "cost": 2,
+    "tags": ["race:gaki"]
+  },
+  {
+    "id": "v_chi_hunger_gaki",
+    "name": "Chi Hunger",
+    "desc": "Mortal blood does not sustain you. Only supernatural Chi will.",
+    "cost": 3,
+    "tags": ["race:gaki"]
+  }
+]
