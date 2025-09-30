@@ -343,9 +343,9 @@ export default function ArkanaCharacterCreation() {
 
       if (response.ok) {
         await response.json();
-        alert('Character created successfully!');
-        // Redirect or show success page
-        window.location.href = `/profile/${uuid}`;
+        alert('Your Arkana Character is created successfully! Please go back to the game and touch your Arkana HUD to refresh your stats.');
+        // Close the page after user confirms the alert
+        window.close();
       } else {
         const error = await response.json();
         setError(error.error || 'Failed to create character');
