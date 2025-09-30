@@ -407,7 +407,11 @@ export async function createTestUserWithInventory(testUser: TestUser, items: Tes
 
 // Generate unique UUIDs for testing
 export function generateTestUUID(): string {
-  return '550e8400-e29b-41d4-a716-' + Math.random().toString(16).substring(2, 14)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 // Generate unique usernames for testing
