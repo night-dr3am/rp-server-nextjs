@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        isHit,
+        isHit: isHit ? "true" : "false",
         damage,
         attackRoll,
         targetNumber,
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
           stat: target.arkanaStats[attack_type === 'power' ? 'mental' : 'dexterity'],
           healthBefore: target.stats.health,
           healthAfter: newTargetHealth,
-          isUnconscious: newTargetHealth <= 0
+          isUnconscious: (newTargetHealth <= 0) ? "true" : "false"
         }
       }
     });
