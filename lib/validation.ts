@@ -468,6 +468,15 @@ export const arkanaPowerCheckSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const arkanaFeatStatCheckSchema = Joi.object({
+  player_uuid: uuidSchema,
+  stat_type: Joi.string().valid('physical', 'dexterity', 'mental', 'perception').required(),
+  target_number: Joi.number().integer().min(1).max(30).required(),
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 export const arkanaFirstAidSchema = Joi.object({
   healer_uuid: uuidSchema,
   target_uuid: uuidSchema,
