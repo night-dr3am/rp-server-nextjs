@@ -108,12 +108,12 @@ describe('/api/arkana/combat/attack', () => {
       expectSuccess(data);
       expect(data.data.attackStat).toBe('Physical');
       expect(data.data.defenseStat).toBe('Dexterity');
-      expect(data.data.attackerMod).toBe(2); // physical 5 - 3 = +2
-      expect(data.data.defenderMod).toBe(-2); // dexterity 1 - 3 = -2
+      expect(data.data.attackerMod).toBe(6); // physical 5 → +6 (from calculateStatModifier)
+      expect(data.data.defenderMod).toBe(-2); // dexterity 1 → -2 (from calculateStatModifier)
       expect(data.data.targetNumber).toBe(8); // 10 + (-2) = 8
       expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
       expect(data.data.d20Roll).toBeLessThanOrEqual(20);
-      expect(data.data.attackRoll).toBe(data.data.d20Roll + 2);
+      expect(data.data.attackRoll).toBe(data.data.d20Roll + 6); // d20 + attacker mod (+6)
       expect(data.data.message).toContain('Strong Warrior');
       expect(data.data.message).toContain('Slow Target');
       expect(data.data.attacker.name).toBe('Strong Warrior');
@@ -162,9 +162,9 @@ describe('/api/arkana/combat/attack', () => {
       expectSuccess(data);
       expect(data.data.attackStat).toBe('Dexterity');
       expect(data.data.defenseStat).toBe('Dexterity');
-      expect(data.data.attackerMod).toBe(1); // dexterity 4 - 3 = +1
-      expect(data.data.defenderMod).toBe(0); // dexterity 3 - 3 = 0
-      expect(data.data.targetNumber).toBe(10); // 10 + 0 = 10
+      expect(data.data.attackerMod).toBe(4); // dexterity 4 → +4 (from calculateStatModifier)
+      expect(data.data.defenderMod).toBe(2); // dexterity 3 → +2 (from calculateStatModifier)
+      expect(data.data.targetNumber).toBe(12); // 10 + 2 = 12
     });
 
     it('should process a power attack correctly', async () => {
@@ -209,8 +209,8 @@ describe('/api/arkana/combat/attack', () => {
       expectSuccess(data);
       expect(data.data.attackStat).toBe('Mental');
       expect(data.data.defenseStat).toBe('Mental');
-      expect(data.data.attackerMod).toBe(2); // mental 5 - 3 = +2
-      expect(data.data.defenderMod).toBe(-2); // mental 1 - 3 = -2
+      expect(data.data.attackerMod).toBe(6); // mental 5 → +6 (from calculateStatModifier)
+      expect(data.data.defenderMod).toBe(-2); // mental 1 → -2 (from calculateStatModifier)
       expect(data.data.targetNumber).toBe(8); // 10 + (-2) = 8
     });
 

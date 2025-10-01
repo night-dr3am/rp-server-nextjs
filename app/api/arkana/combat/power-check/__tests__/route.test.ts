@@ -92,12 +92,12 @@ describe('/api/arkana/combat/power-check', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.mentalMod).toBe(2); // mental 5 - 3 = +2
+      expect(data.data.mentalMod).toBe(6); // mental 5 → +6 (from calculateStatModifier)
       expect(data.data.mentalStat).toBe(5);
       expect(data.data.targetNumber).toBe(12); // Always 12 for power checks
       expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
       expect(data.data.d20Roll).toBeLessThanOrEqual(20);
-      expect(data.data.totalRoll).toBe(data.data.d20Roll + 2);
+      expect(data.data.totalRoll).toBe(data.data.d20Roll + 6); // d20 + mental mod (+6)
       expect(data.data.message).toContain('Powerful Psion');
       expect(data.data.player.name).toBe('Powerful Psion');
       expect(data.data.player.uuid).toBe(player.slUuid);
@@ -168,10 +168,10 @@ describe('/api/arkana/combat/power-check', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.mentalMod).toBe(0); // mental 3 - 3 = 0
+      expect(data.data.mentalMod).toBe(2); // mental 3 → +2 (from calculateStatModifier)
       expect(data.data.mentalStat).toBe(3);
       expect(data.data.targetNumber).toBe(12);
-      expect(data.data.totalRoll).toBe(data.data.d20Roll); // No modifier
+      expect(data.data.totalRoll).toBe(data.data.d20Roll + 2); // d20 + mental mod (+2)
     });
 
     it('should return 404 for non-existent player', async () => {

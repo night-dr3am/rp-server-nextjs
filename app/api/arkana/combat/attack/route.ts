@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
+import { calculateStatModifier } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,10 +86,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate stat modifiers (stat - 3)
-    const getModifier = (stat: number): number => stat - 3;
-
-    // Determine attack resolution based on attack type
+    // Determine attack resolution based on attack type using proper stat modifier calculation
     let attackerMod: number;
     let defenderMod: number;
     let attackStat: string;
@@ -96,20 +94,20 @@ export async function POST(request: NextRequest) {
 
     switch (attack_type) {
       case 'physical':
-        attackerMod = getModifier(attacker.arkanaStats.physical);
-        defenderMod = getModifier(target.arkanaStats.dexterity);
+        attackerMod = calculateStatModifier(attacker.arkanaStats.physical);
+        defenderMod = calculateStatModifier(target.arkanaStats.dexterity);
         attackStat = 'Physical';
         defenseStat = 'Dexterity';
         break;
       case 'ranged':
-        attackerMod = getModifier(attacker.arkanaStats.dexterity);
-        defenderMod = getModifier(target.arkanaStats.dexterity);
+        attackerMod = calculateStatModifier(attacker.arkanaStats.dexterity);
+        defenderMod = calculateStatModifier(target.arkanaStats.dexterity);
         attackStat = 'Dexterity';
         defenseStat = 'Dexterity';
         break;
       case 'power':
-        attackerMod = getModifier(attacker.arkanaStats.mental);
-        defenderMod = getModifier(target.arkanaStats.mental);
+        attackerMod = calculateStatModifier(attacker.arkanaStats.mental);
+        defenderMod = calculateStatModifier(target.arkanaStats.mental);
         attackStat = 'Mental';
         defenseStat = 'Mental';
         break;

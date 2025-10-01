@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
+import { calculateStatModifier } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,8 +50,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate mental modifier (stat - 3)
-    const mentalMod = player.arkanaStats.mental - 3;
+    // Calculate mental modifier using proper stat modifier calculation
+    const mentalMod = calculateStatModifier(player.arkanaStats.mental);
 
     // Roll D20 + mental modifier
     const d20Roll = Math.floor(Math.random() * 20) + 1;
