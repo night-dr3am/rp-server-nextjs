@@ -36,7 +36,8 @@ import {
 export default function ArkanaCharacterCreation() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const uuid = params?.uuid as string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const uuid = params?.uuid as string; // Reserved for future validation
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
 

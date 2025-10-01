@@ -468,6 +468,14 @@ export const arkanaPowerCheckSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const arkanaFirstAidSchema = Joi.object({
+  healer_uuid: uuidSchema,
+  target_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // Crafting system validation schemas
 export const recipeUpsertSchema = Joi.object({
   name: Joi.string().min(1).max(255).required(),
