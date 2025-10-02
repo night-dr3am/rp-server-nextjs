@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { updateProfileSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { Role } from '@prisma/client';
+import { sanitizeForLSL } from '@/lib/stringUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest) {
           faction: result.arkanaStats.faction,
           conceptRole: result.arkanaStats.conceptRole,
           job: result.arkanaStats.job,
-          background: result.arkanaStats.background,
+          background: sanitizeForLSL(result.arkanaStats.background, 50),
           race: result.arkanaStats.race,
           subrace: result.arkanaStats.subrace,
           archetype: result.arkanaStats.archetype,

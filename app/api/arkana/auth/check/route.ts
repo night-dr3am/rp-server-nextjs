@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { checkUserSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
+import { sanitizeForLSL } from '@/lib/stringUtils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
           faction: user.arkanaStats.faction,
           conceptRole: user.arkanaStats.conceptRole,
           job: user.arkanaStats.job,
-          background: user.arkanaStats.background,
+          background: sanitizeForLSL(user.arkanaStats.background, 50),
           race: user.arkanaStats.race,
           subrace: user.arkanaStats.subrace,
           archetype: user.arkanaStats.archetype,
@@ -209,7 +210,7 @@ export async function POST(request: NextRequest) {
           faction: user.arkanaStats.faction,
           conceptRole: user.arkanaStats.conceptRole,
           job: user.arkanaStats.job,
-          background: user.arkanaStats.background,
+          background: sanitizeForLSL(user.arkanaStats.background, 50),
           race: user.arkanaStats.race,
           subrace: user.arkanaStats.subrace,
           archetype: user.arkanaStats.archetype,

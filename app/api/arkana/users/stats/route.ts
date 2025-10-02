@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaStatsSchema, arkanaUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
+import { sanitizeForLSL } from '@/lib/stringUtils';
 
 // GET /api/arkana/users/stats - Retrieve Arkana user statistics
 export async function GET(request: NextRequest) {
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
           faction: user.arkanaStats.faction,
           conceptRole: user.arkanaStats.conceptRole,
           job: user.arkanaStats.job,
-          background: user.arkanaStats.background,
+          background: sanitizeForLSL(user.arkanaStats.background, 50),
           race: user.arkanaStats.race,
           subrace: user.arkanaStats.subrace,
           archetype: user.arkanaStats.archetype,
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
           faction: updatedUser.arkanaStats.faction,
           conceptRole: updatedUser.arkanaStats.conceptRole,
           job: updatedUser.arkanaStats.job,
-          background: updatedUser.arkanaStats.background,
+          background: sanitizeForLSL(updatedUser.arkanaStats.background, 50),
           race: updatedUser.arkanaStats.race,
           subrace: updatedUser.arkanaStats.subrace,
           archetype: updatedUser.arkanaStats.archetype,
