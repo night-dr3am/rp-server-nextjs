@@ -254,12 +254,6 @@ export default function ArkanaCharacterCreation() {
   const getPowerPointsSpent = () => powerPointsSpentTotal(characterModel);
   const getPowerPointsRemaining = () => getPowerPointsTotal() - getPowerPointsSpent();
 
-  // Discord webhook URL from the sample
-  const DISCORD_WEBHOOK_URL = "https://discordapp.com/api/webhooks/1419119617573388348/MDsOewugKvquE0Sowp3LHSO6e_Tngue5lO6Z8ucFhwj6ZbQPn6RLD7L69rPOpYVwFSXW";
-
-  // Maximum Discord message length (leaves room for "...(truncated)")
-  const MAX_DISCORD_MESSAGE_LENGTH = 1980;
-
   // Format character data for Discord webhook
   const formatCharacterForDiscord = () => {
     // Power points system
@@ -318,27 +312,123 @@ export default function ArkanaCharacterCreation() {
 
     message += `**Background:** ${characterModel.identity.background || '-'}\n`;
 
-    // Truncate message if it exceeds the maximum length
-    if (message.length > MAX_DISCORD_MESSAGE_LENGTH) {
-      message = message.substring(0, MAX_DISCORD_MESSAGE_LENGTH) + '...(truncated)';
-    }
-
     return message;
   };
 
-  // Send character data to Discord webhook
+  // Send character data to Discord webhook via server-side API
   const sendToDiscord = async () => {
     try {
       const content = formatCharacterForDiscord();
-      await fetch(DISCORD_WEBHOOK_URL, {
+      const response = await fetch('/api/arkana/submit-to-discord', {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ token, content })
       });
-      console.log('Character data sent to Discord successfully');
+
+      if (response.ok) {
+        console.log('Character data sent to Discord successfully');
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to send to Discord:', errorData.error);
+      }
     } catch (error) {
       console.error('Failed to send to Discord:', error);
       // Don't block character creation if Discord fails
+    }
+  };
+
+  // Send character data to Google Apps Script for Google Drive storage
+  const sendToGoogleScript = async () => {
+    try {
+      // Calculate summary data
+      const totalPowerPoints = getPowerPointsTotal();
+      const spentPowerPoints = getPowerPointsSpent();
+      const remainingPowerPoints = getPowerPointsRemaining();
+      const statPointsSpent = calculateStatPointsSpent();
+
+      // Format summaries
+      const flawsSummary = Array.from(characterModel.flaws).map(flawId =>
+        availableFlaws.find(f => f.id === flawId)?.name || flawId
+      ).filter(Boolean);
+
+      const powersSummary = Array.from(characterModel.picks).map(pickId => {
+        const power = availableCommonPowers.find(p => p.id === pickId)?.name ||
+                     availablePerks.find(p => p.id === pickId)?.name ||
+                     availableArchPowers.find(p => p.id === pickId)?.name ||
+                     availableCybernetics.find(p => p.id === pickId)?.name;
+        return power;
+      }).filter(Boolean);
+
+      const magicSchoolsSummary = Array.from(characterModel.magicSchools).map(schoolId => {
+        const schools = Object.values(availableMagicSchools).flat();
+        return schools.find(s => s.id === schoolId)?.name || schoolId;
+      }).filter(Boolean);
+
+      const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
+      const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
+      const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave) : '';
+
+      // Create full summary text (without truncation for Google submission)
+      const summaryText =
+        `Arkana Character Submission\n` +
+        `Character Name: ${characterModel.identity.characterName || '-'}\n` +
+        `Second Life Name: ${characterModel.identity.agentName || '-'}\n` +
+        `Alias / Callsign: ${characterModel.identity.aliasCallsign || '-'}\n` +
+        `Faction / Allegiance: ${characterModel.identity.faction || '-'}\n` +
+        `Concept / Role: ${characterModel.identity.conceptRole || '-'}\n` +
+        `Job: ${characterModel.identity.job || '-'}\n` +
+        `Race / Archetype: ${characterModel.race || '-'} / ${characterModel.arch || '-'}\n` +
+        `Stats: Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})\n` +
+        `Flaws: ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${totalPowerPoints - 15})\n` +
+        `Common Powers/Perks/Arch/Cyber: ${powersSummary.length ? powersSummary.join(', ') : 'None'}\n` +
+        `Cybernetic Slots: ${characterModel.cyberSlots || 0}\n` +
+        `Magic Schools: ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}\n` +
+        (freeMagicSchoolName ? `Free Magic School: ${freeMagicSchoolName}\n` : '') +
+        (freeMagicWeaveName ? `Free Magic Weave: ${freeMagicWeaveName}\n` : '') +
+        (synthralFreeWeaveName ? `Synthral Free Weave: ${synthralFreeWeaveName}\n` : '') +
+        `Background: ${characterModel.identity.background || '-'}\n` +
+        `Total Power Points: ${totalPowerPoints}, Spent: ${spentPowerPoints}, Remaining: ${remainingPowerPoints}\n`;
+
+      // Create character data object for server-side submission
+      const characterData = {
+        name: characterModel.identity.characterName || '',
+        sl: characterModel.identity.agentName || '',
+        alias: characterModel.identity.aliasCallsign || '',
+        faction: characterModel.identity.faction || '',
+        concept: characterModel.identity.conceptRole || '',
+        job: characterModel.identity.job || '',
+        race: characterModel.race || '',
+        arch: characterModel.arch || '',
+        background: characterModel.identity.background || '',
+        stats: `Phys: ${characterModel.stats.phys}, Dex: ${characterModel.stats.dex}, Mental: ${characterModel.stats.mental}, Perc: ${characterModel.stats.perc}`,
+        flaws: flawsSummary.join(', '),
+        powers: powersSummary.join(', '),
+        cyberSlots: String(characterModel.cyberSlots || 0),
+        magicSchools: magicSchoolsSummary.join(', '),
+        freeMagicSchool: freeMagicSchoolName,
+        freeMagicWeave: freeMagicWeaveName,
+        synthralFreeWeave: synthralFreeWeaveName,
+        points_total: String(totalPowerPoints),
+        points_spent: String(spentPowerPoints),
+        points_remaining: String(remainingPowerPoints),
+        summary: summaryText
+      };
+
+      const response = await fetch('/api/arkana/submit-to-google', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ token, characterData })
+      });
+
+      if (response.ok) {
+        console.log('Character data sent to Google Drive successfully');
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to send to Google Drive:', errorData.error);
+      }
+    } catch (error) {
+      console.error('Failed to send to Google Drive:', error);
+      // Don't block character creation if Google submission fails
     }
   };
 
@@ -346,8 +436,11 @@ export default function ArkanaCharacterCreation() {
     try {
       setLoading(true);
 
-      // Send to Discord webhook first (non-blocking)
+      // Send to Discord webhook (non-blocking)
       await sendToDiscord();
+
+      // Send to Google Apps Script for Google Drive storage (non-blocking)
+      await sendToGoogleScript();
 
       // Convert character model to submission format
       const submissionData = {
