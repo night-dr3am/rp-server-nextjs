@@ -7,6 +7,7 @@ import {
   STAT_NAMES,
   STAT_DESCRIPTIONS,
   calculateStatModifier,
+  CYBERNETIC_SLOT_COST,
   type RaceName,
   type CharacterModel,
   type Flaw,
@@ -254,6 +255,11 @@ export default function ArkanaCharacterCreation() {
   const getPowerPointsSpent = () => powerPointsSpentTotal(characterModel);
   const getPowerPointsRemaining = () => getPowerPointsTotal() - getPowerPointsSpent();
 
+  // Cybernetic slots cost calculation (using imported constant)
+  const calculateCyberSlotsCost = (slots: number): number => {
+    return (slots || 0) * CYBERNETIC_SLOT_COST;
+  };
+
   // Format character data for Discord webhook
   const formatCharacterForDiscord = () => {
     // Power points system
@@ -266,7 +272,7 @@ export default function ArkanaCharacterCreation() {
     const statPointsSpent = calculateStatPointsSpent();
 
     // Breakdown of power points spent
-    const cyberSlotPts = (characterModel.cyberSlots || 0) * 2;
+    const cyberSlotPts = calculateCyberSlotsCost(characterModel.cyberSlots);
     const powersPts = spentPowerPoints - cyberSlotPts;
 
     const flawsSummary = Array.from(characterModel.flaws).map(flawId =>
@@ -848,8 +854,8 @@ export default function ArkanaCharacterCreation() {
     const updateCyberSlots = (delta: number) => {
       const newSlots = Math.max(0, characterModel.cyberSlots + delta);
       // Calculate if this change would exceed point budget
-      const currentCyberCost = characterModel.cyberSlots * 2;
-      const newCyberCost = newSlots * 2;
+      const currentCyberCost = calculateCyberSlotsCost(characterModel.cyberSlots);
+      const newCyberCost = calculateCyberSlotsCost(newSlots);
       const costDifference = newCyberCost - currentCyberCost;
 
       if (spentPoints + costDifference <= totalBudget) {
@@ -1241,12 +1247,12 @@ export default function ArkanaCharacterCreation() {
                       +
                     </button>
                     <span className="ml-2 px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-sm">
-                      2 pts each
+                      1 power point each
                     </span>
                   </div>
                 </div>
                 <p className="text-gray-400 text-sm">
-                  Each slot costs 2 points and allows you to select one cybernetic modification.
+                  Each slot costs 1 point and allows you to select one cybernetic modification.
                 </p>
               </div>
 
@@ -1437,7 +1443,7 @@ export default function ArkanaCharacterCreation() {
     }).filter(Boolean);
 
     // Breakdown of power points spent
-    const cyberSlotPts = (characterModel.cyberSlots || 0) * 2;
+    const cyberSlotPts = calculateCyberSlotsCost(characterModel.cyberSlots);
     const powersPts = spentPowerPoints - cyberSlotPts;
 
     const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
@@ -1557,7 +1563,7 @@ export default function ArkanaCharacterCreation() {
                   <li>Click &ldquo;Previous&rdquo; to go back to Step 5 (Powers, Perks, Augmentations, Magic, and Hacking)</li>
                   <li>Review your current selections and their point costs</li>
                   <li>Remove or adjust selections to reduce your spent power points by {Math.abs(remainingPowerPoints)} {Math.abs(remainingPowerPoints) === 1 ? 'point' : 'points'}</li>
-                  <li>Consider removing expensive powers or reducing cybernetic slots (2 points each)</li>
+                  <li>Consider removing expensive powers or reducing cybernetic slots (1 point each)</li>
                   <li>Return to this summary page once your remaining power points are 0 or positive</li>
                 </ol>
                 <p className="text-red-300 text-sm mt-3 italic">

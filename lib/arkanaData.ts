@@ -19,6 +19,7 @@ export {
 } from './arkana/types';
 
 export {
+  CYBERNETIC_SLOT_COST,
   loadAllData,
   flawsForRace,
   perksForRace,

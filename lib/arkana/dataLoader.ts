@@ -9,6 +9,9 @@ import {
   CharacterModel
 } from './types';
 
+// Constants
+export const CYBERNETIC_SLOT_COST = 1; // Cost per cybernetic slot in power points
+
 // Data caches
 let flaws: Flaw[] = [];
 let commonPowers: CommonPower[] = [];
@@ -186,7 +189,7 @@ export function powerPointsSpentTotal(model: CharacterModel): number {
     return 0;
   }).reduce((a, b) => a + b, 0);
 
-  const cyberSlotCost = (model.cyberSlots || 0) * 2;
+  const cyberSlotCost = (model.cyberSlots || 0) * CYBERNETIC_SLOT_COST;
 
   return spentPicks + spentMagic + cyberSlotCost;
 }
