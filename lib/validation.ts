@@ -382,13 +382,21 @@ export const arkanaCharacterCreateSchema = Joi.object({
   token: Joi.string().required(),
   universe: Joi.string().valid('arkana').required()
 }).custom((value, helpers) => {
-  // Validate stat point allocation (should total 10 points beyond base 1 each)
+  // Validate stat point allocation
   const baseStats = 4; // 1 point each in 4 stats
   const allocated = value.physical + value.dexterity + value.mental + value.perception;
   const pointsUsed = allocated - baseStats;
 
-  if (pointsUsed !== 6) {
-    return helpers.error('any.custom', { message: 'Stats must use exactly 6 points (each stat 1-5, total allocation = 6 + 4 base = 10)' });
+  // Spliced race gets 2 free stat points (Physical +1, Dexterity +1)
+  const expectedPoints = value.race?.toLowerCase() === 'spliced' ? 8 : 6;
+
+  if (pointsUsed !== expectedPoints) {
+    const raceNote = value.race?.toLowerCase() === 'spliced'
+      ? ' (Spliced gets +2 free points: 8 total)'
+      : ' (each stat 1-5, total allocation = 6 + 4 base = 10)';
+    return helpers.error('any.custom', {
+      message: `Stats must use exactly ${expectedPoints} points${raceNote}`
+    });
   }
 
   return value;

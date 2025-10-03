@@ -1241,7 +1241,7 @@ export default function ArkanaCharacterCreation() {
                     </span>
                     <button
                       onClick={() => updateCyberSlots(1)}
-                      disabled={remainingPoints < 2}
+                      disabled={remainingPoints < CYBERNETIC_SLOT_COST}
                       className="w-8 h-8 bg-green-600 text-white rounded disabled:bg-gray-600"
                     >
                       +
