@@ -257,6 +257,9 @@ export default function ArkanaCharacterCreation() {
   // Discord webhook URL from the sample
   const DISCORD_WEBHOOK_URL = "https://discordapp.com/api/webhooks/1419119617573388348/MDsOewugKvquE0Sowp3LHSO6e_Tngue5lO6Z8ucFhwj6ZbQPn6RLD7L69rPOpYVwFSXW";
 
+  // Maximum Discord message length (leaves room for "...(truncated)")
+  const MAX_DISCORD_MESSAGE_LENGTH = 1980;
+
   // Format character data for Discord webhook
   const formatCharacterForDiscord = () => {
     // Power points system
@@ -314,6 +317,11 @@ export default function ArkanaCharacterCreation() {
     if (synthralFreeWeaveName) message += `**Synthral Free Weave:** ${synthralFreeWeaveName}\n`;
 
     message += `**Background:** ${characterModel.identity.background || '-'}\n`;
+
+    // Truncate message if it exceeds the maximum length
+    if (message.length > MAX_DISCORD_MESSAGE_LENGTH) {
+      message = message.substring(0, MAX_DISCORD_MESSAGE_LENGTH) + '...(truncated)';
+    }
 
     return message;
   };
