@@ -882,6 +882,39 @@ export default function ArkanaCharacterCreation() {
           </p>
         </div>
 
+        {/* Reset Page 5 Choices Button */}
+        {(characterModel.picks.size > 0 || characterModel.magicSchools.size > 0 || characterModel.cyberSlots > 0) && (
+          <div className="mb-4">
+            <button
+              onClick={() => {
+                const confirmed = window.confirm(
+                  'Are you sure you want to reset all your Page 5 choices?\n\n' +
+                  'This will clear:\n' +
+                  '• All selected Powers, Perks, and Archetype Powers\n' +
+                  '• All Magic Schools and Weaves\n' +
+                  '• All Cybernetic selections and slots\n\n' +
+                  'Your power points will be refunded.'
+                );
+
+                if (confirmed) {
+                  setCharacterModel(prev => ({
+                    ...prev,
+                    picks: new Set<string>(),
+                    magicSchools: new Set<string>(),
+                    cyberSlots: 0,
+                    freeMagicSchool: '',
+                    freeMagicWeave: '',
+                    synthralFreeWeave: ''
+                  }));
+                }
+              }}
+              className="w-full py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700 transition-colors font-medium"
+            >
+              🔄 Reset Page 5 Choices
+            </button>
+          </div>
+        )}
+
         {/* Free Picks Section */}
         {(isSynthral || isArcanist) && (
           <div className="mb-6 p-4 bg-blue-900 border border-blue-500 rounded">
