@@ -24,8 +24,8 @@ import {
   canUseMagic,
   magicSchoolsAllGrouped,
   groupCyberneticsBySection,
-  pointsSpentTotal,
-  pointsTotal,
+  powerPointsSpentTotal,
+  powerPointsTotal,
   getTechnomancySchoolId,
   getSchoolWeaves,
   getSchoolIdsForArcanist,
@@ -249,23 +249,28 @@ export default function ArkanaCharacterCreation() {
     }
   };
 
-  // Point calculation functions
-  const getTotalPoints = () => pointsTotal(characterModel);
-  const getSpentPoints = () => pointsSpentTotal(characterModel);
-  const getRemainingPoints = () => getTotalPoints() - getSpentPoints();
+  // Power Point calculation functions (separate from stat points)
+  const getPowerPointsTotal = () => powerPointsTotal(characterModel);
+  const getPowerPointsSpent = () => powerPointsSpentTotal(characterModel);
+  const getPowerPointsRemaining = () => getPowerPointsTotal() - getPowerPointsSpent();
 
   // Discord webhook URL from the sample
   const DISCORD_WEBHOOK_URL = "https://discordapp.com/api/webhooks/1419119617573388348/MDsOewugKvquE0Sowp3LHSO6e_Tngue5lO6Z8ucFhwj6ZbQPn6RLD7L69rPOpYVwFSXW";
 
   // Format character data for Discord webhook
   const formatCharacterForDiscord = () => {
-    const totalPoints = getTotalPoints();
-    const spentPoints = getSpentPoints();
-    const remainingPoints = getRemainingPoints();
+    // Power points system
+    const totalPowerPoints = getPowerPointsTotal();
+    const spentPowerPoints = getPowerPointsSpent();
+    const remainingPowerPoints = getPowerPointsRemaining();
+    const flawPointsGained = totalPowerPoints - 15;
+
+    // Stat points system
     const statPointsSpent = calculateStatPointsSpent();
-    const flawPointsGained = totalPoints - 15;
+
+    // Breakdown of power points spent
     const cyberSlotPts = (characterModel.cyberSlots || 0) * 2;
-    const powersPts = spentPoints - cyberSlotPts;
+    const powersPts = spentPowerPoints - cyberSlotPts;
 
     const flawsSummary = Array.from(characterModel.flaws).map(flawId =>
       availableFlaws.find(f => f.id === flawId)?.name || flawId
@@ -297,18 +302,18 @@ export default function ArkanaCharacterCreation() {
       `**Concept / Role:** ${characterModel.identity.conceptRole || '-'}\n` +
       `**Job:** ${characterModel.identity.job || '-'}\n` +
       `**Race / Archetype:** ${characterModel.race || '-'} / ${characterModel.arch || '-'}\n` +
-      `**Stats:** Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Points spent: ${statPointsSpent})\n` +
-      `**Flaws:** ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Points gained: ${flawPointsGained})\n` +
-      `**Common Powers/Perks/Arch/Cyber:** ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Points spent: ${powersPts})\n` +
-      `**Cybernetic Slots:** ${characterModel.cyberSlots || 0} (Points spent: ${cyberSlotPts})\n` +
-      `**Magic Schools:** ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}\n`;
+      `**Stats:** Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})\n` +
+      `**Flaws:** ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${flawPointsGained})\n` +
+      `**Common Powers/Perks/Arch/Cyber:** ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Power Points spent: ${powersPts})\n` +
+      `**Cybernetic Slots:** ${characterModel.cyberSlots || 0} (Power Points spent: ${cyberSlotPts})\n` +
+      `**Magic Schools:** ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}\n` +
+      `**Power Points Budget:** ${totalPowerPoints} total • ${spentPowerPoints} spent • ${remainingPowerPoints} remaining\n`;
 
     if (freeMagicSchoolName) message += `**Free Magic School:** ${freeMagicSchoolName}\n`;
     if (freeMagicWeaveName) message += `**Free Magic Weave:** ${freeMagicWeaveName}\n`;
     if (synthralFreeWeaveName) message += `**Synthral Free Weave:** ${synthralFreeWeaveName}\n`;
 
-    message += `**Background:** ${characterModel.identity.background || '-'}\n` +
-               `**Total Power Points:** ${totalPoints}, **Spent:** ${spentPoints}, **Remaining:** ${remainingPoints}\n`;
+    message += `**Background:** ${characterModel.identity.background || '-'}\n`;
 
     return message;
   };
@@ -712,9 +717,9 @@ export default function ArkanaCharacterCreation() {
   };
 
   const renderStep5 = () => {
-    const totalBudget = getTotalPoints();
-    const spentPoints = getSpentPoints();
-    const remainingPoints = getRemainingPoints();
+    const totalBudget = getPowerPointsTotal();
+    const spentPoints = getPowerPointsSpent();
+    const remainingPoints = getPowerPointsRemaining();
 
     // Helper function to toggle picks
     const togglePick = (id: string) => {
@@ -873,7 +878,7 @@ export default function ArkanaCharacterCreation() {
             Power Points: {totalBudget} • Spent: {spentPoints} • Remaining: {remainingPoints}
           </div>
           <p className="text-cyan-300 text-sm mt-1">
-            Base 15 points + {getTotalPoints() - 15} from flaws
+            Base 15 points + {totalBudget - 15} from flaws
           </p>
         </div>
 
@@ -1270,10 +1275,13 @@ export default function ArkanaCharacterCreation() {
   };
 
   const renderStep6 = () => {
-    const totalPoints = getTotalPoints();
-    const spentPoints = getSpentPoints();
-    const remainingPoints = getRemainingPoints();
-    const flawPointsGained = totalPoints - 15;
+    // Power points system
+    const totalPowerPoints = getPowerPointsTotal();
+    const spentPowerPoints = getPowerPointsSpent();
+    const remainingPowerPoints = getPowerPointsRemaining();
+    const flawPointsGained = totalPowerPoints - 15;
+
+    // Stat points system
     const statPointsSpent = calculateStatPointsSpent();
 
     // Get summary data for powers/perks/etc
@@ -1294,9 +1302,9 @@ export default function ArkanaCharacterCreation() {
       return schools.find(s => s.id === schoolId)?.name || schoolId;
     }).filter(Boolean);
 
-    // Calculate spent points breakdown
+    // Breakdown of power points spent
     const cyberSlotPts = (characterModel.cyberSlots || 0) * 2;
-    const powersPts = spentPoints - cyberSlotPts; // Simplified calculation
+    const powersPts = spentPowerPoints - cyberSlotPts;
 
     const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
     const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
@@ -1312,10 +1320,10 @@ export default function ArkanaCharacterCreation() {
         `Concept / Role: ${characterModel.identity.conceptRole || '-'}`,
         `Job: ${characterModel.identity.job || '-'}`,
         `Race: ${characterModel.race || '-'} / ${characterModel.arch || '—'}`,
-        `Stats: Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Points spent: ${statPointsSpent})`,
-        `Flaws: ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Points gained: ${flawPointsGained})`,
-        `Common Powers/Perks/Arch/Cyber: ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Points spent: ${powersPts})`,
-        `Cybernetic Slots: ${characterModel.cyberSlots || 0} (Points spent: ${cyberSlotPts})`,
+        `Stats: Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})`,
+        `Flaws: ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${flawPointsGained})`,
+        `Common Powers/Perks/Arch/Cyber: ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Power Points spent: ${powersPts})`,
+        `Cybernetic Slots: ${characterModel.cyberSlots || 0} (Power Points spent: ${cyberSlotPts})`,
         `Magic Schools: ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}`
       ];
 
@@ -1324,7 +1332,7 @@ export default function ArkanaCharacterCreation() {
       if (synthralFreeWeaveName) lines.push(`Synthral Free Weave: ${synthralFreeWeaveName}`);
 
       lines.push(`Background: ${characterModel.identity.background || '-'}`);
-      lines.push(`Total Power Points: ${totalPoints}, Spent: ${spentPoints}, Remaining: ${remainingPoints}`);
+      lines.push(`Power Points: ${totalPowerPoints} total • ${spentPowerPoints} spent • ${remainingPowerPoints} remaining`);
 
       return lines.join('\n');
     };
@@ -1372,40 +1380,40 @@ export default function ArkanaCharacterCreation() {
             <div><strong className="text-cyan-300">Concept / Role:</strong> {characterModel.identity.conceptRole || '-'}</div>
             <div><strong className="text-cyan-300">Job:</strong> {characterModel.identity.job || '-'}</div>
             <div><strong className="text-cyan-300">Race:</strong> {characterModel.race || '-'} <span className="text-gray-400">/ {characterModel.arch || '—'}</span></div>
-            <div><strong className="text-cyan-300">Stats:</strong> Phys {characterModel.stats.phys} (HP {characterModel.stats.phys * 5}), Dex {characterModel.stats.dex}, Mental {characterModel.stats.mental}, Perc {characterModel.stats.perc} <span className="text-gray-400">(Points spent: {statPointsSpent})</span></div>
-            <div><strong className="text-cyan-300">Flaws:</strong> {flawsSummary.length ? flawsSummary.join(', ') : 'None'} <span className="text-gray-400">(Points gained: {flawPointsGained})</span></div>
-            <div><strong className="text-cyan-300">Common Powers/Perks/Arch/Cyber:</strong> {powersSummary.length ? powersSummary.join(', ') : 'None'} <span className="text-gray-400">(Points spent: {powersPts})</span></div>
-            <div><strong className="text-cyan-300">Cybernetic Slots:</strong> {characterModel.cyberSlots || 0} <span className="text-gray-400">(Points spent: {cyberSlotPts})</span></div>
+            <div><strong className="text-cyan-300">Stats:</strong> Phys {characterModel.stats.phys} (HP {characterModel.stats.phys * 5}), Dex {characterModel.stats.dex}, Mental {characterModel.stats.mental}, Perc {characterModel.stats.perc} <span className="text-gray-400">(Stat Points spent: {statPointsSpent})</span></div>
+            <div><strong className="text-cyan-300">Flaws:</strong> {flawsSummary.length ? flawsSummary.join(', ') : 'None'} <span className="text-gray-400">(Power Points gained: {flawPointsGained})</span></div>
+            <div><strong className="text-cyan-300">Common Powers/Perks/Arch/Cyber:</strong> {powersSummary.length ? powersSummary.join(', ') : 'None'} <span className="text-gray-400">(Power Points spent: {powersPts})</span></div>
+            <div><strong className="text-cyan-300">Cybernetic Slots:</strong> {characterModel.cyberSlots || 0} <span className="text-gray-400">(Power Points spent: {cyberSlotPts})</span></div>
             <div><strong className="text-cyan-300">Magic Schools:</strong> {magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}</div>
             {freeMagicSchoolName && <div><strong className="text-cyan-300">Free Magic School:</strong> {freeMagicSchoolName}</div>}
             {freeMagicWeaveName && <div><strong className="text-cyan-300">Free Magic Weave:</strong> {freeMagicWeaveName}</div>}
             {synthralFreeWeaveName && <div><strong className="text-cyan-300">Synthral Free Weave:</strong> {synthralFreeWeaveName}</div>}
             <div><strong className="text-cyan-300">Background:</strong> {characterModel.identity.background || '-'}</div>
             <div className="pt-2 border-t border-gray-700">
-              <strong className="text-cyan-300">Power Points:</strong> {totalPoints} • <strong className="text-cyan-300">Spent</strong> {spentPoints} • <strong className="text-cyan-300">Remaining</strong> {remainingPoints}
+              <strong className="text-cyan-300">Power Points:</strong> {totalPowerPoints} total • <strong className="text-cyan-300">Spent</strong> {spentPowerPoints} • <strong className="text-cyan-300">Remaining</strong> {remainingPowerPoints}
             </div>
           </div>
         </div>
 
         {/* Warning Message for Negative Points */}
-        {remainingPoints < 0 && (
+        {remainingPowerPoints < 0 && (
           <div className="mt-4 p-4 bg-red-900 border-2 border-red-500 rounded-lg">
             <div className="flex items-start space-x-3">
               <span className="text-red-400 text-2xl">⚠️</span>
               <div className="flex-1">
                 <p className="text-red-300 font-bold text-lg mb-2">
-                  Point Allocation Exceeded
+                  Power Point Allocation Exceeded
                 </p>
                 <p className="text-red-200 mb-3">
-                  You have allocated {Math.abs(remainingPoints)} more {Math.abs(remainingPoints) === 1 ? 'point' : 'points'} than available.
-                  Your character cannot be submitted until you balance your point allocation.
+                  You have allocated {Math.abs(remainingPowerPoints)} more power {Math.abs(remainingPowerPoints) === 1 ? 'point' : 'points'} than available.
+                  Your character cannot be submitted until you balance your power point allocation.
                 </p>
                 <div className="bg-red-800 bg-opacity-50 p-3 rounded mb-3">
-                  <p className="text-red-100 font-semibold mb-1">Current Allocation:</p>
+                  <p className="text-red-100 font-semibold mb-1">Current Power Point Allocation:</p>
                   <ul className="text-red-200 text-sm space-y-1">
-                    <li>• Total Available Points: <strong>{totalPoints}</strong></li>
-                    <li>• Points Spent: <strong>{spentPoints}</strong></li>
-                    <li>• Points Over Budget: <strong className="text-red-300">{Math.abs(remainingPoints)}</strong></li>
+                    <li>• Total Available Power Points: <strong>{totalPowerPoints}</strong></li>
+                    <li>• Power Points Spent: <strong>{spentPowerPoints}</strong></li>
+                    <li>• Power Points Over Budget: <strong className="text-red-300">{Math.abs(remainingPowerPoints)}</strong></li>
                   </ul>
                 </div>
                 <p className="text-red-200 mb-2">
@@ -1414,9 +1422,9 @@ export default function ArkanaCharacterCreation() {
                 <ol className="text-red-200 text-sm space-y-1 list-decimal list-inside">
                   <li>Click &ldquo;Previous&rdquo; to go back to Step 5 (Powers, Perks, Augmentations, Magic, and Hacking)</li>
                   <li>Review your current selections and their point costs</li>
-                  <li>Remove or adjust selections to reduce your spent points by {Math.abs(remainingPoints)} {Math.abs(remainingPoints) === 1 ? 'point' : 'points'}</li>
+                  <li>Remove or adjust selections to reduce your spent power points by {Math.abs(remainingPowerPoints)} {Math.abs(remainingPowerPoints) === 1 ? 'point' : 'points'}</li>
                   <li>Consider removing expensive powers or reducing cybernetic slots (2 points each)</li>
-                  <li>Return to this summary page once your remaining points are 0 or positive</li>
+                  <li>Return to this summary page once your remaining power points are 0 or positive</li>
                 </ol>
                 <p className="text-red-300 text-sm mt-3 italic">
                   Note: You can gain additional points by selecting flaws in Step 4, but each flaw comes with
@@ -1430,18 +1438,18 @@ export default function ArkanaCharacterCreation() {
         <div className="mt-8">
           <button
             onClick={submitCharacter}
-            disabled={loading || !characterModel.identity.characterName || !characterModel.identity.agentName || !characterModel.race || remainingPoints < 0}
+            disabled={loading || !characterModel.identity.characterName || !characterModel.identity.agentName || !characterModel.race || remainingPowerPoints < 0}
             className="w-full text-white py-3 px-6 rounded font-bold cursor-pointer border-none"
             style={{
               fontSize: '1.2em',
               padding: '10px 28px',
               backgroundColor: '#336633',
               borderRadius: '8px',
-              opacity: (loading || !characterModel.identity.characterName || !characterModel.identity.agentName || !characterModel.race || remainingPoints < 0) ? 0.6 : 1
+              opacity: (loading || !characterModel.identity.characterName || !characterModel.identity.agentName || !characterModel.race || remainingPowerPoints < 0) ? 0.6 : 1
             }}
           >
             {loading ? 'Submitting...' :
-             remainingPoints < 0 ? `CANNOT SUBMIT (${Math.abs(remainingPoints)} points over)` :
+             remainingPowerPoints < 0 ? `CANNOT SUBMIT (${Math.abs(remainingPowerPoints)} power points over)` :
              'SUBMIT CHARACTER'}
           </button>
         </div>

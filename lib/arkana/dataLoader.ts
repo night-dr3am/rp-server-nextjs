@@ -160,14 +160,10 @@ export function groupCyberneticsBySection(arr: Cybernetic[]): Record<string, Cyb
   return out;
 }
 
-// Point calculation functions
-export function pointsSpentTotal(model: CharacterModel): number {
-  // Calculate raw stat points spent (Spliced bonus is handled via initial pool)
-  const stats = model.stats;
-  const statSpent = Math.max(0, stats.phys - 1) +
-                    Math.max(0, stats.dex - 1) +
-                    Math.max(0, stats.mental - 1) +
-                    Math.max(0, stats.perc - 1);
+// Power Point calculation functions (separate from stat points)
+export function powerPointsSpentTotal(model: CharacterModel): number {
+  // Calculate ONLY power points spent (picks + magic + cyber slots)
+  // Stats are tracked separately on Page 3
 
   const allPicks = Array.from(model.picks);
   const spentPicks = allPicks.map(pid => {
@@ -191,10 +187,12 @@ export function pointsSpentTotal(model: CharacterModel): number {
   }).reduce((a, b) => a + b, 0);
 
   const cyberSlotCost = (model.cyberSlots || 0) * 2;
-  return statSpent + spentPicks + spentMagic + cyberSlotCost;
+
+  return spentPicks + spentMagic + cyberSlotCost;
 }
 
-export function pointsTotal(model: CharacterModel): number {
+export function powerPointsTotal(model: CharacterModel): number {
+  // Base power points (15) + bonus from flaws
   const total = 15 + Array.from(model.flaws).reduce((s, fid) => {
     const f = flaws.find(x => x.id === fid);
     return s + (f ? f.cost : 0);
