@@ -163,13 +163,29 @@ export default function ArkanaCharacterCreation() {
   };
 
   const updateRace = (race: string) => {
+    // Spliced race gets 2 free stat points (first point in Physical and Dexterity)
+    // Normal races: 10 total - 4 (for starting at 1 each) = 6 pool
+    // Spliced race: 10 total - 4 + 2 free = 8 pool
+    const isSpliced = race.toLowerCase() === 'spliced';
+    const initialPool = isSpliced ? 8 : 6;
+
     setCharacterModel(prev => ({
       ...prev,
       race,
       arch: '', // Reset archetype when race changes
+
+      // Reset stats to base values (all start at 1, but pool differs by race)
+      stats: { phys: 1, dex: 1, mental: 1, perc: 1, pool: initialPool },
+
+      // Reset flaws (page 4)
+      flaws: new Set<string>(),
+
+      // Reset page 5 choices
       picks: new Set<string>(),
       magicSchools: new Set<string>(),
-      flaws: new Set<string>(),
+      cyberSlots: 0,
+
+      // Reset free selections
       freeMagicSchool: '',
       freeMagicWeave: '',
       synthralFreeWeave: ''
@@ -188,23 +204,45 @@ export default function ArkanaCharacterCreation() {
     }));
   };
 
+  // Helper function to get initial pool for race (Spliced gets 8, others get 6)
+  const getInitialPoolForRace = (race: string = characterModel.race): number => {
+    return race.toLowerCase() === 'spliced' ? 8 : 6;
+  };
+
+  // Helper function to check if race is Spliced
+  const isSplicedRace = (race: string = characterModel.race): boolean => {
+    return race.toLowerCase() === 'spliced';
+  };
+
+  // Helper function to calculate raw stat points spent (no bonus adjustments)
+  const calculateStatPointsSpent = (stats = characterModel.stats): number => {
+    return Math.max(0, stats.phys - 1) +
+           Math.max(0, stats.dex - 1) +
+           Math.max(0, stats.mental - 1) +
+           Math.max(0, stats.perc - 1);
+  };
 
   const handleStatChange = (stat: keyof typeof characterModel.stats, delta: number) => {
     if (stat === 'pool') return; // Don't allow direct pool changes
 
     const newValue = characterModel.stats[stat] + delta;
     if (newValue >= 1 && newValue <= 5) {
-      const currentSpent = (characterModel.stats.phys - 1) + (characterModel.stats.dex - 1) +
-                          (characterModel.stats.mental - 1) + (characterModel.stats.perc - 1);
-      const newSpent = currentSpent - (characterModel.stats[stat] - 1) + (newValue - 1);
+      // Calculate raw spent points (no bonus adjustments)
+      const currentSpent = calculateStatPointsSpent();
+      const currentStatCost = Math.max(0, characterModel.stats[stat] - 1);
+      const newStatCost = Math.max(0, newValue - 1);
+      const newSpent = currentSpent - currentStatCost + newStatCost;
 
-      if (newSpent <= 6) {
+      const initialPool = getInitialPoolForRace();
+
+      // Check if new allocation is within the available pool
+      if (newSpent <= initialPool) {
         setCharacterModel(prev => ({
           ...prev,
           stats: {
             ...prev.stats,
             [stat]: newValue,
-            pool: 6 - newSpent
+            pool: initialPool - newSpent
           }
         }));
       }
@@ -224,8 +262,7 @@ export default function ArkanaCharacterCreation() {
     const totalPoints = getTotalPoints();
     const spentPoints = getSpentPoints();
     const remainingPoints = getRemainingPoints();
-    const statPointsSpent = (characterModel.stats.phys - 1) + (characterModel.stats.dex - 1) +
-                           (characterModel.stats.mental - 1) + (characterModel.stats.perc - 1);
+    const statPointsSpent = calculateStatPointsSpent();
     const flawPointsGained = totalPoints - 15;
     const cyberSlotPts = (characterModel.cyberSlots || 0) * 2;
     const powersPts = spentPoints - cyberSlotPts;
@@ -541,24 +578,35 @@ export default function ArkanaCharacterCreation() {
     </div>
   );
 
-  const renderStep3 = () => (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-cyan-400 mb-6">Stats Allocation</h2>
-      <div className="mb-4">
-        <p className="text-cyan-300 mb-2">Allocate 6 points across your stats (each stat ranges 1-5)</p>
-        <div className="text-xl font-bold text-cyan-400">
-          Points Remaining: {characterModel.stats.pool}
-        </div>
-      </div>
+  const renderStep3 = () => {
+    const isSpliced = isSplicedRace();
 
-      <div className="space-y-4">
-        {(Object.keys(STAT_NAMES) as Array<keyof typeof STAT_NAMES>).map(stat => {
-          return (
-            <div key={stat} className="flex items-center space-x-4 p-4 bg-gray-900 border border-cyan-500 rounded">
-              <div className="flex-1">
-                <div className="font-medium text-cyan-300">{STAT_NAMES[stat]}</div>
-                <div className="text-sm text-gray-400">{STAT_DESCRIPTIONS[stat]}</div>
-              </div>
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-cyan-400 mb-6">Stats Allocation</h2>
+        <div className="mb-4">
+          <p className="text-cyan-300 mb-2">
+            Allocate {isSpliced ? '8' : '6'} points across your stats (each stat ranges 1-5)
+            {isSpliced && <span className="text-green-400 ml-2">(+2 free for Spliced: Physical & Dexterity)</span>}
+          </p>
+          <div className="text-xl font-bold text-cyan-400">
+            Points Remaining: {characterModel.stats.pool}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {(Object.keys(STAT_NAMES) as Array<keyof typeof STAT_NAMES>).map(stat => {
+            const hasBonus = isSpliced && (stat === 'phys' || stat === 'dex');
+
+            return (
+              <div key={stat} className="flex items-center space-x-4 p-4 bg-gray-900 border border-cyan-500 rounded">
+                <div className="flex-1">
+                  <div className="font-medium text-cyan-300">
+                    {STAT_NAMES[stat]}
+                    {hasBonus && <span className="ml-2 text-green-400 text-sm">(+1 free for Spliced)</span>}
+                  </div>
+                  <div className="text-sm text-gray-400">{STAT_DESCRIPTIONS[stat]}</div>
+                </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleStatChange(stat, -1)}
@@ -592,7 +640,8 @@ export default function ArkanaCharacterCreation() {
         </p>
       </div>
     </div>
-  );
+    );
+  };
 
   const renderStep4 = () => {
     const flawPointsGained = Array.from(characterModel.flaws).reduce((sum, flawId) => {
@@ -1225,10 +1274,7 @@ export default function ArkanaCharacterCreation() {
     const spentPoints = getSpentPoints();
     const remainingPoints = getRemainingPoints();
     const flawPointsGained = totalPoints - 15;
-
-    // Calculate stat points spent
-    const statPointsSpent = (characterModel.stats.phys - 1) + (characterModel.stats.dex - 1) +
-                           (characterModel.stats.mental - 1) + (characterModel.stats.perc - 1);
+    const statPointsSpent = calculateStatPointsSpent();
 
     // Get summary data for powers/perks/etc
     const flawsSummary = Array.from(characterModel.flaws).map(flawId =>

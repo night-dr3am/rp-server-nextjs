@@ -162,6 +162,13 @@ export function groupCyberneticsBySection(arr: Cybernetic[]): Record<string, Cyb
 
 // Point calculation functions
 export function pointsSpentTotal(model: CharacterModel): number {
+  // Calculate raw stat points spent (Spliced bonus is handled via initial pool)
+  const stats = model.stats;
+  const statSpent = Math.max(0, stats.phys - 1) +
+                    Math.max(0, stats.dex - 1) +
+                    Math.max(0, stats.mental - 1) +
+                    Math.max(0, stats.perc - 1);
+
   const allPicks = Array.from(model.picks);
   const spentPicks = allPicks.map(pid => {
     if (pid === model.freeMagicWeave || pid === model.synthralFreeWeave) return 0;
@@ -184,7 +191,7 @@ export function pointsSpentTotal(model: CharacterModel): number {
   }).reduce((a, b) => a + b, 0);
 
   const cyberSlotCost = (model.cyberSlots || 0) * 2;
-  return spentPicks + spentMagic + cyberSlotCost;
+  return statSpent + spentPicks + spentMagic + cyberSlotCost;
 }
 
 export function pointsTotal(model: CharacterModel): number {
