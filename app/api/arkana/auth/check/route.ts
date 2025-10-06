@@ -71,22 +71,31 @@ export async function GET(request: NextRequest) {
       data: { lastActive: new Date() }
     });
 
-    // Return user data with consistent Arkana stats format (same as register endpoint)
+    // Return user data with nested structure (consistent with GET_STATS endpoint)
     return NextResponse.json({
       success: true,
       data: {
-        id: user.id,
-        sl_uuid: user.slUuid,
-        universe: user.universe,
-        role: user.role,
-        title: encodeForLSL(user.title),
-        titleColor: user.titleColor,
-        status: user.stats?.status || 0,
-        health: user.stats?.health || 100,
-        created_at: user.createdAt,
-        last_active: user.lastActive,
-        hasArkanaCharacter: !!user.arkanaStats ? "true" : "false",  // String for LSL compatibility
-        // Include arkanaStats object for LSL parsing
+        user: {
+          id: user.id,
+          slUuid: user.slUuid,
+          username: user.username,
+          role: user.role,
+          universe: user.universe,
+          title: encodeForLSL(user.title),
+          titleColor: user.titleColor,
+          createdAt: user.createdAt,
+          lastActive: user.lastActive
+        },
+        stats: user.stats ? {
+          status: user.stats.status,
+          health: user.stats.health,
+          hunger: user.stats.hunger,
+          thirst: user.stats.thirst,
+          goldCoin: user.stats.goldCoin,
+          silverCoin: user.stats.silverCoin,
+          copperCoin: user.stats.copperCoin,
+          lastUpdated: user.stats.lastUpdated
+        } : null,
         arkanaStats: user.arkanaStats ? {
           id: user.arkanaStats.id,
           characterName: encodeForLSL(user.arkanaStats.characterName),
@@ -108,7 +117,8 @@ export async function GET(request: NextRequest) {
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
           createdAt: user.arkanaStats.createdAt
-        } : null
+        } : null,
+        hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
       }
     });
 
@@ -186,22 +196,31 @@ export async function POST(request: NextRequest) {
       data: { lastActive: new Date() }
     });
 
-    // Return user data with consistent Arkana stats format (same as register endpoint)
+    // Return user data with nested structure (consistent with GET_STATS endpoint)
     return NextResponse.json({
       success: true,
       data: {
-        id: user.id,
-        sl_uuid: user.slUuid,
-        universe: user.universe,
-        role: user.role,
-        title: encodeForLSL(user.title),
-        titleColor: user.titleColor,
-        status: user.stats?.status || 0,
-        health: user.stats?.health || 100,
-        created_at: user.createdAt,
-        last_active: user.lastActive,
-        hasArkanaCharacter: !!user.arkanaStats ? "true" : "false",  // String for LSL compatibility
-        // Include arkanaStats object for LSL parsing
+        user: {
+          id: user.id,
+          slUuid: user.slUuid,
+          username: user.username,
+          role: user.role,
+          universe: user.universe,
+          title: encodeForLSL(user.title),
+          titleColor: user.titleColor,
+          createdAt: user.createdAt,
+          lastActive: user.lastActive
+        },
+        stats: user.stats ? {
+          status: user.stats.status,
+          health: user.stats.health,
+          hunger: user.stats.hunger,
+          thirst: user.stats.thirst,
+          goldCoin: user.stats.goldCoin,
+          silverCoin: user.stats.silverCoin,
+          copperCoin: user.stats.copperCoin,
+          lastUpdated: user.stats.lastUpdated
+        } : null,
         arkanaStats: user.arkanaStats ? {
           id: user.arkanaStats.id,
           characterName: encodeForLSL(user.arkanaStats.characterName),
@@ -223,7 +242,8 @@ export async function POST(request: NextRequest) {
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
           createdAt: user.arkanaStats.createdAt
-        } : null
+        } : null,
+        hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
       }
     });
 

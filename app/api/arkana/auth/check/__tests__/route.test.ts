@@ -94,8 +94,9 @@ describe('GET and POST /api/arkana/auth/check', () => {
       const data = await parseJsonResponse(response)
 
       expectSuccess(data)
-      expect(data.data.sl_uuid).toBe(uuid)
-      expect(data.data.universe).toBe('arkana')
+      expect(data.data.user.slUuid).toBe(uuid)
+      expect(data.data.user.universe).toBe('arkana')
+      expect(data.data.stats.health).toBe(100)
       expect(data.data.hasArkanaCharacter).toBe("true")
       expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
       expect(decodeURIComponent(data.data.arkanaStats.race)).toBe('Human')
@@ -238,8 +239,9 @@ describe('GET and POST /api/arkana/auth/check', () => {
       const data = await parseJsonResponse(response)
 
       expectSuccess(data)
-      expect(data.data.sl_uuid).toBe(uuid)
-      expect(data.data.universe).toBe('arkana')
+      expect(data.data.user.slUuid).toBe(uuid)
+      expect(data.data.user.universe).toBe('arkana')
+      expect(data.data.stats.health).toBe(100)
       expect(data.data.hasArkanaCharacter).toBe("true")
       expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
     })
