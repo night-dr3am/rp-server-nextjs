@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
-          alreadyRegistered: true,
+          alreadyRegistered: "true",  // String for LSL compatibility
           arkanaStats: {
             characterName: user.arkanaStats.characterName,
             race: user.arkanaStats.race,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        alreadyRegistered: false,
+        alreadyRegistered: "false",  // String for LSL compatibility
         characterCreationUrl: characterCreationUrl,
         token: token,
         expiresAt: expiresAt.toISOString(),

@@ -56,7 +56,7 @@ describe('POST /api/arkana/character/register', () => {
     const data = await parseJsonResponse(response)
 
     expectSuccess(data)
-    expect(data.data.alreadyRegistered).toBe(false)
+    expect(data.data.alreadyRegistered).toBe("false")
     expect(data.data.characterCreationUrl).toContain('/arkana/create/')
     expect(data.data.token).toBeDefined()
     expect(data.data.expiresAt).toBeDefined()
@@ -126,7 +126,7 @@ describe('POST /api/arkana/character/register', () => {
     const data = await parseJsonResponse(response)
 
     expectSuccess(data)
-    expect(data.data.alreadyRegistered).toBe(true)
+    expect(data.data.alreadyRegistered).toBe("true")
     expect(data.data.arkanaStats.characterName).toBe('Test Character')
     expect(data.data.arkanaStats.race).toBe('Human')
     expect(data.data.arkanaStats.archetype).toBe('Arcanist')
@@ -144,7 +144,7 @@ describe('POST /api/arkana/character/register', () => {
     const data = await parseJsonResponse(response)
 
     expectSuccess(data)
-    expect(data.data.alreadyRegistered).toBe(false)
+    expect(data.data.alreadyRegistered).toBe("false")
     expect(data.data.characterCreationUrl).toBeDefined()
     expect(data.data.token).toBeDefined()
     expect(data.data.user.uuid).toBe(uuid)

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { updateProfileSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { Role } from '@prisma/client';
-import { sanitizeForLSL } from '@/lib/stringUtils';
+import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -166,24 +166,25 @@ export async function POST(request: NextRequest) {
         update_type,
         update_value,
         // Return characterName instead of username for Arkana
-        characterName: result.arkanaStats.characterName,
+        // URL-encode for LSL UTF-8 support (Japanese, Chinese, emoji, etc.)
+        characterName: encodeForLSL(result.arkanaStats.characterName),
         role: result.user.role,
-        title: result.user.title,
+        title: encodeForLSL(result.user.title),
         titleColor: result.user.titleColor,
         // Include full arkanaStats for LSL parsing
-        hasArkanaCharacter: true,
+        hasArkanaCharacter: "true",  // String for LSL compatibility
         arkanaStats: {
           id: result.arkanaStats.id,
-          characterName: result.arkanaStats.characterName,
-          agentName: result.arkanaStats.agentName,
-          aliasCallsign: result.arkanaStats.aliasCallsign,
-          faction: result.arkanaStats.faction,
-          conceptRole: result.arkanaStats.conceptRole,
-          job: result.arkanaStats.job,
-          background: sanitizeForLSL(result.arkanaStats.background, 50),
-          race: result.arkanaStats.race,
-          subrace: result.arkanaStats.subrace,
-          archetype: result.arkanaStats.archetype,
+          characterName: encodeForLSL(result.arkanaStats.characterName),
+          agentName: encodeForLSL(result.arkanaStats.agentName),
+          aliasCallsign: encodeForLSL(result.arkanaStats.aliasCallsign),
+          faction: encodeForLSL(result.arkanaStats.faction),
+          conceptRole: encodeForLSL(result.arkanaStats.conceptRole),
+          job: encodeForLSL(result.arkanaStats.job),
+          background: encodeForLSL(sanitizeForLSL(result.arkanaStats.background, 50)),
+          race: encodeForLSL(result.arkanaStats.race),
+          subrace: encodeForLSL(result.arkanaStats.subrace),
+          archetype: encodeForLSL(result.arkanaStats.archetype),
           physical: result.arkanaStats.physical,
           dexterity: result.arkanaStats.dexterity,
           mental: result.arkanaStats.mental,

@@ -89,13 +89,13 @@ describe('POST /api/arkana/users/profile', () => {
 
     expectSuccess(data)
     expect(data.data.message).toBe('Character name updated successfully')
-    expect(data.data.characterName).toBe('New Character Name')
+    expect(decodeURIComponent(data.data.characterName)).toBe('New Character Name')
     expect(data.data.update_type).toBe('name')
     expect(data.data.update_value).toBe('New Character Name')
-    expect(data.data.hasArkanaCharacter).toBe(true)
-    expect(data.data.arkanaStats.characterName).toBe('New Character Name')
+    expect(data.data.hasArkanaCharacter).toBe("true")
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('New Character Name')
     expect(data.data.arkanaStats.physical).toBe(3)
-    expect(data.data.arkanaStats.race).toBe('Human')
+    expect(decodeURIComponent(data.data.arkanaStats.race)).toBe('Human')
   })
 
   it('should update role successfully', async () => {
@@ -147,8 +147,8 @@ describe('POST /api/arkana/users/profile', () => {
     expectSuccess(data)
     expect(data.data.message).toBe('Role updated successfully')
     expect(data.data.role).toBe('JARL')
-    expect(data.data.characterName).toBe('Test Character')
-    expect(data.data.arkanaStats.characterName).toBe('Test Character')
+    expect(decodeURIComponent(data.data.characterName)).toBe('Test Character')
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
   })
 
   it('should update title successfully', async () => {
@@ -199,9 +199,9 @@ describe('POST /api/arkana/users/profile', () => {
 
     expectSuccess(data)
     expect(data.data.message).toBe('Title updated successfully')
-    expect(data.data.title).toBe('Elite Agent')
-    expect(data.data.characterName).toBe('Test Character')
-    expect(data.data.arkanaStats.characterName).toBe('Test Character')
+    expect(decodeURIComponent(data.data.title)).toBe('Elite Agent')
+    expect(decodeURIComponent(data.data.characterName)).toBe('Test Character')
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
   })
 
   it('should clear title when update_value is empty', async () => {
@@ -253,7 +253,7 @@ describe('POST /api/arkana/users/profile', () => {
 
     expectSuccess(data)
     expect(data.data.message).toBe('Title cleared successfully')
-    expect(data.data.title).toBeNull()
+    expect(data.data.title).toBe('') // Empty string when URL-encoded
   })
 
   it('should update title color successfully', async () => {
@@ -305,7 +305,7 @@ describe('POST /api/arkana/users/profile', () => {
     expectSuccess(data)
     expect(data.data.message).toBe('Title color updated successfully')
     expect(data.data.titleColor).toBe('<1, 0, 0>')
-    expect(data.data.characterName).toBe('Test Character')
+    expect(decodeURIComponent(data.data.characterName)).toBe('Test Character')
   })
 
   it('should return 400 for wrong universe', async () => {

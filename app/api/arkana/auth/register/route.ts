@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         universe: user.universe,
         role: user.role,
         health: user.stats?.health,
-        hasArkanaCharacter: !!user.arkanaStats,
+        hasArkanaCharacter: !!user.arkanaStats ? "true" : "false",  // String for LSL compatibility
         // Include arkanaStats object for LSL parsing
         arkanaStats: user.arkanaStats ? {
           id: user.arkanaStats.id,

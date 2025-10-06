@@ -96,10 +96,10 @@ describe('GET and POST /api/arkana/auth/check', () => {
       expectSuccess(data)
       expect(data.data.sl_uuid).toBe(uuid)
       expect(data.data.universe).toBe('arkana')
-      expect(data.data.hasArkanaCharacter).toBe(true)
-      expect(data.data.arkanaStats.characterName).toBe('Test Character')
-      expect(data.data.arkanaStats.race).toBe('Human')
-      expect(data.data.arkanaStats.archetype).toBe('Arcanist')
+      expect(data.data.hasArkanaCharacter).toBe("true")
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
+      expect(decodeURIComponent(data.data.arkanaStats.race)).toBe('Human')
+      expect(decodeURIComponent(data.data.arkanaStats.archetype)).toBe('Arcanist')
     })
 
     it('should return 404 for user without completed Arkana registration', async () => {
@@ -240,8 +240,8 @@ describe('GET and POST /api/arkana/auth/check', () => {
       expectSuccess(data)
       expect(data.data.sl_uuid).toBe(uuid)
       expect(data.data.universe).toBe('arkana')
-      expect(data.data.hasArkanaCharacter).toBe(true)
-      expect(data.data.arkanaStats.characterName).toBe('Test Character')
+      expect(data.data.hasArkanaCharacter).toBe("true")
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character')
     })
 
     it('should return 400 for wrong universe in POST', async () => {

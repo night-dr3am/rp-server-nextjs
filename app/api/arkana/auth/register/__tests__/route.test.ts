@@ -44,7 +44,7 @@ describe('POST /api/arkana/auth/register', () => {
     expect(data.data.universe).toBe('arkana')
     expect(data.data.role).toBe('FREE')
     expect(data.data.health).toBe(100)
-    expect(data.data.hasArkanaCharacter).toBe(false)
+    expect(data.data.hasArkanaCharacter).toBe("false")
     expect(data.data.arkanaStats).toBeNull()
     expect(data.data.message).toBe('User registered successfully in Arkana universe')
   })

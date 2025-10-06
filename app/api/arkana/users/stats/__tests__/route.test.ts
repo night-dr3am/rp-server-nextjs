@@ -69,13 +69,13 @@ describe('/api/arkana/users/stats', () => {
       expect(data.data.user.slUuid).toBe(user.slUuid);
       expect(data.data.user.universe).toBe('arkana');
       expect(data.data.arkanaStats).toBeDefined();
-      expect(data.data.arkanaStats.characterName).toBe('Test Character');
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character');
       expect(data.data.arkanaStats.race).toBe('human');
       expect(data.data.arkanaStats.archetype).toBe('Arcanist');
       expect(data.data.arkanaStats.hitPoints).toBe(15);
       expect(data.data.arkanaStats.credits).toBe(1000);
       expect(data.data.arkanaStats.chips).toBe(500);
-      expect(data.data.hasArkanaCharacter).toBe(true);
+      expect(data.data.hasArkanaCharacter).toBe("true");
     });
 
     it('should retrieve user stats without Arkana character data', async () => {
@@ -96,7 +96,7 @@ describe('/api/arkana/users/stats', () => {
       expect(data.data.user.universe).toBe('arkana');
       expect(data.data.stats).toBeDefined(); // Basic stats should exist
       expect(data.data.arkanaStats).toBeNull();
-      expect(data.data.hasArkanaCharacter).toBe(false);
+      expect(data.data.hasArkanaCharacter).toBe("false");
     });
 
     it('should return 404 for user not found in Arkana universe', async () => {
@@ -221,16 +221,16 @@ describe('/api/arkana/users/stats', () => {
     expectSuccess(data);
 
     const arkanaStats = data.data.arkanaStats;
-    expect(arkanaStats.characterName).toBe('Complete Character');
-    expect(arkanaStats.agentName).toBe('CompleteAgent');
-    expect(arkanaStats.aliasCallsign).toBe('CC');
-    expect(arkanaStats.faction).toBe('Test Faction');
-    expect(arkanaStats.conceptRole).toBe('Hacker');
-    expect(arkanaStats.job).toBe('Data Analyst');
-    expect(arkanaStats.background).toBe('Born in the sprawl');
-    expect(arkanaStats.race).toBe('strigoi');
-    expect(arkanaStats.subrace).toBe('Life');
-    expect(arkanaStats.archetype).toBe('Life');
+    expect(decodeURIComponent(arkanaStats.characterName)).toBe('Complete Character');
+    expect(decodeURIComponent(arkanaStats.agentName)).toBe('CompleteAgent');
+    expect(decodeURIComponent(arkanaStats.aliasCallsign)).toBe('CC');
+    expect(decodeURIComponent(arkanaStats.faction)).toBe('Test Faction');
+    expect(decodeURIComponent(arkanaStats.conceptRole)).toBe('Hacker');
+    expect(decodeURIComponent(arkanaStats.job)).toBe('Data Analyst');
+    expect(decodeURIComponent(arkanaStats.background)).toBe('Born in the sprawl');
+    expect(decodeURIComponent(arkanaStats.race)).toBe('strigoi');
+    expect(decodeURIComponent(arkanaStats.subrace)).toBe('Life');
+    expect(decodeURIComponent(arkanaStats.archetype)).toBe('Life');
     expect(arkanaStats.physical).toBe(2);
     expect(arkanaStats.dexterity).toBe(3);
     expect(arkanaStats.mental).toBe(4);
@@ -407,9 +407,9 @@ describe('/api/arkana/users/stats', () => {
 
       expectSuccess(data);
       expect(data.data.arkanaStats).toBeDefined();
-      expect(data.data.arkanaStats.characterName).toBe('Test Character');
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Test Character');
       expect(data.data.arkanaStats.credits).toBe(1000);
-      expect(data.data.hasArkanaCharacter).toBe(true);
+      expect(data.data.hasArkanaCharacter).toBe("true");
     });
 
     it('should return 404 for user not found in Arkana universe', async () => {
