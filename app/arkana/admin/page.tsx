@@ -3,19 +3,22 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
+  type Flaw,
   type CommonPower,
   type Perk,
   type ArchetypePower,
   type Cybernetic,
   type MagicSchool,
   loadAllData,
+  flawsForRace,
   perksForRace,
   commonPowersForRace,
   archPowersForRaceArch,
   cyberneticsAll,
   canUseMagic,
   magicSchoolsAllGrouped,
-  groupCyberneticsBySection
+  groupCyberneticsBySection,
+  getAllFlaws
 } from '@/lib/arkanaData';
 
 interface User {
@@ -61,6 +64,7 @@ interface EditDataForm {
   hitPoints: number;
   health: number;
   status: number;
+  flaws: Set<string>;
   commonPowers: Set<string>;
   archetypePowers: Set<string>;
   perks: Set<string>;
@@ -146,6 +150,7 @@ function AdminDashboardContent() {
 
   // Arkana data state
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
   const [availableCommonPowers, setAvailableCommonPowers] = useState<CommonPower[]>([]);
   const [availableArchPowers, setAvailableArchPowers] = useState<ArchetypePower[]>([]);
@@ -154,7 +159,7 @@ function AdminDashboardContent() {
 
   // UI state
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [currentTab, setCurrentTab] = useState<string>('common');
+  const [currentTab, setCurrentTab] = useState<string>('flaws');
 
   // Verify admin access
   useEffect(() => {
@@ -206,6 +211,73 @@ function AdminDashboardContent() {
     loadData();
   }, []);
 
+  // Re-convert flaws when data loads (handles race condition)
+  useEffect(() => {
+    if (!dataLoaded || !selectedUser?.arkanaStats) return;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[CLIENT EFFECT] Re-converting flaws after data load');
+      console.log('[CLIENT EFFECT] Flaws in selectedUser:', selectedUser.arkanaStats.flaws);
+    }
+
+    const race = selectedUser.arkanaStats.race;
+    const archetype = selectedUser.arkanaStats.archetype || '';
+    const flawsJson = selectedUser.arkanaStats.flaws;
+
+    // Convert flaws from JSON to IDs
+    const flawIds = new Set<string>();
+    if (Array.isArray(flawsJson)) {
+      const allFlawsList = getAllFlaws();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[CLIENT EFFECT] All flaws available:', allFlawsList.length);
+      }
+      (flawsJson as Array<{id?: string; name: string; cost: number}>).forEach((flawObj) => {
+        // Use ID if available (new format), otherwise fall back to name matching (legacy format)
+        if (flawObj.id) {
+          flawIds.add(flawObj.id);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[CLIENT EFFECT] Matched flaw by ID: "${flawObj.name}" -> ID: ${flawObj.id}`);
+          }
+        } else {
+          const flaw = allFlawsList.find(f => f.name === flawObj.name);
+          if (flaw) {
+            flawIds.add(flaw.id);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`[CLIENT EFFECT] Matched flaw by name: "${flawObj.name}" -> ID: ${flaw.id}`);
+            }
+          } else {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(`[CLIENT EFFECT] Could not find flaw: "${flawObj.name}"`);
+            }
+          }
+        }
+      });
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[CLIENT EFFECT] Final converted flaw IDs:', Array.from(flawIds));
+    }
+
+    // Update editData with converted flaws
+    setEditData(prev => ({
+      ...prev,
+      flaws: flawIds
+    }));
+
+    // Update available options for this race/archetype
+    setAvailableFlaws(flawsForRace(race, archetype));
+    setAvailablePerks(perksForRace(race, archetype));
+    setAvailableCommonPowers(commonPowersForRace(race));
+    setAvailableArchPowers(archPowersForRaceArch(race, archetype));
+    setAvailableCybernetics(cyberneticsAll());
+
+    if (canUseMagic(race, archetype)) {
+      const magicSchools = magicSchoolsAllGrouped(race, archetype);
+      setAvailableMagicSchools(magicSchools);
+      setExpandedSections(new Set(Object.keys(magicSchools)));
+    }
+  }, [dataLoaded, selectedUser]);
+
   const fetchUsers = async (page = 1, search = '') => {
     try {
       const response = await fetch(`/api/arkana/admin/users?token=${token}&search=${encodeURIComponent(search)}&page=${page}&limit=20`);
@@ -237,6 +309,49 @@ function AdminDashboardContent() {
         const race = result.data.arkanaStats.race;
         const archetype = result.data.arkanaStats.archetype || '';
 
+        // DEV: Log what we received from API
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[CLIENT LOAD] Flaws received from API:', result.data.arkanaStats.flaws);
+          console.log('[CLIENT LOAD] Data loaded status:', dataLoaded);
+        }
+
+        // Convert flaws JSON to Set of IDs (only if data is loaded)
+        const flawsJson = result.data.arkanaStats.flaws;
+        const flawIds = new Set<string>();
+        if (dataLoaded && flawsJson && Array.isArray(flawsJson)) {
+          // flawsJson is [{id?: "...", name: "...", cost: ...}, ...]
+          // We need to convert it to IDs, preferring the ID field if available
+          const allFlawsList = getAllFlaws();
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[CLIENT LOAD] All flaws available:', allFlawsList.length);
+          }
+          (flawsJson as Array<{id?: string; name: string; cost: number}>).forEach((flawObj) => {
+            // Use ID if available (new format), otherwise fall back to name matching (legacy format)
+            if (flawObj.id) {
+              flawIds.add(flawObj.id);
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`[CLIENT LOAD] Matched flaw by ID: "${flawObj.name}" -> ID: ${flawObj.id}`);
+              }
+            } else {
+              const flaw = allFlawsList.find(f => f.name === flawObj.name);
+              if (flaw) {
+                flawIds.add(flaw.id);
+                if (process.env.NODE_ENV === 'development') {
+                  console.log(`[CLIENT LOAD] Matched flaw by name: "${flawObj.name}" -> ID: ${flaw.id}`);
+                }
+              } else {
+                if (process.env.NODE_ENV === 'development') {
+                  console.warn(`[CLIENT LOAD] Could not find flaw: "${flawObj.name}"`);
+                }
+              }
+            }
+          });
+        }
+
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[CLIENT LOAD] Converted flaw IDs:', Array.from(flawIds));
+        }
+
         // Convert arrays to Sets for easier toggling
         setEditData({
           // Identity
@@ -260,6 +375,8 @@ function AdminDashboardContent() {
           // Current health
           health: result.data.stats?.health || result.data.arkanaStats.hitPoints,
           status: result.data.stats?.status || 0,
+          // Flaws
+          flaws: flawIds,
           // Powers (convert arrays to Sets)
           commonPowers: new Set(result.data.arkanaStats.commonPowers || []),
           archetypePowers: new Set(result.data.arkanaStats.archetypePowers || []),
@@ -278,6 +395,7 @@ function AdminDashboardContent() {
 
         // Filter available options based on race/archetype
         if (dataLoaded && race) {
+          setAvailableFlaws(flawsForRace(race, archetype));
           setAvailablePerks(perksForRace(race, archetype));
           setAvailableCommonPowers(commonPowersForRace(race));
           setAvailableArchPowers(archPowersForRaceArch(race, archetype));
@@ -307,12 +425,19 @@ function AdminDashboardContent() {
       // Convert Sets back to Arrays for API submission
       const submissionData = {
         ...editData,
+        flaws: Array.from(editData.flaws || []),
         commonPowers: Array.from(editData.commonPowers || []),
         archetypePowers: Array.from(editData.archetypePowers || []),
         perks: Array.from(editData.perks || []),
         magicSchools: Array.from(editData.magicSchools || []),
         cyberneticAugments: Array.from(editData.cyberneticAugments || [])
       };
+
+      // DEV: Log what we're sending to API
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[CLIENT SAVE] Flaws being sent to API:', submissionData.flaws);
+        console.log('[CLIENT SAVE] Full submission data:', submissionData);
+      }
 
       const response = await fetch(`/api/arkana/admin/user/${selectedUser.user.id}`, {
         method: 'PUT',
@@ -348,6 +473,16 @@ function AdminDashboardContent() {
   };
 
   // Helper functions for power selection
+  const toggleFlaw = (id: string) => {
+    const currentSet = new Set(editData.flaws || []);
+    if (currentSet.has(id)) {
+      currentSet.delete(id);
+    } else {
+      currentSet.add(id);
+    }
+    setEditData(prev => ({ ...prev, flaws: currentSet }));
+  };
+
   const togglePower = (id: string, type: 'commonPowers' | 'archetypePowers' | 'perks' | 'cyberneticAugments') => {
     const currentSet = new Set(editData[type] || []);
     if (currentSet.has(id)) {
@@ -384,6 +519,7 @@ function AdminDashboardContent() {
     const confirmed = window.confirm(
       'Are you sure you want to reset all Powers & Abilities selections?\n\n' +
       'This will clear:\n' +
+      '• All selected Flaws\n' +
       '• All selected Powers, Perks, and Archetype Powers\n' +
       '• All Magic Schools and Weaves\n' +
       '• All Cybernetic selections'
@@ -392,6 +528,7 @@ function AdminDashboardContent() {
     if (confirmed) {
       setEditData(prev => ({
         ...prev,
+        flaws: new Set<string>(),
         commonPowers: new Set<string>(),
         archetypePowers: new Set<string>(),
         perks: new Set<string>(),
@@ -412,6 +549,7 @@ function AdminDashboardContent() {
     }
 
     const tabs = [
+      { id: 'flaws', name: 'Flaws' },
       { id: 'common', name: 'Common Powers' },
       { id: 'archetype', name: 'Archetype Powers' },
       { id: 'perks', name: 'Perks' },
@@ -423,7 +561,8 @@ function AdminDashboardContent() {
       <div className="bg-gray-800 border border-cyan-600 rounded p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-cyan-400">Powers & Abilities</h3>
-          {((editData.commonPowers?.size || 0) > 0 ||
+          {((editData.flaws?.size || 0) > 0 ||
+            (editData.commonPowers?.size || 0) > 0 ||
             (editData.archetypePowers?.size || 0) > 0 ||
             (editData.perks?.size || 0) > 0 ||
             (editData.magicSchools?.size || 0) > 0 ||
@@ -456,6 +595,38 @@ function AdminDashboardContent() {
 
         {/* Tab Content */}
         <div className="min-h-[300px]">
+          {currentTab === 'flaws' && (
+            <div className="space-y-3">
+              <h4 className="text-md font-bold text-cyan-300">Flaws</h4>
+              <p className="text-cyan-300 text-sm mb-3">
+                Select flaws for this character. Flaws grant additional power points during character creation.
+              </p>
+              {availableFlaws.length > 0 ? (
+                availableFlaws.map(flaw => (
+                  <div key={flaw.id} className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editData.flaws?.has(flaw.id) || false}
+                        onChange={() => toggleFlaw(flaw.id)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-cyan-300">{flaw.name}</span>
+                          <span className="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">+{flaw.cost} pts</span>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-1">{flaw.desc}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No flaws available for this race/archetype.</p>
+              )}
+            </div>
+          )}
+
           {currentTab === 'common' && (
             <div className="space-y-3">
               <h4 className="text-md font-bold text-cyan-300">Common Powers</h4>

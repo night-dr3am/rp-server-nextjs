@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Convert flaws array to JSON format expected by schema
     const flawsJson = characterData.flaws?.map((flawId: string) => {
       const flaw = allFlaws.find(f => f.id === flawId);
-      return flaw ? { name: flaw.name, cost: flaw.cost } : null;
+      return flaw ? { id: flaw.id, name: flaw.name, cost: flaw.cost } : null;
     }).filter(Boolean) || null;
 
     // Convert cybernetics array to JSON format expected by schema

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaAdminVerifySchema, arkanaAdminUserUpdateSchema } from '@/lib/validation';
 import { validateAdminToken, validateHealthValues } from '@/lib/arkana/adminUtils';
+import { getAllFlaws, loadAllData } from '@/lib/arkana/dataLoader';
 
 interface RouteContext {
   params: Promise<{ userId: string }>;
@@ -55,6 +56,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
+    // DEV: Log what we're sending from database
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[SERVER GET] Flaws from database:', user.arkanaStats.flaws);
+    }
+
     // Return full user data
     return NextResponse.json({
       success: true,
@@ -93,6 +99,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
+    // Load Arkana data if not already loaded
+    await loadAllData();
+
     const params = await context.params;
     const userId = params.userId;
     const body = await request.json();
@@ -152,13 +161,42 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       }
     }
 
+    // DEV: Log what we received
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[SERVER PUT] Received flaws:', value.flaws);
+    }
+
+    // Convert flaws array to JSON format if provided
+    let flawsJson = null;
+    if (value.flaws !== undefined && Array.isArray(value.flaws)) {
+      const allFlaws = getAllFlaws();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SERVER PUT] All flaws loaded:', allFlaws.length);
+      }
+      flawsJson = value.flaws.map((flawId: string) => {
+        const flaw = allFlaws.find(f => f.id === flawId);
+        if (process.env.NODE_ENV === 'development') {
+          if (flaw) {
+            console.log(`[SERVER PUT] Matched ID "${flawId}" -> {id: "${flaw.id}", name: "${flaw.name}", cost: ${flaw.cost}}`);
+          } else {
+            console.warn(`[SERVER PUT] Could not find flaw with ID: "${flawId}"`);
+          }
+        }
+        return flaw ? { id: flaw.id, name: flaw.name, cost: flaw.cost } : null;
+      }).filter(Boolean);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SERVER PUT] Final flaws JSON to save:', flawsJson);
+      }
+    }
+
     // Build update data for arkanaStats
     const arkanaStatsUpdate: Record<string, unknown> = {};
     const arkanaFields = [
       'characterName', 'agentName', 'aliasCallsign', 'faction', 'conceptRole', 'job', 'background',
       'race', 'subrace', 'archetype',
       'physical', 'dexterity', 'mental', 'perception', 'hitPoints',
-      'inherentPowers', 'weaknesses', 'flaws',
+      'inherentPowers', 'weaknesses',
       'commonPowers', 'archetypePowers', 'perks',
       'magicSchools', 'magicWeaves',
       'cybernetics', 'cyberneticAugments',
@@ -170,6 +208,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       if (value[field] !== undefined) {
         arkanaStatsUpdate[field] = value[field];
       }
+    }
+
+    // Add converted flaws if provided
+    if (value.flaws !== undefined) {
+      arkanaStatsUpdate.flaws = flawsJson;
     }
 
     // Build update data for userStats
