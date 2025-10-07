@@ -96,8 +96,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Generate profile URL
-    const profileUrl = `/profile/${user.slUuid}?token=${token}&universe=${encodeURIComponent(user.universe)}`;
+    // Generate profile URL based on universe
+    const profilePath = user.universe === 'arkana' ? '/arkana/profile' : '/profile';
+    const profileUrl = `${profilePath}/${user.slUuid}?token=${token}&universe=${encodeURIComponent(user.universe)}`;
 
     return NextResponse.json({
       success: true,

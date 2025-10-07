@@ -139,8 +139,8 @@ describe('POST /api/arkana/submit-to-discord', () => {
   });
 
   it('should return 401 for wrong universe token', async () => {
-    // Create a Gor universe user
-    const gorUser = await createTestUser({
+    // Create a Gor universe user (wrong universe for Arkana endpoint)
+    await createTestUser({
       sl_uuid: '550e8400-e29b-41d4-a716-446655440099',
       universe: 'Gor',
       username: 'GorTestUser',

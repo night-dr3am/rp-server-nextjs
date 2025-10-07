@@ -90,7 +90,7 @@ describe('POST /api/arkana/admin/verify', () => {
   });
 
   it('should deny access for non-arkana universe user', async () => {
-    const { user, token } = await createTestUser('Gor'); // Gor universe
+    const { token } = await createTestUser('Gor'); // Gor universe
 
     const request = createMockPostRequest('/api/arkana/admin/verify', {
       token
@@ -115,7 +115,7 @@ describe('POST /api/arkana/admin/verify', () => {
   });
 
   it('should deny access for user without Arkana character', async () => {
-    const { user, token } = await createTestUser('arkana');
+    const { token } = await createTestUser('arkana');
 
     // Don't create arkanaStats
 
