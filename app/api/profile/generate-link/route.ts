@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    if (recentTokens >= 5) {
+    if (recentTokens >= 10) {
       return NextResponse.json(
         { success: false, error: 'Rate limit exceeded. Please wait before generating a new profile link.' },
         { status: 429 }
