@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaCharacterCreateSchema } from '@/lib/validation';
 import { validateProfileToken } from '@/lib/profileTokenUtils';
-import { getAllFlaws, loadAllData } from '@/lib/arkana/dataLoader';
+import { getAllFlaws, getAllCommonPowers, getAllArchPowers, getAllPerks, loadAllData } from '@/lib/arkana/dataLoader';
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,11 +81,33 @@ export async function POST(request: NextRequest) {
     const cyberneticsJson = characterData.cybernetics?.length > 0 ?
       characterData.cybernetics.map((cybId: string) => ({ id: cybId })) : null;
 
-    // Merge picks into perks array (since schema doesn't have picks field)
-    const allPerks = [
-      ...(characterData.perks || []),
-      ...(characterData.picks || [])
-    ];
+    // Load all data sources to categorize picks
+    const allCommonPowers = getAllCommonPowers();
+    const allArchPowers = getAllArchPowers();
+    const allPerksData = getAllPerks();
+
+    // Categorize picks into their respective arrays
+    const cyberneticIds: string[] = [];
+    const commonPowerIds: string[] = [];
+    const archetypePowerIds: string[] = [];
+    const perkIds: string[] = [];
+
+    (characterData.picks || []).forEach((id: string) => {
+      if (id.startsWith('cyb_')) {
+        cyberneticIds.push(id);
+      } else if (allCommonPowers.find(p => p.id === id)) {
+        commonPowerIds.push(id);
+      } else if (allArchPowers.find(p => p.id === id)) {
+        archetypePowerIds.push(id);
+      } else {
+        perkIds.push(id);
+      }
+    });
+
+    // Merge categorized picks with explicitly provided arrays
+    const allCommonPowersArray = [...(characterData.commonPowers || []), ...commonPowerIds];
+    const allArchPowersArray = [...(characterData.archetypePowers || []), ...archetypePowerIds];
+    const allPerks = [...(characterData.perks || []), ...perkIds];
 
     // Note: cyberSlots, freeMagicSchool, freeMagicWeave, synthralFreeWeave are used for
     // character creation logic but not stored in DB. They're handled in the frontend.
@@ -117,13 +139,13 @@ export async function POST(request: NextRequest) {
       powerPointsBudget: powerPointsBudget,
       powerPointsBonus: powerPointsBonus,
       powerPointsSpent: powerPointsSpent,
-      commonPowers: characterData.commonPowers || [],
-      archetypePowers: characterData.archetypePowers || [],
+      commonPowers: allCommonPowersArray,
+      archetypePowers: allArchPowersArray,
       perks: allPerks,
       magicSchools: characterData.magicSchools || [],
       magicWeaves: characterData.magicWeaves || [],
       cybernetics: cyberneticsJson,
-      cyberneticAugments: characterData.cyberneticAugments || [],
+      cyberneticAugments: [...(characterData.cyberneticAugments || []), ...cyberneticIds],
       registrationCompleted: isCompleteCharacter
     };
 
