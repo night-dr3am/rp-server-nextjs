@@ -2,6 +2,21 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import {
+  type CommonPower,
+  type Perk,
+  type ArchetypePower,
+  type Cybernetic,
+  type MagicSchool,
+  loadAllData,
+  perksForRace,
+  commonPowersForRace,
+  archPowersForRaceArch,
+  cyberneticsAll,
+  canUseMagic,
+  magicSchoolsAllGrouped,
+  groupCyberneticsBySection
+} from '@/lib/arkanaData';
 
 interface User {
   id: string;
@@ -46,11 +61,11 @@ interface EditDataForm {
   hitPoints: number;
   health: number;
   status: number;
-  commonPowers: string[];
-  archetypePowers: string[];
-  perks: string[];
-  magicSchools: string[];
-  cyberneticAugments: string[];
+  commonPowers: Set<string>;
+  archetypePowers: Set<string>;
+  perks: Set<string>;
+  magicSchools: Set<string>;
+  cyberneticAugments: Set<string>;
   credits: number;
   chips: number;
   xp: number;
@@ -129,6 +144,18 @@ function AdminDashboardContent() {
   const [editData, setEditData] = useState<Partial<EditDataForm>>({});
   const [saving, setSaving] = useState(false);
 
+  // Arkana data state
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
+  const [availableCommonPowers, setAvailableCommonPowers] = useState<CommonPower[]>([]);
+  const [availableArchPowers, setAvailableArchPowers] = useState<ArchetypePower[]>([]);
+  const [availableCybernetics, setAvailableCybernetics] = useState<Cybernetic[]>([]);
+  const [availableMagicSchools, setAvailableMagicSchools] = useState<Record<string, MagicSchool[]>>({});
+
+  // UI state
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [currentTab, setCurrentTab] = useState<string>('common');
+
   // Verify admin access
   useEffect(() => {
     const verifyAdmin = async () => {
@@ -164,6 +191,21 @@ function AdminDashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // Load arkana data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await loadAllData();
+        setDataLoaded(true);
+      } catch (err) {
+        console.error('Failed to load arkana data:', err);
+        setError('Failed to load character data');
+      }
+    };
+
+    loadData();
+  }, []);
+
   const fetchUsers = async (page = 1, search = '') => {
     try {
       const response = await fetch(`/api/arkana/admin/users?token=${token}&search=${encodeURIComponent(search)}&page=${page}&limit=20`);
@@ -191,6 +233,11 @@ function AdminDashboardContent() {
 
       if (result.success) {
         setSelectedUser(result.data);
+
+        const race = result.data.arkanaStats.race;
+        const archetype = result.data.arkanaStats.archetype || '';
+
+        // Convert arrays to Sets for easier toggling
         setEditData({
           // Identity
           characterName: result.data.arkanaStats.characterName,
@@ -201,9 +248,9 @@ function AdminDashboardContent() {
           job: result.data.arkanaStats.job || '',
           background: result.data.arkanaStats.background || '',
           // Lineage
-          race: result.data.arkanaStats.race,
+          race: race,
           subrace: result.data.arkanaStats.subrace || '',
-          archetype: result.data.arkanaStats.archetype || '',
+          archetype: archetype,
           // Stats
           physical: result.data.arkanaStats.physical,
           dexterity: result.data.arkanaStats.dexterity,
@@ -213,14 +260,14 @@ function AdminDashboardContent() {
           // Current health
           health: result.data.stats?.health || result.data.arkanaStats.hitPoints,
           status: result.data.stats?.status || 0,
-          // Powers
-          commonPowers: result.data.arkanaStats.commonPowers || [],
-          archetypePowers: result.data.arkanaStats.archetypePowers || [],
-          perks: result.data.arkanaStats.perks || [],
+          // Powers (convert arrays to Sets)
+          commonPowers: new Set(result.data.arkanaStats.commonPowers || []),
+          archetypePowers: new Set(result.data.arkanaStats.archetypePowers || []),
+          perks: new Set(result.data.arkanaStats.perks || []),
           // Magic
-          magicSchools: result.data.arkanaStats.magicSchools || [],
+          magicSchools: new Set(result.data.arkanaStats.magicSchools || []),
           // Cybernetics
-          cyberneticAugments: result.data.arkanaStats.cyberneticAugments || [],
+          cyberneticAugments: new Set(result.data.arkanaStats.cyberneticAugments || []),
           // Economy
           credits: result.data.arkanaStats.credits,
           chips: result.data.arkanaStats.chips,
@@ -228,6 +275,24 @@ function AdminDashboardContent() {
           // Role
           arkanaRole: result.data.arkanaStats.arkanaRole
         });
+
+        // Filter available options based on race/archetype
+        if (dataLoaded && race) {
+          setAvailablePerks(perksForRace(race, archetype));
+          setAvailableCommonPowers(commonPowersForRace(race));
+          setAvailableArchPowers(archPowersForRaceArch(race, archetype));
+          setAvailableCybernetics(cyberneticsAll());
+
+          if (canUseMagic(race, archetype)) {
+            const magicSchools = magicSchoolsAllGrouped(race, archetype);
+            setAvailableMagicSchools(magicSchools);
+            // Auto-expand all magic school sections
+            setExpandedSections(new Set(Object.keys(magicSchools)));
+          } else {
+            setAvailableMagicSchools({});
+            setExpandedSections(new Set());
+          }
+        }
       }
     } catch {
       setError('Failed to fetch user details');
@@ -239,10 +304,20 @@ function AdminDashboardContent() {
 
     setSaving(true);
     try {
+      // Convert Sets back to Arrays for API submission
+      const submissionData = {
+        ...editData,
+        commonPowers: Array.from(editData.commonPowers || []),
+        archetypePowers: Array.from(editData.archetypePowers || []),
+        perks: Array.from(editData.perks || []),
+        magicSchools: Array.from(editData.magicSchools || []),
+        cyberneticAugments: Array.from(editData.cyberneticAugments || [])
+      };
+
       const response = await fetch(`/api/arkana/admin/user/${selectedUser.user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, ...editData })
+        body: JSON.stringify({ token, ...submissionData })
       });
 
       const result = await response.json();
@@ -270,6 +345,338 @@ function AdminDashboardContent() {
     if (percentage >= 50) return 'bg-yellow-500';
     if (percentage >= 25) return 'bg-orange-500';
     return 'bg-red-500';
+  };
+
+  // Helper functions for power selection
+  const togglePower = (id: string, type: 'commonPowers' | 'archetypePowers' | 'perks' | 'cyberneticAugments') => {
+    const currentSet = new Set(editData[type] || []);
+    if (currentSet.has(id)) {
+      currentSet.delete(id);
+    } else {
+      currentSet.add(id);
+    }
+    setEditData(prev => ({ ...prev, [type]: currentSet }));
+  };
+
+  const toggleMagicSchool = (id: string) => {
+    const currentSet = new Set(editData.magicSchools || []);
+    if (currentSet.has(id)) {
+      currentSet.delete(id);
+    } else {
+      currentSet.add(id);
+    }
+    setEditData(prev => ({ ...prev, magicSchools: currentSet }));
+  };
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  };
+
+  const resetPowersSelection = () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to reset all Powers & Abilities selections?\n\n' +
+      'This will clear:\n' +
+      '• All selected Powers, Perks, and Archetype Powers\n' +
+      '• All Magic Schools and Weaves\n' +
+      '• All Cybernetic selections'
+    );
+
+    if (confirmed) {
+      setEditData(prev => ({
+        ...prev,
+        commonPowers: new Set<string>(),
+        archetypePowers: new Set<string>(),
+        perks: new Set<string>(),
+        magicSchools: new Set<string>(),
+        cyberneticAugments: new Set<string>()
+      }));
+    }
+  };
+
+  const renderPowersSection = () => {
+    if (!dataLoaded) {
+      return (
+        <div className="bg-gray-800 border border-cyan-600 rounded p-4">
+          <h3 className="text-lg font-bold text-cyan-400 mb-3">Powers & Abilities</h3>
+          <p className="text-cyan-300">Loading character data...</p>
+        </div>
+      );
+    }
+
+    const tabs = [
+      { id: 'common', name: 'Common Powers' },
+      { id: 'archetype', name: 'Archetype Powers' },
+      { id: 'perks', name: 'Perks' },
+      { id: 'cybernetics', name: 'Cybernetics' },
+      { id: 'magic', name: 'Magic' }
+    ];
+
+    return (
+      <div className="bg-gray-800 border border-cyan-600 rounded p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-cyan-400">Powers & Abilities</h3>
+          {((editData.commonPowers?.size || 0) > 0 ||
+            (editData.archetypePowers?.size || 0) > 0 ||
+            (editData.perks?.size || 0) > 0 ||
+            (editData.magicSchools?.size || 0) > 0 ||
+            (editData.cyberneticAugments?.size || 0) > 0) && (
+            <button
+              onClick={resetPowersSelection}
+              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
+            >
+              🔄 Reset All
+            </button>
+          )}
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-gray-900 p-1 rounded mb-4">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setCurrentTab(tab.id)}
+              className={`px-4 py-2 rounded transition-colors ${
+                currentTab === tab.id
+                  ? 'bg-cyan-600 text-white'
+                  : 'text-cyan-300 hover:bg-gray-700'
+              }`}
+            >
+              {tab.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className="min-h-[300px]">
+          {currentTab === 'common' && (
+            <div className="space-y-3">
+              <h4 className="text-md font-bold text-cyan-300">Common Powers</h4>
+              {availableCommonPowers.length > 0 ? (
+                availableCommonPowers.map(power => (
+                  <div key={power.id} className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editData.commonPowers?.has(power.id) || false}
+                        onChange={() => togglePower(power.id, 'commonPowers')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-cyan-300">{power.name}</span>
+                          <span className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{power.cost} pts</span>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-1">{power.desc}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No common powers available for this race.</p>
+              )}
+            </div>
+          )}
+
+          {currentTab === 'archetype' && (
+            <div className="space-y-3">
+              <h4 className="text-md font-bold text-cyan-300">Archetype Powers</h4>
+              {availableArchPowers.length > 0 ? (
+                availableArchPowers.map(power => (
+                  <div key={power.id} className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editData.archetypePowers?.has(power.id) || false}
+                        onChange={() => togglePower(power.id, 'archetypePowers')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-cyan-300">{power.name}</span>
+                          <span className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{power.cost} pts</span>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-1">{power.desc}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No archetype powers available for this race/archetype.</p>
+              )}
+            </div>
+          )}
+
+          {currentTab === 'perks' && (
+            <div className="space-y-3">
+              <h4 className="text-md font-bold text-cyan-300">Perks</h4>
+              {availablePerks.length > 0 ? (
+                availablePerks.map(perk => (
+                  <div key={perk.id} className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editData.perks?.has(perk.id) || false}
+                        onChange={() => togglePower(perk.id, 'perks')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-cyan-300">{perk.name}</span>
+                          <span className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{perk.cost} pts</span>
+                        </div>
+                        <p className="text-gray-400 text-sm mt-1">{perk.desc}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No perks available for this race/archetype.</p>
+              )}
+            </div>
+          )}
+
+          {currentTab === 'cybernetics' && (
+            <div className="space-y-4">
+              <h4 className="text-md font-bold text-cyan-300">Cybernetics</h4>
+              <p className="text-cyan-300 text-sm mb-3">
+                Select cybernetic augmentations for this character. Admins can freely add/remove without slot restrictions.
+              </p>
+
+              {/* Cybernetic Modifications */}
+              <div className="space-y-3">
+                {Object.entries(groupCyberneticsBySection(availableCybernetics)).map(([section, cybers]) => (
+                  cybers.length > 0 && (
+                    <div key={section}>
+                      <h5 className="text-sm font-semibold text-cyan-300 mb-2">{section}</h5>
+                      {cybers.map(cyber => (
+                        <div key={cyber.id} className="p-3 bg-gray-800 border border-gray-600 rounded mb-2">
+                          <label className="flex items-start space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editData.cyberneticAugments?.has(cyber.id) || false}
+                              onChange={() => togglePower(cyber.id, 'cyberneticAugments')}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-cyan-300">{cyber.name}</span>
+                                <span className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{cyber.cost} pts</span>
+                              </div>
+                              <p className="text-gray-400 text-sm mt-1">{cyber.desc}</p>
+                            </div>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
+
+          {currentTab === 'magic' && (
+            <div className="space-y-4">
+              <h4 className="text-md font-bold text-cyan-300">Magic Schools & Weaves</h4>
+
+              {canUseMagic(editData.race || '', editData.archetype || '') ? (
+                Object.keys(availableMagicSchools).length > 0 ? (
+                  <div className="space-y-4">
+                    {Object.entries(availableMagicSchools).map(([section, schools]) => {
+                      const schoolEntry = schools[0];
+                      const weaves = schools.slice(1);
+                      const schoolSelected = editData.magicSchools?.has(schoolEntry.id) || false;
+
+                      return (
+                        <div key={section}>
+                          <button
+                            onClick={() => toggleSection(section)}
+                            className="w-full flex items-center justify-between text-md font-semibold text-cyan-300 mb-2 p-2 rounded hover:bg-gray-800 transition-colors"
+                          >
+                            <span>{section}</span>
+                            <span
+                              className={`transform transition-transform duration-200 ${
+                                expandedSections.has(section) ? 'rotate-90' : 'rotate-0'
+                              }`}
+                            >
+                              ▶
+                            </span>
+                          </button>
+
+                          {expandedSections.has(section) && (
+                            <div className="space-y-2">
+                              {/* School Entry */}
+                              <div className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                                <label className="flex items-start space-x-3 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={schoolSelected}
+                                    onChange={() => toggleMagicSchool(schoolEntry.id)}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-medium text-cyan-300">{schoolEntry.name}</span>
+                                      <span className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{schoolEntry.cost} pts</span>
+                                    </div>
+                                    <p className="text-gray-400 text-sm mt-1">{schoolEntry.desc}</p>
+                                  </div>
+                                </label>
+                              </div>
+
+                              {/* Weaves */}
+                              {weaves.map(weave => {
+                                const weaveSelected = editData.magicSchools?.has(weave.id) || false;
+
+                                return (
+                                  <div key={weave.id} className="ml-6 p-3 bg-gray-800 border border-gray-600 rounded">
+                                    <label className="flex items-start space-x-3 cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={weaveSelected}
+                                        onChange={() => toggleMagicSchool(weave.id)}
+                                        disabled={!schoolSelected}
+                                        className="mt-1"
+                                      />
+                                      <div className="flex-1">
+                                        <div className="flex items-center space-x-2">
+                                          <span className="font-medium text-cyan-300">{weave.name}</span>
+                                          <span className="px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs">{weave.cost} pts</span>
+                                        </div>
+                                        <p className="text-gray-400 text-sm mt-1">{weave.desc}</p>
+                                      </div>
+                                    </label>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No magic schools data available.</p>
+                )
+              ) : (
+                <div className="p-4 bg-gray-900 border border-yellow-500 rounded">
+                  <p className="text-yellow-300">
+                    Magic is not available for the current race/archetype combination.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -505,33 +912,8 @@ function AdminDashboardContent() {
                 </div>
               </div>
 
-              {/* Powers Section */}
-              <div className="bg-gray-800 border border-cyan-600 rounded p-4">
-                <h3 className="text-lg font-bold text-cyan-400 mb-3">Powers & Abilities</h3>
-                <p className="text-sm text-cyan-300 mb-4">Note: Use comma-separated values for lists (e.g., &quot;Power1, Power2, Power3&quot;)</p>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-cyan-300 mb-1">Common Powers</label>
-                    <input type="text" value={(editData.commonPowers || []).join(', ')} onChange={(e) => setEditData({...editData, commonPowers: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-cyan-300 mb-1">Archetype Powers</label>
-                    <input type="text" value={(editData.archetypePowers || []).join(', ')} onChange={(e) => setEditData({...editData, archetypePowers: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-cyan-300 mb-1">Perks</label>
-                    <input type="text" value={(editData.perks || []).join(', ')} onChange={(e) => setEditData({...editData, perks: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-cyan-300 mb-1">Magic Schools</label>
-                    <input type="text" value={(editData.magicSchools || []).join(', ')} onChange={(e) => setEditData({...editData, magicSchools: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-cyan-300 mb-1">Cybernetic Augments</label>
-                    <input type="text" value={(editData.cyberneticAugments || []).join(', ')} onChange={(e) => setEditData({...editData, cyberneticAugments: e.target.value.split(',').map((s: string) => s.trim()).filter((s: string) => s)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
-                  </div>
-                </div>
-              </div>
+              {/* Powers & Abilities Section - New Tabbed Interface */}
+              {renderPowersSection()}
 
               {/* Admin Role */}
               <div className="bg-gray-800 border border-purple-600 rounded p-4">
