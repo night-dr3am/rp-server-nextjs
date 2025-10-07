@@ -560,3 +560,84 @@ export const craftingCategoriesSchema = Joi.object({
   timestamp: timestampSchema,
   signature: signatureSchema
 });
+
+// Arkana profile and admin validation schemas
+export const arkanaProfileDataSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  token: Joi.string().required(),
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(5).max(100).optional().default(20)
+});
+
+export const arkanaAdminVerifySchema = Joi.object({
+  token: Joi.string().required()
+});
+
+export const arkanaAdminUserSearchSchema = Joi.object({
+  token: Joi.string().required(),
+  search: Joi.string().min(1).max(255).optional().allow(''),
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(5).max(100).optional().default(20)
+});
+
+export const arkanaAdminUserUpdateSchema = Joi.object({
+  token: Joi.string().required(),
+
+  // Identity fields
+  characterName: Joi.string().min(1).max(255).optional(),
+  agentName: Joi.string().min(1).max(255).optional(),
+  aliasCallsign: Joi.string().max(255).allow('').optional(),
+  faction: Joi.string().max(255).allow('').optional(),
+  conceptRole: Joi.string().max(512).allow('').optional(),
+  job: Joi.string().max(256).allow('').optional(),
+  background: Joi.string().allow('').optional(),
+
+  // Lineage
+  race: Joi.string().max(100).optional(),
+  subrace: Joi.string().max(100).allow('').optional(),
+  archetype: Joi.string().max(100).allow('').optional(),
+
+  // Stats (1-10 range for admin flexibility, though normal is 1-5)
+  physical: Joi.number().integer().min(1).max(10).optional(),
+  dexterity: Joi.number().integer().min(1).max(10).optional(),
+  mental: Joi.number().integer().min(1).max(10).optional(),
+  perception: Joi.number().integer().min(1).max(10).optional(),
+  hitPoints: Joi.number().integer().min(1).max(100).optional(),
+
+  // Current health from userStats
+  health: Joi.number().integer().min(0).max(100).optional(),
+  status: Joi.number().integer().min(0).max(3).optional(), // 0=Healthy, 1=Injured, 2=Unconscious, 3=Dead
+
+  // Powers and abilities
+  inherentPowers: Joi.array().items(Joi.string()).optional(),
+  weaknesses: Joi.array().items(Joi.string()).optional(),
+  flaws: Joi.alternatives().try(Joi.array(), Joi.object()).optional(),
+  commonPowers: Joi.array().items(Joi.string()).optional(),
+  archetypePowers: Joi.array().items(Joi.string()).optional(),
+  perks: Joi.array().items(Joi.string()).optional(),
+
+  // Magic
+  magicSchools: Joi.array().items(Joi.string()).optional(),
+  magicWeaves: Joi.array().items(Joi.string()).optional(),
+
+  // Cybernetics
+  cybernetics: Joi.alternatives().try(Joi.array(), Joi.object()).optional(),
+  cyberneticAugments: Joi.array().items(Joi.string()).optional(),
+
+  // Economy
+  credits: Joi.number().integer().min(0).optional(),
+  chips: Joi.number().integer().min(0).optional(),
+  xp: Joi.number().integer().min(0).optional(),
+
+  // Admin role
+  arkanaRole: Joi.string().valid('player', 'admin').optional()
+}).custom((value, helpers) => {
+  // Validate health doesn't exceed hitPoints if both are provided
+  if (value.health !== undefined && value.hitPoints !== undefined) {
+    if (value.health > value.hitPoints) {
+      return helpers.message({ custom: 'Current health cannot exceed maximum health (hitPoints)' });
+    }
+  }
+  return value;
+});

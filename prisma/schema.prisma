@@ -215,6 +215,7 @@ model ArkanaStats {
 
   // Metadata
   registrationCompleted  Boolean   @default(false) @map("registration_completed")
+  arkanaRole             String    @default("player") @map("arkana_role")  // "player" or "admin"
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 

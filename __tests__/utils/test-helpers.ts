@@ -148,6 +148,13 @@ export function createMockPostRequest(path: string, body: any): NextRequest {
   return createMockRequest('POST', body, path)
 }
 
+/**
+ * Create PUT request with body
+ */
+export function createMockPutRequest(path: string, body: any): NextRequest {
+  return createMockRequest('PUT', body, path)
+}
+
 // Create API request body with timestamp and signature
 export function createApiBody(data: any, universe: string = 'Gor'): any {
   const timestamp = generateTimestamp();
@@ -304,35 +311,31 @@ export async function createTestUser(universeOrTestUser: string | TestUser) {
       }
     });
 
-    // Generate token for Arkana character creation
-    let token = '';
-    if (universe === 'arkana') {
-      // Generate proper JWT token for testing
-      const jwt = require('jsonwebtoken');
-      const jwtSecret = process.env.JWT_SECRET || 'test_jwt_secret_for_testing_only';
+    // Generate token for profile access
+    const jwt = require('jsonwebtoken');
+    const jwtSecret = process.env.JWT_SECRET || 'test_jwt_secret_for_testing_only';
 
-      const sessionId = `arkana_test_${user.id}_${Date.now()}`;
-      token = jwt.sign(
-        {
-          sub: user.slUuid,
-          universe: 'arkana',
-          purpose: 'arkana_character_creation',
-          iat: Math.floor(Date.now() / 1000),
-          exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
-          jti: sessionId
-        },
-        jwtSecret
-      );
+    const sessionId = `${universe}_test_${user.id}_${Date.now()}`;
+    const token = jwt.sign(
+      {
+        sub: user.slUuid,
+        universe: universe,
+        purpose: universe === 'arkana' ? 'arkana_character_creation' : 'profile_access',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+        jti: sessionId
+      },
+      jwtSecret
+    );
 
-      const profileToken = await prisma.profileToken.create({
-        data: {
-          userId: user.id,
-          token: token,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-          sessionId: sessionId
-        }
-      });
-    }
+    const profileToken = await prisma.profileToken.create({
+      data: {
+        userId: user.id,
+        token: token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        sessionId: null // Don't set sessionId initially - let the first request associate it
+      }
+    });
 
     return { user, token, testUser };
   }
