@@ -109,10 +109,10 @@ describe('/api/arkana/combat/first-aid', () => {
       expect(data.data.healingAmount).toBe(1);
       expect(data.data.target.healthBefore).toBe(5);
       expect(data.data.target.healthAfter).toBe(6);
-      expect(data.data.message).toContain('Skilled Medic');
-      expect(data.data.message).toContain('Wounded Fighter');
-      expect(data.data.healer.name).toBe('Skilled Medic');
-      expect(data.data.target.name).toBe('Wounded Fighter');
+      expect(data.data.message).toContain('Skilled%20Medic');
+      expect(data.data.message).toContain('Wounded%20Fighter');
+      expect(data.data.healer.name).toBe('Skilled%20Medic');
+      expect(data.data.target.name).toBe('Wounded%20Fighter');
     });
 
     it('should allow self-healing', async () => {
@@ -147,8 +147,8 @@ describe('/api/arkana/combat/first-aid', () => {
       expect(data.data.healingAmount).toBe(1);
       expect(data.data.healer.uuid).toBe(player.slUuid);
       expect(data.data.target.uuid).toBe(player.slUuid);
-      expect(data.data.healer.name).toBe('Self Healer');
-      expect(data.data.target.name).toBe('Self Healer');
+      expect(data.data.healer.name).toBe('Self%20Healer');
+      expect(data.data.target.name).toBe('Self%20Healer');
       expect(data.data.target.healthBefore).toBe(8);
       expect(data.data.target.healthAfter).toBe(9);
     });

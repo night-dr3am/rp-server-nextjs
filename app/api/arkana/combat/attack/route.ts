@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { calculateStatModifier } from '@/lib/arkana/types';
+import { encodeForLSL } from '@/lib/stringUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -164,16 +165,16 @@ export async function POST(request: NextRequest) {
         defenderMod,
         attackStat,
         defenseStat,
-        message: resultMessage,
+        message: encodeForLSL(resultMessage),
         attacker: {
           uuid: attacker.slUuid,
-          name: attackerName,
+          name: encodeForLSL(attackerName),
           stat: attacker.arkanaStats[attack_type === 'physical' ? 'physical' :
                                       attack_type === 'ranged' ? 'dexterity' : 'mental']
         },
         target: {
           uuid: target.slUuid,
-          name: targetName,
+          name: encodeForLSL(targetName),
           stat: target.arkanaStats[attack_type === 'power' ? 'mental' : 'dexterity'],
           healthBefore: target.stats.health,
           healthAfter: newTargetHealth,

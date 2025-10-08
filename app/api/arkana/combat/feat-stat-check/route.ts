@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaFeatStatCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { calculateStatModifier } from '@/lib/arkana/types';
+import { encodeForLSL } from '@/lib/stringUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -105,10 +106,10 @@ export async function POST(request: NextRequest) {
         targetNumber: target_number,
         statType: stat_type,
         statValue,
-        message: resultMessage,
+        message: encodeForLSL(resultMessage),
         player: {
           uuid: player.slUuid,
-          name: playerName
+          name: encodeForLSL(playerName)
         }
       }
     });

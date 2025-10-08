@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaFirstAidSchema } from '@/lib/validation';
+import { encodeForLSL } from '@/lib/stringUtils';
 import { validateSignature } from '@/lib/signature';
 
 export async function POST(request: NextRequest) {
@@ -137,14 +138,14 @@ export async function POST(request: NextRequest) {
       data: {
         isSuccess: "true",
         healingAmount,
-        message: resultMessage,
+        message: encodeForLSL(resultMessage),
         healer: {
           uuid: healer.slUuid,
-          name: healerName
+          name: encodeForLSL(healerName)
         },
         target: {
           uuid: target.slUuid,
-          name: targetName,
+          name: encodeForLSL(targetName),
           healthBefore,
           healthAfter
         }

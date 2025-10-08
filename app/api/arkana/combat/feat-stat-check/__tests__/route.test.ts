@@ -100,9 +100,9 @@ describe('/api/arkana/combat/feat-stat-check', () => {
       expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
       expect(data.data.d20Roll).toBeLessThanOrEqual(20);
       expect(data.data.totalRoll).toBe(data.data.d20Roll + 6);
-      expect(data.data.message).toContain('Strong Warrior');
+      expect(data.data.message).toContain('Strong%20Warrior');
       expect(data.data.message).toContain('Physical');
-      expect(data.data.player.name).toBe('Strong Warrior');
+      expect(data.data.player.name).toBe('Strong%20Warrior');
       expect(data.data.player.uuid).toBe(player.slUuid);
       expect(['true', 'false']).toContain(data.data.isSuccess);
     });

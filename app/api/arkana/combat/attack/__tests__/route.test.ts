@@ -114,10 +114,10 @@ describe('/api/arkana/combat/attack', () => {
       expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
       expect(data.data.d20Roll).toBeLessThanOrEqual(20);
       expect(data.data.attackRoll).toBe(data.data.d20Roll + 6); // d20 + attacker mod (+6)
-      expect(data.data.message).toContain('Strong Warrior');
-      expect(data.data.message).toContain('Slow Target');
-      expect(data.data.attacker.name).toBe('Strong Warrior');
-      expect(data.data.target.name).toBe('Slow Target');
+      expect(data.data.message).toContain('Strong%20Warrior');
+      expect(data.data.message).toContain('Slow%20Target');
+      expect(data.data.attacker.name).toBe('Strong%20Warrior');
+      expect(data.data.target.name).toBe('Slow%20Target');
     });
 
     it('should process a ranged attack correctly', async () => {

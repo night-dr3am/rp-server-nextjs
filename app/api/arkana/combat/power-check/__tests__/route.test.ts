@@ -98,8 +98,8 @@ describe('/api/arkana/combat/power-check', () => {
       expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
       expect(data.data.d20Roll).toBeLessThanOrEqual(20);
       expect(data.data.totalRoll).toBe(data.data.d20Roll + 6); // d20 + mental mod (+6)
-      expect(data.data.message).toContain('Powerful Psion');
-      expect(data.data.player.name).toBe('Powerful Psion');
+      expect(data.data.message).toContain('Powerful%20Psion');
+      expect(data.data.player.name).toBe('Powerful%20Psion');
       expect(data.data.player.uuid).toBe(player.slUuid);
       // isSuccess should be a string "true" or "false" for LSL compatibility
       expect(['true', 'false']).toContain(data.data.isSuccess);

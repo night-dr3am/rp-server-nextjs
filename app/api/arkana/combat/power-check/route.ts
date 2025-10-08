@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaPowerCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { calculateStatModifier } from '@/lib/arkana/types';
+import { encodeForLSL } from '@/lib/stringUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,10 +78,10 @@ export async function POST(request: NextRequest) {
         totalRoll,
         targetNumber,
         mentalStat: player.arkanaStats.mental,
-        message: resultMessage,
+        message: encodeForLSL(resultMessage),
         player: {
           uuid: player.slUuid,
-          name: playerName
+          name: encodeForLSL(playerName)
         }
       }
     });
