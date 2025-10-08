@@ -75,8 +75,14 @@ export interface CharacterModel {
   };
   cyberSlots: number;
   flaws: Set<string>;
-  picks: Set<string>;
+  // Separate Sets for each power/ability type
+  commonPowers: Set<string>;
+  archetypePowers: Set<string>;
+  perks: Set<string>;
+  cyberneticAugments: Set<string>;
+  // Separate Sets for magic schools and weaves
   magicSchools: Set<string>;
+  magicWeaves: Set<string>;
   page5tab: string;
   freeMagicSchool: string;
   freeMagicWeave: string;

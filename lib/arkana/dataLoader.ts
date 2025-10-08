@@ -165,24 +165,52 @@ export function groupCyberneticsBySection(arr: Cybernetic[]): Record<string, Cyb
 
 // Power Point calculation functions (separate from stat points)
 export function powerPointsSpentTotal(model: CharacterModel): number {
-  // Calculate ONLY power points spent (picks + magic + cyber slots)
+  // Calculate ONLY power points spent (powers/perks/cybernetics + magic + cyber slots)
   // Stats are tracked separately on Page 3
 
-  const allPicks = Array.from(model.picks);
-  const spentPicks = allPicks.map(pid => {
-    if (pid === model.freeMagicWeave || pid === model.synthralFreeWeave) return 0;
+  // Calculate spent points from all power/perk/cybernetic types
+  let spentPowerPoints = 0;
 
-    const arrs = [commonPowers, perks, archPowers, cybernetics];
-    for (const arr of arrs) {
-      const found = arr.find(x => x.id === pid);
-      if (found && typeof found.cost !== "undefined") return found.cost;
-      if (found) return 1;
-    }
+  // Common Powers
+  Array.from(model.commonPowers || []).forEach(id => {
+    const found = commonPowers.find(x => x.id === id);
+    if (found && typeof found.cost !== "undefined") spentPowerPoints += found.cost;
+    else if (found) spentPowerPoints += 1;
+  });
+
+  // Archetype Powers
+  Array.from(model.archetypePowers || []).forEach(id => {
+    const found = archPowers.find(x => x.id === id);
+    if (found && typeof found.cost !== "undefined") spentPowerPoints += found.cost;
+    else if (found) spentPowerPoints += 1;
+  });
+
+  // Perks
+  Array.from(model.perks || []).forEach(id => {
+    const found = perks.find(x => x.id === id);
+    if (found && typeof found.cost !== "undefined") spentPowerPoints += found.cost;
+    else if (found) spentPowerPoints += 1;
+  });
+
+  // Cybernetic Augments
+  Array.from(model.cyberneticAugments || []).forEach(id => {
+    const found = cybernetics.find(x => x.id === id);
+    if (found && typeof found.cost !== "undefined") spentPowerPoints += found.cost;
+    else if (found) spentPowerPoints += 1;
+  });
+
+  // Magic Schools
+  const spentMagicSchools = Array.from(model.magicSchools || []).map(id => {
+    if (id === model.freeMagicSchool || id === getTechnomancySchoolId()) return 0;
+    const found = magicSchools.find(x => x.id === id);
+    if (found && typeof found.cost !== "undefined") return found.cost;
+    if (found) return 1;
     return 0;
   }).reduce((a, b) => a + b, 0);
 
-  const spentMagic = Array.from(model.magicSchools).map(id => {
-    if (id === model.freeMagicSchool || id === getTechnomancySchoolId()) return 0;
+  // Magic Weaves
+  const spentMagicWeaves = Array.from(model.magicWeaves || []).map(id => {
+    if (id === model.freeMagicWeave || id === model.synthralFreeWeave) return 0;
     const found = magicSchools.find(x => x.id === id);
     if (found && typeof found.cost !== "undefined") return found.cost;
     if (found) return 1;
@@ -191,7 +219,7 @@ export function powerPointsSpentTotal(model: CharacterModel): number {
 
   const cyberSlotCost = (model.cyberSlots || 0) * CYBERNETIC_SLOT_COST;
 
-  return spentPicks + spentMagic + cyberSlotCost;
+  return spentPowerPoints + spentMagicSchools + spentMagicWeaves + cyberSlotCost;
 }
 
 export function powerPointsTotal(model: CharacterModel): number {

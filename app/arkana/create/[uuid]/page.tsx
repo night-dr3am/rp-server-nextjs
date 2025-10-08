@@ -71,8 +71,14 @@ export default function ArkanaCharacterCreation() {
     },
     cyberSlots: 0,
     flaws: new Set<string>(),
-    picks: new Set<string>(),
+    // Separate Sets for each power/ability type
+    commonPowers: new Set<string>(),
+    archetypePowers: new Set<string>(),
+    perks: new Set<string>(),
+    cyberneticAugments: new Set<string>(),
+    // Separate Sets for magic schools and weaves
     magicSchools: new Set<string>(),
+    magicWeaves: new Set<string>(),
     page5tab: 'common',
     freeMagicSchool: '',
     freeMagicWeave: '',
@@ -181,9 +187,13 @@ export default function ArkanaCharacterCreation() {
       // Reset flaws (page 4)
       flaws: new Set<string>(),
 
-      // Reset page 5 choices
-      picks: new Set<string>(),
+      // Reset page 5 choices - all separate Sets
+      commonPowers: new Set<string>(),
+      archetypePowers: new Set<string>(),
+      perks: new Set<string>(),
+      cyberneticAugments: new Set<string>(),
       magicSchools: new Set<string>(),
+      magicWeaves: new Set<string>(),
       cyberSlots: 0,
 
       // Reset free selections
@@ -197,8 +207,13 @@ export default function ArkanaCharacterCreation() {
     setCharacterModel(prev => ({
       ...prev,
       arch,
-      picks: new Set<string>(),
+      // Reset all power/ability selections
+      commonPowers: new Set<string>(),
+      archetypePowers: new Set<string>(),
+      perks: new Set<string>(),
+      cyberneticAugments: new Set<string>(),
       magicSchools: new Set<string>(),
+      magicWeaves: new Set<string>(),
       freeMagicSchool: '',
       freeMagicWeave: '',
       synthralFreeWeave: ''
@@ -279,18 +294,42 @@ export default function ArkanaCharacterCreation() {
       availableFlaws.find(f => f.id === flawId)?.name || flawId
     ).filter(Boolean);
 
-    const powersSummary = Array.from(characterModel.picks).map(pickId => {
-      const power = availableCommonPowers.find(p => p.id === pickId)?.name ||
-                   availablePerks.find(p => p.id === pickId)?.name ||
-                   availableArchPowers.find(p => p.id === pickId)?.name ||
-                   availableCybernetics.find(p => p.id === pickId)?.name;
-      return power;
-    }).filter(Boolean);
+    // Combine all powers/perks/cybernetics for display
+    const powersSummary: string[] = [];
 
-    const magicSchoolsSummary = Array.from(characterModel.magicSchools).map(schoolId => {
-      const schools = Object.values(availableMagicSchools).flat();
-      return schools.find(s => s.id === schoolId)?.name || schoolId;
-    }).filter(Boolean);
+    Array.from(characterModel.commonPowers).forEach(id => {
+      const power = availableCommonPowers.find(p => p.id === id);
+      if (power) powersSummary.push(power.name);
+    });
+
+    Array.from(characterModel.archetypePowers).forEach(id => {
+      const power = availableArchPowers.find(p => p.id === id);
+      if (power) powersSummary.push(power.name);
+    });
+
+    Array.from(characterModel.perks).forEach(id => {
+      const perk = availablePerks.find(p => p.id === id);
+      if (perk) powersSummary.push(perk.name);
+    });
+
+    Array.from(characterModel.cyberneticAugments).forEach(id => {
+      const cyber = availableCybernetics.find(c => c.id === id);
+      if (cyber) powersSummary.push(cyber.name);
+    });
+
+    // Combine magic schools and weaves for display
+    const magicSchoolsSummary: string[] = [];
+    const allMagicData = Object.values(availableMagicSchools).flat();
+
+    Array.from(characterModel.magicSchools).forEach(schoolId => {
+      const school = allMagicData.find(s => s.id === schoolId);
+      if (school) magicSchoolsSummary.push(school.name);
+    });
+
+    Array.from(characterModel.magicWeaves).forEach(weaveId => {
+      const weave = allMagicData.find(s => s.id === weaveId);
+      if (weave) magicSchoolsSummary.push(weave.name);
+    });
 
     const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
     const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
@@ -357,18 +396,42 @@ export default function ArkanaCharacterCreation() {
         availableFlaws.find(f => f.id === flawId)?.name || flawId
       ).filter(Boolean);
 
-      const powersSummary = Array.from(characterModel.picks).map(pickId => {
-        const power = availableCommonPowers.find(p => p.id === pickId)?.name ||
-                     availablePerks.find(p => p.id === pickId)?.name ||
-                     availableArchPowers.find(p => p.id === pickId)?.name ||
-                     availableCybernetics.find(p => p.id === pickId)?.name;
-        return power;
-      }).filter(Boolean);
+      // Combine all powers/perks/cybernetics for display
+      const powersSummary: string[] = [];
 
-      const magicSchoolsSummary = Array.from(characterModel.magicSchools).map(schoolId => {
-        const schools = Object.values(availableMagicSchools).flat();
-        return schools.find(s => s.id === schoolId)?.name || schoolId;
-      }).filter(Boolean);
+      Array.from(characterModel.commonPowers).forEach(id => {
+        const power = availableCommonPowers.find(p => p.id === id);
+        if (power) powersSummary.push(power.name);
+      });
+
+      Array.from(characterModel.archetypePowers).forEach(id => {
+        const power = availableArchPowers.find(p => p.id === id);
+        if (power) powersSummary.push(power.name);
+      });
+
+      Array.from(characterModel.perks).forEach(id => {
+        const perk = availablePerks.find(p => p.id === id);
+        if (perk) powersSummary.push(perk.name);
+      });
+
+      Array.from(characterModel.cyberneticAugments).forEach(id => {
+        const cyber = availableCybernetics.find(c => c.id === id);
+        if (cyber) powersSummary.push(cyber.name);
+      });
+
+      // Combine magic schools and weaves for display
+      const magicSchoolsSummary: string[] = [];
+      const allMagicData = Object.values(availableMagicSchools).flat();
+
+      Array.from(characterModel.magicSchools).forEach(schoolId => {
+        const school = allMagicData.find(s => s.id === schoolId);
+        if (school) magicSchoolsSummary.push(school.name);
+      });
+
+      Array.from(characterModel.magicWeaves).forEach(weaveId => {
+        const weave = allMagicData.find(s => s.id === weaveId);
+        if (weave) magicSchoolsSummary.push(weave.name);
+      });
 
       const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
       const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
@@ -469,10 +532,14 @@ export default function ArkanaCharacterCreation() {
         mental: characterModel.stats.mental,
         perception: characterModel.stats.perc,
 
-        // Convert Sets to Arrays for submission
+        // Convert Sets to Arrays for submission - now properly separated
         flaws: Array.from(characterModel.flaws),
-        picks: Array.from(characterModel.picks),
+        commonPowers: Array.from(characterModel.commonPowers),
+        archetypePowers: Array.from(characterModel.archetypePowers),
+        perks: Array.from(characterModel.perks),
+        cyberneticAugments: Array.from(characterModel.cyberneticAugments),
         magicSchools: Array.from(characterModel.magicSchools),
+        magicWeaves: Array.from(characterModel.magicWeaves),
 
         // Additional arkana-data-main specific fields
         cyberSlots: characterModel.cyberSlots,
@@ -828,15 +895,45 @@ export default function ArkanaCharacterCreation() {
     const spentPoints = getPowerPointsSpent();
     const remainingPoints = getPowerPointsRemaining();
 
-    // Helper function to toggle picks
-    const togglePick = (id: string) => {
-      const newPicks = new Set(characterModel.picks);
-      if (newPicks.has(id)) {
-        newPicks.delete(id);
+    // Helper functions to toggle each power/ability type
+    const toggleCommonPower = (id: string) => {
+      const newSet = new Set(characterModel.commonPowers);
+      if (newSet.has(id)) {
+        newSet.delete(id);
       } else {
-        newPicks.add(id);
+        newSet.add(id);
       }
-      setCharacterModel(prev => ({ ...prev, picks: newPicks }));
+      setCharacterModel(prev => ({ ...prev, commonPowers: newSet }));
+    };
+
+    const toggleArchetypePower = (id: string) => {
+      const newSet = new Set(characterModel.archetypePowers);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setCharacterModel(prev => ({ ...prev, archetypePowers: newSet }));
+    };
+
+    const togglePerk = (id: string) => {
+      const newSet = new Set(characterModel.perks);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setCharacterModel(prev => ({ ...prev, perks: newSet }));
+    };
+
+    const toggleCyberneticAugment = (id: string) => {
+      const newSet = new Set(characterModel.cyberneticAugments);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setCharacterModel(prev => ({ ...prev, cyberneticAugments: newSet }));
     };
 
     // Helper function to toggle magic schools
@@ -848,6 +945,17 @@ export default function ArkanaCharacterCreation() {
         newMagicSchools.add(id);
       }
       setCharacterModel(prev => ({ ...prev, magicSchools: newMagicSchools }));
+    };
+
+    // Helper function to toggle magic weaves
+    const toggleMagicWeave = (id: string) => {
+      const newSet = new Set(characterModel.magicWeaves);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setCharacterModel(prev => ({ ...prev, magicWeaves: newSet }));
     };
 
     // Cybernetic slot management
@@ -863,20 +971,10 @@ export default function ArkanaCharacterCreation() {
           const updatedModel = { ...prev, cyberSlots: newSlots };
 
           // If reducing slots, remove excess selected cybernetics
-          if (newSlots < prev.cyberSlots) {
-            const selectedCybers = Array.from(prev.picks).filter(id =>
-              availableCybernetics.find(c => c.id === id)
-            );
-
-            // If too many cybernetics selected, remove excess
-            if (selectedCybers.length > newSlots) {
-              const cybersToRemove = selectedCybers.slice(newSlots);
-
-              // Remove excess from picks
-              const newPicks = new Set(prev.picks);
-              cybersToRemove.forEach(id => newPicks.delete(id));
-              updatedModel.picks = newPicks;
-            }
+          if (newSlots < prev.cyberSlots && prev.cyberneticAugments.size > newSlots) {
+            const cyberArray = Array.from(prev.cyberneticAugments);
+            const cybersToKeep = cyberArray.slice(0, newSlots);
+            updatedModel.cyberneticAugments = new Set(cybersToKeep);
           }
 
           return updatedModel;
@@ -888,11 +986,12 @@ export default function ArkanaCharacterCreation() {
     const updateSynthralFreeWeave = (weaveId: string) => {
       setCharacterModel(prev => {
         const newMagicSchools = new Set(prev.magicSchools);
+        const newMagicWeaves = new Set(prev.magicWeaves);
         const techSchoolId = getTechnomancySchoolId();
 
         // Remove previous free weave if it exists
-        if (prev.synthralFreeWeave && newMagicSchools.has(prev.synthralFreeWeave)) {
-          newMagicSchools.delete(prev.synthralFreeWeave);
+        if (prev.synthralFreeWeave && newMagicWeaves.has(prev.synthralFreeWeave)) {
+          newMagicWeaves.delete(prev.synthralFreeWeave);
         }
 
         // Auto-add Technomancy school if not already added
@@ -902,13 +1001,14 @@ export default function ArkanaCharacterCreation() {
 
         // Add the new free weave if selected
         if (weaveId) {
-          newMagicSchools.add(weaveId);
+          newMagicWeaves.add(weaveId);
         }
 
         return {
           ...prev,
           synthralFreeWeave: weaveId,
-          magicSchools: newMagicSchools
+          magicSchools: newMagicSchools,
+          magicWeaves: newMagicWeaves
         };
       });
     };
@@ -916,6 +1016,12 @@ export default function ArkanaCharacterCreation() {
     const updateArcanistFreeSchool = (schoolId: string) => {
       setCharacterModel(prev => {
         const newMagicSchools = new Set(prev.magicSchools);
+        const newMagicWeaves = new Set(prev.magicWeaves);
+
+        // Remove previous free weave if school changes
+        if (prev.freeMagicWeave && newMagicWeaves.has(prev.freeMagicWeave)) {
+          newMagicWeaves.delete(prev.freeMagicWeave);
+        }
 
         // Add the selected school
         if (schoolId && !newMagicSchools.has(schoolId)) {
@@ -926,29 +1032,30 @@ export default function ArkanaCharacterCreation() {
           ...prev,
           freeMagicSchool: schoolId,
           freeMagicWeave: '', // Reset weave selection when school changes
-          magicSchools: newMagicSchools
+          magicSchools: newMagicSchools,
+          magicWeaves: newMagicWeaves
         };
       });
     };
 
     const updateArcanistFreeWeave = (weaveId: string) => {
       setCharacterModel(prev => {
-        const newMagicSchools = new Set(prev.magicSchools);
+        const newMagicWeaves = new Set(prev.magicWeaves);
 
         // Remove previous free weave if it exists
-        if (prev.freeMagicWeave && newMagicSchools.has(prev.freeMagicWeave)) {
-          newMagicSchools.delete(prev.freeMagicWeave);
+        if (prev.freeMagicWeave && newMagicWeaves.has(prev.freeMagicWeave)) {
+          newMagicWeaves.delete(prev.freeMagicWeave);
         }
 
         // Add the new free weave if selected
         if (weaveId) {
-          newMagicSchools.add(weaveId);
+          newMagicWeaves.add(weaveId);
         }
 
         return {
           ...prev,
           freeMagicWeave: weaveId,
-          magicSchools: newMagicSchools
+          magicWeaves: newMagicWeaves
         };
       });
     };
@@ -990,7 +1097,10 @@ export default function ArkanaCharacterCreation() {
         </div>
 
         {/* Reset Page 5 Choices Button */}
-        {(characterModel.picks.size > 0 || characterModel.magicSchools.size > 0 || characterModel.cyberSlots > 0) && (
+        {(characterModel.commonPowers.size > 0 || characterModel.archetypePowers.size > 0 ||
+          characterModel.perks.size > 0 || characterModel.cyberneticAugments.size > 0 ||
+          characterModel.magicSchools.size > 0 || characterModel.magicWeaves.size > 0 ||
+          characterModel.cyberSlots > 0) && (
           <div className="mb-4">
             <button
               onClick={() => {
@@ -1006,8 +1116,12 @@ export default function ArkanaCharacterCreation() {
                 if (confirmed) {
                   setCharacterModel(prev => ({
                     ...prev,
-                    picks: new Set<string>(),
+                    commonPowers: new Set<string>(),
+                    archetypePowers: new Set<string>(),
+                    perks: new Set<string>(),
+                    cyberneticAugments: new Set<string>(),
                     magicSchools: new Set<string>(),
+                    magicWeaves: new Set<string>(),
                     cyberSlots: 0,
                     freeMagicSchool: '',
                     freeMagicWeave: '',
@@ -1138,9 +1252,9 @@ export default function ArkanaCharacterCreation() {
                   <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
-                      checked={characterModel.picks.has(power.id)}
-                      onChange={() => togglePick(power.id)}
-                      disabled={!characterModel.picks.has(power.id) && remainingPoints < power.cost}
+                      checked={characterModel.commonPowers.has(power.id)}
+                      onChange={() => toggleCommonPower(power.id)}
+                      disabled={!characterModel.commonPowers.has(power.id) && remainingPoints < power.cost}
                       className="mt-1"
                     />
                     <div className="flex-1">
@@ -1167,9 +1281,9 @@ export default function ArkanaCharacterCreation() {
                   <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
-                      checked={characterModel.picks.has(perk.id)}
-                      onChange={() => togglePick(perk.id)}
-                      disabled={!characterModel.picks.has(perk.id) && remainingPoints < perk.cost}
+                      checked={characterModel.perks.has(perk.id)}
+                      onChange={() => togglePerk(perk.id)}
+                      disabled={!characterModel.perks.has(perk.id) && remainingPoints < perk.cost}
                       className="mt-1"
                     />
                     <div className="flex-1">
@@ -1196,9 +1310,9 @@ export default function ArkanaCharacterCreation() {
                   <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
-                      checked={characterModel.picks.has(power.id)}
-                      onChange={() => togglePick(power.id)}
-                      disabled={!characterModel.picks.has(power.id) && remainingPoints < power.cost}
+                      checked={characterModel.archetypePowers.has(power.id)}
+                      onChange={() => toggleArchetypePower(power.id)}
+                      disabled={!characterModel.archetypePowers.has(power.id) && remainingPoints < power.cost}
                       className="mt-1"
                     />
                     <div className="flex-1">
@@ -1268,12 +1382,10 @@ export default function ArkanaCharacterCreation() {
                             <label className="flex items-start space-x-3">
                               <input
                                 type="checkbox"
-                                checked={characterModel.picks.has(cyber.id)}
-                                onChange={() => togglePick(cyber.id)}
-                                disabled={!characterModel.picks.has(cyber.id) &&
-                                  (Array.from(characterModel.picks).filter(id =>
-                                    availableCybernetics.find(c => c.id === id)
-                                  ).length >= characterModel.cyberSlots || remainingPoints < cyber.cost)}
+                                checked={characterModel.cyberneticAugments.has(cyber.id)}
+                                onChange={() => toggleCyberneticAugment(cyber.id)}
+                                disabled={!characterModel.cyberneticAugments.has(cyber.id) &&
+                                  (characterModel.cyberneticAugments.size >= characterModel.cyberSlots || remainingPoints < cyber.cost)}
                                 className="mt-1"
                               />
                               <div className="flex-1">
@@ -1360,7 +1472,7 @@ export default function ArkanaCharacterCreation() {
                         {weaves.map(weave => {
                           const isFreeWeave = (isSynthral && weave.id === characterModel.synthralFreeWeave) ||
                                             (isArcanist && weave.id === characterModel.freeMagicWeave);
-                          const weaveSelected = characterModel.magicSchools.has(weave.id);
+                          const weaveSelected = characterModel.magicWeaves.has(weave.id);
 
                           return (
                             <div key={weave.id} className="ml-6 p-3 bg-gray-800 border border-gray-600 rounded">
@@ -1368,7 +1480,7 @@ export default function ArkanaCharacterCreation() {
                                 <input
                                   type="checkbox"
                                   checked={weaveSelected}
-                                  onChange={() => !isFreeWeave && toggleMagicSchool(weave.id)}
+                                  onChange={() => !isFreeWeave && toggleMagicWeave(weave.id)}
                                   disabled={
                                     isFreeWeave || // Free weaves are disabled
                                     !schoolSelected || // Can't select weaves without school
@@ -1429,18 +1541,42 @@ export default function ArkanaCharacterCreation() {
       availableFlaws.find(f => f.id === flawId)?.name || flawId
     ).filter(Boolean);
 
-    const powersSummary = Array.from(characterModel.picks).map(pickId => {
-      const power = availableCommonPowers.find(p => p.id === pickId)?.name ||
-                   availablePerks.find(p => p.id === pickId)?.name ||
-                   availableArchPowers.find(p => p.id === pickId)?.name ||
-                   availableCybernetics.find(p => p.id === pickId)?.name;
-      return power;
-    }).filter(Boolean);
+    // Combine all powers/perks/cybernetics for display
+    const powersSummary: string[] = [];
 
-    const magicSchoolsSummary = Array.from(characterModel.magicSchools).map(schoolId => {
-      const schools = Object.values(availableMagicSchools).flat();
-      return schools.find(s => s.id === schoolId)?.name || schoolId;
-    }).filter(Boolean);
+    Array.from(characterModel.commonPowers).forEach(id => {
+      const power = availableCommonPowers.find(p => p.id === id);
+      if (power) powersSummary.push(power.name);
+    });
+
+    Array.from(characterModel.archetypePowers).forEach(id => {
+      const power = availableArchPowers.find(p => p.id === id);
+      if (power) powersSummary.push(power.name);
+    });
+
+    Array.from(characterModel.perks).forEach(id => {
+      const perk = availablePerks.find(p => p.id === id);
+      if (perk) powersSummary.push(perk.name);
+    });
+
+    Array.from(characterModel.cyberneticAugments).forEach(id => {
+      const cyber = availableCybernetics.find(c => c.id === id);
+      if (cyber) powersSummary.push(cyber.name);
+    });
+
+    // Combine magic schools and weaves for display
+    const magicSchoolsSummary: string[] = [];
+    const allMagicData = Object.values(availableMagicSchools).flat();
+
+    Array.from(characterModel.magicSchools).forEach(schoolId => {
+      const school = allMagicData.find(s => s.id === schoolId);
+      if (school) magicSchoolsSummary.push(school.name);
+    });
+
+    Array.from(characterModel.magicWeaves).forEach(weaveId => {
+      const weave = allMagicData.find(s => s.id === weaveId);
+      if (weave) magicSchoolsSummary.push(weave.name);
+    });
 
     // Breakdown of power points spent
     const cyberSlotPts = calculateCyberSlotsCost(characterModel.cyberSlots);

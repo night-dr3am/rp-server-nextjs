@@ -69,6 +69,7 @@ interface EditDataForm {
   archetypePowers: Set<string>;
   perks: Set<string>;
   magicSchools: Set<string>;
+  magicWeaves: Set<string>;
   cyberneticAugments: Set<string>;
   credits: number;
   chips: number;
@@ -383,6 +384,7 @@ function AdminDashboardContent() {
           perks: new Set(result.data.arkanaStats.perks || []),
           // Magic
           magicSchools: new Set(result.data.arkanaStats.magicSchools || []),
+          magicWeaves: new Set(result.data.arkanaStats.magicWeaves || []),
           // Cybernetics
           cyberneticAugments: new Set(result.data.arkanaStats.cyberneticAugments || []),
           // Economy
@@ -430,6 +432,7 @@ function AdminDashboardContent() {
         archetypePowers: Array.from(editData.archetypePowers || []),
         perks: Array.from(editData.perks || []),
         magicSchools: Array.from(editData.magicSchools || []),
+        magicWeaves: Array.from(editData.magicWeaves || []),
         cyberneticAugments: Array.from(editData.cyberneticAugments || [])
       };
 
@@ -503,6 +506,16 @@ function AdminDashboardContent() {
     setEditData(prev => ({ ...prev, magicSchools: currentSet }));
   };
 
+  const toggleMagicWeave = (id: string) => {
+    const currentSet = new Set(editData.magicWeaves || []);
+    if (currentSet.has(id)) {
+      currentSet.delete(id);
+    } else {
+      currentSet.add(id);
+    }
+    setEditData(prev => ({ ...prev, magicWeaves: currentSet }));
+  };
+
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
@@ -533,6 +546,7 @@ function AdminDashboardContent() {
         archetypePowers: new Set<string>(),
         perks: new Set<string>(),
         magicSchools: new Set<string>(),
+        magicWeaves: new Set<string>(),
         cyberneticAugments: new Set<string>()
       }));
     }
@@ -804,7 +818,7 @@ function AdminDashboardContent() {
 
                               {/* Weaves */}
                               {weaves.map(weave => {
-                                const weaveSelected = editData.magicSchools?.has(weave.id) || false;
+                                const weaveSelected = editData.magicWeaves?.has(weave.id) || false;
 
                                 return (
                                   <div key={weave.id} className="ml-6 p-3 bg-gray-800 border border-gray-600 rounded">
@@ -812,7 +826,7 @@ function AdminDashboardContent() {
                                       <input
                                         type="checkbox"
                                         checked={weaveSelected}
-                                        onChange={() => toggleMagicSchool(weave.id)}
+                                        onChange={() => toggleMagicWeave(weave.id)}
                                         disabled={!schoolSelected}
                                         className="mt-1"
                                       />
