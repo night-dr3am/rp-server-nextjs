@@ -2,6 +2,19 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import {
+  loadAllData,
+  getAllCommonPowers,
+  getAllPerks,
+  getAllArchPowers,
+  getAllCybernetics,
+  getSchoolName,
+  getWeaveName,
+  type CommonPower,
+  type Perk,
+  type ArchetypePower,
+  type Cybernetic
+} from '@/lib/arkanaData';
 
 interface User {
   id: string;
@@ -111,6 +124,13 @@ export default function ArkanaProfilePage() {
   const [eventsLimit, setEventsLimit] = useState(20);
   const [sessionId] = useState(() => crypto.randomUUID());
 
+  // Arkana data state
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [commonPowersData, setCommonPowersData] = useState<CommonPower[]>([]);
+  const [perksData, setPerksData] = useState<Perk[]>([]);
+  const [archPowersData, setArchPowersData] = useState<ArchetypePower[]>([]);
+  const [cyberneticsData, setCyberneticsData] = useState<Cybernetic[]>([]);
+
   const fetchProfileData = useCallback(async () => {
     try {
       setLoading(true);
@@ -141,6 +161,24 @@ export default function ArkanaProfilePage() {
     fetchProfileData();
   }, [uuid, universe, token, eventsPage, eventsLimit, fetchProfileData]);
 
+  // Load arkana data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await loadAllData();
+        setCommonPowersData(getAllCommonPowers());
+        setPerksData(getAllPerks());
+        setArchPowersData(getAllArchPowers());
+        setCyberneticsData(getAllCybernetics());
+        setDataLoaded(true);
+      } catch (err) {
+        console.error('Failed to load arkana data:', err);
+      }
+    };
+
+    loadData();
+  }, []);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -148,6 +186,47 @@ export default function ArkanaProfilePage() {
   const capitalize = (str: string | null | undefined) => {
     if (!str || str.length === 0) return str || '';
     return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  // Helper functions to map IDs to user-friendly names
+  const getCommonPowerName = (id: string): string => {
+    if (!dataLoaded) return id;
+    const power = commonPowersData.find(p => p.id === id);
+    return power ? power.name : id;
+  };
+
+  const getArchPowerName = (id: string): string => {
+    if (!dataLoaded) return id;
+    const power = archPowersData.find(p => p.id === id);
+    return power ? power.name : id;
+  };
+
+  const getPerkName = (id: string): string => {
+    if (!dataLoaded) return id;
+    const perk = perksData.find(p => p.id === id);
+    return perk ? perk.name : id;
+  };
+
+  const getCyberneticName = (id: string): string => {
+    if (!dataLoaded) return id;
+    const cyber = cyberneticsData.find(c => c.id === id);
+    return cyber ? cyber.name : id;
+  };
+
+  // Generic function to get power name (for inherent powers and weaknesses)
+  const getPowerName = (id: string): string => {
+    if (!dataLoaded) return id;
+    // Try finding in common powers first
+    let power = commonPowersData.find(p => p.id === id);
+    if (power) return power.name;
+    // Try archetype powers
+    power = archPowersData.find(p => p.id === id);
+    if (power) return power.name;
+    // Try perks
+    const perk = perksData.find(p => p.id === id);
+    if (perk) return perk.name;
+    // Fallback to ID
+    return id;
   };
 
   const getStatusText = (status: number) => {
@@ -377,15 +456,25 @@ export default function ArkanaProfilePage() {
         {/* Powers & Abilities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Common Powers & Perks */}
-          {(arkanaStats.commonPowers.length > 0 || arkanaStats.perks.length > 0 || arkanaStats.archetypePowers.length > 0) && (
+          {(arkanaStats.commonPowers.length > 0 || arkanaStats.perks.length > 0 || arkanaStats.archetypePowers.length > 0 || arkanaStats.inherentPowers.length > 0) && (
             <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6">
               <h3 className="text-xl font-bold text-cyan-400 mb-4">Powers & Perks</h3>
+              {arkanaStats.inherentPowers.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-cyan-400 font-medium mb-2">Inherent Powers:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {arkanaStats.inherentPowers.map((powerId, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-blue-900 text-blue-300 rounded text-xs">{getPowerName(powerId)}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
               {arkanaStats.commonPowers.length > 0 && (
                 <div className="mb-4">
                   <p className="text-sm text-cyan-400 font-medium mb-2">Common Powers:</p>
                   <div className="flex flex-wrap gap-2">
-                    {arkanaStats.commonPowers.map((power, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{power}</span>
+                    {arkanaStats.commonPowers.map((powerId, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-cyan-900 text-cyan-300 rounded text-xs">{getCommonPowerName(powerId)}</span>
                     ))}
                   </div>
                 </div>
@@ -394,8 +483,8 @@ export default function ArkanaProfilePage() {
                 <div className="mb-4">
                   <p className="text-sm text-cyan-400 font-medium mb-2">Archetype Powers:</p>
                   <div className="flex flex-wrap gap-2">
-                    {arkanaStats.archetypePowers.map((power, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-purple-900 text-purple-300 rounded text-xs">{power}</span>
+                    {arkanaStats.archetypePowers.map((powerId, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-purple-900 text-purple-300 rounded text-xs">{getArchPowerName(powerId)}</span>
                     ))}
                   </div>
                 </div>
@@ -404,8 +493,8 @@ export default function ArkanaProfilePage() {
                 <div>
                   <p className="text-sm text-cyan-400 font-medium mb-2">Perks:</p>
                   <div className="flex flex-wrap gap-2">
-                    {arkanaStats.perks.map((perk, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">{perk}</span>
+                    {arkanaStats.perks.map((perkId, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">{getPerkName(perkId)}</span>
                     ))}
                   </div>
                 </div>
@@ -437,8 +526,8 @@ export default function ArkanaProfilePage() {
                 <div>
                   <p className="text-sm text-red-400 font-medium mb-2">Weaknesses:</p>
                   <div className="flex flex-wrap gap-2">
-                    {arkanaStats.weaknesses.map((weakness, idx) => (
-                      <span key={idx} className="px-2 py-1 bg-orange-900 text-orange-300 rounded text-xs">{weakness}</span>
+                    {arkanaStats.weaknesses.map((weaknessId, idx) => (
+                      <span key={idx} className="px-2 py-1 bg-orange-900 text-orange-300 rounded text-xs">{getPowerName(weaknessId)}</span>
                     ))}
                   </div>
                 </div>
@@ -454,8 +543,20 @@ export default function ArkanaProfilePage() {
             <div className="bg-gray-900 border border-purple-500 rounded-lg shadow-lg shadow-purple-500/20 p-6">
               <h3 className="text-xl font-bold text-purple-400 mb-4">Magic Schools</h3>
               <div className="flex flex-wrap gap-2">
-                {arkanaStats.magicSchools.map((school, idx) => (
-                  <span key={idx} className="px-3 py-1 bg-purple-900 text-purple-300 rounded">{school}</span>
+                {arkanaStats.magicSchools.map((schoolId, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-purple-900 text-purple-300 rounded">{getSchoolName(schoolId)}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Magic Weaves */}
+          {arkanaStats.magicWeaves.length > 0 && (
+            <div className="bg-gray-900 border border-purple-500 rounded-lg shadow-lg shadow-purple-500/20 p-6">
+              <h3 className="text-xl font-bold text-purple-400 mb-4">Magic Weaves</h3>
+              <div className="flex flex-wrap gap-2">
+                {arkanaStats.magicWeaves.map((weaveId, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-purple-900 text-purple-300 rounded text-sm">{getWeaveName(weaveId)}</span>
                 ))}
               </div>
             </div>
@@ -466,8 +567,8 @@ export default function ArkanaProfilePage() {
             <div className="bg-gray-900 border border-orange-500 rounded-lg shadow-lg shadow-orange-500/20 p-6">
               <h3 className="text-xl font-bold text-orange-400 mb-4">Cybernetics</h3>
               <div className="flex flex-wrap gap-2">
-                {arkanaStats.cyberneticAugments.map((augment, idx) => (
-                  <span key={idx} className="px-3 py-1 bg-orange-900 text-orange-300 rounded text-sm">{augment}</span>
+                {arkanaStats.cyberneticAugments.map((cyberId, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-orange-900 text-orange-300 rounded text-sm">{getCyberneticName(cyberId)}</span>
                 ))}
               </div>
             </div>
