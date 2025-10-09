@@ -468,6 +468,11 @@ function AdminDashboardContent() {
     return max > 0 ? (current / max) * 100 : 0;
   };
 
+  const capitalize = (str: string | null | undefined) => {
+    if (!str || str.length === 0) return str || '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   const getHealthColor = (percentage: number) => {
     if (percentage >= 75) return 'bg-green-500';
     if (percentage >= 50) return 'bg-yellow-500';
@@ -954,7 +959,7 @@ function AdminDashboardContent() {
                             <div className="text-xs text-gray-400">{user.slUuid.substring(0, 8)}...</div>
                           </td>
                           <td className="px-4 py-3 text-sm text-cyan-300">{user.agentName}</td>
-                          <td className="px-4 py-3 text-sm text-cyan-300">{user.race} / {user.archetype}</td>
+                          <td className="px-4 py-3 text-sm text-cyan-300">{capitalize(user.race)} / {capitalize(user.archetype)}</td>
                           <td className="px-4 py-3">
                             <div className="text-xs text-cyan-300 mb-1">{user.currentHealth}/{user.maxHealth}</div>
                             <div className="w-full bg-gray-700 rounded-full h-2">

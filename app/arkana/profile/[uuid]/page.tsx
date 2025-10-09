@@ -145,6 +145,11 @@ export default function ArkanaProfilePage() {
     return new Date(dateString).toLocaleString();
   };
 
+  const capitalize = (str: string | null | undefined) => {
+    if (!str || str.length === 0) return str || '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   const getStatusText = (status: number) => {
     switch (status) {
       case 0: return 'Looking for roleplay';
@@ -352,18 +357,18 @@ export default function ArkanaProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-cyan-400 font-medium">Race</p>
-              <p className="text-lg text-cyan-100">{arkanaStats.race}</p>
+              <p className="text-lg text-cyan-100">{capitalize(arkanaStats.race)}</p>
             </div>
             {arkanaStats.subrace && (
               <div>
                 <p className="text-sm text-cyan-400 font-medium">Subrace</p>
-                <p className="text-lg text-cyan-100">{arkanaStats.subrace}</p>
+                <p className="text-lg text-cyan-100">{capitalize(arkanaStats.subrace)}</p>
               </div>
             )}
             {arkanaStats.archetype && (
               <div>
                 <p className="text-sm text-cyan-400 font-medium">Archetype</p>
-                <p className="text-lg text-cyan-100">{arkanaStats.archetype}</p>
+                <p className="text-lg text-cyan-100">{capitalize(arkanaStats.archetype)}</p>
               </div>
             )}
           </div>
