@@ -304,7 +304,7 @@ describe('/api/arkana/users/stats', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.stats.status).toBe(5);
+      expect(data.data.stats.status).toBe(2); // Clamped from 5 to 2 (Arkana max)
       expect(data.data.stats.health).toBe(85);
       expect(data.data.stats.hunger).toBe(90);
       expect(data.data.stats.thirst).toBe(95);
@@ -317,7 +317,7 @@ describe('/api/arkana/users/stats', () => {
       await prisma.userStats.create({
         data: {
           userId: user.id,
-          status: 10,
+          status: 1, // OOC
           health: 70,
           hunger: 80,
           thirst: 90
@@ -339,7 +339,7 @@ describe('/api/arkana/users/stats', () => {
       expect(data.data.stats.health).toBe(45);
       expect(data.data.stats.hunger).toBe(80); // Should remain unchanged
       expect(data.data.stats.thirst).toBe(90); // Should remain unchanged
-      expect(data.data.stats.status).toBe(10); // Should remain unchanged
+      expect(data.data.stats.status).toBe(1); // Should remain unchanged
     });
 
     it('should clamp stats values to valid ranges', async () => {

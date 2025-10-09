@@ -327,7 +327,7 @@ export const arkanaStatsSchema = Joi.object({
 export const arkanaUpdateStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
   universe: Joi.string().valid('arkana').required(),
-  status: Joi.number().integer().optional(), // Allow any value for clamping
+  status: Joi.number().integer().optional(), // Allow any value for clamping (Arkana uses: 0=RP, 1=OOC, 2=AFK)
   health: Joi.number().integer().optional(), // Allow any value for clamping
   hunger: Joi.number().integer().optional(), // Allow any value for clamping
   thirst: Joi.number().integer().optional(), // Allow any value for clamping
@@ -607,7 +607,7 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
 
   // Current health from userStats
   health: Joi.number().integer().min(0).max(100).optional(),
-  status: Joi.number().integer().min(0).max(3).optional(), // 0=Healthy, 1=Injured, 2=Unconscious, 3=Dead
+  status: Joi.number().integer().min(0).max(2).optional(), // Arkana: 0=RP, 1=OOC, 2=AFK
 
   // Powers and abilities
   inherentPowers: Joi.array().items(Joi.string()).optional(),

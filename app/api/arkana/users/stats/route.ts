@@ -171,8 +171,8 @@ export async function POST(request: NextRequest) {
     };
 
     // Only update fields if they're provided in the request
-    // Clamp stats values to valid ranges (0-100)
-    if (userStatus !== undefined) updateData.status = Math.max(0, Math.min(100, userStatus));
+    // Clamp stats values to valid ranges
+    if (userStatus !== undefined) updateData.status = Math.max(0, Math.min(2, userStatus)); // Arkana: 0=RP, 1=OOC, 2=AFK
     if (health !== undefined) updateData.health = Math.max(0, Math.min(100, health));
     if (hunger !== undefined) updateData.hunger = Math.max(0, Math.min(100, hunger));
     if (thirst !== undefined) updateData.thirst = Math.max(0, Math.min(100, thirst));

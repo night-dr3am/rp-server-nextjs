@@ -1076,6 +1076,18 @@ function AdminDashboardContent() {
                     <input type="number" min="1" max="100" value={editData.hitPoints} onChange={(e) => setEditData({...editData, hitPoints: parseInt(e.target.value)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
                   </div>
                 </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-cyan-300 mb-1">Status</label>
+                  <select
+                    value={editData.status}
+                    onChange={(e) => setEditData({...editData, status: parseInt(e.target.value)})}
+                    className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100"
+                  >
+                    <option value={0}>RP (Looking for roleplay)</option>
+                    <option value={1}>OOC (Out of character)</option>
+                    <option value={2}>AFK (Away)</option>
+                  </select>
+                </div>
               </div>
 
               {/* Economy Section */}

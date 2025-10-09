@@ -147,11 +147,10 @@ export default function ArkanaProfilePage() {
 
   const getStatusText = (status: number) => {
     switch (status) {
-      case 0: return 'Healthy';
-      case 1: return 'Injured';
-      case 2: return 'Unconscious';
-      case 3: return 'Dead';
-      default: return 'Unknown';
+      case 0: return 'Looking for roleplay';
+      case 1: return 'Out of character';
+      case 2: return 'Away';
+      default: return 'Looking for roleplay';
     }
   };
 
