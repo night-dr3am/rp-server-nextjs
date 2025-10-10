@@ -1,0 +1,223 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Arkana Effects System Schema",
+  "description": "Validation schema for Arkana abilities and effects",
+
+  "definitions": {
+    "ability": {
+      "type": "object",
+      "required": ["id", "name", "desc", "cost", "abilityType", "tags", "baseStat", "targetType", "range", "effects"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ability"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the ability"
+        },
+        "desc": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "cost": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Point cost to purchase this ability"
+        },
+        "abilityType": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["attack", "ability", "passive"]
+          },
+          "minItems": 1,
+          "description": "Type(s) of ability - can have multiple"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "damage", "heal", "buff", "debuff", "control", "defense", "mental", "physical",
+              "transform", "utility", "movement", "stealth", "social", "charm", "domination",
+              "necrotic", "fire", "ice", "lightning", "poison", "energy"
+            ]
+          },
+          "description": "Descriptive tags for categorization"
+        },
+        "baseStat": {
+          "type": "string",
+          "enum": ["Physical", "Dexterity", "Mental", "Perception", "Stealth"],
+          "description": "Primary stat used for this ability"
+        },
+        "targetType": {
+          "type": "string",
+          "enum": ["single", "self", "area", "cone", "line", "all", "all_enemies", "all_allies"],
+          "description": "Targeting mode for this ability"
+        },
+        "range": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Range in meters (0 = melee/touch, 999 = unlimited/sight)"
+        },
+        "effects": {
+          "type": "object",
+          "properties": {
+            "attack": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Effect IDs applied when used as attack"
+            },
+            "ability": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Effect IDs applied when activated as ability"
+            },
+            "passive": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Effect IDs that are always active"
+            },
+            "onHit": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Effect IDs applied when attack hits"
+            },
+            "onDefense": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Effect IDs applied when user is attacked"
+            }
+          },
+          "description": "Effects organized by context"
+        },
+        "species": {
+          "type": "string",
+          "enum": ["human", "strigoi", "gaki", "spliced", "veilborn", "synthral"],
+          "description": "Species restriction (optional)"
+        },
+        "arch": {
+          "type": "string",
+          "description": "Archetype restriction (optional)"
+        },
+        "section": {
+          "type": "string",
+          "description": "Magic school or section (optional)"
+        },
+        "usesPerScene": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Usage limit per scene (optional)"
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Required ability IDs (optional)"
+        }
+      }
+    },
+
+    "effect": {
+      "type": "object",
+      "required": ["id", "name", "desc", "category"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the effect"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the effect"
+        },
+        "desc": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "check", "damage", "stat_modifier", "control", "defense",
+            "heal", "utility", "resource", "special"
+          ],
+          "description": "Primary category of the effect"
+        },
+        "type": {
+          "type": "string",
+          "description": "Specific type within category"
+        },
+        "target": {
+          "type": "string",
+          "enum": ["self", "enemy", "ally", "area", "all_enemies", "all_allies"],
+          "description": "Who/what this effect targets"
+        },
+        "duration": {
+          "type": "string",
+          "enum": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "scene", "permanent"],
+          "description": "How long the effect lasts"
+        },
+        "checkStat": {
+          "type": "string",
+          "enum": ["Physical", "Dexterity", "Mental", "Perception", "Stealth"],
+          "description": "Stat used for check (if applicable)"
+        },
+        "checkVs": {
+          "type": "string",
+          "enum": ["fixed", "enemy_stat"],
+          "description": "Check against fixed TN or enemy stat"
+        },
+        "checkTN": {
+          "type": "integer",
+          "description": "Target number for fixed checks"
+        },
+        "checkVsStat": {
+          "type": "string",
+          "enum": ["Physical", "Dexterity", "Mental", "Perception", "Stealth"],
+          "description": "Enemy stat to check against"
+        },
+        "damageType": {
+          "type": "string",
+          "enum": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy"],
+          "description": "Type of damage dealt"
+        },
+        "damageFormula": {
+          "type": "string",
+          "description": "Damage calculation formula (e.g., '6 + Mental')"
+        },
+        "damageFixed": {
+          "type": "integer",
+          "description": "Fixed damage amount"
+        },
+        "controlType": {
+          "type": "string",
+          "enum": [
+            "stun", "paralyze", "sleep", "confusion", "fear", "bind",
+            "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion"
+          ],
+          "description": "Type of control effect"
+        },
+        "resistType": {
+          "type": "string",
+          "enum": ["Physical", "Mental", "Dexterity", "Perception", "Stealth", "none"],
+          "description": "Stat used to resist this effect"
+        },
+        "utilityType": {
+          "type": "string",
+          "enum": ["stealth", "perception", "initiative", "movement", "sensory", "social"],
+          "description": "Type of utility benefit"
+        }
+      }
+    }
+  },
+
+  "allowedValues": {
+    "abilityType": ["attack", "ability", "passive"],
+    "stats": ["Physical", "Dexterity", "Mental", "Perception", "Stealth"],
+    "targetType": ["single", "self", "area", "cone", "line", "all", "all_enemies", "all_allies"],
+    "effectCategory": ["check", "damage", "stat_modifier", "control", "defense", "heal", "utility", "resource", "special"],
+    "damageType": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy"],
+    "controlType": ["stun", "paralyze", "sleep", "confusion", "fear", "bind", "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion"],
+    "duration": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "scene", "permanent"],
+    "species": ["human", "strigoi", "gaki", "spliced", "veilborn", "synthral"]
+  }
+}

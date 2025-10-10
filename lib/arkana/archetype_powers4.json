@@ -5,7 +5,15 @@
     "desc": "Exude an irresistible aura of attraction; mortals drawn like moths to flame.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "life"
+    "arch": "life",
+    "abilityType": ["ability"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_mental", "control_attraction"]
+    }
   },
   {
     "id": "strigoi_life_sanguine_glamour",
@@ -13,7 +21,15 @@
     "desc": "Manipulate appearance subtly, masking pallor, wounds, or hunger to look radiant and alive.",
     "cost": 2,
     "species": "strigoi",
-    "arch": "life"
+    "arch": "life",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_glamour"]
+    }
   },
   {
     "id": "strigoi_life_cradle_of_hunger",
@@ -21,7 +37,15 @@
     "desc": "Touch can sap energy, leaving mortals weak as if struck by days of exhaustion.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "life"
+    "arch": "life",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2", "debuff_exhaustion"]
+    }
   },
   {
     "id": "strigoi_life_blood_seed",
@@ -29,7 +53,15 @@
     "desc": "Plant a blood seed of desire in a mortal; supernatural yearning until accepted or spurned.",
     "cost": 4,
     "species": "strigoi",
-    "arch": "life"
+    "arch": "life",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_desire"]
+    }
   },
   {
     "id": "strigoi_death_carrion_call",
@@ -37,7 +69,15 @@
     "desc": "Draw vermin and scavengers; influence swarms. Spliced may resist with Mental roll.",
     "cost": 2,
     "species": "strigoi",
-    "arch": "death"
+    "arch": "death",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_summon_vermin"]
+    }
   },
   {
     "id": "strigoi_death_bone_whisper",
@@ -45,7 +85,15 @@
     "desc": "Touch a corpse to glean fragments of its memories or final sensations.",
     "cost": 2,
     "species": "strigoi",
-    "arch": "death"
+    "arch": "death",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_corpse_memory"]
+    }
   },
   {
     "id": "strigoi_death_rotting_grasp",
@@ -53,7 +101,16 @@
     "desc": "Corrode wood, cloth, or weak flesh; spoil food, weaken doors, inflict painful wounds.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "death"
+    "arch": "death",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "utility", "necrotic"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_necrotic_3"],
+      "ability": ["check_mental_vs_tn10", "utility_corrode"]
+    }
   },
   {
     "id": "strigoi_death_echo_of_barrow",
@@ -61,7 +118,15 @@
     "desc": "Voice heard as a whisper from a grave, carrying dread into minds.",
     "cost": 2,
     "species": "strigoi",
-    "arch": "death"
+    "arch": "death",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_fear"]
+    }
   },
   {
     "id": "strigoi_warrior_hungering_grip",
@@ -69,7 +134,15 @@
     "desc": "A clutch drains blood and stamina, weakening prey.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "warrior"
+    "arch": "warrior",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2", "debuff_physical_minus_2"]
+    }
   },
   {
     "id": "strigoi_warrior_unholy_endurance",
@@ -77,7 +150,15 @@
     "desc": "Fight through wounds that would incapacitate mortals; -3 damage reduction for scene.",
     "cost": 4,
     "species": "strigoi",
-    "arch": "warrior"
+    "arch": "warrior",
+    "abilityType": ["ability"],
+    "tags": ["defense", "buff"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "defense_damage_reduction_3"]
+    }
   },
   {
     "id": "strigoi_warrior_ferine_snarl",
@@ -85,7 +166,16 @@
     "desc": "Growl startles animals, causes stampedes, or mortals hesitate in fear; -1 to attack rolls.",
     "cost": 2,
     "species": "strigoi",
-    "arch": "warrior"
+    "arch": "warrior",
+    "abilityType": ["attack", "ability"],
+    "tags": ["debuff", "control"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["check_physical_vs_mental", "debuff_attack_minus_1"],
+      "ability": ["utility_frighten_animals"]
+    }
   },
   {
     "id": "strigoi_warrior_crimson_frenzy",
@@ -93,7 +183,15 @@
     "desc": "Gain automatic +2 to all attack rolls when activated in battle.",
     "cost": 4,
     "species": "strigoi",
-    "arch": "warrior"
+    "arch": "warrior",
+    "abilityType": ["ability"],
+    "tags": ["buff"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_attack_2"]
+    }
   },
   {
     "id": "strigoi_ruler_pale_host",
@@ -101,23 +199,47 @@
     "desc": "Gatherings bend to your rhythm; conversations stall, eyes fix, people forget time.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "ruler"
+    "arch": "ruler",
+    "abilityType": ["ability"],
+    "tags": ["control", "mental", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_mental", "control_social_influence"]
+    }
   },
   {
     "id": "strigoi_ruler_oathbreakers_curse",
-    "name": "Oathbreaker’s Curse",
+    "name": "Oathbreaker's Curse",
     "desc": "Curse those who break loyalty/pacts; torments in dreams until reparations.",
     "cost": 4,
     "species": "strigoi",
-    "arch": "ruler"
+    "arch": "ruler",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_curse"]
+    }
   },
   {
     "id": "strigoi_ruler_lineages_weight",
-    "name": "Lineage’s Weight",
+    "name": "Lineage's Weight",
     "desc": "Blood carries nobility; mortals treat you as authority.",
     "cost": 3,
     "species": "strigoi",
-    "arch": "ruler"
+    "arch": "ruler",
+    "abilityType": ["passive"],
+    "tags": ["buff", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["buff_social_authority"]
+    }
   },
   {
     "id": "strigoi_ruler_crown_of_silence",
@@ -125,7 +247,15 @@
     "desc": "Silence an individual's voice for minutes.",
     "cost": 4,
     "species": "strigoi",
-    "arch": "ruler"
+    "arch": "ruler",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_silence"]
+    }
   },
   {
     "id": "gaki_yin_corpse_flesh",
@@ -133,7 +263,15 @@
     "desc": "Appear as perfectly lifeless, even to machines.",
     "cost": 2,
     "species": "gaki",
-    "arch": "yin"
+    "arch": "yin",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "stealth"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_corpse"]
+    }
   },
   {
     "id": "gaki_yin_grave_whisper",
@@ -141,7 +279,15 @@
     "desc": "Command shades and dead memories from the Ark's databanks or ghosts.",
     "cost": 3,
     "species": "gaki",
-    "arch": "yin"
+    "arch": "yin",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_command_spirits"]
+    }
   },
   {
     "id": "gaki_yin_void_step",
@@ -149,7 +295,15 @@
     "desc": "Phase into shadows or thin walls like a wraith.",
     "cost": 4,
     "species": "gaki",
-    "arch": "yin"
+    "arch": "yin",
+    "abilityType": ["ability"],
+    "tags": ["utility", "movement", "stealth"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "movement_phase"]
+    }
   },
   {
     "id": "gaki_yin_soul_extraction",
@@ -157,7 +311,15 @@
     "desc": "Draw hun-fragments or memories from mortals and spirits.",
     "cost": 4,
     "species": "gaki",
-    "arch": "yin"
+    "arch": "yin",
+    "abilityType": ["attack"],
+    "tags": ["utility", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "utility_soul_extraction"]
+    }
   },
   {
     "id": "gaki_hun_aura_of_judgment",
@@ -165,7 +327,15 @@
     "desc": "Reveal moral/karmic stains in others; relive corruption.",
     "cost": 3,
     "species": "gaki",
-    "arch": "hun"
+    "arch": "hun",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_reveal_corruption"]
+    }
   },
   {
     "id": "gaki_hun_chi_balance",
@@ -173,7 +343,15 @@
     "desc": "Restore harmony in mortals/systems disrupted by chi imbalance.",
     "cost": 2,
     "species": "gaki",
-    "arch": "hun"
+    "arch": "hun",
+    "abilityType": ["ability"],
+    "tags": ["heal", "utility"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "ability_chi_balance_restore"]
+    }
   },
   {
     "id": "gaki_hun_mandate_of_heaven",
@@ -181,7 +359,15 @@
     "desc": "Impose commands that compel obedience from mortals/lesser spirits.",
     "cost": 4,
     "species": "gaki",
-    "arch": "hun"
+    "arch": "hun",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "domination"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_command"]
+    }
   },
   {
     "id": "gaki_hun_solar_radiance",
@@ -189,7 +375,15 @@
     "desc": "Channel yang chi into blinding aura of justice that burns corrupt.",
     "cost": 5,
     "species": "gaki",
-    "arch": "hun"
+    "arch": "hun",
+    "abilityType": ["attack"],
+    "tags": ["damage", "control", "fire"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_fire_5_area_blind", "control_blind"]
+    }
   },
   {
     "id": "gaki_yang_life_mask",
@@ -197,7 +391,15 @@
     "desc": "Pass perfectly for living mortals, radiate body heat.",
     "cost": 2,
     "species": "gaki",
-    "arch": "yang"
+    "arch": "yang",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_living"]
+    }
   },
   {
     "id": "gaki_yang_chi_feast",
@@ -205,7 +407,15 @@
     "desc": "Feed on sex, food, or strong emotion as well as blood/breath.",
     "cost": 2,
     "species": "gaki",
-    "arch": "yang"
+    "arch": "yang",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_chi_feast"]
+    }
   },
   {
     "id": "gaki_yang_elemental_surge",
@@ -213,7 +423,15 @@
     "desc": "Burst of vital Yang Chi energy: leap, heal, ignite passion; leaves user drained.",
     "cost": 4,
     "species": "gaki",
-    "arch": "yang"
+    "arch": "yang",
+    "abilityType": ["ability"],
+    "tags": ["heal", "buff", "movement"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "heal_yang_3", "buff_movement_3"]
+    }
   },
   {
     "id": "gaki_yang_dance_of_ten_thousand_fires",
@@ -221,7 +439,16 @@
     "desc": "Explode in brilliant yang energy, burning enemies and invigorating allies.",
     "cost": 5,
     "species": "gaki",
-    "arch": "yang"
+    "arch": "yang",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "heal", "fire"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["damage_fire_6_area"],
+      "ability": ["heal_area_3"]
+    }
   },
   {
     "id": "gaki_po_searing_agony",
@@ -229,7 +456,15 @@
     "desc": "Inflict agony that transcends physical pain, cutting to the soul.",
     "cost": 4,
     "species": "gaki",
-    "arch": "po"
+    "arch": "po",
+    "abilityType": ["attack"],
+    "tags": ["damage", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_mental_5"]
+    }
   },
   {
     "id": "gaki_po_skinning_self",
@@ -237,15 +472,31 @@
     "desc": "Flay own flesh to gain Yin Chi; wounds take time to heal but never hungry.",
     "cost": 3,
     "species": "gaki",
-    "arch": "po"
+    "arch": "po",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "utility_self_harm_resource"]
+    }
   },
   {
     "id": "gaki_po_hells_visage",
-    "name": "Hell’s Visage",
+    "name": "Hell's Visage",
     "desc": "Manifest monstrous, oni-like form that terrifies mortals.",
     "cost": 3,
     "species": "gaki",
-    "arch": "po"
+    "arch": "po",
+    "abilityType": ["ability"],
+    "tags": ["transform", "control"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "transform_oni", "control_fear"]
+    }
   },
   {
     "id": "gaki_po_dharma_crucible",
@@ -253,7 +504,15 @@
     "desc": "Force an enemy to relive karmic sins and suffer their own torment.",
     "cost": 5,
     "species": "gaki",
-    "arch": "po"
+    "arch": "po",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "domination"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_karmic_torment", "damage_mental_5"]
+    }
   },
   {
     "id": "gaki_chudo_mortal_veil",
@@ -261,7 +520,15 @@
     "desc": "Perfectly mimic mannerisms, accents, and subtle details of mortals.",
     "cost": 2,
     "species": "gaki",
-    "arch": "chudo"
+    "arch": "chudo",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_mimic"]
+    }
   },
   {
     "id": "gaki_chudo_cycle_of_faces",
@@ -269,15 +536,31 @@
     "desc": "Swap between multiple crafted personas, each with unique resonance.",
     "cost": 3,
     "species": "gaki",
-    "arch": "chudo"
+    "arch": "chudo",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_personas"]
+    }
   },
   {
     "id": "gaki_chudo_memory_weaving",
     "name": "Memory Weaving",
-    "desc": "Plant false recollections or alter small pieces of another’s past.",
+    "desc": "Plant false recollections or alter small pieces of another's past.",
     "cost": 4,
     "species": "gaki",
-    "arch": "chudo"
+    "arch": "chudo",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_memory_alter"]
+    }
   },
   {
     "id": "gaki_chudo_puppet_master",
@@ -285,7 +568,15 @@
     "desc": "Control the physical actions of an individual briefly. The victim is aware of losing control.",
     "cost": 5,
     "species": "gaki",
-    "arch": "chudo"
+    "arch": "chudo",
+    "abilityType": ["attack"],
+    "tags": ["control", "domination"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_body_control"]
+    }
   },
   {
     "id": "spliced_chim_hybrid_senses",
@@ -293,7 +584,15 @@
     "desc": "Pick one: telescopic vision, echolocation, enhanced smell, or heat sensing. +1 Perception using chosen sense.",
     "cost": 1,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["passive"],
+    "tags": ["buff", "utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["buff_perception_1"]
+    }
   },
   {
     "id": "spliced_chim_adaptive_morph",
@@ -301,7 +600,15 @@
     "desc": "Temporarily adapt to the environment, e.g., gills, wings, etc.",
     "cost": 5,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "movement"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "transform_environmental"]
+    }
   },
   {
     "id": "spliced_chim_echo_mutation",
@@ -309,7 +616,15 @@
     "desc": "Briefly mimic last observed power of a target creature.",
     "cost": 3,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_mimic_power"]
+    }
   },
   {
     "id": "spliced_chim_armored_form",
@@ -317,7 +632,15 @@
     "desc": "Harden shifted form, granting +4 HP. Can be activated once per scene.",
     "cost": 2,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["buff", "defense"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_hp_4"]
+    }
   },
   {
     "id": "spliced_chim_chimerical_eyes",
@@ -325,7 +648,15 @@
     "desc": "Gain additional eyes to detect magical energy and spells.",
     "cost": 2,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_detect_magic"]
+    }
   },
   {
     "id": "spliced_chim_mana_claw",
@@ -333,7 +664,15 @@
     "desc": "Channel mana into natural weapons; Mental modifier to hit; adds +6 damage to attacks.",
     "cost": 3,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["attack"],
+    "tags": ["damage", "energy"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_energy_6"]
+    }
   },
   {
     "id": "spliced_chim_whispling",
@@ -341,7 +680,15 @@
     "desc": "Create mana drones that can speak or channel energy-based powers.",
     "cost": 2,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_summon_drones"]
+    }
   },
   {
     "id": "spliced_chim_hungering_maw",
@@ -349,7 +696,15 @@
     "desc": "Grow an additional mouth for one extra bite attack per turn.",
     "cost": 4,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["buff"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_extra_attack"]
+    }
   },
   {
     "id": "spliced_chim_gravity_grasp",
@@ -357,7 +712,16 @@
     "desc": "Create intense gravity area; Mental vs Physical: fail = grappled & damage, success = damage only.",
     "cost": 5,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "control", "force"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_force_4"],
+      "ability": ["check_mental_vs_physical", "control_grapple", "damage_force_4"]
+    }
   },
   {
     "id": "spliced_chim_out_on_a_limb",
@@ -365,7 +729,15 @@
     "desc": "Grow an extra limb temporarily.",
     "cost": 1,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "utility_grow_limb"]
+    }
   },
   {
     "id": "spliced_chim_eldritch_flash",
@@ -373,7 +745,15 @@
     "desc": "Create a blinding flash of unnatural light; Mental vs Defense (10 + Physical) to blind.",
     "cost": 3,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["attack"],
+    "tags": ["control"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "control_blind"]
+    }
   },
   {
     "id": "spliced_chim_eldritch_maser",
@@ -381,7 +761,15 @@
     "desc": "Fire a beam of unstable mana; Mental vs Defense (10 + Dex), 8 + Mental damage.",
     "cost": 2,
     "species": "spliced",
-    "arch": "chimeric"
+    "arch": "chimeric",
+    "abilityType": ["attack"],
+    "tags": ["damage", "energy"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_dexterity", "damage_energy_8"]
+    }
   },
   {
     "id": "spliced_insect_web_spinning",
@@ -389,7 +777,15 @@
     "desc": "Create restraints or barriers from silk.",
     "cost": 2,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["ability"],
+    "tags": ["utility", "control"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "utility_web_create"]
+    }
   },
   {
     "id": "spliced_insect_carapace_armor",
@@ -397,7 +793,15 @@
     "desc": "Harden carapace, reducing physical damage by 3 for 2 turns; can only be used once per scene.",
     "cost": 3,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["ability"],
+    "tags": ["defense", "buff"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "defense_damage_reduction_3_temp"]
+    }
   },
   {
     "id": "spliced_insect_venom_sting",
@@ -405,7 +809,15 @@
     "desc": "Inject paralytic or necrotic venom with a successful attack.",
     "cost": 3,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["attack"],
+    "tags": ["control", "damage", "poison"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "control_paralyze", "damage_poison_2"]
+    }
   },
   {
     "id": "spliced_insect_wall_crawl",
@@ -413,7 +825,15 @@
     "desc": "Scale walls and ceilings effortlessly.",
     "cost": 1,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["passive"],
+    "tags": ["utility", "movement"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["movement_wall_climbing"]
+    }
   },
   {
     "id": "spliced_insect_hive_mind",
@@ -421,7 +841,15 @@
     "desc": "Telepathic communication with nearby Insectoids who share this power.",
     "cost": 2,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["passive"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "all_allies",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_telepathy"]
+    }
   },
   {
     "id": "spliced_insect_stink_cloud",
@@ -429,7 +857,15 @@
     "desc": "Emit noxious gas impairing mental stats (-3) in a 5 ft radius for 3 turns.",
     "cost": 5,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["attack"],
+    "tags": ["debuff", "poison"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 5,
+    "effects": {
+      "attack": ["debuff_mental_minus_3"]
+    }
   },
   {
     "id": "spliced_insect_buzzing",
@@ -437,7 +873,15 @@
     "desc": "Create a droning sound that disrupts concentration and actions; can maintain each turn but forbids other actions.",
     "cost": 4,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["ability"],
+    "tags": ["control", "debuff"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "control_disruption"]
+    }
   },
   {
     "id": "spliced_insect_compound_eyes",
@@ -445,7 +889,15 @@
     "desc": "Grants 360° vision even in human form.",
     "cost": 2,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_vision_360"]
+    }
   },
   {
     "id": "spliced_insect_wasp_sting",
@@ -453,7 +905,15 @@
     "desc": "Paralyzing sting grants an extra attack each turn; target rolls Physical to resist paralysis.",
     "cost": 5,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["attack"],
+    "tags": ["control", "buff", "poison"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "control_paralyze", "buff_extra_attack"]
+    }
   },
   {
     "id": "spliced_insect_mana_cocoon",
@@ -461,7 +921,15 @@
     "desc": "Restrain target with a mana cocoon; target can resist with a Mental roll.",
     "cost": 2,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["attack"],
+    "tags": ["control"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_cocoon"]
+    }
   },
   {
     "id": "spliced_insect_bugs_might",
@@ -469,7 +937,15 @@
     "desc": "Temporarily lift, carry, or throw objects several times their size; +1 Strength.",
     "cost": 1,
     "species": "spliced",
-    "arch": "insectoid"
+    "arch": "insectoid",
+    "abilityType": ["ability"],
+    "tags": ["buff", "utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_physical_1"]
+    }
   },
   {
     "id": "spliced_reptilian_venom_fang",
@@ -477,7 +953,15 @@
     "desc": "Bite delivers poison that slows victim (-1 Dex); resisted by Physical roll.",
     "cost": 3,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "poison"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_poison_2", "debuff_dexterity_minus_1"]
+    }
   },
   {
     "id": "spliced_reptilian_scalehide",
@@ -485,15 +969,31 @@
     "desc": "Natural armor reduces incoming damage by 2 for 3 turns.",
     "cost": 5,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["ability"],
+    "tags": ["defense", "buff"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "defense_damage_reduction_2"]
+    }
   },
   {
     "id": "spliced_reptilian_constrictors_coil",
-    "name": "Constrictor’s Coil",
+    "name": "Constrictor's Coil",
     "desc": "Grapple target and optionally constrict each turn; target may resist with Physical roll.",
     "cost": 4,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "control"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "control_constrict", "damage_constrict_2"]
+    }
   },
   {
     "id": "spliced_reptilian_detach",
@@ -501,7 +1001,15 @@
     "desc": "Detach a limb harmlessly; limb regenerates before reuse.",
     "cost": 1,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "utility_limb_detach"]
+    }
   },
   {
     "id": "spliced_reptilian_shed_skin",
@@ -509,7 +1017,15 @@
     "desc": "Remove maladies, sickness, or poison; cleanses conditions.",
     "cost": 2,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["ability"],
+    "tags": ["heal", "utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "heal_cleanse"]
+    }
   },
   {
     "id": "spliced_reptilian_poison_spit",
@@ -517,15 +1033,31 @@
     "desc": "Spit poisonous projectile; target rolls Physical to resist poison and damage.",
     "cost": 2,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "poison"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_poison_2", "debuff_dexterity_minus_1"]
+    }
   },
   {
     "id": "spliced_reptilian_chameleons_mantle",
-    "name": "Chameleon’s Mantle",
+    "name": "Chameleon's Mantle",
     "desc": "Blend with surroundings; grants +2 to Hide checks while stationary.",
     "cost": 2,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["ability"],
+    "tags": ["buff", "stealth", "utility"],
+    "baseStat": "Stealth",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_stealth_2"]
+    }
   },
   {
     "id": "spliced_reptilian_hypnotizing_gaze",
@@ -533,7 +1065,15 @@
     "desc": "Temporarily trance target; can last one scene. Mental roll to resist every 2 turns.",
     "cost": 3,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_trance"]
+    }
   },
   {
     "id": "spliced_reptilian_heat_sense",
@@ -541,7 +1081,15 @@
     "desc": "Detect heat and thermal differences.",
     "cost": 1,
     "species": "spliced",
-    "arch": "reptilian"
+    "arch": "reptilian",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_heat_vision"]
+    }
   },
   {
     "id": "spliced_avian_keen_sight",
@@ -549,7 +1097,15 @@
     "desc": "Perfect clarity at range and in darkness.",
     "cost": 1,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_keen_sight"]
+    }
   },
   {
     "id": "spliced_avian_piercing_cry",
@@ -557,7 +1113,15 @@
     "desc": "Disorient/stun targets; Mental roll to resist.",
     "cost": 2,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_stun"]
+    }
   },
   {
     "id": "spliced_avian_predatory_dive",
@@ -565,7 +1129,15 @@
     "desc": "Strike from above; knock target prone on failed Dex.",
     "cost": 3,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "control", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_physical_vs_dexterity", "damage_physical_3", "control_knockdown"]
+    }
   },
   {
     "id": "spliced_avian_wing_blades",
@@ -573,7 +1145,15 @@
     "desc": "Reinforce wings with blade structures; add Dex to attack when flying.",
     "cost": 3,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["ability"],
+    "tags": ["buff", "damage"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_attack_dex_flying"]
+    }
   },
   {
     "id": "spliced_avian_wing_darts",
@@ -581,7 +1161,16 @@
     "desc": "Fire wing blades as projectiles; requires Wing Blades active.",
     "cost": 2,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Dexterity",
+    "targetType": "single",
+    "range": 30,
+    "prerequisites": ["spliced_avian_wing_blades"],
+    "effects": {
+      "attack": ["check_dexterity_vs_dexterity", "damage_dexterity_2"]
+    }
   },
   {
     "id": "spliced_avian_conspiracy_to_murder",
@@ -589,7 +1178,16 @@
     "desc": "Summon mana spirit flock to scout or attack; see through their eyes.",
     "cost": 4,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "utility", "energy"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 30,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_energy_2"],
+      "ability": ["check_mental_vs_tn10", "utility_summon_spirit_flock"]
+    }
   },
   {
     "id": "spliced_avian_voice_mimic",
@@ -597,7 +1195,15 @@
     "desc": "Mimic a voice heard in last 24 hours.",
     "cost": 1,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_voice_mimic"]
+    }
   },
   {
     "id": "spliced_avian_a_little_bird_told_me",
@@ -605,7 +1211,15 @@
     "desc": "Send message via summoned spirit to a familiar target.",
     "cost": 2,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 999,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_spirit_message"]
+    }
   },
   {
     "id": "spliced_avian_moving_at_hyper_squawk",
@@ -613,7 +1227,15 @@
     "desc": "Enhanced flight speed.",
     "cost": 1,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["ability"],
+    "tags": ["buff", "movement"],
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_dexterity_vs_tn10", "buff_dexterity_2"]
+    }
   },
   {
     "id": "spliced_avian_ripping_pecks",
@@ -621,7 +1243,15 @@
     "desc": "Jagged beak causes bleeding effect; +1 damage per turn.",
     "cost": 3,
     "species": "spliced",
-    "arch": "avian"
+    "arch": "avian",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2", "damage_bleed_1"]
+    }
   },
   {
     "id": "spliced_aquatic_abyssal_sense",
@@ -629,7 +1259,15 @@
     "desc": "Echolocation or pressure detection; reveals hidden/invisible creatures, traps, and doors.",
     "cost": 3,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_echolocation"]
+    }
   },
   {
     "id": "spliced_aquatic_surge_strike",
@@ -637,7 +1275,15 @@
     "desc": "Burst of speed in water or zero-G.",
     "cost": 2,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["ability"],
+    "tags": ["buff", "movement"],
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_dexterity_vs_tn10", "buff_dexterity_2"]
+    }
   },
   {
     "id": "spliced_aquatic_crushing_bite",
@@ -645,7 +1291,15 @@
     "desc": "Bite that can shear most materials; +3 damage.",
     "cost": 4,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_5"]
+    }
   },
   {
     "id": "spliced_aquatic_rough_skin",
@@ -653,7 +1307,15 @@
     "desc": "Damage attackers who strike the Aquatic with claws/flesh; 1 damage per strike.",
     "cost": 3,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["passive"],
+    "tags": ["defense", "damage"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["passive_reflect_damage_1"]
+    }
   },
   {
     "id": "spliced_aquatic_aqua_shot",
@@ -661,7 +1323,16 @@
     "desc": "Pull water from air to fire as projectile; 3 uses per scene without external water source.",
     "cost": 3,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 30,
+    "usesPerScene": 3,
+    "effects": {
+      "attack": ["check_physical_vs_dexterity", "damage_physical_3_ranged"]
+    }
   },
   {
     "id": "spliced_aquatic_consume",
@@ -669,7 +1340,15 @@
     "desc": "Consume inorganic items harmlessly.",
     "cost": 1,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_consume_inorganic"]
+    }
   },
   {
     "id": "spliced_aquatic_chomp_chomp",
@@ -677,15 +1356,32 @@
     "desc": "Sharpen teeth in human form to perform bite attacks.",
     "cost": 1,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["ability"],
+    "tags": ["buff", "damage"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_physical_1"]
+    }
   },
   {
     "id": "spliced_aquatic_eels_spite",
-    "name": "Eel’s Spite",
+    "name": "Eel's Spite",
     "desc": "Conduct electricity through body; shocks target, 2 uses per scene.",
     "cost": 4,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["attack"],
+    "tags": ["damage", "lightning"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "usesPerScene": 2,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_lightning_3"]
+    }
   },
   {
     "id": "spliced_aquatic_still_water",
@@ -693,7 +1389,15 @@
     "desc": "Camouflage in water; +2 to Hide checks if perfectly still.",
     "cost": 1,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["ability"],
+    "tags": ["buff", "stealth", "utility"],
+    "baseStat": "Stealth",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["buff_stealth_2"]
+    }
   },
   {
     "id": "spliced_aquatic_echo_pulse",
@@ -701,7 +1405,15 @@
     "desc": "Sonic ring pushes enemies away; resisted with Physical roll.",
     "cost": 2,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["attack"],
+    "tags": ["control", "damage"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "control_push", "damage_sonic_2"]
+    }
   },
   {
     "id": "spliced_aquatic_death_roll",
@@ -709,7 +1421,15 @@
     "desc": "After successful bite, lock jaws and spin prey; damage + disorient; hold 3 turns or until released.",
     "cost": 5,
     "species": "spliced",
-    "arch": "aquatic"
+    "arch": "aquatic",
+    "abilityType": ["attack"],
+    "tags": ["damage", "control", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "control_grapple", "damage_constrict_2", "control_disruption"]
+    }
   },
   {
     "id": "spliced_predator_savage_rend",
@@ -717,15 +1437,31 @@
     "desc": "Claws and teeth deal devastating damage.",
     "cost": 2,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_4"]
+    }
   },
   {
     "id": "spliced_predator_alphas_roar",
-    "name": "Alpha’s Roar",
+    "name": "Alpha's Roar",
     "desc": "Creatures within earshot must roll Mental; failure: cannot approach and attack rolls suffer -1.",
     "cost": 1,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["attack"],
+    "tags": ["control", "debuff"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_physical_vs_mental", "control_fear_area", "debuff_attack_minus_1"]
+    }
   },
   {
     "id": "spliced_predator_unstoppable_charge",
@@ -733,7 +1469,15 @@
     "desc": "Charge in straight line; deals damage; Dex roll to resist knockdown.",
     "cost": 2,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["attack"],
+    "tags": ["damage", "control", "physical"],
+    "baseStat": "Physical",
+    "targetType": "line",
+    "range": 20,
+    "effects": {
+      "attack": ["check_physical_vs_dexterity", "damage_charge_4", "control_knockdown"]
+    }
   },
   {
     "id": "spliced_predator_scent_lock",
@@ -741,7 +1485,15 @@
     "desc": "Track chosen scent; lasts 24 hours or until dispelled.",
     "cost": 1,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_scent_tracking"]
+    }
   },
   {
     "id": "spliced_predator_cat_scratch_fever",
@@ -749,7 +1501,15 @@
     "desc": "Claws may cause sickness/poison; -2 Strength & Fortitude; resisted by Physical roll.",
     "cost": 3,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "poison"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2", "debuff_physical_minus_2"]
+    }
   },
   {
     "id": "spliced_predator_howling_cannon",
@@ -757,15 +1517,31 @@
     "desc": "Cone of force from roar/howl; Physical roll to resist.",
     "cost": 3,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["attack"],
+    "tags": ["damage", "force"],
+    "baseStat": "Physical",
+    "targetType": "cone",
+    "range": 15,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_force_3", "control_push"]
+    }
   },
   {
     "id": "spliced_predator_cats_eye",
-    "name": "Cat’s Eye",
+    "name": "Cat's Eye",
     "desc": "See in total darkness; visualize infrared.",
     "cost": 1,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["passive"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["utility_darkvision"]
+    }
   },
   {
     "id": "spliced_predator_marking_territory",
@@ -773,7 +1549,15 @@
     "desc": "Mark area with scent, claws, or other method; supernatural awareness of mark; alerts allies.",
     "cost": 1,
     "species": "spliced",
-    "arch": "predators"
+    "arch": "predators",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_territory_mark"]
+    }
   },
   {
     "id": "veil_echo_dream_recall",
@@ -781,7 +1565,15 @@
     "desc": "Replay memories or dreams as visible illusions.",
     "cost": 2,
     "species": "veilborn",
-    "arch": "echoes"
+    "arch": "echoes",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_illusion_create"]
+    }
   },
   {
     "id": "veil_echo_archive_walk",
@@ -789,15 +1581,31 @@
     "desc": "Enter data flows as a ghost; traverse archives, retrieve information, interact remotely.",
     "cost": 3,
     "species": "veilborn",
-    "arch": "echoes"
+    "arch": "echoes",
+    "abilityType": ["ability"],
+    "tags": ["utility", "movement"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_data_ghost"]
+    }
   },
   {
     "id": "veil_veils_identity_mask",
     "name": "Identity Mask",
-    "desc": "Cloak oneself in another’s likeness; visual and auditory mimicry.",
+    "desc": "Cloak oneself in another's likeness; visual and auditory mimicry.",
     "cost": 3,
     "species": "veilborn",
-    "arch": "veils"
+    "arch": "veils",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "transform_mimic"]
+    }
   },
   {
     "id": "veil_veils_whisper_stitch",
@@ -805,7 +1613,15 @@
     "desc": "Hear voices through vents, wires, or channels; gain information remotely.",
     "cost": 2,
     "species": "veilborn",
-    "arch": "veils"
+    "arch": "veils",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "area",
+    "range": 30,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_eavesdrop"]
+    }
   },
   {
     "id": "veil_blossoms_verdant_surge",
@@ -813,7 +1629,15 @@
     "desc": "Accelerate plant growth instantly; create cover, obstacles, or effects.",
     "cost": 3,
     "species": "veilborn",
-    "arch": "blossoms"
+    "arch": "blossoms",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_plant_growth"]
+    }
   },
   {
     "id": "veil_blossoms_charm_of_bloom",
@@ -821,7 +1645,15 @@
     "desc": "Awaken longing, creativity, or passion; influence targets emotionally.",
     "cost": 2,
     "species": "veilborn",
-    "arch": "blossoms"
+    "arch": "blossoms",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_emotion_influence"]
+    }
   },
   {
     "id": "veil_glass_starlit_gaze",
@@ -829,7 +1661,15 @@
     "desc": "Overwhelm mortals with cosmic visions; −1 Mental for 1 turn, may dazzle/distract.",
     "cost": 3,
     "species": "veilborn",
-    "arch": "glass"
+    "arch": "glass",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "debuff"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_dazzle", "debuff_entropy_disruption"]
+    }
   },
   {
     "id": "veil_glass_astral_reflection",
@@ -837,7 +1677,15 @@
     "desc": "Bend or refract light; become partially transparent or dazzling.",
     "cost": 3,
     "species": "veilborn",
-    "arch": "glass"
+    "arch": "glass",
+    "abilityType": ["ability"],
+    "tags": ["buff", "stealth", "utility"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_transparency"]
+    }
   },
   {
     "id": "human_arc_thaumaturgy",
@@ -845,7 +1693,15 @@
     "desc": "Create sensory or physical magical effects (lights, voices, smells, vibrations).",
     "cost": 1,
     "species": "human",
-    "arch": "arcanist"
+    "arch": "arcanist",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_thaumaturgy"]
+    }
   },
   {
     "id": "human_arc_magic_of_echoes",
@@ -853,7 +1709,15 @@
     "desc": "Recall residual magical effects recently cast in an area.",
     "cost": 1,
     "species": "human",
-    "arch": "arcanist"
+    "arch": "arcanist",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_detect_residual_magic"]
+    }
   },
   {
     "id": "human_arc_ley_pull",
@@ -861,7 +1725,15 @@
     "desc": "Draw energy from nearby ley lines to enhance a spell; +2 flat bonus to damage or effect.",
     "cost": 2,
     "species": "human",
-    "arch": "arcanist"
+    "arch": "arcanist",
+    "abilityType": ["ability"],
+    "tags": ["buff"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_damage_2"]
+    }
   },
   {
     "id": "human_arc_ley_mapping",
@@ -869,7 +1741,15 @@
     "desc": "Locate magical nodes or high-energy areas; utility/planning.",
     "cost": 2,
     "species": "human",
-    "arch": "arcanist"
+    "arch": "arcanist",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_ley_detection"]
+    }
   },
   {
     "id": "human_synthral_ritual_magitech",
@@ -877,7 +1757,15 @@
     "desc": "Influence devices/systems with technomancy; ritualized activation.",
     "cost": 1,
     "species": "human",
-    "arch": "synthral"
+    "arch": "synthral",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_tech_influence"]
+    }
   },
   {
     "id": "human_synthral_systemic_runes",
@@ -885,7 +1773,15 @@
     "desc": "Cybernetic tattoos act as conduits for technomancy; repeated use reduces TN.",
     "cost": 2,
     "species": "human",
-    "arch": "synthral"
+    "arch": "synthral",
+    "abilityType": ["passive"],
+    "tags": ["buff", "utility"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["buff_tech_mastery"]
+    }
   },
   {
     "id": "human_synthral_tecno_manipulation",
@@ -893,7 +1789,15 @@
     "desc": "Manipulate technology through will and magic; switch on/off, move, or alter machines.",
     "cost": 2,
     "species": "human",
-    "arch": "synthral"
+    "arch": "synthral",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_tech_control"]
+    }
   },
   {
     "id": "human_synthral_cyber_sprites",
@@ -901,7 +1805,15 @@
     "desc": "Create digital/magical servitors; deliver messages, activate devices, distract targets.",
     "cost": 3,
     "species": "human",
-    "arch": "synthral"
+    "arch": "synthral",
+    "abilityType": ["ability"],
+    "tags": ["utility", "social"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_summon_cyber_sprites"]
+    }
   },
   {
     "id": "human_psion_mindshatter_pulse",
@@ -909,7 +1821,15 @@
     "desc": "Burst of mental energy disrupts thought; confusion, memory loss.",
     "cost": 3,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_confusion_memory"]
+    }
   },
   {
     "id": "human_psion_telekinetic_surge",
@@ -917,7 +1837,16 @@
     "desc": "Move, lift, hurl, or crush objects with mental force.",
     "cost": 4,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "utility", "force"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 30,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_tk_crush_4"],
+      "ability": ["check_mental_vs_tn10", "utility_telekinesis"]
+    }
   },
   {
     "id": "human_psion_cognitive_echo",
@@ -925,7 +1854,15 @@
     "desc": "Read surface thoughts/emotional states; replay memories, sense intentions.",
     "cost": 2,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["ability"],
+    "tags": ["utility", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_read_thoughts"]
+    }
   },
   {
     "id": "human_psion_neural_web",
@@ -933,7 +1870,15 @@
     "desc": "Link minds for shared thoughts, sensations, coordinated action.",
     "cost": 3,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["ability"],
+    "tags": ["utility", "mental", "social"],
+    "baseStat": "Mental",
+    "targetType": "all_allies",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_mind_link"]
+    }
   },
   {
     "id": "human_psion_flame_of_will",
@@ -941,7 +1886,16 @@
     "desc": "Generate fire/heat, manipulate thermal energy, create fire bursts.",
     "cost": 3,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["attack", "ability"],
+    "tags": ["damage", "fire", "utility"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_fire_4"],
+      "ability": ["check_mental_vs_tn10", "utility_heat_manipulation"]
+    }
   },
   {
     "id": "human_psion_eyes_beyond_time",
@@ -949,7 +1903,15 @@
     "desc": "Precognition, retrocognition, probability shaping; grants tactical info.",
     "cost": 5,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["ability"],
+    "tags": ["utility"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_precognition"]
+    }
   },
   {
     "id": "human_psion_memory_emotion_sculpt",
@@ -957,7 +1919,15 @@
     "desc": "Absorb, redirect, or manipulate emotions and memories; −1 Mental for 1–3 turns.",
     "cost": 4,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "debuff"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_emotion_memory_sculpt", "debuff_mental_minus_1"]
+    }
   },
   {
     "id": "human_psion_biokinetics",
@@ -965,7 +1935,15 @@
     "desc": "Enhance body functions temporarily (speed, reflexes, strength); +1 Phys or Dex for 1–3 turns.",
     "cost": 3,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["ability"],
+    "tags": ["buff"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_biokinetic_1"]
+    }
   },
   {
     "id": "human_psion_psychokinetics",
@@ -973,6 +1951,14 @@
     "desc": "Create/manipulate chaotic psychic energy; 8 + Mental damage.",
     "cost": 4,
     "species": "human",
-    "arch": "psion"
+    "arch": "psion",
+    "abilityType": ["attack"],
+    "tags": ["damage", "energy"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_physical", "damage_energy_8"]
+    }
   }
 ]
