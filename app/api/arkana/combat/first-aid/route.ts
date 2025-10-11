@@ -75,6 +75,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if target is in RP mode (status === 0 means IC/RP mode)
+    if (!target.stats || target.stats.status !== 0) {
+      return NextResponse.json(
+        { success: false, error: 'Target player is not in RP mode' },
+        { status: 400 }
+      );
+    }
+
     // Check if healer has used first aid in the last 30 minutes
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     const recentFirstAid = await prisma.event.findFirst({

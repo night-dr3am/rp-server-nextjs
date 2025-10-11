@@ -163,6 +163,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if target is in RP mode (status === 0 means IC/RP mode)
+    if (target.stats.status !== 0) {
+      return NextResponse.json(
+        { success: false, error: 'Target player is not in RP mode' },
+        { status: 400 }
+      );
+    }
+
     // Load arkana data
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();

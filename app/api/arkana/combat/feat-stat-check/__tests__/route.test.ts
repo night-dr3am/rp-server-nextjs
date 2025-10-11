@@ -415,6 +415,44 @@ describe('/api/arkana/combat/feat-stat-check', () => {
       expect(response.status).toBe(400);
     });
 
+    it('should return 400 when player is not in RP mode', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'OOC Player',
+        race: 'human',
+        archetype: 'Fighter',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 15
+      });
+
+      // Set player status to 1 (OOC mode, not in RP)
+      await prisma.userStats.update({
+        where: { userId: player.id },
+        data: { status: 1 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const statCheckData = {
+        player_uuid: player.slUuid,
+        stat_type: 'physical',
+        target_number: 15,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/feat-stat-check', statCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Player is not in RP mode');
+      expect(response.status).toBe(400);
+    });
+
     it('should return 400 for invalid signature', async () => {
       const player = await createArkanaTestUser({
         characterName: 'Test Player',

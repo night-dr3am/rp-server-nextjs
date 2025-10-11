@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get player with their arkanaStats
+    // Get player with their arkanaStats and stats
     const player = await prisma.user.findFirst({
       where: { slUuid: player_uuid, universe: 'arkana' },
-      include: { arkanaStats: true }
+      include: { arkanaStats: true, stats: true }
     });
 
     // Validate player exists
@@ -47,6 +47,14 @@ export async function POST(request: NextRequest) {
     if (!player.arkanaStats || !player.arkanaStats.registrationCompleted) {
       return NextResponse.json(
         { success: false, error: 'Player registration incomplete' },
+        { status: 400 }
+      );
+    }
+
+    // Check if player is in RP mode (status === 0 means IC/RP mode)
+    if (!player.stats || player.stats.status !== 0) {
+      return NextResponse.json(
+        { success: false, error: 'Player is not in RP mode' },
         { status: 400 }
       );
     }

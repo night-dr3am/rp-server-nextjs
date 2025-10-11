@@ -486,6 +486,54 @@ describe('/api/arkana/combat/first-aid', () => {
       expect(response.status).toBe(400);
     });
 
+    it('should return 400 when target is not in RP mode', async () => {
+      const healer = await createArkanaTestUser({
+        characterName: 'Healer',
+        race: 'human',
+        archetype: 'Healer',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 5,
+        hitPoints: 10
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'OOC Patient',
+        race: 'human',
+        archetype: 'Fighter',
+        physical: 5,
+        dexterity: 3,
+        mental: 2,
+        perception: 2,
+        hitPoints: 25
+      }, 10);
+
+      // Set target status to 1 (OOC mode, not in RP)
+      await prisma.userStats.update({
+        where: { userId: target.id },
+        data: { status: 1 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const firstAidData = {
+        healer_uuid: healer.slUuid,
+        target_uuid: target.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/first-aid', firstAidData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Target player is not in RP mode');
+      expect(response.status).toBe(400);
+    });
+
     it('should return 400 for invalid signature', async () => {
       const healer = await createArkanaTestUser({
         characterName: 'Healer',

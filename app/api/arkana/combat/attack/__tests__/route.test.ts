@@ -292,6 +292,55 @@ describe('/api/arkana/combat/attack', () => {
       expect(response.status).toBe(400);
     });
 
+    it('should return 400 when target is not in RP mode', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'human',
+        archetype: 'Fighter',
+        physical: 5,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 25
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'OOC Target',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10
+      });
+
+      // Set target status to 1 (OOC mode, not in RP)
+      await prisma.userStats.update({
+        where: { userId: target.id },
+        data: { status: 1 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const attackData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Target player is not in RP mode');
+      expect(response.status).toBe(400);
+    });
+
     it('should return 404 for non-existent attacker', async () => {
       const target = await createArkanaTestUser({
         characterName: 'Target',

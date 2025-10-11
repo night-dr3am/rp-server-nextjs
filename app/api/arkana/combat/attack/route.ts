@@ -87,6 +87,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if target is in RP mode (status === 0 means IC/RP mode)
+    if (target.stats.status !== 0) {
+      return NextResponse.json(
+        { success: false, error: 'Target player is not in RP mode' },
+        { status: 400 }
+      );
+    }
+
     // Determine attack resolution based on attack type using proper stat modifier calculation
     let attackerMod: number;
     let defenderMod: number;

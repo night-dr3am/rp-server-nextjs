@@ -217,6 +217,60 @@ describe('/api/arkana/combat/power-attack', () => {
       expect(response.status).toBe(400);
     });
 
+    it('should return 400 when target is not in RP mode', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'OOC Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      // Set target status to 1 (OOC mode, not in RP)
+      await prisma.userStats.update({
+        where: { userId: target.id },
+        data: { status: 1 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Target player is not in RP mode');
+      expect(response.status).toBe(400);
+    });
+
     it('should not allow attacking yourself', async () => {
       const attacker = await createArkanaTestUser({
         characterName: 'Self Attacker',
