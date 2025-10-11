@@ -62,12 +62,10 @@ export async function POST(request: NextRequest) {
     const userArchPowerIds = player.arkanaStats.archetypePowers || [];
 
     // Filter and map user's powers to include only attack powers
+    // Memory-optimized: return only id and name (details fetched via power-info)
     const attackPowers: Array<{
       id: string;
       name: string;
-      baseStat: string;
-      targetType: string;
-      range: number;
     }> = [];
 
     // Process common powers
@@ -76,10 +74,7 @@ export async function POST(request: NextRequest) {
       if (power && power.abilityType && power.abilityType.includes('attack')) {
         attackPowers.push({
           id: power.id,
-          name: power.name,
-          baseStat: power.baseStat || 'Mental',
-          targetType: power.targetType || 'single',
-          range: power.range || 20
+          name: power.name
         });
       }
     });
@@ -90,24 +85,18 @@ export async function POST(request: NextRequest) {
       if (power && power.abilityType && power.abilityType.includes('attack')) {
         attackPowers.push({
           id: power.id,
-          name: power.name,
-          baseStat: power.baseStat || 'Mental',
-          targetType: power.targetType || 'single',
-          range: power.range || 20
+          name: power.name
         });
       }
     });
 
-    // Return the list of attack powers
+    // Return the list of attack powers (id and name only for memory optimization)
     return NextResponse.json({
       success: true,
       data: {
         powers: attackPowers.map(p => ({
           id: p.id,
-          name: encodeForLSL(p.name),
-          baseStat: p.baseStat,
-          targetType: p.targetType,
-          range: p.range
+          name: encodeForLSL(p.name)
         }))
       }
     });

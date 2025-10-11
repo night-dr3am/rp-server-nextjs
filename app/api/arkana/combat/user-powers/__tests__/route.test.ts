@@ -13,13 +13,10 @@ import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-
 import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
 
-// Type for power response
+// Type for power response (memory-optimized: only id and name)
 interface PowerResponse {
   id: string;
   name: string;
-  baseStat: string;
-  targetType: string;
-  range: number;
 }
 
 describe('/api/arkana/combat/user-powers', () => {
@@ -113,9 +110,7 @@ describe('/api/arkana/combat/user-powers', () => {
       const hypnosisPower = data.data.powers.find((p: PowerResponse) => p.id === 'strigoi_hypnosis');
       expect(hypnosisPower).toBeDefined();
       expect(hypnosisPower.name).toBeDefined();
-      expect(hypnosisPower.baseStat).toBeDefined();
-      expect(hypnosisPower.targetType).toBeDefined();
-      expect(hypnosisPower.range).toBeDefined();
+      // Details (baseStat, targetType, range) fetched via power-info endpoint
     });
 
     it('should return attack powers from user archetype powers', async () => {
@@ -155,7 +150,7 @@ describe('/api/arkana/combat/user-powers', () => {
       // Both archetype powers are attack powers
       const cradlePower = data.data.powers.find((p: PowerResponse) => p.id === 'strigoi_life_cradle_of_hunger');
       expect(cradlePower).toBeDefined();
-      expect(cradlePower.baseStat).toBe('Physical');
+      expect(cradlePower.name).toBeDefined();
     });
 
     it('should return empty list for user with no attack powers', async () => {
