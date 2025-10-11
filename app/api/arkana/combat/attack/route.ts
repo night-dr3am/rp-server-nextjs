@@ -126,7 +126,14 @@ export async function POST(request: NextRequest) {
     let newTargetHealth = target.stats.health;
 
     if (isHit) {
-      damage = 1; // Base damage, can add weapon modifiers later
+      // Calculate damage based on attack type: 1 + attacker's stat modifier
+      if (attack_type === 'physical') {
+        damage = 1 + calculateStatModifier(attacker.arkanaStats.physical);
+      } else if (attack_type === 'ranged') {
+        damage = 1 + calculateStatModifier(attacker.arkanaStats.dexterity);
+      }
+      // Ensure minimum 1 damage on successful hit
+      damage = Math.max(1, damage);
       newTargetHealth = Math.max(0, target.stats.health - damage);
 
       // Update target's health
