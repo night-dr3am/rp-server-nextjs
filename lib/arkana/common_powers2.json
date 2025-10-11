@@ -415,7 +415,7 @@
   {
     "id": "veil_emotion_theft",
     "name": "Emotion Theft",
-    "desc": "Siphon dominant emotion; target suffers −1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
+    "desc": "Siphon dominant emotion; target suffers -1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
     "cost": 3,
     "species": "veilborn",
     "abilityType": ["attack"],
@@ -445,7 +445,7 @@
   {
     "id": "veil_entropy_pulse",
     "name": "Entropy Pulse",
-    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (−1 TN or effect for 1 turn).",
+    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (-1 TN or effect for 1 turn).",
     "cost": 2,
     "species": "veilborn",
     "abilityType": ["attack"],

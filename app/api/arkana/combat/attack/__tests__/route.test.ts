@@ -167,25 +167,25 @@ describe('/api/arkana/combat/attack', () => {
       expect(data.data.targetNumber).toBe(12); // 10 + 2 = 12
     });
 
-    it('should process a power attack correctly', async () => {
+    it('should reject power attack type and redirect to power-attack endpoint', async () => {
       const attacker = await createArkanaTestUser({
         characterName: 'Psion',
         race: 'human',
         archetype: 'Mentalist',
         physical: 2,
         dexterity: 2,
-        mental: 5, // High mental for power attacks
+        mental: 5,
         perception: 3,
         hitPoints: 10
       });
 
       const target = await createArkanaTestUser({
-        characterName: 'Weak Mind',
+        characterName: 'Target',
         race: 'human',
         archetype: 'Fighter',
         physical: 4,
         dexterity: 3,
-        mental: 1, // Low mental = vulnerable to power attacks
+        mental: 1,
         perception: 2,
         hitPoints: 20
       });
@@ -206,12 +206,9 @@ describe('/api/arkana/combat/attack', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectSuccess(data);
-      expect(data.data.attackStat).toBe('Mental');
-      expect(data.data.defenseStat).toBe('Mental');
-      expect(data.data.attackerMod).toBe(6); // mental 5 → +6 (from calculateStatModifier)
-      expect(data.data.defenderMod).toBe(-2); // mental 1 → -2 (from calculateStatModifier)
-      expect(data.data.targetNumber).toBe(8); // 10 + (-2) = 8
+      // Should reject power attacks and suggest power-attack endpoint
+      expectError(data);
+      expect(response.status).toBe(400);
     });
 
     it('should return 400 for self-attack', async () => {
@@ -493,7 +490,7 @@ describe('/api/arkana/combat/attack', () => {
         signature: 'a'.repeat(64) // Valid 64-char hex signature
       };
 
-      ['physical', 'ranged', 'power'].forEach(attackType => {
+      ['physical', 'ranged'].forEach(attackType => {
         const payload = { ...basePayload, attack_type: attackType };
         const { error } = arkanaCombatAttackSchema.validate(payload);
         expect(error).toBeUndefined();

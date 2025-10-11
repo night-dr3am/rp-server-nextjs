@@ -459,11 +459,11 @@ export const arkanaPaymentSchema = Joi.object({
   signature: signatureSchema
 });
 
-// Arkana combat validation schema
+// Arkana combat validation schema (physical and ranged only - power attacks use power-attack endpoint)
 export const arkanaCombatAttackSchema = Joi.object({
   attacker_uuid: uuidSchema,
   target_uuid: uuidSchema,
-  attack_type: Joi.string().valid('physical', 'ranged', 'power').required(),
+  attack_type: Joi.string().valid('physical', 'ranged').required(),
   universe: Joi.string().valid('arkana').required(),
   timestamp: timestampSchema,
   signature: signatureSchema
@@ -492,6 +492,50 @@ export const arkanaFirstAidSchema = Joi.object({
   timestamp: timestampSchema,
   signature: signatureSchema
 });
+
+// Arkana power-based combat validation schemas
+export const arkanaUserPowersSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaPowerInfoSchema = Joi.object({
+  player_uuid: uuidSchema,
+  power_id: Joi.string().min(1).max(255).optional(),
+  power_name: Joi.string().min(1).max(255).optional(),
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+}).custom((value, helpers) => {
+  // Ensure at least one of power_id or power_name is provided
+  if (!value.power_id && !value.power_name) {
+    return helpers.error('any.invalid', { message: 'Either power_id or power_name must be provided' });
+  }
+  return value;
+}, 'Power identifier validation');
+
+export const arkanaPowerAttackSchema = Joi.object({
+  attacker_uuid: uuidSchema,
+  power_id: Joi.string().min(1).max(255).optional(),
+  power_name: Joi.string().min(1).max(255).optional(),
+  target_uuid: uuidSchema,
+  nearby_uuids: Joi.array().items(Joi.string().uuid()).optional().default([]),
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+}).custom((value, helpers) => {
+  // Ensure at least one of power_id or power_name is provided
+  if (!value.power_id && !value.power_name) {
+    return helpers.error('any.invalid', { message: 'Either power_id or power_name must be provided' });
+  }
+  // Ensure attacker and target are different
+  if (value.attacker_uuid === value.target_uuid) {
+    return helpers.error('any.invalid', { message: 'Cannot attack yourself' });
+  }
+  return value;
+}, 'Power attack validation');
 
 // Crafting system validation schemas
 export const recipeUpsertSchema = Joi.object({

@@ -1,5 +1,14 @@
 // TypeScript types for Arkana character creation data
 
+// Effects structure based on effectsSystemSchema.json
+export interface PowerEffects {
+  attack?: string[];
+  ability?: string[];
+  passive?: string[];
+  onHit?: string[];
+  onDefense?: string[];
+}
+
 export interface Flaw {
   id: string;
   name: string;
@@ -14,6 +23,12 @@ export interface CommonPower {
   desc: string;
   cost: number;
   species: string;
+  abilityType?: string[];
+  tags?: string[];
+  baseStat?: string;
+  targetType?: string;
+  range?: number;
+  effects?: PowerEffects;
 }
 
 export interface Perk {
@@ -32,6 +47,12 @@ export interface ArchetypePower {
   cost: number;
   species: string;
   arch: string;
+  abilityType?: string[];
+  tags?: string[];
+  baseStat?: string;
+  targetType?: string;
+  range?: number;
+  effects?: PowerEffects;
 }
 
 export interface Cybernetic {

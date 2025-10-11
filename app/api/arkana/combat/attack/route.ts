@@ -106,15 +106,9 @@ export async function POST(request: NextRequest) {
         attackStat = 'Dexterity';
         defenseStat = 'Dexterity';
         break;
-      case 'power':
-        attackerMod = calculateStatModifier(attacker.arkanaStats.mental);
-        defenderMod = calculateStatModifier(target.arkanaStats.mental);
-        attackStat = 'Mental';
-        defenseStat = 'Mental';
-        break;
       default:
         return NextResponse.json(
-          { success: false, error: 'Invalid attack type' },
+          { success: false, error: 'Invalid attack type. Use /api/arkana/combat/power-attack for power attacks' },
           { status: 400 }
         );
     }

@@ -1658,7 +1658,7 @@
   {
     "id": "veil_glass_starlit_gaze",
     "name": "Starlit Gaze",
-    "desc": "Overwhelm mortals with cosmic visions; −1 Mental for 1 turn, may dazzle/distract.",
+    "desc": "Overwhelm mortals with cosmic visions; -1 Mental for 1 turn, may dazzle/distract.",
     "cost": 3,
     "species": "veilborn",
     "arch": "glass",
@@ -1916,7 +1916,7 @@
   {
     "id": "human_psion_memory_emotion_sculpt",
     "name": "Memory and Emotion Sculpt",
-    "desc": "Absorb, redirect, or manipulate emotions and memories; −1 Mental for 1–3 turns.",
+    "desc": "Absorb, redirect, or manipulate emotions and memories; -1 Mental for 1–3 turns.",
     "cost": 4,
     "species": "human",
     "arch": "psion",
