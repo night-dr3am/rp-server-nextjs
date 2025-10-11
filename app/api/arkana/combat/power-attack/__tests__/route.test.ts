@@ -314,4 +314,122 @@ describe('/api/arkana/combat/power-attack', () => {
       expect(error?.message).toBeDefined();
     });
   });
+
+  describe('Effect Message Tests', () => {
+    it('should include effect details in message for powers with stat modifiers', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Emotion Thief',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,  // +0 modifier
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_emotion_theft'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,  // +0 modifier
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'veil_emotion_theft',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.message).toBeDefined();
+
+      // Decode the message and check for effect details
+      const decodedMessage = decodeURIComponent(data.data.message);
+
+      // Should have hit/miss status
+      expect(decodedMessage).toMatch(/HIT!|MISS!/);
+
+      // If it hits, should mention target and attacker effects
+      if (decodedMessage.includes('HIT!')) {
+        expect(decodedMessage).toContain('Target:');
+        expect(decodedMessage).toContain('Mental');
+        expect(decodedMessage).toContain('Attacker:');
+      }
+    });
+
+    it('should show debuff details for pure debuff powers', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Entropy Master',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_entropy_pulse'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'veil_entropy_pulse',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const decodedMessage = decodeURIComponent(data.data.message);
+
+      // Should show 0 damage and target effects if hit
+      if (decodedMessage.includes('HIT!')) {
+        expect(decodedMessage).toContain('0 damage dealt');
+        expect(decodedMessage).toContain('Target:');
+      }
+    });
+  });
 });

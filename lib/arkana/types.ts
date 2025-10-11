@@ -9,6 +9,59 @@ export interface PowerEffects {
   onDefense?: string[];
 }
 
+// Effect definition from effects.json
+export interface EffectDefinition {
+  id: string;
+  name: string;
+  desc: string;
+  category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'heal' | 'utility' | 'defense' | 'special';
+  type?: string;
+
+  // Check-related fields
+  checkStat?: string;
+  checkVs?: 'fixed' | 'enemy_stat';
+  checkVsStat?: string;
+  checkTN?: number;
+
+  // Damage-related fields
+  damageType?: string;
+  damageFormula?: string;
+  damageFixed?: number;
+
+  // Heal-related fields
+  healType?: string;
+  healFormula?: string;
+
+  // Stat modifier fields
+  stat?: string;
+  modifier?: number;
+  modifierType?: 'stat_value' | 'roll_bonus';
+
+  // Control-related fields
+  controlType?: string;
+
+  // Utility fields
+  utilityType?: string;
+
+  // Defense fields
+  defenseType?: string;
+  damageReduction?: number;
+
+  // Common fields
+  target?: 'enemy' | 'self' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'single';
+  duration?: string;
+  resistType?: string;
+}
+
+// Result of executing an effect
+export interface EffectResult {
+  success: boolean;
+  effectDef: EffectDefinition;
+  damage?: number;
+  heal?: number;
+  rollInfo?: string;
+}
+
 export interface Flaw {
   id: string;
   name: string;

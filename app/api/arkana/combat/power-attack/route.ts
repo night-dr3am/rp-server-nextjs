@@ -2,92 +2,106 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { calculateStatModifier } from '@/lib/arkana/types';
 import { encodeForLSL } from '@/lib/stringUtils';
-import type { CommonPower, ArchetypePower } from '@/lib/arkana/types';
+import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
 import type { ArkanaStats } from '@prisma/client';
 
-// Effect interpreter function
+// Effect interpreter function using structured data from effects.json
 function executeEffect(
-  effect: string,
+  effectId: string,
   attacker: ArkanaStats,
   target: ArkanaStats,
-  targetsStat?: number
-): { success: boolean; damage?: number; description?: string } {
-  // Parse effect string (e.g., "check_mental_vs_mental", "damage_physical_3")
-  const parts = effect.split('_');
+  targetStatValue?: number
+): EffectResult | null {
+  const effectDef = getEffectDefinition(effectId);
 
-  // Check effects (roll-based)
-  if (parts[0] === 'check') {
-    const attackStat = parts[1]; // physical, mental, dexterity, perception
-    const defenseType = parts[3]; // mental, physical, tn10, etc.
+  if (!effectDef) {
+    console.warn(`Effect definition not found: ${effectId}`);
+    return null;
+  }
 
-    // Get attacker modifier based on stat
+  // Handle CHECK effects
+  if (effectDef.category === 'check') {
     let attackerMod = 0;
-    if (attackStat === 'physical') attackerMod = calculateStatModifier(attacker.physical);
-    else if (attackStat === 'mental') attackerMod = calculateStatModifier(attacker.mental);
-    else if (attackStat === 'dexterity') attackerMod = calculateStatModifier(attacker.dexterity);
-    else if (attackStat === 'perception') attackerMod = calculateStatModifier(attacker.perception);
+    if (effectDef.checkStat === 'Physical') attackerMod = calculateStatModifier(attacker.physical);
+    else if (effectDef.checkStat === 'Mental') attackerMod = calculateStatModifier(attacker.mental);
+    else if (effectDef.checkStat === 'Dexterity') attackerMod = calculateStatModifier(attacker.dexterity);
+    else if (effectDef.checkStat === 'Perception') attackerMod = calculateStatModifier(attacker.perception);
 
-    // Determine target number
     let targetNumber = 10;
-    if (defenseType === 'mental') {
-      targetNumber = 10 + calculateStatModifier(targetsStat || target?.mental || 2);
-    } else if (defenseType === 'physical') {
-      targetNumber = 10 + calculateStatModifier(targetsStat || target?.physical || 2);
-    } else if (defenseType === 'dexterity') {
-      targetNumber = 10 + calculateStatModifier(targetsStat || target?.dexterity || 2);
-    } else if (defenseType === 'perception') {
-      targetNumber = 10 + calculateStatModifier(targetsStat || target?.perception || 2);
-    } else if (defenseType.startsWith('tn')) {
-      targetNumber = parseInt(defenseType.substring(2)) || 10;
+    if (effectDef.checkVs === 'enemy_stat' && effectDef.checkVsStat) {
+      targetNumber = 10 + calculateStatModifier(targetStatValue || 2);
+    } else if (effectDef.checkVs === 'fixed' && effectDef.checkTN) {
+      targetNumber = effectDef.checkTN;
     }
 
-    // Roll d20
     const d20 = Math.floor(Math.random() * 20) + 1;
     const total = d20 + attackerMod;
     const success = total >= targetNumber;
 
     return {
       success,
-      description: `Roll: ${d20}+${attackerMod}=${total} vs TN:${targetNumber}`
+      effectDef,
+      rollInfo: `Roll: ${d20}+${attackerMod}=${total} vs TN:${targetNumber}`
     };
   }
 
-  // Damage effects
-  if (parts[0] === 'damage') {
-    const damageType = parts[1]; // physical, mental, fire, necrotic, etc.
-    const damageAmount = parseInt(parts[2]) || 1;
+  // Handle DAMAGE effects
+  if (effectDef.category === 'damage') {
+    let damage = effectDef.damageFixed || 0;
 
-    return {
-      success: true,
-      damage: damageAmount,
-      description: `${damageAmount} ${damageType} damage`
-    };
+    if (effectDef.damageFormula) {
+      const parts = effectDef.damageFormula.split('+').map(p => p.trim());
+      damage = parseInt(parts[0]) || 0;
+
+      if (parts[1]) {
+        const statName = parts[1];
+        if (statName === 'Physical') damage += calculateStatModifier(attacker.physical);
+        else if (statName === 'Mental') damage += calculateStatModifier(attacker.mental);
+        else if (statName === 'Dexterity') damage += calculateStatModifier(attacker.dexterity);
+        else if (statName === 'Perception') damage += calculateStatModifier(attacker.perception);
+      }
+    }
+
+    return { success: true, damage, effectDef };
   }
 
-  // Debuff/buff effects (placeholder - can be expanded)
-  if (parts[0] === 'debuff' || parts[0] === 'buff') {
-    return {
-      success: true,
-      description: effect.replace(/_/g, ' ')
-    };
+  // Handle STAT_MODIFIER, CONTROL, HEAL, etc. - just return the definition
+  return { success: true, effectDef };
+}
+
+// Build human-readable effect message
+function buildEffectMessage(result: EffectResult): string {
+  const def = result.effectDef;
+
+  if (def.category === 'damage' && result.damage) {
+    return `${result.damage} ${def.damageType} damage`;
   }
 
-  // Control effects (placeholder)
-  if (parts[0] === 'control') {
-    return {
-      success: true,
-      description: effect.replace(/_/g, ' ')
-    };
+  if (def.category === 'stat_modifier') {
+    const sign = (def.modifier || 0) >= 0 ? '+' : '';
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    return `${sign}${def.modifier} ${def.stat}${duration}`;
   }
 
-  // Default: effect not yet implemented
-  return {
-    success: true,
-    description: effect.replace(/_/g, ' ')
-  };
+  if (def.category === 'control') {
+    return `${def.controlType || 'control'} effect`;
+  }
+
+  if (def.category === 'heal' && result.heal) {
+    return `Heals ${result.heal} HP`;
+  }
+
+  // Fallback: use effect name
+  return def.name;
 }
 
 export async function POST(request: NextRequest) {
@@ -183,19 +197,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Execute effects - handle undefined safely
+    // Execute effects using structured data
     const attackEffects = (power.effects?.attack && Array.isArray(power.effects.attack))
       ? power.effects.attack
       : [];
-    const affectedPlayers: Array<{ uuid: string; name: string; effects: string[] }> = [];
+    const appliedEffects: EffectResult[] = [];
     let totalDamage = 0;
     let attackSuccess = false;
     let rollDescription = '';
 
     // First, execute check effects to determine success
-    for (const effect of attackEffects) {
-      if (effect.startsWith('check_')) {
-        // Get target stat value safely
+    for (const effectId of attackEffects) {
+      if (effectId.startsWith('check_')) {
         const baseStatName = power.baseStat?.toLowerCase() || 'mental';
         let targetStatValue: number;
         if (baseStatName === 'physical') targetStatValue = target.arkanaStats.physical;
@@ -204,14 +217,16 @@ export async function POST(request: NextRequest) {
         else if (baseStatName === 'perception') targetStatValue = target.arkanaStats.perception;
         else targetStatValue = target.arkanaStats.mental;
 
-        const result = executeEffect(effect, attacker.arkanaStats, target.arkanaStats, targetStatValue);
-        attackSuccess = result.success;
-        rollDescription = result.description || '';
-        break; // Only one check effect per attack
+        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, targetStatValue);
+        if (result) {
+          attackSuccess = result.success;
+          rollDescription = result.rollInfo || '';
+        }
+        break;
       }
     }
 
-    // If attack failed on check, don't apply damage effects
+    // If attack failed on check, return miss
     if (!attackSuccess && attackEffects.some((e: string) => e.startsWith('check_'))) {
       return NextResponse.json({
         success: true,
@@ -226,7 +241,7 @@ export async function POST(request: NextRequest) {
             uuid: target.slUuid,
             name: encodeForLSL(target.arkanaStats.characterName),
             healthBefore: target.stats.health,
-            healthAfter: target.stats.health, // No change on miss
+            healthAfter: target.stats.health,
             isUnconscious: (target.stats.health <= 0) ? 'true' : 'false'
           },
           message: encodeForLSL(`${attacker.arkanaStats.characterName} uses ${power.name} on ${target.arkanaStats.characterName} - MISS! ${rollDescription}`)
@@ -234,55 +249,69 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Attack succeeded or no check required - apply damage effects
-    for (const effect of attackEffects) {
-      if (effect.startsWith('damage_')) {
-        const result = executeEffect(effect, attacker.arkanaStats, target.arkanaStats);
-        if (result.damage) {
-          totalDamage += result.damage;
+    // Attack succeeded - apply all non-check effects
+    for (const effectId of attackEffects) {
+      if (!effectId.startsWith('check_')) {
+        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats);
+        if (result) {
+          appliedEffects.push(result);
+          if (result.damage) totalDamage += result.damage;
         }
       }
     }
 
-    // Apply damage to target
+    // Apply damage to target health
     let newTargetHealth = target.stats.health;
     if (totalDamage > 0) {
       newTargetHealth = Math.max(0, target.stats.health - totalDamage);
       await prisma.userStats.update({
         where: { userId: target.id },
-        data: {
-          health: newTargetHealth,
-          lastUpdated: new Date()
-        }
-      });
-
-      affectedPlayers.push({
-        uuid: target.slUuid,
-        name: target.arkanaStats.characterName,
-        effects: [`Took ${totalDamage} damage`]
+        data: { health: newTargetHealth, lastUpdated: new Date() }
       });
     }
 
-    // Build result message
+    // Build comprehensive message with effect details
     const attackerName = attacker.arkanaStats.characterName;
     const targetName = target.arkanaStats.characterName;
-    const resultMessage = attackSuccess
-      ? `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription} - ${totalDamage} damage dealt`
-      : `${attackerName} uses ${power.name} on ${targetName} - ${totalDamage} damage dealt`;
+
+    let message = `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription}`;
+
+    // Always show damage (even if 0)
+    message += ` - ${totalDamage} damage dealt`;
+
+    // Group effects by target
+    const targetEffects = appliedEffects.filter(e =>
+      e.effectDef.target === 'enemy' || e.effectDef.target === 'single'
+    );
+    const selfEffects = appliedEffects.filter(e =>
+      e.effectDef.target === 'self'
+    );
+
+    if (targetEffects.length > 0) {
+      const msgs = targetEffects.map(buildEffectMessage);
+      message += `. Target: ${msgs.join(', ')}`;
+    }
+
+    if (selfEffects.length > 0) {
+      const msgs = selfEffects.map(buildEffectMessage);
+      message += `. Attacker: ${msgs.join(', ')}`;
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        attackSuccess: attackSuccess ? 'true' : 'false',
+        attackSuccess: 'true',
         powerUsed: power.name,
         powerBaseStat: power.baseStat || 'Mental',
         rollInfo: rollDescription,
         totalDamage,
-        affected: affectedPlayers.map(p => ({
-          uuid: p.uuid,
-          name: encodeForLSL(p.name),
-          effects: p.effects
-        })),
+        affected: appliedEffects
+          .filter(e => e.effectDef.target === 'enemy' || e.effectDef.target === 'single')
+          .map(e => ({
+            uuid: target.slUuid,
+            name: encodeForLSL(targetName),
+            effects: [buildEffectMessage(e)]
+          })),
         target: {
           uuid: target.slUuid,
           name: encodeForLSL(targetName),
@@ -290,7 +319,7 @@ export async function POST(request: NextRequest) {
           healthAfter: newTargetHealth,
           isUnconscious: (newTargetHealth <= 0) ? 'true' : 'false'
         },
-        message: encodeForLSL(resultMessage)
+        message: encodeForLSL(message)
       }
     });
 

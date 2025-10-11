@@ -6,7 +6,8 @@ import {
   ArchetypePower,
   Cybernetic,
   MagicSchool,
-  CharacterModel
+  CharacterModel,
+  EffectDefinition
 } from './types';
 
 // Constants
@@ -19,17 +20,19 @@ let perks: Perk[] = [];
 let archPowers: ArchetypePower[] = [];
 let cybernetics: Cybernetic[] = [];
 let magicSchools: MagicSchool[] = [];
+let effectsMap: Map<string, EffectDefinition> = new Map();
 
 // Load all data function
 export async function loadAllData(): Promise<void> {
   try {
-    const [flawsData, commonData, perksData, archData, cyberData, magicData] = await Promise.all([
+    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData] = await Promise.all([
       import('./flaws3.json').then(m => m.default),
       import('./common_powers2.json').then(m => m.default),
       import('./perks2.json').then(m => m.default),
       import('./archetype_powers4.json').then(m => m.default),
       import('./cybernetics2.json').then(m => m.default),
-      import('./magic_schools8.json').then(m => m.default)
+      import('./magic_schools8.json').then(m => m.default),
+      import('./effects.json').then(m => m.default)
     ]);
 
     flaws = flawsData;
@@ -38,6 +41,10 @@ export async function loadAllData(): Promise<void> {
     archPowers = archData;
     cybernetics = cyberData;
     magicSchools = magicData;
+
+    // Load effects into map for fast lookup
+    // Cast the JSON data to EffectDefinition array
+    effectsMap = new Map((effectsData as EffectDefinition[]).map(e => [e.id, e]));
   } catch (error) {
     console.error('Failed to load Arkana data:', error);
     throw error;
@@ -277,3 +284,6 @@ export function getAllPerks(): Perk[] { return perks; }
 export function getAllArchPowers(): ArchetypePower[] { return archPowers; }
 export function getAllCybernetics(): Cybernetic[] { return cybernetics; }
 export function getAllMagicSchools(): MagicSchool[] { return magicSchools; }
+export function getEffectDefinition(effectId: string): EffectDefinition | undefined {
+  return effectsMap.get(effectId);
+}
