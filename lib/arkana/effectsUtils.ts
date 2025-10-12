@@ -343,3 +343,28 @@ export function getEffectiveStatModifier(
   // Calculate and return the final modifier for d20 rolls
   return calculateStatModifier(effectiveValue);
 }
+
+/**
+ * Clear all turn-based and scene-based effects
+ * Keeps only permanent effects
+ * @param activeEffects - Current active effects
+ * @param baseStats - Base character stats
+ * @returns Updated activeEffects and liveStats with only permanent effects
+ */
+export function clearSceneEffects(
+  activeEffects: ActiveEffect[],
+  baseStats: ArkanaStats
+): { activeEffects: ActiveEffect[]; liveStats: LiveStats } {
+  // Filter to keep only permanent effects
+  const remainingEffects = activeEffects.filter(effect => {
+    const effectDef = getEffectDefinition(effect.effectId);
+    return effectDef?.duration === 'permanent';
+  });
+
+  const liveStats = recalculateLiveStats(baseStats, remainingEffects);
+
+  return {
+    activeEffects: remainingEffects,
+    liveStats
+  };
+}

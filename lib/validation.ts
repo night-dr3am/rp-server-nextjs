@@ -555,6 +555,21 @@ export const arkanaPowerActivateSchema = Joi.object({
   return value;
 }, 'Power activate validation');
 
+// Arkana turn management validation schemas
+export const arkanaEndTurnSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaEndSceneSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // Crafting system validation schemas
 export const recipeUpsertSchema = Joi.object({
   name: Joi.string().min(1).max(255).required(),
