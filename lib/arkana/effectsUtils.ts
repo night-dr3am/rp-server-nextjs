@@ -245,3 +245,28 @@ export function parseActiveEffects(jsonData: unknown): ActiveEffect[] {
   }
   return jsonData as ActiveEffect[];
 }
+
+/**
+ * Format LiveStats object into LSL-friendly string
+ * Returns pipe-separated key:value pairs for display in HUD
+ * Format: "stat1:value1|stat2:value2|..."
+ * Examples:
+ *   "Stealth:+3|Physical:-1" (numeric modifiers with sign)
+ *   "paralyzed:Paralyzed|Stealth:+2" (control effects as key:value)
+ */
+export function formatLiveStatsForLSL(liveStats: LiveStats): string {
+  const parts: string[] = [];
+
+  for (const [statName, value] of Object.entries(liveStats)) {
+    if (typeof value === 'number') {
+      // Format numeric values with sign
+      const sign = value >= 0 ? '+' : '';
+      parts.push(`${statName}:${sign}${value}`);
+    } else if (typeof value === 'string') {
+      // Format string values (control effects)
+      parts.push(`${statName}:${value}`);
+    }
+  }
+
+  return parts.join('|');
+}

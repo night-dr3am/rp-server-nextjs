@@ -173,8 +173,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If activation failed on check, return failure
+    // If activation failed on check, still process turn and return failure
     if (!activationSuccess && activateEffects.some((e: string) => e.startsWith('check_'))) {
+      // Process turn for caster (decrement all effects) even on failure
+      const casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
+      const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects: turnProcessed.activeEffects,
+          liveStats: turnProcessed.liveStats
+        })
+      });
+
       return NextResponse.json({
         success: true,
         data: {
@@ -185,7 +197,8 @@ export async function POST(request: NextRequest) {
           affected: [],
           caster: {
             uuid: caster.slUuid,
-            name: encodeForLSL(caster.arkanaStats.characterName)
+            name: encodeForLSL(caster.arkanaStats.characterName),
+            turnsRemaining: turnProcessed.activeEffects.length
           },
           message: encodeForLSL(`${caster.arkanaStats.characterName} attempts ${power.name} - FAILED! ${rollDescription}`)
         }

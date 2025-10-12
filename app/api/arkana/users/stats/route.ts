@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaStatsSchema, arkanaUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
+import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL } from '@/lib/arkana/effectsUtils';
 
 // GET /api/arkana/users/stats - Retrieve Arkana user statistics
 export async function GET(request: NextRequest) {
@@ -55,6 +56,14 @@ export async function GET(request: NextRequest) {
         { success: false, error: 'User not found in Arkana universe' },
         { status: 404 }
       );
+    }
+
+    // Calculate liveStats string for HUD display
+    let liveStatsString = '';
+    if (user.arkanaStats) {
+      const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
     }
 
     // Return user stats including Arkana character data
@@ -118,6 +127,7 @@ export async function GET(request: NextRequest) {
           credits: user.arkanaStats.credits,
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
+          liveStatsString: liveStatsString,
           createdAt: user.arkanaStats.createdAt,
           updatedAt: user.arkanaStats.updatedAt
         } : null,
@@ -206,6 +216,14 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Calculate liveStats string for HUD display
+    let liveStatsString = '';
+    if (updatedUser.arkanaStats) {
+      const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
+    }
+
     // Return the updated stats in the same format as GET
     return NextResponse.json({
       success: true,
@@ -267,6 +285,7 @@ export async function POST(request: NextRequest) {
           credits: updatedUser.arkanaStats.credits,
           chips: updatedUser.arkanaStats.chips,
           xp: updatedUser.arkanaStats.xp,
+          liveStatsString: liveStatsString,
           createdAt: updatedUser.arkanaStats.createdAt,
           updatedAt: updatedUser.arkanaStats.updatedAt
         } : null,

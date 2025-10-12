@@ -64,6 +64,10 @@ describe('/api/arkana/combat/power-activate', () => {
     // If activeEffects provided but no liveStats, calculate them
     let calculatedLiveStats = arkanaStatsData.liveStats;
     if (arkanaStatsData.activeEffects && arkanaStatsData.activeEffects.length > 0 && !arkanaStatsData.liveStats) {
+      // Load effect data before calculating liveStats
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
       // Create a temporary ArkanaStats object for calculation
       const tempStats = {
         physical: arkanaStatsData.physical,

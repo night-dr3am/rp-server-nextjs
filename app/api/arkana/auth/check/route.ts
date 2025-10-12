@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { checkUserSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
+import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL } from '@/lib/arkana/effectsUtils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,6 +72,14 @@ export async function GET(request: NextRequest) {
       data: { lastActive: new Date() }
     });
 
+    // Calculate liveStats string for HUD display
+    let liveStatsString = '';
+    if (user.arkanaStats) {
+      const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
+    }
+
     // Return user data with nested structure (consistent with GET_STATS endpoint)
     return NextResponse.json({
       success: true,
@@ -116,6 +125,7 @@ export async function GET(request: NextRequest) {
           credits: user.arkanaStats.credits,
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
+          liveStatsString: liveStatsString,
           createdAt: user.arkanaStats.createdAt
         } : null,
         hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
@@ -196,6 +206,14 @@ export async function POST(request: NextRequest) {
       data: { lastActive: new Date() }
     });
 
+    // Calculate liveStats string for HUD display
+    let liveStatsString = '';
+    if (user.arkanaStats) {
+      const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
+    }
+
     // Return user data with nested structure (consistent with GET_STATS endpoint)
     return NextResponse.json({
       success: true,
@@ -241,6 +259,7 @@ export async function POST(request: NextRequest) {
           credits: user.arkanaStats.credits,
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
+          liveStatsString: liveStatsString,
           createdAt: user.arkanaStats.createdAt
         } : null,
         hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
