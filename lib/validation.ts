@@ -497,6 +497,7 @@ export const arkanaFirstAidSchema = Joi.object({
 export const arkanaUserPowersSchema = Joi.object({
   player_uuid: uuidSchema,
   universe: Joi.string().valid('arkana').required(),
+  type: Joi.string().valid('attack', 'ability').optional().default('attack'),
   timestamp: timestampSchema,
   signature: signatureSchema
 });
@@ -536,6 +537,23 @@ export const arkanaPowerAttackSchema = Joi.object({
   }
   return value;
 }, 'Power attack validation');
+
+export const arkanaPowerActivateSchema = Joi.object({
+  caster_uuid: uuidSchema,
+  power_id: Joi.string().min(1).max(255).optional(),
+  power_name: Joi.string().min(1).max(255).optional(),
+  target_uuid: uuidSchema.optional(), // Optional for self-targeted powers
+  nearby_uuids: Joi.array().items(Joi.string().uuid()).optional().default([]),
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+}).custom((value, helpers) => {
+  // Ensure at least one of power_id or power_name is provided
+  if (!value.power_id && !value.power_name) {
+    return helpers.error('any.invalid', { message: 'Either power_id or power_name must be provided' });
+  }
+  return value;
+}, 'Power activate validation');
 
 // Crafting system validation schemas
 export const recipeUpsertSchema = Joi.object({

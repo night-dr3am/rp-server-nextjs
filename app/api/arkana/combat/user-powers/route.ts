@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { player_uuid, universe, timestamp, signature } = value;
+    const { player_uuid, universe, type, timestamp, signature } = value;
 
     // Validate signature for Arkana universe
     const signatureValidation = validateSignature(timestamp, signature, universe);
@@ -61,9 +61,10 @@ export async function POST(request: NextRequest) {
     const userCommonPowerIds = player.arkanaStats.commonPowers || [];
     const userArchPowerIds = player.arkanaStats.archetypePowers || [];
 
-    // Filter and map user's powers to include only attack powers
+    // Filter powers based on type (attack or ability)
     // Memory-optimized: return only id and name (details fetched via power-info)
-    const attackPowers: Array<{
+    const powerType = type || 'attack';
+    const filteredPowers: Array<{
       id: string;
       name: string;
     }> = [];
@@ -71,8 +72,8 @@ export async function POST(request: NextRequest) {
     // Process common powers
     userCommonPowerIds.forEach((powerId: string) => {
       const power = allCommonPowers.find((p: CommonPower) => p.id === powerId);
-      if (power && power.abilityType && power.abilityType.includes('attack')) {
-        attackPowers.push({
+      if (power && power.abilityType && power.abilityType.includes(powerType)) {
+        filteredPowers.push({
           id: power.id,
           name: power.name
         });
@@ -82,19 +83,19 @@ export async function POST(request: NextRequest) {
     // Process archetype powers
     userArchPowerIds.forEach((powerId: string) => {
       const power = allArchPowers.find((p: ArchetypePower) => p.id === powerId);
-      if (power && power.abilityType && power.abilityType.includes('attack')) {
-        attackPowers.push({
+      if (power && power.abilityType && power.abilityType.includes(powerType)) {
+        filteredPowers.push({
           id: power.id,
           name: power.name
         });
       }
     });
 
-    // Return the list of attack powers (id and name only for memory optimization)
+    // Return the filtered list of powers (id and name only for memory optimization)
     return NextResponse.json({
       success: true,
       data: {
-        powers: attackPowers.map(p => ({
+        powers: filteredPowers.map(p => ({
           id: p.id,
           name: encodeForLSL(p.name)
         }))
