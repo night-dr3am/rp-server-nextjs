@@ -213,6 +213,10 @@ model ArkanaStats {
   chips                  Int       @default(0)
   xp                     Int       @default(0)
 
+  // Active Effects System
+  activeEffects          Json?     @default("[]") @map("active_effects")  // Array of ActiveEffect objects
+  liveStats              Json?     @default("{}") @map("live_stats")      // Dynamic stat calculations
+
   // Metadata
   registrationCompleted  Boolean   @default(false) @map("registration_completed")
   arkanaRole             String    @default("player") @map("arkana_role")  // "player" or "admin"

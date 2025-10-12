@@ -2,75 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
-import { calculateStatModifier } from '@/lib/arkana/types';
+import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects } from '@/lib/arkana/effectsUtils';
 import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
-import type { ArkanaStats } from '@prisma/client';
-
-// Effect interpreter function using structured data from effects.json
-function executeEffect(
-  effectId: string,
-  attacker: ArkanaStats,
-  target: ArkanaStats,
-  targetStatValue?: number
-): EffectResult | null {
-  const effectDef = getEffectDefinition(effectId);
-
-  if (!effectDef) {
-    console.warn(`Effect definition not found: ${effectId}`);
-    return null;
-  }
-
-  // Handle CHECK effects
-  if (effectDef.category === 'check') {
-    let attackerMod = 0;
-    if (effectDef.checkStat === 'Physical') attackerMod = calculateStatModifier(attacker.physical);
-    else if (effectDef.checkStat === 'Mental') attackerMod = calculateStatModifier(attacker.mental);
-    else if (effectDef.checkStat === 'Dexterity') attackerMod = calculateStatModifier(attacker.dexterity);
-    else if (effectDef.checkStat === 'Perception') attackerMod = calculateStatModifier(attacker.perception);
-
-    let targetNumber = 10;
-    if (effectDef.checkVs === 'enemy_stat' && effectDef.checkVsStat) {
-      targetNumber = 10 + calculateStatModifier(targetStatValue || 2);
-    } else if (effectDef.checkVs === 'fixed' && effectDef.checkTN) {
-      targetNumber = effectDef.checkTN;
-    }
-
-    const d20 = Math.floor(Math.random() * 20) + 1;
-    const total = d20 + attackerMod;
-    const success = total >= targetNumber;
-
-    return {
-      success,
-      effectDef,
-      rollInfo: `Roll: ${d20}+${attackerMod}=${total} vs TN:${targetNumber}`
-    };
-  }
-
-  // Handle DAMAGE effects
-  if (effectDef.category === 'damage') {
-    let damage = effectDef.damageFixed || 0;
-
-    if (effectDef.damageFormula) {
-      const parts = effectDef.damageFormula.split('+').map(p => p.trim());
-      damage = parseInt(parts[0]) || 0;
-
-      if (parts[1]) {
-        const statName = parts[1];
-        if (statName === 'Physical') damage += calculateStatModifier(attacker.physical);
-        else if (statName === 'Mental') damage += calculateStatModifier(attacker.mental);
-        else if (statName === 'Dexterity') damage += calculateStatModifier(attacker.dexterity);
-        else if (statName === 'Perception') damage += calculateStatModifier(attacker.perception);
-      }
-    }
-
-    return { success: true, damage, effectDef };
-  }
-
-  // Handle STAT_MODIFIER, CONTROL, HEAL, etc. - just return the definition
-  return { success: true, effectDef };
-}
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -278,6 +213,52 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Process activeEffects and liveStats for target and attacker
+    const targetEffects = appliedEffects.filter(e =>
+      e.effectDef.target === 'enemy' || e.effectDef.target === 'single'
+    );
+    const selfEffects = appliedEffects.filter(e =>
+      e.effectDef.target === 'self'
+    );
+
+    // Update target's activeEffects and liveStats
+    if (targetEffects.length > 0) {
+      let targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+
+      for (const effectResult of targetEffects) {
+        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult);
+      }
+
+      const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetActiveEffects);
+
+      await prisma.arkanaStats.update({
+        where: { userId: target.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects: targetActiveEffects,
+          liveStats: targetLiveStats
+        })
+      });
+    }
+
+    // Update attacker's activeEffects and liveStats
+    if (selfEffects.length > 0) {
+      let attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+
+      for (const effectResult of selfEffects) {
+        attackerActiveEffects = applyActiveEffect(attackerActiveEffects, effectResult);
+      }
+
+      const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerActiveEffects);
+
+      await prisma.arkanaStats.update({
+        where: { userId: attacker.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects: attackerActiveEffects,
+          liveStats: attackerLiveStats
+        })
+      });
+    }
+
     // Build comprehensive message with effect details
     const attackerName = attacker.arkanaStats.characterName;
     const targetName = target.arkanaStats.characterName;
@@ -287,14 +268,7 @@ export async function POST(request: NextRequest) {
     // Always show damage (even if 0)
     message += ` - ${totalDamage} damage dealt`;
 
-    // Group effects by target
-    const targetEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'enemy' || e.effectDef.target === 'single'
-    );
-    const selfEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'self'
-    );
-
+    // Add effect messages (targetEffects and selfEffects already filtered above)
     if (targetEffects.length > 0) {
       const msgs = targetEffects.map(buildEffectMessage);
       message += `. Target: ${msgs.join(', ')}`;

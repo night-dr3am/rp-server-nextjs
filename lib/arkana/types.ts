@@ -62,6 +62,20 @@ export interface EffectResult {
   rollInfo?: string;
 }
 
+// Active Effect tracking
+export interface ActiveEffect {
+  effectId: string;        // EffectDefinition id
+  name: string;            // Effect name for display
+  duration: string;        // Original duration (e.g., "turns:3", "scene")
+  turnsLeft: number;       // Turns remaining
+  appliedAt: string;       // ISO timestamp when effect was applied
+}
+
+// Live Stats for dynamic calculations
+export interface LiveStats {
+  [statName: string]: number | string;  // e.g., { Stealth: 5, Physical: -1, Status: "paralyzed" }
+}
+
 export interface Flaw {
   id: string;
   name: string;
