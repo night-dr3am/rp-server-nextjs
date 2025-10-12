@@ -12,6 +12,8 @@ import {
 import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-setup';
 import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
+import type { ActiveEffect, LiveStats, ArkanaStats } from '@/lib/arkana/types';
+import { recalculateLiveStats } from '@/lib/arkana/effectsUtils';
 
 describe('/api/arkana/combat/power-check', () => {
   beforeAll(async () => {
@@ -26,7 +28,9 @@ describe('/api/arkana/combat/power-check', () => {
     await cleanupDatabase();
   });
 
-  // Helper function to create a complete Arkana test user
+  /**
+   * Helper: Create Arkana test user with stats and optional active effects
+   */
   async function createArkanaTestUser(arkanaStatsData: {
     characterName: string;
     race: string;
@@ -36,27 +40,61 @@ describe('/api/arkana/combat/power-check', () => {
     mental: number;
     perception: number;
     hitPoints: number;
+    commonPowers?: string[];
+    archetypePowers?: string[];
+    activeEffects?: ActiveEffect[];
+    liveStats?: LiveStats;
+    status?: number;
+    health?: number;
   }) {
     const { user } = await createTestUser('arkana');
 
-    // Create userStats
+    // Create user stats with specified status (default 0 = RP mode) and health
     await prisma.userStats.create({
       data: {
         userId: user.id,
-        health: 100,
+        health: arkanaStatsData.health !== undefined ? arkanaStatsData.health : 100,
         hunger: 100,
         thirst: 100,
-        copperCoin: 100
+        copperCoin: 100,
+        status: arkanaStatsData.status !== undefined ? arkanaStatsData.status : 0
       }
     });
 
-    // Create arkanaStats
+    // If activeEffects provided but no liveStats, calculate them
+    let calculatedLiveStats = arkanaStatsData.liveStats;
+    if (arkanaStatsData.activeEffects && arkanaStatsData.activeEffects.length > 0 && !arkanaStatsData.liveStats) {
+      // Load effect data before calculating liveStats
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      // Create a temporary ArkanaStats object for calculation
+      const tempStats = {
+        physical: arkanaStatsData.physical,
+        mental: arkanaStatsData.mental,
+        dexterity: arkanaStatsData.dexterity,
+        perception: arkanaStatsData.perception,
+      } as ArkanaStats;
+      calculatedLiveStats = recalculateLiveStats(tempStats, arkanaStatsData.activeEffects);
+    }
+
     await prisma.arkanaStats.create({
       data: {
         userId: user.id,
         agentName: user.username + ' Resident',
         registrationCompleted: true,
-        ...arkanaStatsData
+        characterName: arkanaStatsData.characterName,
+        race: arkanaStatsData.race,
+        archetype: arkanaStatsData.archetype,
+        physical: arkanaStatsData.physical,
+        dexterity: arkanaStatsData.dexterity,
+        mental: arkanaStatsData.mental,
+        perception: arkanaStatsData.perception,
+        hitPoints: arkanaStatsData.hitPoints,
+        commonPowers: arkanaStatsData.commonPowers || [],
+        archetypePowers: arkanaStatsData.archetypePowers || [],
+        activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
+        liveStats: (calculatedLiveStats || {}) as unknown as typeof prisma.$Prisma.JsonNull
       }
     });
 
@@ -350,6 +388,385 @@ describe('/api/arkana/combat/power-check', () => {
       // isSuccess must be a string, not a boolean, for LSL JSON parsing
       expect(typeof data.data.isSuccess).toBe('string');
       expect(['true', 'false']).toContain(data.data.isSuccess);
+    });
+  });
+
+  describe('1. LiveStats Usage with Power Checks', () => {
+    /**
+     * IMPORTANT: Effect modifiers work by modifying the base stat value,
+     * which is then converted to a d20 modifier using calculateStatModifier().
+     *
+     * Power checks use Mental stat exclusively with fixed TN of 12.
+     * Example: Mental 2 (0 mod) + buff_mental_1_turn (+1) = Mental 3 (+2 mod)
+     */
+
+    it('1.1 should apply mental buff to power check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Buffed Psion',
+        race: 'human',
+        archetype: 'Mentalist',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier base
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental: 1 } → Effective Mental = 3 → +2 modifier
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental 2 + buff (+1) = Mental 3 → +2 modifier
+      expect(data.data.mentalMod).toBe(2);
+      expect(data.data.mentalStat).toBe(2); // Base stat value
+
+      // Verify effect decremented
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const activeEffects = (updatedPlayer?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+    });
+
+    it('1.2 should apply mental debuff to power check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Confused Mage',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 3, // +2 modifier base
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_mental_minus_1',
+            name: 'Mental Debuff -1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental: -1 } → Effective Mental = 2 → 0 modifier
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental 3 + debuff (-1) = Mental 2 → 0 modifier
+      expect(data.data.mentalMod).toBe(0);
+    });
+
+    it('1.3 should stack multiple mental modifiers', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Multi-Buffed Psion',
+        race: 'human',
+        archetype: 'Mentalist',
+        physical: 2,
+        dexterity: 2,
+        mental: 1, // -2 modifier base
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_mental_2_area',
+            name: 'Mental Bonus +2 (area)',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental: 3 } → Effective Mental = 4 → +4 modifier
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental 1 + buff1 (+1) + buff2 (+2) = Mental 4 → +4 modifier
+      expect(data.data.mentalMod).toBe(4);
+    });
+
+    it('1.4 should maintain TN of 12 regardless of modifiers', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Buffed Player',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 5, // +6 modifier base
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // TN is always 12 for power checks
+      expect(data.data.targetNumber).toBe(12);
+      // Mental stat recorded is base stat value
+      expect(data.data.mentalStat).toBe(5);
+    });
+  });
+
+  describe('2. Turn Processing', () => {
+    it('2.1 should decrement effect after successful check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Player',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 5, // +6 modifier (high success chance)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:3',
+            turnsLeft: 3, // Will decrement to 2
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify effect decremented
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const activeEffects = (updatedPlayer?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+    });
+
+    it('2.2 should decrement effect after failed check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Player',
+        race: 'human',
+        archetype: 'Fighter',
+        physical: 5,
+        dexterity: 2,
+        mental: 1, // -2 modifier (high failure chance against TN 12)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify effect still decremented even on failure
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const activeEffects = (updatedPlayer?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+    });
+
+    it('2.3 should expire effect when turnsLeft reaches 0', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Player',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:1',
+            turnsLeft: 1, // Will expire
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify effect expired
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const activeEffects = (updatedPlayer?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects).toHaveLength(0);
+
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental).toBeUndefined();
+    });
+
+    it('2.4 should handle multiple successive power checks', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Multi-Check Player',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:5',
+            turnsLeft: 5, // Start at 5
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      // Perform 3 power checks sequentially
+      for (let i = 0; i < 3; i++) {
+        await new Promise(resolve => setTimeout(resolve, 10)); // Small delay for timestamp
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        const powerCheckData = {
+          player_uuid: player.slUuid,
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+        const response = await POST(request);
+        const data = await parseJsonResponse(response);
+
+        expectSuccess(data);
+
+        // Verify effect correctly decremented
+        const updatedPlayer = await prisma.arkanaStats.findFirst({
+          where: { userId: player.id }
+        });
+        const activeEffects = (updatedPlayer?.activeEffects || []) as unknown as ActiveEffect[];
+        expect(activeEffects[0].turnsLeft).toBe(5 - (i + 1)); // 5 - turns elapsed
+      }
     });
   });
 

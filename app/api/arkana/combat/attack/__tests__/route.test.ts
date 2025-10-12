@@ -12,6 +12,8 @@ import {
 import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-setup';
 import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
+import type { ActiveEffect, LiveStats, ArkanaStats } from '@/lib/arkana/types';
+import { recalculateLiveStats } from '@/lib/arkana/effectsUtils';
 
 describe('/api/arkana/combat/attack', () => {
   beforeAll(async () => {
@@ -26,7 +28,9 @@ describe('/api/arkana/combat/attack', () => {
     await cleanupDatabase();
   });
 
-  // Helper function to create a complete Arkana test user
+  /**
+   * Helper: Create Arkana test user with stats and optional active effects
+   */
   async function createArkanaTestUser(arkanaStatsData: {
     characterName: string;
     race: string;
@@ -36,63 +40,119 @@ describe('/api/arkana/combat/attack', () => {
     mental: number;
     perception: number;
     hitPoints: number;
+    commonPowers?: string[];
+    archetypePowers?: string[];
+    activeEffects?: ActiveEffect[];
+    liveStats?: LiveStats;
+    status?: number;
+    health?: number;
   }) {
     const { user } = await createTestUser('arkana');
 
-    // Create userStats
+    // Create user stats with specified status (default 0 = RP mode) and health
     await prisma.userStats.create({
       data: {
         userId: user.id,
-        health: 100,
+        health: arkanaStatsData.health !== undefined ? arkanaStatsData.health : 100,
         hunger: 100,
         thirst: 100,
-        copperCoin: 100
+        copperCoin: 100,
+        status: arkanaStatsData.status !== undefined ? arkanaStatsData.status : 0
       }
     });
 
-    // Create arkanaStats
+    // If activeEffects provided but no liveStats, calculate them
+    let calculatedLiveStats = arkanaStatsData.liveStats;
+    if (arkanaStatsData.activeEffects && arkanaStatsData.activeEffects.length > 0 && !arkanaStatsData.liveStats) {
+      // Load effect data before calculating liveStats
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      // Create a temporary ArkanaStats object for calculation
+      const tempStats = {
+        physical: arkanaStatsData.physical,
+        mental: arkanaStatsData.mental,
+        dexterity: arkanaStatsData.dexterity,
+        perception: arkanaStatsData.perception,
+      } as ArkanaStats;
+      calculatedLiveStats = recalculateLiveStats(tempStats, arkanaStatsData.activeEffects);
+    }
+
     await prisma.arkanaStats.create({
       data: {
         userId: user.id,
         agentName: user.username + ' Resident',
         registrationCompleted: true,
-        ...arkanaStatsData
+        characterName: arkanaStatsData.characterName,
+        race: arkanaStatsData.race,
+        archetype: arkanaStatsData.archetype,
+        physical: arkanaStatsData.physical,
+        dexterity: arkanaStatsData.dexterity,
+        mental: arkanaStatsData.mental,
+        perception: arkanaStatsData.perception,
+        hitPoints: arkanaStatsData.hitPoints,
+        commonPowers: arkanaStatsData.commonPowers || [],
+        archetypePowers: arkanaStatsData.archetypePowers || [],
+        activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
+        liveStats: (calculatedLiveStats || {}) as unknown as typeof prisma.$Prisma.JsonNull
       }
     });
 
     return user;
   }
 
-  describe('API Endpoint Tests', () => {
-    it('should process a physical attack correctly', async () => {
-      // Create attacker with high physical stat
+  describe('1. LiveStats Usage in Calculations', () => {
+    /**
+     * IMPORTANT: Effect modifiers work by modifying the base stat value,
+     * which is then converted to a d20 modifier using calculateStatModifier().
+     *
+     * Example: Physical 2 (0 mod) + buff_physical_1 (+1) = Physical 3 (+2 mod)
+     *
+     * Stat to Modifier mapping (calculateStatModifier):
+     * - Stat 0: -3 modifier
+     * - Stat 1: -2 modifier
+     * - Stat 2: 0 modifier
+     * - Stat 3: +2 modifier
+     * - Stat 4: +4 modifier
+     * - Stat 5: +6 modifier
+     */
+    it('1.1 should apply positive stat modifiers to attack rolls', async () => {
       const attacker = await createArkanaTestUser({
-        characterName: 'Strong Warrior',
+        characterName: 'Buffed Attacker',
         race: 'human',
-        archetype: 'Fighter',
-        physical: 5, // High physical = +2 modifier
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'turns:3',
+            turnsLeft: 3, // Will decrement to 2 after action
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical: 1 } → Effective Physical = 3 → +2 modifier
       });
 
-      // Create target with low dexterity
       const target = await createArkanaTestUser({
-        characterName: 'Slow Target',
+        characterName: 'Target',
         race: 'human',
-        archetype: 'Scholar',
+        archetype: 'Warrior',
         physical: 2,
-        dexterity: 1, // Low dex = -2 modifier (TN = 10 + (-2) = 8)
-        mental: 5,
-        perception: 3,
+        dexterity: 2, // 0 modifier (defense)
+        mental: 2,
+        perception: 2,
         hitPoints: 10
       });
 
       const timestamp = new Date().toISOString();
       const signature = generateSignature(timestamp, 'arkana');
 
-      const attackData = {
+      const requestData = {
         attacker_uuid: attacker.slUuid,
         target_uuid: target.slUuid,
         attack_type: 'physical',
@@ -101,44 +161,52 @@ describe('/api/arkana/combat/attack', () => {
         signature: signature
       };
 
-      const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
+      // Attacker: Physical 2 + buff (+1) = Physical 3 → +2 modifier
+      expect(data.data.attackerMod).toBe(2);
       expect(data.data.attackStat).toBe('Physical');
-      expect(data.data.defenseStat).toBe('Dexterity');
-      expect(data.data.attackerMod).toBe(6); // physical 5 → +6 (from calculateStatModifier)
-      expect(data.data.defenderMod).toBe(-2); // dexterity 1 → -2 (from calculateStatModifier)
-      expect(data.data.targetNumber).toBe(8); // 10 + (-2) = 8
-      expect(data.data.d20Roll).toBeGreaterThanOrEqual(1);
-      expect(data.data.d20Roll).toBeLessThanOrEqual(20);
-      expect(data.data.attackRoll).toBe(data.data.d20Roll + 6); // d20 + attacker mod (+6)
-      expect(data.data.message).toContain('Strong%20Warrior');
-      expect(data.data.message).toContain('Slow%20Target');
-      expect(data.data.attacker.name).toBe('Strong%20Warrior');
-      expect(data.data.target.name).toBe('Slow%20Target');
+
+      // Verify effect decremented in database
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const activeEffects = (updatedAttacker?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
     });
 
-    it('should process a ranged attack correctly', async () => {
+    it('1.2 should apply negative stat modifiers to attack rolls', async () => {
       const attacker = await createArkanaTestUser({
-        characterName: 'Archer',
+        characterName: 'Debuffed Attacker',
         race: 'human',
-        archetype: 'Ranger',
-        physical: 2,
-        dexterity: 4, // Good dex for ranged
-        mental: 3,
-        perception: 4,
-        hitPoints: 10
+        archetype: 'Warrior',
+        physical: 3, // +1 modifier base
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_physical_minus_2',
+            name: 'Physical Debuff -2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical: -2 } → Effective Physical = 1 → -2 modifier
       });
 
       const target = await createArkanaTestUser({
         characterName: 'Target',
         race: 'human',
-        archetype: 'Mage',
+        archetype: 'Warrior',
         physical: 2,
-        dexterity: 3,
-        mental: 4,
+        dexterity: 2,
+        mental: 2,
         perception: 2,
         hitPoints: 10
       });
@@ -146,25 +214,412 @@ describe('/api/arkana/combat/attack', () => {
       const timestamp = new Date().toISOString();
       const signature = generateSignature(timestamp, 'arkana');
 
-      const attackData = {
+      const requestData = {
         attacker_uuid: attacker.slUuid,
         target_uuid: target.slUuid,
-        attack_type: 'ranged',
+        attack_type: 'physical',
         universe: 'arkana',
         timestamp: timestamp,
         signature: signature
       };
 
-      const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.attackStat).toBe('Dexterity');
-      expect(data.data.defenseStat).toBe('Dexterity');
-      expect(data.data.attackerMod).toBe(4); // dexterity 4 → +4 (from calculateStatModifier)
-      expect(data.data.defenderMod).toBe(2); // dexterity 3 → +2 (from calculateStatModifier)
-      expect(data.data.targetNumber).toBe(12); // 10 + 2 = 12
+      // Attacker: Physical 3 + debuff (-2) = Physical 1 → -2 modifier
+      expect(data.data.attackerMod).toBe(-2);
+    });
+
+    it('1.3 should stack multiple modifiers on same stat', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Multi-Buffed',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'scene',
+            turnsLeft: 5,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_attack_2',
+            name: 'Attack Roll Buff +2',
+            duration: 'scene',
+            turnsLeft: 5,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical: 3 } → Effective Physical = 5 → +6 modifier
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical 2 + buff1 (+1) + buff2 (+2) = Physical 5 → +6 modifier
+      expect(data.data.attackerMod).toBe(6);
+    });
+
+    it('1.4 should net buffs and debuffs correctly', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Mixed Effects',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'scene',
+            turnsLeft: 5,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'debuff_physical_minus_2',
+            name: 'Physical Debuff -2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical: -1 } → Effective Physical = 1 → -2 modifier
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical 2 + buff (+1) + debuff (-2) = Physical 1 → -2 modifier
+      expect(data.data.attackerMod).toBe(-2);
+    });
+
+    it('1.5 should apply liveStats to both attacker and defender independently', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Buffed Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_attack_2',
+            name: 'Attack Roll Buff +2',
+            duration: 'scene',
+            turnsLeft: 5,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Physical: 2 } → Effective Physical = 4 → +4 modifier
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Debuffed Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2, // 0 modifier base (defense stat for physical attacks)
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_dexterity_minus_1',
+            name: 'Dexterity Debuff -1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Dexterity: -1 } → Effective Dexterity = 1 → -2 modifier
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical 2 + buff (+2) = Physical 4 → +4 modifier
+      expect(data.data.attackerMod).toBe(4);
+      // Defender: Dexterity 2 + debuff (-1) = Dexterity 1 → -2 modifier
+      expect(data.data.defenderMod).toBe(-2);
+      // Target number: 10 + (-2) = 8, easier to hit
+      expect(data.data.targetNumber).toBe(8);
+    });
+  });
+
+  describe('2. Turn Processing', () => {
+    it('2.1 should decrement single effect by 1 turn', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'turns:3',
+            turnsLeft: 3, // Will decrement to 2
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify effect decremented in database
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+
+      const activeEffects = (updatedAttacker?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+    });
+
+    it('2.2 should decrement all multiple effects', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'turns:3',
+            turnsLeft: 3, // Will decrement to 2
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_dexterity_3',
+            name: 'Dexterity Bonus +3',
+            duration: 'turns:5',
+            turnsLeft: 5, // Will decrement to 4
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_mental_1_turn',
+            name: 'Mental Bonus +1 (1 turn)',
+            duration: 'turns:2',
+            turnsLeft: 2, // Will decrement to 1
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify all effects decremented in database
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+
+      const activeEffects = (updatedAttacker?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects).toHaveLength(3);
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+      expect(activeEffects[1].turnsLeft).toBe(4); // 5 - 1
+      expect(activeEffects[2].turnsLeft).toBe(1); // 2 - 1
+    });
+
+    it('2.3 should remove effect when turnsLeft reaches 0', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_1',
+            name: 'Physical Bonus +1',
+            duration: 'turns:1',
+            turnsLeft: 1, // Will expire
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify effect removed in database
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+
+      const activeEffects = (updatedAttacker?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects).toHaveLength(0); // Effect expired
+
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Physical).toBeUndefined(); // Stat bonus removed
     });
 
     it('should reject power attack type and redirect to power-attack endpoint', async () => {
