@@ -4,8 +4,8 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects } from '@/lib/arkana/effectsUtils';
-import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
+import type { CommonPower, ArchetypePower, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -106,6 +106,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse liveStats for both attacker and target to include active effect modifiers
+    const attackerLiveStats = (attacker.arkanaStats.liveStats as LiveStats) || {};
+    const targetLiveStats = (target.arkanaStats.liveStats as LiveStats) || {};
+
     // Load arkana data
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
@@ -149,7 +153,7 @@ export async function POST(request: NextRequest) {
     let attackSuccess = false;
     let rollDescription = '';
 
-    // First, execute check effects to determine success
+    // First, execute check effects to determine success (using effective stats)
     for (const effectId of attackEffects) {
       if (effectId.startsWith('check_')) {
         const baseStatName = power.baseStat?.toLowerCase() || 'mental';
@@ -160,7 +164,7 @@ export async function POST(request: NextRequest) {
         else if (baseStatName === 'perception') targetStatValue = target.arkanaStats.perception;
         else targetStatValue = target.arkanaStats.mental;
 
-        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, targetStatValue);
+        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, targetStatValue, attackerLiveStats, targetLiveStats);
         if (result) {
           attackSuccess = result.success;
           rollDescription = result.rollInfo || '';
@@ -169,8 +173,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If attack failed on check, return miss
+    // If attack failed on check, process turn and return miss
     if (!attackSuccess && attackEffects.some((e: string) => e.startsWith('check_'))) {
+      // Process turn for attacker (decrement all effects) even on failure
+      const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+      const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+
+      await prisma.arkanaStats.update({
+        where: { userId: attacker.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects: turnProcessed.activeEffects,
+          liveStats: turnProcessed.liveStats
+        })
+      });
+
       return NextResponse.json({
         success: true,
         data: {
@@ -192,10 +208,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Attack succeeded - apply all non-check effects
+    // Attack succeeded - apply all non-check effects (using effective stats)
     for (const effectId of attackEffects) {
       if (!effectId.startsWith('check_')) {
-        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats);
+        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, undefined, attackerLiveStats, targetLiveStats);
         if (result) {
           appliedEffects.push(result);
           if (result.damage) totalDamage += result.damage;
@@ -240,24 +256,25 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update attacker's activeEffects and liveStats
-    if (selfEffects.length > 0) {
-      let attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+    // Update attacker's activeEffects and liveStats (apply self-effects first)
+    let attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
 
+    if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
         attackerActiveEffects = applyActiveEffect(attackerActiveEffects, effectResult);
       }
-
-      const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerActiveEffects);
-
-      await prisma.arkanaStats.update({
-        where: { userId: attacker.id },
-        data: buildArkanaStatsUpdate({
-          activeEffects: attackerActiveEffects,
-          liveStats: attackerLiveStats
-        })
-      });
     }
+
+    // Process turn for attacker (decrement all effects by 1 turn)
+    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+
+    await prisma.arkanaStats.update({
+      where: { userId: attacker.id },
+      data: buildArkanaStatsUpdate({
+        activeEffects: turnProcessed.activeEffects,
+        liveStats: turnProcessed.liveStats
+      })
+    });
 
     // Build comprehensive message with effect details
     const attackerName = attacker.arkanaStats.characterName;

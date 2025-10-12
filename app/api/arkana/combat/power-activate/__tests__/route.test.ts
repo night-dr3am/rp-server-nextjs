@@ -1445,7 +1445,7 @@ describe('/api/arkana/combat/power-activate', () => {
   });
 
   describe('7. Power-Attack vs Power-Activate Comparison', () => {
-    it('7.1 power-attack does NOT process turn', async () => {
+    it('7.1 power-attack DOES process turn (consistent with power-activate)', async () => {
       const attacker = await createArkanaTestUser({
         characterName: 'Attacker',
         race: 'strigoi',
@@ -1501,13 +1501,13 @@ describe('/api/arkana/combat/power-activate', () => {
 
       expectSuccess(data);
 
-      // Verify attacker's effects NOT decremented
+      // Verify attacker's effects ARE decremented (now consistent with power-activate)
       const updatedAttacker = await prisma.arkanaStats.findFirst({
         where: { userId: attacker.id }
       });
 
       const activeEffects = (updatedAttacker?.activeEffects || []) as unknown as ActiveEffect[];
-      expect(activeEffects[0].turnsLeft).toBe(3); // NOT decremented
+      expect(activeEffects[0].turnsLeft).toBe(2); // Decremented from 3 to 2
     });
 
     it('7.2 power-activate DOES process turn', async () => {

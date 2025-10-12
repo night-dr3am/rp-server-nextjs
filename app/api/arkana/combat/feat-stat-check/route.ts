@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaFeatStatCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { calculateStatModifier } from '@/lib/arkana/types';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier } from '@/lib/arkana/effectsUtils';
+import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,24 +60,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the appropriate stat value based on stat_type
-    let statValue: number;
+    // Parse liveStats for player to include active effect modifiers
+    const playerLiveStats = (player.arkanaStats.liveStats as LiveStats) || {};
+
+    // Get the appropriate stat value and calculate effective modifier (includes buffs/debuffs)
+    let statModifier: number;
     let statName: string;
+    let statValue: number;
 
     switch (stat_type) {
       case 'physical':
+        statModifier = getEffectiveStatModifier(player.arkanaStats, playerLiveStats, 'physical');
         statValue = player.arkanaStats.physical;
         statName = 'Physical';
         break;
       case 'dexterity':
+        statModifier = getEffectiveStatModifier(player.arkanaStats, playerLiveStats, 'dexterity');
         statValue = player.arkanaStats.dexterity;
         statName = 'Dexterity';
         break;
       case 'mental':
+        statModifier = getEffectiveStatModifier(player.arkanaStats, playerLiveStats, 'mental');
         statValue = player.arkanaStats.mental;
         statName = 'Mental';
         break;
       case 'perception':
+        statModifier = getEffectiveStatModifier(player.arkanaStats, playerLiveStats, 'perception');
         statValue = player.arkanaStats.perception;
         statName = 'Perception';
         break;
@@ -86,9 +95,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-
-    // Calculate stat modifier using proper stat modifier calculation
-    const statModifier = calculateStatModifier(statValue);
 
     // Roll D20 + stat modifier
     const d20Roll = Math.floor(Math.random() * 20) + 1;
@@ -102,6 +108,18 @@ export async function POST(request: NextRequest) {
     const resultMessage = isSuccess
       ? `${playerName} succeeds on ${statName} check! (Roll: ${d20Roll}+${statModifier}=${totalRoll} vs TN:${target_number})`
       : `${playerName} fails ${statName} check. (Roll: ${d20Roll}+${statModifier}=${totalRoll} vs TN:${target_number})`;
+
+    // Process turn for player (decrement all activeEffects by 1 turn)
+    const playerActiveEffects = parseActiveEffects(player.arkanaStats.activeEffects);
+    const turnProcessed = processEffectsTurn(playerActiveEffects, player.arkanaStats);
+
+    await prisma.arkanaStats.update({
+      where: { userId: player.id },
+      data: buildArkanaStatsUpdate({
+        activeEffects: turnProcessed.activeEffects,
+        liveStats: turnProcessed.liveStats
+      })
+    });
 
     // Return detailed result with string booleans for LSL compatibility
     return NextResponse.json({

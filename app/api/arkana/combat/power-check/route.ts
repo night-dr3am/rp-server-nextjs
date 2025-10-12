@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { calculateStatModifier } from '@/lib/arkana/types';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier } from '@/lib/arkana/effectsUtils';
+import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,8 +52,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate mental modifier using proper stat modifier calculation
-    const mentalMod = calculateStatModifier(player.arkanaStats.mental);
+    // Parse liveStats for player to include active effect modifiers
+    const playerLiveStats = (player.arkanaStats.liveStats as LiveStats) || {};
+
+    // Calculate effective mental modifier (includes buffs/debuffs)
+    const mentalMod = getEffectiveStatModifier(player.arkanaStats, playerLiveStats, 'mental');
+    const mentalStat = player.arkanaStats.mental;
 
     // Roll D20 + mental modifier
     const d20Roll = Math.floor(Math.random() * 20) + 1;
@@ -68,6 +73,18 @@ export async function POST(request: NextRequest) {
       ? `${playerName} succeeds on power check! (Roll: ${d20Roll}+${mentalMod}=${totalRoll} vs TN:${targetNumber})`
       : `${playerName} fails power check. (Roll: ${d20Roll}+${mentalMod}=${totalRoll} vs TN:${targetNumber})`;
 
+    // Process turn for player (decrement all activeEffects by 1 turn)
+    const playerActiveEffects = parseActiveEffects(player.arkanaStats.activeEffects);
+    const turnProcessed = processEffectsTurn(playerActiveEffects, player.arkanaStats);
+
+    await prisma.arkanaStats.update({
+      where: { userId: player.id },
+      data: buildArkanaStatsUpdate({
+        activeEffects: turnProcessed.activeEffects,
+        liveStats: turnProcessed.liveStats
+      })
+    });
+
     // Return detailed result with string booleans for LSL compatibility
     return NextResponse.json({
       success: true,
@@ -77,7 +94,7 @@ export async function POST(request: NextRequest) {
         mentalMod,
         totalRoll,
         targetNumber,
-        mentalStat: player.arkanaStats.mental,
+        mentalStat,
         message: encodeForLSL(resultMessage),
         player: {
           uuid: player.slUuid,

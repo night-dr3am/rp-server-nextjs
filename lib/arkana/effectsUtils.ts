@@ -7,12 +7,20 @@ import liveStatsConfig from './liveStatsConfig.json';
 /**
  * Execute an effect and return the result
  * Handles check, damage, stat_modifier, control, heal effects
+ * @param effectId - The effect ID to execute
+ * @param attacker - Attacker's base stats
+ * @param target - Target's base stats
+ * @param targetStatValue - Optional target stat value for checks
+ * @param attackerLiveStats - Optional attacker's liveStats for effective stat calculations
+ * @param targetLiveStats - Optional target's liveStats for effective stat calculations
  */
 export function executeEffect(
   effectId: string,
   attacker: ArkanaStats,
   target: ArkanaStats,
-  targetStatValue?: number
+  targetStatValue?: number,
+  attackerLiveStats?: LiveStats | null,
+  targetLiveStats?: LiveStats | null
 ): EffectResult | null {
   const effectDef = getEffectDefinition(effectId);
 
@@ -24,14 +32,34 @@ export function executeEffect(
   // Handle CHECK effects
   if (effectDef.category === 'check') {
     let attackerMod = 0;
-    if (effectDef.checkStat === 'Physical') attackerMod = calculateStatModifier(attacker.physical);
-    else if (effectDef.checkStat === 'Mental') attackerMod = calculateStatModifier(attacker.mental);
-    else if (effectDef.checkStat === 'Dexterity') attackerMod = calculateStatModifier(attacker.dexterity);
-    else if (effectDef.checkStat === 'Perception') attackerMod = calculateStatModifier(attacker.perception);
+    // Use effective stats if liveStats provided, otherwise use base stats
+    if (effectDef.checkStat === 'Physical') {
+      attackerMod = attackerLiveStats
+        ? getEffectiveStatModifier(attacker, attackerLiveStats, 'physical')
+        : calculateStatModifier(attacker.physical);
+    } else if (effectDef.checkStat === 'Mental') {
+      attackerMod = attackerLiveStats
+        ? getEffectiveStatModifier(attacker, attackerLiveStats, 'mental')
+        : calculateStatModifier(attacker.mental);
+    } else if (effectDef.checkStat === 'Dexterity') {
+      attackerMod = attackerLiveStats
+        ? getEffectiveStatModifier(attacker, attackerLiveStats, 'dexterity')
+        : calculateStatModifier(attacker.dexterity);
+    } else if (effectDef.checkStat === 'Perception') {
+      attackerMod = attackerLiveStats
+        ? getEffectiveStatModifier(attacker, attackerLiveStats, 'perception')
+        : calculateStatModifier(attacker.perception);
+    }
 
     let targetNumber = 10;
     if (effectDef.checkVs === 'enemy_stat' && effectDef.checkVsStat) {
-      targetNumber = 10 + calculateStatModifier(targetStatValue || 2);
+      // Use effective target stat if liveStats provided
+      if (targetLiveStats && effectDef.checkVsStat) {
+        const statName = effectDef.checkVsStat.toLowerCase() as 'physical' | 'dexterity' | 'mental' | 'perception';
+        targetNumber = 10 + getEffectiveStatModifier(target, targetLiveStats, statName);
+      } else {
+        targetNumber = 10 + calculateStatModifier(targetStatValue || 2);
+      }
     } else if (effectDef.checkVs === 'fixed' && effectDef.checkTN) {
       targetNumber = effectDef.checkTN;
     }
@@ -57,10 +85,24 @@ export function executeEffect(
 
       if (parts[1]) {
         const statName = parts[1];
-        if (statName === 'Physical') damage += calculateStatModifier(attacker.physical);
-        else if (statName === 'Mental') damage += calculateStatModifier(attacker.mental);
-        else if (statName === 'Dexterity') damage += calculateStatModifier(attacker.dexterity);
-        else if (statName === 'Perception') damage += calculateStatModifier(attacker.perception);
+        // Use effective stats if liveStats provided, otherwise use base stats
+        if (statName === 'Physical') {
+          damage += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'physical')
+            : calculateStatModifier(attacker.physical);
+        } else if (statName === 'Mental') {
+          damage += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'mental')
+            : calculateStatModifier(attacker.mental);
+        } else if (statName === 'Dexterity') {
+          damage += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'dexterity')
+            : calculateStatModifier(attacker.dexterity);
+        } else if (statName === 'Perception') {
+          damage += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'perception')
+            : calculateStatModifier(attacker.perception);
+        }
       }
     }
 
@@ -269,4 +311,35 @@ export function formatLiveStatsForLSL(liveStats: LiveStats): string {
   }
 
   return parts.join('|');
+}
+
+/**
+ * Get effective stat modifier by applying liveStats modifiers to base arkanaStats
+ * and calculating the final modifier for combat rolls
+ * Used in combat calculations to include buffs/debuffs
+ * @param arkanaStats - Base character stats
+ * @param liveStats - Current active effect modifiers
+ * @param statName - Which stat to get (physical, dexterity, mental, perception)
+ * @returns Final stat modifier for d20 rolls (includes buffs/debuffs)
+ */
+export function getEffectiveStatModifier(
+  arkanaStats: ArkanaStats,
+  liveStats: LiveStats | null | undefined,
+  statName: 'physical' | 'dexterity' | 'mental' | 'perception'
+): number {
+  const baseValue = arkanaStats[statName];
+
+  // Apply liveStats modifier if present
+  let effectiveValue = baseValue;
+  if (liveStats) {
+    // LiveStats uses capitalized stat names (Physical, Dexterity, Mental, Perception)
+    const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
+    const liveModifier = typeof liveStats[capitalizedName] === 'number'
+      ? (liveStats[capitalizedName] as number)
+      : 0;
+    effectiveValue = baseValue + liveModifier;
+  }
+
+  // Calculate and return the final modifier for d20 rolls
+  return calculateStatModifier(effectiveValue);
 }

@@ -5,7 +5,7 @@ import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
-import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
+import type { CommonPower, ArchetypePower, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -108,6 +108,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Parse liveStats for caster and target (if exists) to include active effect modifiers
+    const casterLiveStats = (caster.arkanaStats.liveStats as LiveStats) || {};
+    const targetLiveStats = target ? ((target.arkanaStats?.liveStats as LiveStats) || {}) : {};
+
     // Load arkana data
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
@@ -150,7 +154,7 @@ export async function POST(request: NextRequest) {
     let activationSuccess = true;
     let rollDescription = '';
 
-    // First, execute check effects to determine success
+    // First, execute check effects to determine success (using effective stats)
     for (const effectId of activateEffects) {
       if (effectId.startsWith('check_')) {
         const baseStatName = power.baseStat?.toLowerCase() || 'mental';
@@ -164,7 +168,7 @@ export async function POST(request: NextRequest) {
           else targetStatValue = target.arkanaStats.mental;
         }
 
-        const result = executeEffect(effectId, caster.arkanaStats, caster.arkanaStats, targetStatValue);
+        const result = executeEffect(effectId, caster.arkanaStats, target?.arkanaStats || caster.arkanaStats, targetStatValue, casterLiveStats, targetLiveStats);
         if (result) {
           activationSuccess = result.success;
           rollDescription = result.rollInfo || '';
@@ -205,12 +209,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Activation succeeded - apply all non-check effects
+    // Activation succeeded - apply all non-check effects (using effective stats)
     const targetRef = target || caster; // Use target if specified, otherwise self
     const targetArkanaStats = targetRef.arkanaStats || caster.arkanaStats; // Guaranteed to exist
+    const effectiveTargetLiveStats = target ? targetLiveStats : casterLiveStats; // Use appropriate liveStats
     for (const effectId of activateEffects) {
       if (!effectId.startsWith('check_')) {
-        const result = executeEffect(effectId, caster.arkanaStats, targetArkanaStats);
+        const result = executeEffect(effectId, caster.arkanaStats, targetArkanaStats, undefined, casterLiveStats, effectiveTargetLiveStats);
         if (result) {
           appliedEffects.push(result);
         }

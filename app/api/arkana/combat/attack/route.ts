@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { calculateStatModifier } from '@/lib/arkana/types';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier } from '@/lib/arkana/effectsUtils';
+import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -95,7 +96,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine attack resolution based on attack type using proper stat modifier calculation
+    // Parse liveStats for both attacker and target to include active effect modifiers
+    const attackerLiveStats = (attacker.arkanaStats.liveStats as LiveStats) || {};
+    const targetLiveStats = (target.arkanaStats.liveStats as LiveStats) || {};
+
+    // Determine attack resolution based on attack type using effective stat modifiers (includes buffs/debuffs)
     let attackerMod: number;
     let defenderMod: number;
     let attackStat: string;
@@ -103,14 +108,14 @@ export async function POST(request: NextRequest) {
 
     switch (attack_type) {
       case 'physical':
-        attackerMod = calculateStatModifier(attacker.arkanaStats.physical);
-        defenderMod = calculateStatModifier(target.arkanaStats.dexterity);
+        attackerMod = getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'physical');
+        defenderMod = getEffectiveStatModifier(target.arkanaStats, targetLiveStats, 'dexterity');
         attackStat = 'Physical';
         defenseStat = 'Dexterity';
         break;
       case 'ranged':
-        attackerMod = calculateStatModifier(attacker.arkanaStats.dexterity);
-        defenderMod = calculateStatModifier(target.arkanaStats.dexterity);
+        attackerMod = getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'dexterity');
+        defenderMod = getEffectiveStatModifier(target.arkanaStats, targetLiveStats, 'dexterity');
         attackStat = 'Dexterity';
         defenseStat = 'Dexterity';
         break;
@@ -134,11 +139,11 @@ export async function POST(request: NextRequest) {
     let newTargetHealth = target.stats.health;
 
     if (isHit) {
-      // Calculate damage based on attack type: 1 + attacker's stat modifier
+      // Calculate damage based on attack type: 1 + attacker's effective stat modifier (includes buffs/debuffs)
       if (attack_type === 'physical') {
-        damage = 1 + calculateStatModifier(attacker.arkanaStats.physical);
+        damage = 1 + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'physical');
       } else if (attack_type === 'ranged') {
-        damage = 1 + calculateStatModifier(attacker.arkanaStats.dexterity);
+        damage = 1 + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'dexterity');
       }
       // Ensure minimum 1 damage on successful hit
       damage = Math.max(1, damage);
@@ -153,6 +158,18 @@ export async function POST(request: NextRequest) {
         }
       });
     }
+
+    // Process turn for attacker (decrement all activeEffects by 1 turn)
+    const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+
+    await prisma.arkanaStats.update({
+      where: { userId: attacker.id },
+      data: buildArkanaStatsUpdate({
+        activeEffects: turnProcessed.activeEffects,
+        liveStats: turnProcessed.liveStats
+      })
+    });
 
     // Create result message
     const attackerName = attacker.arkanaStats.characterName;
