@@ -164,6 +164,109 @@ describe('/api/arkana/users/stats', () => {
       expect(data.error).toContain('must be a valid GUID');
     });
 
+  it('should handle empty activeEffects and liveStats gracefully', async () => {
+    const { user } = await createTestUser('arkana');
+
+    // Create Arkana character with explicitly null/empty activeEffects and liveStats
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Empty LiveStats Test',
+        agentName: 'TestAgent',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 15,
+        statPointsPool: 0,
+        statPointsSpent: 6,
+        flaws: ['flaw_addiction'],
+        flawPointsGranted: 3,
+        powerPointsBudget: 15,
+        powerPointsBonus: 3,
+        powerPointsSpent: 0,
+        credits: 1000,
+        chips: 500,
+        xp: 0,
+        registrationCompleted: true,
+        // Explicitly set these to potential problem values
+        activeEffects: [],
+        liveStats: {}
+      }
+    });
+
+    const params = createApiBody({
+      sl_uuid: user.slUuid,
+      universe: 'arkana'
+    }, 'arkana');
+
+    const request = createMockGetRequest('/api/arkana/users/stats', params);
+    const response = await GET(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.user.slUuid).toBe(user.slUuid);
+    expect(data.data.arkanaStats).toBeDefined();
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Empty LiveStats Test');
+    // liveStatsString should be empty string when no active effects
+    expect(data.data.arkanaStats.liveStatsString).toBe('');
+  });
+
+  it('should handle corrupted activeEffects gracefully', async () => {
+    const { user } = await createTestUser('arkana');
+
+    // Create Arkana character with corrupted activeEffects (non-array value)
+    const arkanaStats = await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Corrupted Data Test',
+        agentName: 'TestAgent',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 15,
+        statPointsPool: 0,
+        statPointsSpent: 6,
+        flaws: ['flaw_addiction'],
+        flawPointsGranted: 3,
+        powerPointsBudget: 15,
+        powerPointsBonus: 3,
+        powerPointsSpent: 0,
+        credits: 1000,
+        chips: 500,
+        xp: 0,
+        registrationCompleted: true,
+        activeEffects: [],
+        liveStats: {}
+      }
+    });
+
+    // Manually corrupt the activeEffects field in the database using raw SQL
+    await prisma.$executeRaw`UPDATE arkana_stats SET active_effects = '{"invalid": "json"}' WHERE id = ${arkanaStats.id}`;
+
+    const params = createApiBody({
+      sl_uuid: user.slUuid,
+      universe: 'arkana'
+    }, 'arkana');
+
+    const request = createMockGetRequest('/api/arkana/users/stats', params);
+    const response = await GET(request);
+    const data = await parseJsonResponse(response);
+
+    // Should still succeed, just with empty liveStatsString
+    expectSuccess(data);
+    expect(data.data.user.slUuid).toBe(user.slUuid);
+    expect(data.data.arkanaStats).toBeDefined();
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Corrupted Data Test');
+    // liveStatsString should be empty when data is corrupted
+    expect(data.data.arkanaStats.liveStatsString).toBe('');
+  });
+
   it('should return complete arkana character data structure', async () => {
     const { user } = await createTestUser('arkana');
 

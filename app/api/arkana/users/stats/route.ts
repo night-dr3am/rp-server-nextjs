@@ -61,9 +61,14 @@ export async function GET(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (user.arkanaStats) {
-      const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
-      const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      try {
+        const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
+        const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+        liveStatsString = formatLiveStatsForLSL(liveStats);
+      } catch {
+        // If liveStats calculation fails (corrupted data), continue with empty string
+        liveStatsString = '';
+      }
     }
 
     // Return user stats including Arkana character data
@@ -219,9 +224,14 @@ export async function POST(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (updatedUser.arkanaStats) {
-      const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
-      const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      try {
+        const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
+        const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
+        liveStatsString = formatLiveStatsForLSL(liveStats);
+      } catch {
+        // If liveStats calculation fails (corrupted data), continue with empty string
+        liveStatsString = '';
+      }
     }
 
     // Return the updated stats in the same format as GET
