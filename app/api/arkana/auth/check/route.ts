@@ -4,6 +4,7 @@ import { checkUserSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
 import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL } from '@/lib/arkana/effectsUtils';
+import { loadAllData } from '@/lib/arkana/dataLoader';
 
 export async function GET(request: NextRequest) {
   try {
@@ -75,6 +76,8 @@ export async function GET(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (user.arkanaStats) {
+      // Load effect definitions needed for recalculation
+      await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
       liveStatsString = formatLiveStatsForLSL(liveStats);
@@ -209,6 +212,8 @@ export async function POST(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (user.arkanaStats) {
+      // Load effect definitions needed for recalculation
+      await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
       liveStatsString = formatLiveStatsForLSL(liveStats);

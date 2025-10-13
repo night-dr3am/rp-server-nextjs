@@ -174,6 +174,93 @@ describe('GET and POST /api/arkana/auth/check', () => {
 
       expectError(data, 'User not found in Arkana universe')
     })
+
+    it('should process activeEffects and liveStats correctly with multiple effects', async () => {
+      // Create test user with specific activeEffects and liveStats
+      const uuid = generateTestUUID()
+      const username = generateTestUsername()
+
+      await prisma.user.create({
+        data: {
+          slUuid: uuid,
+          universe: 'arkana',
+          username: username,
+          role: 'FREE',
+          stats: {
+            create: {
+              health: 100,
+              hunger: 100,
+              thirst: 100,
+              copperCoin: 10
+            }
+          },
+          arkanaStats: {
+            create: {
+              characterName: 'Debuffed Character',
+              agentName: `${username} Resident`,
+              race: 'human',
+              archetype: 'Arcanist',
+              physical: 3,
+              dexterity: 2,
+              mental: 4,
+              perception: 3,
+              hitPoints: 15,
+              statPointsPool: 0,
+              statPointsSpent: 6,
+              flaws: [],
+              flawPointsGranted: 0,
+              powerPointsBudget: 15,
+              powerPointsBonus: 0,
+              powerPointsSpent: 0,
+              credits: 1000,
+              chips: 500,
+              xp: 0,
+              registrationCompleted: true,
+              // Test with specific activeEffects
+              activeEffects: [
+                {
+                  name: "Mental Debuff -1",
+                  duration: "turns:2",
+                  effectId: "debuff_mental_minus_1",
+                  appliedAt: "2025-10-12T15:10:06.612Z",
+                  turnsLeft: 2
+                },
+                {
+                  name: "Entropy Disruption",
+                  duration: "turns:1",
+                  effectId: "debuff_entropy_disruption",
+                  appliedAt: "2025-10-12T15:12:10.572Z",
+                  turnsLeft: 1
+                }
+              ],
+              liveStats: {
+                Mental: -2
+              }
+            }
+          }
+        }
+      })
+
+      const timestamp = new Date().toISOString()
+      const signature = generateSignature(timestamp, 'arkana')
+      const params = {
+        sl_uuid: uuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      }
+
+      const request = createMockGetRequest('/api/arkana/auth/check', params)
+      const response = await GET(request)
+      const data = await parseJsonResponse(response)
+
+      expectSuccess(data)
+      expect(data.data.user.slUuid).toBe(uuid)
+      expect(data.data.arkanaStats).toBeDefined()
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Debuffed Character')
+      // liveStatsString should contain Mental:-2 formatted for LSL
+      expect(data.data.arkanaStats.liveStatsString).toBe('Mental:-2')
+    })
   })
 
   describe('POST', () => {
@@ -304,6 +391,89 @@ describe('GET and POST /api/arkana/auth/check', () => {
       const data = await parseJsonResponse(response)
 
       expectError(data, 'User not found in Arkana universe')
+    })
+
+    it('should process activeEffects and liveStats correctly with multiple effects in POST', async () => {
+      // Create test user with specific activeEffects and liveStats
+      const uuid = generateTestUUID()
+      const username = generateTestUsername()
+
+      await prisma.user.create({
+        data: {
+          slUuid: uuid,
+          universe: 'arkana',
+          username: username,
+          role: 'FREE',
+          stats: {
+            create: {
+              health: 100,
+              hunger: 100,
+              thirst: 100,
+              copperCoin: 10
+            }
+          },
+          arkanaStats: {
+            create: {
+              characterName: 'Debuffed Character',
+              agentName: `${username} Resident`,
+              race: 'human',
+              archetype: 'Arcanist',
+              physical: 3,
+              dexterity: 2,
+              mental: 4,
+              perception: 3,
+              hitPoints: 15,
+              statPointsPool: 0,
+              statPointsSpent: 6,
+              flaws: [],
+              flawPointsGranted: 0,
+              powerPointsBudget: 15,
+              powerPointsBonus: 0,
+              powerPointsSpent: 0,
+              credits: 1000,
+              chips: 500,
+              xp: 0,
+              registrationCompleted: true,
+              // Test with specific activeEffects
+              activeEffects: [
+                {
+                  name: "Mental Debuff -1",
+                  duration: "turns:2",
+                  effectId: "debuff_mental_minus_1",
+                  appliedAt: "2025-10-12T15:10:06.612Z",
+                  turnsLeft: 2
+                },
+                {
+                  name: "Entropy Disruption",
+                  duration: "turns:1",
+                  effectId: "debuff_entropy_disruption",
+                  appliedAt: "2025-10-12T15:12:10.572Z",
+                  turnsLeft: 1
+                }
+              ],
+              liveStats: {
+                Mental: -2
+              }
+            }
+          }
+        }
+      })
+
+      const body = createApiBody({
+        sl_uuid: uuid,
+        universe: 'arkana'
+      }, 'arkana')
+
+      const request = createMockPostRequest('/api/arkana/auth/check', body)
+      const response = await POST(request)
+      const data = await parseJsonResponse(response)
+
+      expectSuccess(data)
+      expect(data.data.user.slUuid).toBe(uuid)
+      expect(data.data.arkanaStats).toBeDefined()
+      expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Debuffed Character')
+      // liveStatsString should contain Mental:-2 formatted for LSL
+      expect(data.data.arkanaStats.liveStatsString).toBe('Mental:-2')
     })
   })
 })
