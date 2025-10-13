@@ -256,23 +256,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update attacker's activeEffects and liveStats (apply self-effects first)
+    // Update attacker's activeEffects and liveStats
     let attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
 
+    // Process turn for attacker FIRST (decrement all PRE-EXISTING effects by 1 turn)
+    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+    attackerActiveEffects = turnProcessed.activeEffects;
+
+    // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
         attackerActiveEffects = applyActiveEffect(attackerActiveEffects, effectResult);
       }
     }
 
-    // Process turn for attacker (decrement all effects by 1 turn)
-    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+    // Recalculate liveStats with both decremented old effects AND new self-effects
+    const finalLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerActiveEffects);
 
     await prisma.arkanaStats.update({
       where: { userId: attacker.id },
       data: buildArkanaStatsUpdate({
-        activeEffects: turnProcessed.activeEffects,
-        liveStats: turnProcessed.liveStats
+        activeEffects: attackerActiveEffects,
+        liveStats: finalLiveStats
       })
     });
 

@@ -152,7 +152,6 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(data.data.activationSuccess).toMatch(/^(true|false)$/);
       expect(data.data.message).toBeDefined();
       expect(data.data.caster).toBeDefined();
-      expect(data.data.caster.turnsRemaining).toBeDefined();
     });
 
     it('1.2 should activate self-targeted ability power without target', async () => {
@@ -453,7 +452,6 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(2); // Both effects still active
 
       // Verify in database
       const updatedCaster = await prisma.arkanaStats.findFirst({
@@ -507,7 +505,6 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(0); // Effect expired
 
       // Verify in database
       const updatedCaster = await prisma.arkanaStats.findFirst({
@@ -562,7 +559,6 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(1); // Effect still active
 
       // Verify in database
       const updatedCaster = await prisma.arkanaStats.findFirst({
@@ -632,7 +628,6 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(1); // Only 1 effect remains
 
       // Verify in database
       const updatedCaster = await prisma.arkanaStats.findFirst({
@@ -1100,7 +1095,7 @@ describe('/api/arkana/combat/power-activate', () => {
         const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
         const dexBuff = activeEffects.find(e => e.effectId === 'buff_dexterity_3');
         expect(dexBuff).toBeDefined();
-        expect(dexBuff?.turnsLeft).toBe(1); // turns:2 minus 1 for turn processing
+        expect(dexBuff?.turnsLeft).toBe(2); // Full duration (new effects applied AFTER turn processing)
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
         expect(liveStats.Dexterity).toBe(3);
@@ -1201,7 +1196,7 @@ describe('/api/arkana/combat/power-activate', () => {
         const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
         const stealthBuff = activeEffects.find(e => e.effectId === 'buff_stealth_4');
         expect(stealthBuff).toBeDefined();
-        expect(stealthBuff?.turnsLeft).toBe(998); // 999 - 1 for turn processing
+        expect(stealthBuff?.turnsLeft).toBe(999); // Full duration (new effects applied AFTER turn processing)
         expect(stealthBuff?.duration).toBe('scene');
       } else {
         console.log('Yin Shroud activation failed check, skipping scene duration verification');
@@ -1310,7 +1305,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
       // If activation succeeded, verify stacking logic
       if (data.data.activationSuccess === 'true') {
-        expect(dexBuff?.turnsLeft).toBe(1); // Decremented, not refreshed
+        expect(dexBuff?.turnsLeft).toBe(2); // New effect (turns:2) replaces old (turns:1) - longer duration wins
       } else {
         // Check failed - existing buff should still be decremented
         expect(dexBuff?.turnsLeft).toBe(1); // Original 2-1=1 from turn processing
@@ -1722,65 +1717,7 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(data.data.rollInfo).toBeDefined();
       expect(data.data.affected).toBeDefined();
       expect(data.data.caster).toBeDefined();
-      expect(data.data.caster.turnsRemaining).toBeDefined();
       expect(data.data.message).toBeDefined();
-    });
-
-    it('9.4 should return turnsRemaining count in response', async () => {
-      const caster = await createArkanaTestUser({
-        characterName: 'Multi Effect Caster',
-        race: 'human',
-        archetype: 'Psion',
-        physical: 2,
-        dexterity: 2,
-        mental: 4,
-        perception: 3,
-        hitPoints: 10,
-        commonPowers: ['veil_entropy_pulse'],
-        archetypePowers: [],
-        activeEffects: [
-          {
-            effectId: 'buff_dexterity_3',
-            name: 'Dexterity Bonus +3',
-            duration: 'turns:2',
-            turnsLeft: 3,
-            appliedAt: new Date().toISOString()
-          },
-          {
-            effectId: 'buff_physical_1',
-            name: 'Physical Bonus +1',
-            duration: 'scene',
-            turnsLeft: 5,
-            appliedAt: new Date().toISOString()
-          },
-          {
-            effectId: 'buff_stealth_3',
-            name: 'Stealth Bonus +3',
-            duration: 'scene',
-            turnsLeft: 999,
-            appliedAt: new Date().toISOString()
-          }
-        ]
-      });
-
-      const timestamp = new Date().toISOString();
-      const signature = generateSignature(timestamp, 'arkana');
-
-      const requestData = {
-        caster_uuid: caster.slUuid,
-        power_id: 'veil_entropy_pulse',
-        nearby_uuids: [],
-        universe: 'arkana',
-        timestamp: timestamp,
-        signature: signature
-      };
-
-      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
-      const response = await POST(request);
-      const data = await parseJsonResponse(response);
-
-      expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(3); // All 3 still active after turn
     });
   });
 
@@ -1955,7 +1892,6 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.caster.turnsRemaining).toBe(0);
     });
   });
 
@@ -2182,7 +2118,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
         const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
         expect(activeEffects.length).toBeGreaterThan(0);
-        expect(activeEffects[0].turnsLeft).toBe(1); // turns:2 minus 1 for turn
+        expect(activeEffects[0].turnsLeft).toBe(2); // Full duration (new effects applied AFTER turn processing)
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
         expect(liveStats.Dexterity).toBe(3);
@@ -2218,19 +2154,20 @@ describe('/api/arkana/combat/power-activate', () => {
 
       expectSuccess(data);
 
-      // Step 5: Verify buff expired (was at turns:1, now 0) - only if first activation succeeded
+      // Step 5: Verify buff decremented (started at turns:2, now at turns:1) - only if first activation succeeded
       const updatedCaster2 = await prisma.arkanaStats.findFirst({
         where: { userId: caster.id }
       });
 
       const activeEffects2 = (updatedCaster2?.activeEffects || []) as unknown as ActiveEffect[];
 
-      // If first activation succeeded, buff should have expired now after second activation
+      // If first activation succeeded, buff should still be active with turnsLeft:1 after second activation
       if (firstActivationSucceeded) {
-        expect(activeEffects2.length).toBe(0); // Buff expired
+        expect(activeEffects2.length).toBe(1); // Buff still active
+        expect(activeEffects2[0].turnsLeft).toBe(1); // Decremented from 2 to 1
 
         const liveStats2 = (updatedCaster2?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats2.Dexterity).toBeUndefined(); // Effect removed
+        expect(liveStats2.Dexterity).toBe(3); // Effect still active
       }
 
       // Step 6: Verify target was affected by second power

@@ -201,8 +201,7 @@ export async function POST(request: NextRequest) {
           affected: [],
           caster: {
             uuid: caster.slUuid,
-            name: encodeForLSL(caster.arkanaStats.characterName),
-            turnsRemaining: turnProcessed.activeEffects.length
+            name: encodeForLSL(caster.arkanaStats.characterName)
           },
           message: encodeForLSL(`${caster.arkanaStats.characterName} attempts ${power.name} - FAILED! ${rollDescription}`)
         }
@@ -252,7 +251,11 @@ export async function POST(request: NextRequest) {
     // Update caster's activeEffects and liveStats
     let casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
 
-    // Apply self-targeted effects first
+    // Process turn for caster FIRST (decrement all PRE-EXISTING effects by 1 turn)
+    const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+    casterActiveEffects = turnProcessed.activeEffects;
+
+    // THEN apply new self-targeted effects from this ability (these should start with full duration)
     for (const effectResult of selfEffects) {
       casterActiveEffects = applyActiveEffect(casterActiveEffects, effectResult);
     }
@@ -264,14 +267,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Process turn for caster (decrement all effects)
-    const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+    // Recalculate liveStats with both decremented old effects AND new self-effects
+    const finalLiveStats = recalculateLiveStats(caster.arkanaStats, casterActiveEffects);
 
     await prisma.arkanaStats.update({
       where: { userId: caster.id },
       data: buildArkanaStatsUpdate({
-        activeEffects: turnProcessed.activeEffects,
-        liveStats: turnProcessed.liveStats
+        activeEffects: casterActiveEffects,
+        liveStats: finalLiveStats
       })
     });
 
@@ -312,8 +315,7 @@ export async function POST(request: NextRequest) {
           })),
         caster: {
           uuid: caster.slUuid,
-          name: encodeForLSL(casterName),
-          turnsRemaining: turnProcessed.activeEffects.length
+          name: encodeForLSL(casterName)
         },
         message: encodeForLSL(message)
       }
