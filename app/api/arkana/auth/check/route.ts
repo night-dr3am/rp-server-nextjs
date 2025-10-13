@@ -259,8 +259,7 @@ export async function POST(request: NextRequest) {
           credits: user.arkanaStats.credits,
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
-          liveStatsString: liveStatsString,
-          createdAt: user.arkanaStats.createdAt
+          liveStatsString: liveStatsString
         } : null,
         hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
       }

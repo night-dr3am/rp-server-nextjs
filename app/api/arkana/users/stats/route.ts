@@ -4,6 +4,7 @@ import { arkanaStatsSchema, arkanaUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
 import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL } from '@/lib/arkana/effectsUtils';
+import { loadAllData } from '@/lib/arkana/dataLoader';
 
 // GET /api/arkana/users/stats - Retrieve Arkana user statistics
 export async function GET(request: NextRequest) {
@@ -61,14 +62,11 @@ export async function GET(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (user.arkanaStats) {
-      try {
-        const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
-        const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
-        liveStatsString = formatLiveStatsForLSL(liveStats);
-      } catch {
-        // If liveStats calculation fails (corrupted data), continue with empty string
-        liveStatsString = '';
-      }
+      // Load effect definitions needed for recalculation
+      await loadAllData();
+      const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
     }
 
     // Return user stats including Arkana character data
@@ -113,28 +111,10 @@ export async function GET(request: NextRequest) {
           mental: user.arkanaStats.mental,
           perception: user.arkanaStats.perception,
           hitPoints: user.arkanaStats.hitPoints,
-          statPointsPool: user.arkanaStats.statPointsPool,
-          statPointsSpent: user.arkanaStats.statPointsSpent,
-          inherentPowers: user.arkanaStats.inherentPowers,
-          weaknesses: user.arkanaStats.weaknesses,
-          flaws: user.arkanaStats.flaws,
-          flawPointsGranted: user.arkanaStats.flawPointsGranted,
-          powerPointsBudget: user.arkanaStats.powerPointsBudget,
-          powerPointsBonus: user.arkanaStats.powerPointsBonus,
-          powerPointsSpent: user.arkanaStats.powerPointsSpent,
-          commonPowers: user.arkanaStats.commonPowers,
-          archetypePowers: user.arkanaStats.archetypePowers,
-          perks: user.arkanaStats.perks,
-          magicSchools: user.arkanaStats.magicSchools,
-          magicWeaves: user.arkanaStats.magicWeaves,
-          cybernetics: user.arkanaStats.cybernetics,
-          cyberneticAugments: user.arkanaStats.cyberneticAugments,
           credits: user.arkanaStats.credits,
           chips: user.arkanaStats.chips,
           xp: user.arkanaStats.xp,
-          liveStatsString: liveStatsString,
-          createdAt: user.arkanaStats.createdAt,
-          updatedAt: user.arkanaStats.updatedAt
+          liveStatsString: liveStatsString
         } : null,
         hasArkanaCharacter: !!user.arkanaStats ? "true" : "false"  // String for LSL compatibility
       }
@@ -224,14 +204,11 @@ export async function POST(request: NextRequest) {
     // Calculate liveStats string for HUD display
     let liveStatsString = '';
     if (updatedUser.arkanaStats) {
-      try {
-        const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
-        const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
-        liveStatsString = formatLiveStatsForLSL(liveStats);
-      } catch {
-        // If liveStats calculation fails (corrupted data), continue with empty string
-        liveStatsString = '';
-      }
+      // Load effect definitions needed for recalculation
+      await loadAllData();
+      const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
+      const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
+      liveStatsString = formatLiveStatsForLSL(liveStats);
     }
 
     // Return the updated stats in the same format as GET
@@ -276,28 +253,10 @@ export async function POST(request: NextRequest) {
           mental: updatedUser.arkanaStats.mental,
           perception: updatedUser.arkanaStats.perception,
           hitPoints: updatedUser.arkanaStats.hitPoints,
-          statPointsPool: updatedUser.arkanaStats.statPointsPool,
-          statPointsSpent: updatedUser.arkanaStats.statPointsSpent,
-          inherentPowers: updatedUser.arkanaStats.inherentPowers,
-          weaknesses: updatedUser.arkanaStats.weaknesses,
-          flaws: updatedUser.arkanaStats.flaws,
-          flawPointsGranted: updatedUser.arkanaStats.flawPointsGranted,
-          powerPointsBudget: updatedUser.arkanaStats.powerPointsBudget,
-          powerPointsBonus: updatedUser.arkanaStats.powerPointsBonus,
-          powerPointsSpent: updatedUser.arkanaStats.powerPointsSpent,
-          commonPowers: updatedUser.arkanaStats.commonPowers,
-          archetypePowers: updatedUser.arkanaStats.archetypePowers,
-          perks: updatedUser.arkanaStats.perks,
-          magicSchools: updatedUser.arkanaStats.magicSchools,
-          magicWeaves: updatedUser.arkanaStats.magicWeaves,
-          cybernetics: updatedUser.arkanaStats.cybernetics,
-          cyberneticAugments: updatedUser.arkanaStats.cyberneticAugments,
           credits: updatedUser.arkanaStats.credits,
           chips: updatedUser.arkanaStats.chips,
           xp: updatedUser.arkanaStats.xp,
-          liveStatsString: liveStatsString,
-          createdAt: updatedUser.arkanaStats.createdAt,
-          updatedAt: updatedUser.arkanaStats.updatedAt
+          liveStatsString: liveStatsString
         } : null,
         hasArkanaCharacter: !!updatedUser.arkanaStats ? "true" : "false"  // String for LSL compatibility
       }
@@ -314,8 +273,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Return truncated error message for LSL compatibility
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    const truncated = errorMsg.substring(0, 400);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: truncated },
       { status: 500 }
     );
   }

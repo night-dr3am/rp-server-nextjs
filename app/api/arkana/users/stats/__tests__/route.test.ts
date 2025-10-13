@@ -267,7 +267,7 @@ describe('/api/arkana/users/stats', () => {
     expect(data.data.arkanaStats.liveStatsString).toBe('');
   });
 
-  it('should return complete arkana character data structure', async () => {
+  it('should return truncated arkana character data structure', async () => {
     const { user } = await createTestUser('arkana');
 
     // Create comprehensive Arkana character
@@ -289,22 +289,6 @@ describe('/api/arkana/users/stats', () => {
         mental: 4,
         perception: 3,
         hitPoints: 10,
-        statPointsPool: 0,
-        statPointsSpent: 6,
-        inherentPowers: ['power_life_sense'],
-        weaknesses: ['weakness_sunlight'],
-        flaws: ['flaw_addiction', 'flaw_phobia'],
-        flawPointsGranted: 5,
-        powerPointsBudget: 15,
-        powerPointsBonus: 5,
-        powerPointsSpent: 8,
-        commonPowers: ['power_enhanced_senses'],
-        archetypePowers: ['power_life_drain'],
-        perks: ['perk_tech_savvy'],
-        magicSchools: ['school_technomancy'],
-        magicWeaves: ['weave_data_stream'],
-        cybernetics: ['cyber_neural_interface'],
-        cyberneticAugments: ['augment_memory_boost'],
         credits: 2500,
         chips: 750,
         xp: 100,
@@ -339,19 +323,76 @@ describe('/api/arkana/users/stats', () => {
     expect(arkanaStats.mental).toBe(4);
     expect(arkanaStats.perception).toBe(3);
     expect(arkanaStats.hitPoints).toBe(10);
-    expect(arkanaStats.inherentPowers).toEqual(['power_life_sense']);
-    expect(arkanaStats.weaknesses).toEqual(['weakness_sunlight']);
-    expect(arkanaStats.flaws).toEqual(['flaw_addiction', 'flaw_phobia']);
-    expect(arkanaStats.commonPowers).toEqual(['power_enhanced_senses']);
-    expect(arkanaStats.archetypePowers).toEqual(['power_life_drain']);
-    expect(arkanaStats.perks).toEqual(['perk_tech_savvy']);
-    expect(arkanaStats.magicSchools).toEqual(['school_technomancy']);
-    expect(arkanaStats.magicWeaves).toEqual(['weave_data_stream']);
-    expect(arkanaStats.cybernetics).toEqual(['cyber_neural_interface']);
-    expect(arkanaStats.cyberneticAugments).toEqual(['augment_memory_boost']);
     expect(arkanaStats.credits).toBe(2500);
     expect(arkanaStats.chips).toBe(750);
     expect(arkanaStats.xp).toBe(100);
+  });
+
+  it('should process activeEffects and liveStats correctly with multiple debuffs', async () => {
+    const { user } = await createTestUser('arkana');
+
+    // Create Arkana character with specific activeEffects and liveStats that might cause issues
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Debuffed Character',
+        agentName: 'TestAgent',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 15,
+        statPointsPool: 0,
+        statPointsSpent: 6,
+        flaws: [],
+        flawPointsGranted: 0,
+        powerPointsBudget: 15,
+        powerPointsBonus: 0,
+        powerPointsSpent: 0,
+        credits: 1000,
+        chips: 500,
+        xp: 0,
+        registrationCompleted: true,
+        // Test with specific activeEffects that have caused issues
+        activeEffects: [
+          {
+            name: "Mental Debuff -1",
+            duration: "turns:2",
+            effectId: "debuff_mental_minus_1",
+            appliedAt: "2025-10-12T15:10:06.612Z",
+            turnsLeft: 2
+          },
+          {
+            name: "Entropy Disruption",
+            duration: "turns:1",
+            effectId: "debuff_entropy_disruption",
+            appliedAt: "2025-10-12T15:12:10.572Z",
+            turnsLeft: 1
+          }
+        ],
+        liveStats: {
+          Mental: -2
+        }
+      }
+    });
+
+    const params = createApiBody({
+      sl_uuid: user.slUuid,
+      universe: 'arkana'
+    }, 'arkana');
+
+    const request = createMockGetRequest('/api/arkana/users/stats', params);
+    const response = await GET(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.user.slUuid).toBe(user.slUuid);
+    expect(data.data.arkanaStats).toBeDefined();
+    expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Debuffed Character');
+    // liveStatsString should contain Mental:-2 formatted for LSL
+    expect(data.data.arkanaStats.liveStatsString).toBe('Mental:-2');
   });
 });
 
