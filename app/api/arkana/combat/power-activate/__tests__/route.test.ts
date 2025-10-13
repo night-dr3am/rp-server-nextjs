@@ -1392,7 +1392,217 @@ describe('/api/arkana/combat/power-activate', () => {
   });
 
   describe('6. Multi-Target Tests', () => {
-    it('6.2 self-targeted power applies to caster', async () => {
+    it('6.1 area power (Pulse Bloom) affects caster and all nearby allies', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Area Caster',
+        race: 'veilborn',
+        archetype: 'Blossoms',
+        physical: 2,
+        dexterity: 2,
+        mental: 5, // +7 modifier, ensures check success (d20+7 vs TN:10)
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_pulse_bloom'], // Area power: buff_mental_2_area, targetType: "area"
+        archetypePowers: []
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Ally 1',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const nearby2 = await createArkanaTestUser({
+        characterName: 'Nearby Ally 2',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_pulse_bloom',
+        // No target_uuid for area power
+        nearby_uuids: [nearby1.slUuid, nearby2.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      if (data.data.activationSuccess === 'true') {
+        // Verify response includes all affected users
+        expect(data.data.affected).toBeDefined();
+        expect(data.data.affected.length).toBe(3); // Caster + 2 nearby
+
+        // Verify caster was buffed
+        const updatedCaster = await prisma.arkanaStats.findFirst({
+          where: { userId: caster.id }
+        });
+        const casterEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
+        const casterBuff = casterEffects.find(e => e.effectId === 'buff_mental_2_area');
+        expect(casterBuff).toBeDefined();
+        expect(casterBuff?.turnsLeft).toBe(2);
+
+        const casterLiveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
+        expect(casterLiveStats.Mental).toBe(2);
+
+        // Verify nearby allies were buffed
+        const updatedNearby1 = await prisma.arkanaStats.findFirst({
+          where: { userId: nearby1.id }
+        });
+        const nearby1Effects = (updatedNearby1?.activeEffects || []) as unknown as ActiveEffect[];
+        expect(nearby1Effects.some(e => e.effectId === 'buff_mental_2_area')).toBe(true);
+
+        const updatedNearby2 = await prisma.arkanaStats.findFirst({
+          where: { userId: nearby2.id }
+        });
+        const nearby2Effects = (updatedNearby2?.activeEffects || []) as unknown as ActiveEffect[];
+        expect(nearby2Effects.some(e => e.effectId === 'buff_mental_2_area')).toBe(true);
+      } else {
+        console.log('Pulse Bloom activation failed check, skipping area power verification');
+      }
+    });
+
+    it('6.2 area power excludes caster from nearby list (no duplicates)', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Blossoms',
+        physical: 2,
+        dexterity: 2,
+        mental: 5, // +7 modifier, ensures check success
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_pulse_bloom'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_pulse_bloom',
+        // Incorrectly includes caster in nearby_uuids (should be filtered out)
+        nearby_uuids: [caster.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      if (data.data.activationSuccess === 'true') {
+        // Verify only caster affected (no duplicates)
+        expect(data.data.affected.length).toBe(1);
+        expect(data.data.affected[0].uuid).toBe(caster.slUuid);
+      }
+    });
+
+    it('6.3 area power filters out nearby users not in RP mode', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Blossoms',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_pulse_bloom'],
+        archetypePowers: []
+      });
+
+      const nearbyRP = await createArkanaTestUser({
+        characterName: 'In RP Mode',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: [],
+        status: 0 // RP mode
+      });
+
+      const nearbyOOC = await createArkanaTestUser({
+        characterName: 'OOC Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: [],
+        status: 1 // OOC mode
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_pulse_bloom',
+        nearby_uuids: [nearbyRP.slUuid, nearbyOOC.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      if (data.data.activationSuccess === 'true') {
+        // Verify only caster + RP player affected (OOC excluded)
+        expect(data.data.affected.length).toBe(2);
+        const affectedUUIDs = data.data.affected.map((a: { uuid: string }) => a.uuid);
+        expect(affectedUUIDs).toContain(caster.slUuid);
+        expect(affectedUUIDs).toContain(nearbyRP.slUuid);
+        expect(affectedUUIDs).not.toContain(nearbyOOC.slUuid);
+
+        // Verify OOC player was NOT affected
+        const updatedOOC = await prisma.arkanaStats.findFirst({
+          where: { userId: nearbyOOC.id }
+        });
+        const oocEffects = (updatedOOC?.activeEffects || []) as unknown as ActiveEffect[];
+        expect(oocEffects.length).toBe(0);
+      }
+    });
+
+    it('6.4 self-targeted power applies to caster only', async () => {
       const caster = await createArkanaTestUser({
         characterName: 'Self Buffer',
         race: 'gaki',
@@ -1441,6 +1651,119 @@ describe('/api/arkana/combat/power-activate', () => {
       } else {
         console.log('Chi Step activation failed check, skipping self-target verification');
       }
+    });
+
+    it('6.5 area power with empty nearby_uuids affects caster only', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Lone Caster',
+        race: 'veilborn',
+        archetype: 'Blossoms',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_pulse_bloom'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_pulse_bloom',
+        nearby_uuids: [], // No nearby players
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      if (data.data.activationSuccess === 'true') {
+        // Verify only caster affected
+        expect(data.data.affected.length).toBe(1);
+        expect(data.data.affected[0].uuid).toBe(caster.slUuid);
+
+        // Verify caster has buff
+        const updatedCaster = await prisma.arkanaStats.findFirst({
+          where: { userId: caster.id }
+        });
+        const casterEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
+        expect(casterEffects.some(e => e.effectId === 'buff_mental_2_area')).toBe(true);
+      }
+    });
+
+    it('6.6 single-target power with nearby_uuids affects only specified target', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'gaki',
+        archetype: 'Life',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['gaki_chi_manipulation'], // Single target power
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Primary Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const nearby = await createArkanaTestUser({
+        characterName: 'Nearby Observer',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'gaki_chi_manipulation',
+        target_uuid: target.slUuid,
+        nearby_uuids: [nearby.slUuid], // Should be ignored for single-target power
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify nearby player was NOT affected (only specific target)
+      const updatedNearby = await prisma.arkanaStats.findFirst({
+        where: { userId: nearby.id }
+      });
+      const nearbyEffects = (updatedNearby?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(nearbyEffects.length).toBe(0);
     });
   });
 

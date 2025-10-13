@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
 import type { CommonPower, ArchetypePower, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -85,7 +85,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Get target if specified (for non-self powers)
-    let target = null;
+    type UserWithStats = Awaited<ReturnType<typeof prisma.user.findFirst<{
+      where: { slUuid: string; universe: string };
+      include: { arkanaStats: true; stats: true };
+    }>>>;
+
+    let target: UserWithStats = null;
+    const allPotentialTargets: UserWithStats[] = [];
+
     if (target_uuid) {
       target = await prisma.user.findFirst({
         where: { slUuid: target_uuid, universe: 'arkana' },
@@ -106,6 +113,28 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+
+      allPotentialTargets.push(target);
+    }
+
+    // Load nearby users for area effects
+    if (value.nearby_uuids && Array.isArray(value.nearby_uuids) && value.nearby_uuids.length > 0) {
+      const nearbyUsers = await prisma.user.findMany({
+        where: {
+          slUuid: { in: value.nearby_uuids },
+          universe: 'arkana'
+        },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // Filter to only registered users in RP mode
+      const validNearby = nearbyUsers.filter(u =>
+        u?.arkanaStats?.registrationCompleted &&
+        u.stats?.status === 0 &&
+        u.slUuid !== caster.slUuid // Exclude caster from nearby list
+      );
+
+      allPotentialTargets.push(...validNearby);
     }
 
     // Parse liveStats for caster and target (if exists) to include active effect modifiers
@@ -150,7 +179,6 @@ export async function POST(request: NextRequest) {
     const activateEffects = (power.effects?.ability && Array.isArray(power.effects.ability))
       ? power.effects.ability
       : [];
-    const appliedEffects: EffectResult[] = [];
     let activationSuccess = true;
     let rollDescription = '';
 
@@ -208,95 +236,142 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Activation succeeded - apply all non-check effects (using effective stats)
-    const targetRef = target || caster; // Use target if specified, otherwise self
-    const targetArkanaStats = targetRef.arkanaStats || caster.arkanaStats; // Guaranteed to exist
-    const effectiveTargetLiveStats = target ? targetLiveStats : casterLiveStats; // Use appropriate liveStats
+    // Activation succeeded - apply all non-check effects to applicable targets
+    const appliedEffectsMap = new Map<string, EffectResult[]>(); // Track per user
+
     for (const effectId of activateEffects) {
-      if (!effectId.startsWith('check_')) {
-        const result = executeEffect(effectId, caster.arkanaStats, targetArkanaStats, undefined, casterLiveStats, effectiveTargetLiveStats);
+      if (effectId.startsWith('check_')) continue;
+
+      const effectDef = getEffectDefinition(effectId);
+      if (!effectDef) continue;
+
+      // Determine which users should receive this effect
+      const applicableTargets: typeof allPotentialTargets = [];
+
+      if (effectDef.target === 'self') {
+        // Self effects go to caster only
+        applicableTargets.push({ ...caster, arkanaStats: caster.arkanaStats! });
+      } else if (effectDef.target === 'all_allies' || effectDef.target === 'area') {
+        // Area effects: caster + all nearby
+        applicableTargets.push({ ...caster, arkanaStats: caster.arkanaStats! });
+        applicableTargets.push(...allPotentialTargets);
+      } else if (effectDef.target === 'all_enemies') {
+        // Enemy area effects: all nearby (not caster)
+        applicableTargets.push(...allPotentialTargets);
+      } else if (effectDef.target === 'enemy' || effectDef.target === 'single' || effectDef.target === 'ally') {
+        // Single target effects
+        if (target) {
+          applicableTargets.push(target);
+        }
+      }
+
+      // Apply effect to each applicable target
+      for (const applicableTarget of applicableTargets) {
+        if (!applicableTarget || !applicableTarget.arkanaStats) continue;
+
+        const targetLiveStats = (applicableTarget.arkanaStats.liveStats as LiveStats) || {};
+        const result = executeEffect(effectId, caster.arkanaStats, applicableTarget.arkanaStats, undefined, casterLiveStats, targetLiveStats);
+
         if (result) {
-          appliedEffects.push(result);
+          const userKey = applicableTarget.slUuid;
+          if (!appliedEffectsMap.has(userKey)) {
+            appliedEffectsMap.set(userKey, []);
+          }
+          appliedEffectsMap.get(userKey)!.push(result);
         }
       }
     }
 
+    // ALWAYS process caster's turn first (decrement all PRE-EXISTING effects)
+    // This happens regardless of whether the caster receives new effects from this power
+    let casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
+    const casterTurnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+    casterActiveEffects = casterTurnProcessed.activeEffects;
+
+    // Track which users have been updated (to avoid duplicate processing)
+    const updatedUsers = new Set<string>();
+
     // Process activeEffects and liveStats for all affected users
-    const targetEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'enemy' || e.effectDef.target === 'single' || e.effectDef.target === 'ally'
-    );
-    const selfEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'self'
-    );
+    const affectedUsersData: Array<{
+      uuid: string;
+      name: string;
+      effects: string[];
+    }> = [];
 
-    // Update target's activeEffects and liveStats (if not self-targeted)
-    if (target && target.arkanaStats && targetEffects.length > 0) {
-      let targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+    // Apply new effects to all affected users (including caster if they receive effects)
+    for (const [userUuid, effectResults] of appliedEffectsMap.entries()) {
+      const affectedUser = [caster, ...allPotentialTargets].find(u => u && u.slUuid === userUuid);
+      if (!affectedUser?.arkanaStats) continue;
 
-      for (const effectResult of targetEffects) {
-        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult);
+      let userActiveEffects: typeof casterActiveEffects;
+
+      // If this is the caster, use the already-processed effects
+      if (userUuid === caster.slUuid) {
+        userActiveEffects = casterActiveEffects;
+      } else {
+        // For other users, just parse their current effects (no turn processing)
+        userActiveEffects = parseActiveEffects(affectedUser.arkanaStats.activeEffects);
       }
 
-      const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetActiveEffects);
+      // Apply all new effects for this user
+      for (const effectResult of effectResults) {
+        userActiveEffects = applyActiveEffect(userActiveEffects, effectResult);
+      }
 
+      // Recalculate liveStats
+      const userLiveStats = recalculateLiveStats(affectedUser.arkanaStats, userActiveEffects);
+
+      // Update database
       await prisma.arkanaStats.update({
-        where: { userId: target.id },
+        where: { userId: affectedUser.id },
         data: buildArkanaStatsUpdate({
-          activeEffects: targetActiveEffects,
-          liveStats: targetLiveStats
+          activeEffects: userActiveEffects,
+          liveStats: userLiveStats
+        })
+      });
+
+      updatedUsers.add(userUuid);
+
+      // Track for response
+      affectedUsersData.push({
+        uuid: userUuid,
+        name: encodeForLSL(affectedUser.arkanaStats.characterName),
+        effects: effectResults.map(buildEffectMessage)
+      });
+    }
+
+    // If caster wasn't updated yet (no self-effects), update them now with just turn processing
+    if (!updatedUsers.has(caster.slUuid)) {
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects: casterActiveEffects,
+          liveStats: casterTurnProcessed.liveStats
         })
       });
     }
 
-    // Update caster's activeEffects and liveStats
-    let casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
-
-    // Process turn for caster FIRST (decrement all PRE-EXISTING effects by 1 turn)
-    const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
-    casterActiveEffects = turnProcessed.activeEffects;
-
-    // THEN apply new self-targeted effects from this ability (these should start with full duration)
-    for (const effectResult of selfEffects) {
-      casterActiveEffects = applyActiveEffect(casterActiveEffects, effectResult);
-    }
-
-    // If self-targeted, apply target effects to self
-    if (!target && targetEffects.length > 0) {
-      for (const effectResult of targetEffects) {
-        casterActiveEffects = applyActiveEffect(casterActiveEffects, effectResult);
-      }
-    }
-
-    // Recalculate liveStats with both decremented old effects AND new self-effects
-    const finalLiveStats = recalculateLiveStats(caster.arkanaStats, casterActiveEffects);
-
-    await prisma.arkanaStats.update({
-      where: { userId: caster.id },
-      data: buildArkanaStatsUpdate({
-        activeEffects: casterActiveEffects,
-        liveStats: finalLiveStats
-      })
-    });
-
     // Build comprehensive message with effect details
     const casterName = caster.arkanaStats.characterName;
-    const targetName = target?.arkanaStats?.characterName || casterName;
 
     let message = `${casterName} activates ${power.name}`;
-    if (target) {
-      message += ` on ${targetName}`;
+
+    if (power.targetType === 'area') {
+      message += ` affecting ${affectedUsersData.length} ${affectedUsersData.length === 1 ? 'target' : 'targets'}`;
+    } else if (power.targetType === 'self') {
+      message += ' on themselves';
+    } else if (target?.arkanaStats) {
+      message += ` on ${target.arkanaStats.characterName}`;
     }
+
     message += ` - SUCCESS! ${rollDescription}`;
 
-    // Add effect messages
-    if (targetEffects.length > 0) {
-      const msgs = targetEffects.map(buildEffectMessage);
-      message += `. Target: ${msgs.join(', ')}`;
-    }
-
-    if (selfEffects.length > 0) {
-      const msgs = selfEffects.map(buildEffectMessage);
-      message += `. Caster: ${msgs.join(', ')}`;
+    // Add effect summary
+    const effectSummary = affectedUsersData
+      .map(u => `${u.name}: ${u.effects.join(', ')}`)
+      .join('; ');
+    if (effectSummary) {
+      message += `. Effects: ${effectSummary}`;
     }
 
     return NextResponse.json({
@@ -306,13 +381,7 @@ export async function POST(request: NextRequest) {
         powerUsed: power.name,
         powerBaseStat: power.baseStat || 'Mental',
         rollInfo: rollDescription,
-        affected: appliedEffects
-          .filter(e => e.effectDef.target !== 'self')
-          .map(e => ({
-            uuid: target ? target.slUuid : caster.slUuid,
-            name: encodeForLSL(targetName),
-            effects: [buildEffectMessage(e)]
-          })),
+        affected: affectedUsersData,
         caster: {
           uuid: caster.slUuid,
           name: encodeForLSL(casterName)
