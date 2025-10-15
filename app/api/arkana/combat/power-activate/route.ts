@@ -405,10 +405,10 @@ export async function POST(request: NextRequest) {
 
       updatedUsers.add(userUuid);
 
-      // Track for response
+      // Track for response (use raw name for message building, will encode later)
       affectedUsersData.push({
         uuid: userUuid,
-        name: encodeForLSL(affectedUser.arkanaStats.characterName),
+        name: affectedUser.arkanaStats.characterName,
         effects: effectResults.map(buildEffectMessage)
       });
     }
@@ -454,7 +454,11 @@ export async function POST(request: NextRequest) {
         powerUsed: ability.name,
         powerBaseStat: ability.baseStat || 'Mental',
         rollInfo: rollDescription,
-        affected: affectedUsersData,
+        affected: affectedUsersData.map(u => ({
+          uuid: u.uuid,
+          name: encodeForLSL(u.name),
+          effects: u.effects
+        })),
         caster: {
           uuid: caster.slUuid,
           name: encodeForLSL(casterName)
