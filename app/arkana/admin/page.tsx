@@ -1047,6 +1047,14 @@ function AdminDashboardContent() {
                     <label className="block text-sm font-medium text-cyan-300 mb-1">Faction</label>
                     <input type="text" value={editData.faction} onChange={(e) => setEditData({...editData, faction: e.target.value})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-cyan-300 mb-1">Job</label>
+                    <input type="text" value={editData.job} onChange={(e) => setEditData({...editData, job: e.target.value})} maxLength={256} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-cyan-300 mb-1">Background</label>
+                  <textarea value={editData.background} onChange={(e) => setEditData({...editData, background: e.target.value})} rows={4} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100 resize-y" placeholder="Character backstory and background information..."></textarea>
                 </div>
               </div>
 
