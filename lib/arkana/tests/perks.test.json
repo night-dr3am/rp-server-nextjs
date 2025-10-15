@@ -1,0 +1,47 @@
+[
+  {
+    "id": "perk_combat_veteran",
+    "name": "Combat Veteran",
+    "desc": "Years of combat experience grant bonus to attack rolls",
+    "cost": 2,
+    "species": null,
+    "arch": null,
+    "tags": ["combat"]
+  },
+  {
+    "id": "perk_quick_reflexes",
+    "name": "Quick Reflexes",
+    "desc": "Enhanced reflexes grant bonus to defense",
+    "cost": 2,
+    "species": null,
+    "arch": null,
+    "tags": ["defense", "dexterity"]
+  },
+  {
+    "id": "perk_iron_will",
+    "name": "Iron Will",
+    "desc": "Strong willpower grants resistance to mental effects",
+    "cost": 2,
+    "species": null,
+    "arch": null,
+    "tags": ["mental", "defense"]
+  },
+  {
+    "id": "perk_strigoi_bloodline",
+    "name": "Ancient Bloodline",
+    "desc": "Noble vampire lineage grants social advantages",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": null,
+    "tags": ["social", "passive"]
+  },
+  {
+    "id": "perk_veilborn_resonance",
+    "name": "Harmonic Resonance",
+    "desc": "Attunement to biodome systems grants environmental bonuses",
+    "cost": 2,
+    "species": "veilborn",
+    "arch": null,
+    "tags": ["utility", "passive"]
+  }
+]

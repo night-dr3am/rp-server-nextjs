@@ -1,0 +1,200 @@
+[
+  {
+    "id": "strigoi_hypnosis",
+    "name": "Hypnosis",
+    "desc": "Implant suggestions and triggers. (MEN)",
+    "cost": 2,
+    "species": "strigoi",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 2,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_suggestion"]
+    }
+  },
+  {
+    "id": "strigoi_shapeshifting",
+    "name": "Shapeshifting",
+    "desc": "Mist forms, wolf-like attributes, or bat-like wings. (PHYS)",
+    "cost": 2,
+    "species": "strigoi",
+    "abilityType": ["ability"],
+    "tags": ["transform", "utility", "movement"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "transform_mist_wolf_bat"]
+    }
+  },
+  {
+    "id": "strigoi_wall_walking",
+    "name": "Wall-Walking",
+    "desc": "Scale sheer surfaces like a spider.",
+    "cost": 1,
+    "species": "strigoi",
+    "abilityType": ["passive"],
+    "tags": ["utility", "movement"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "passive": ["movement_wall_climbing"]
+    }
+  },
+  {
+    "id": "strigoi_dreamwalking",
+    "name": "Dreamwalking",
+    "desc": "Invade and shape dreams, feed subtly. (MEN)",
+    "cost": 3,
+    "species": "strigoi",
+    "abilityType": ["attack", "ability"],
+    "tags": ["control", "mental", "damage"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_mental_2"],
+      "ability": ["check_mental_vs_mental", "control_dreamwalk"]
+    }
+  },
+  {
+    "id": "veil_emotion_theft",
+    "name": "Emotion Theft",
+    "desc": "Siphon dominant emotion; target suffers -1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
+    "cost": 3,
+    "species": "veilborn",
+    "abilityType": ["attack"],
+    "tags": ["debuff", "buff", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "debuff_mental_minus_1", "buff_mental_1_turn"]
+    }
+  },
+  {
+    "id": "veil_entropy_pulse",
+    "name": "Entropy Pulse",
+    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (-1 TN or effect for 1 turn).",
+    "cost": 2,
+    "species": "veilborn",
+    "abilityType": ["attack"],
+    "tags": ["debuff", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "debuff_entropy_disruption"]
+    }
+  },
+  {
+    "id": "gaki_chi_manipulation",
+    "name": "Chi Manipulation",
+    "desc": "Store, transfer, or balance yin/yang chi between beings. (MEN)",
+    "cost": 2,
+    "species": "gaki",
+    "abilityType": ["attack", "ability"],
+    "tags": ["debuff", "heal", "mental", "utility"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 5,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "debuff_mental_minus_1"],
+      "ability": ["ability_chi_balance_restore"]
+    }
+  },
+  {
+    "id": "gaki_dreamwalking",
+    "name": "Dreamwalking",
+    "desc": "Invade dreams, subtly feed, induce nightmares/ecstasy. (MEN)",
+    "cost": 3,
+    "species": "gaki",
+    "abilityType": ["attack", "ability"],
+    "tags": ["control", "mental", "damage"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_mental_2"],
+      "ability": ["check_mental_vs_mental", "control_dreamwalk"]
+    }
+  },
+  {
+    "id": "gaki_chi_step",
+    "name": "Chi Step",
+    "desc": "Short bursts of superhuman speed and agility. (DEX)",
+    "cost": 3,
+    "species": "gaki",
+    "abilityType": ["ability"],
+    "tags": ["buff", "utility", "movement"],
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_dexterity_vs_tn10", "buff_dexterity_3"]
+    }
+  },
+  {
+    "id": "gaki_yin_shroud",
+    "name": "Yin Shroud",
+    "desc": "Cloak themselves in shadow and silence.",
+    "cost": 3,
+    "species": "gaki",
+    "abilityType": ["ability"],
+    "tags": ["stealth", "utility"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_stealth_4"]
+    }
+  },
+  {
+    "id": "veil_pulse_bloom",
+    "name": "Pulse Bloom",
+    "desc": "Emit radiant pulse affecting flora/nearby minds; accelerate growth, restore morale/clarity.",
+    "cost": 3,
+    "species": "veilborn",
+    "abilityType": ["ability"],
+    "tags": ["buff", "utility", "mental"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_mental_2_area"]
+    }
+  },
+  {
+    "id": "spliced_tail_slap",
+    "name": "Tail Slap",
+    "desc": "Powerful tail attack; Physical roll to hit.",
+    "cost": 2,
+    "species": "spliced",
+    "abilityType": ["attack"],
+    "tags": ["damage", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 5,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_3"]
+    }
+  },
+  {
+    "id": "human_telekinesis",
+    "name": "Telekinesis",
+    "desc": "Move objects with mental power.",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["utility", "mental"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10"]
+    }
+  }
+]

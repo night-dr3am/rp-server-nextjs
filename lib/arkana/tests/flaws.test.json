@@ -1,0 +1,51 @@
+[
+  {
+    "id": "flaw_glass_jaw",
+    "name": "Glass Jaw",
+    "desc": "Takes extra damage from physical attacks",
+    "cost": 2,
+    "tags": ["race:strigoi", "race:gaki", "race:veilborn", "race:spliced", "species:human_without_power", "species:arcanist", "species:synthral", "species:psion"]
+  },
+  {
+    "id": "flaw_weak_willed",
+    "name": "Weak-Willed",
+    "desc": "Vulnerable to mental manipulation",
+    "cost": 2,
+    "tags": ["race:strigoi", "race:gaki", "race:veilborn", "race:spliced", "species:human_without_power", "species:arcanist", "species:synthral", "species:psion"]
+  },
+  {
+    "id": "flaw_clumsy",
+    "name": "Clumsy",
+    "desc": "Reduced dexterity in complex situations",
+    "cost": 1,
+    "tags": ["race:strigoi", "race:gaki", "race:veilborn", "race:spliced", "species:human_without_power", "species:arcanist", "species:synthral", "species:psion"]
+  },
+  {
+    "id": "flaw_sunlight_weakness",
+    "name": "Sunlight Vulnerability",
+    "desc": "Weakened by natural sunlight",
+    "cost": 3,
+    "tags": ["race:strigoi"]
+  },
+  {
+    "id": "flaw_feeding_frenzy",
+    "name": "Feeding Frenzy",
+    "desc": "Must make willpower check when feeding to avoid losing control",
+    "cost": 2,
+    "tags": ["race:strigoi", "race:gaki"]
+  },
+  {
+    "id": "flaw_unstable_powers",
+    "name": "Unstable Powers",
+    "desc": "Powers occasionally misfire or backfire",
+    "cost": 2,
+    "tags": ["species:arcanist", "species:psion"]
+  },
+  {
+    "id": "flaw_addiction",
+    "name": "Addiction",
+    "desc": "Addicted to a substance or behavior, requires willpower to resist",
+    "cost": 3,
+    "tags": ["race:strigoi", "race:gaki", "race:veilborn", "race:spliced", "species:human_without_power", "species:arcanist", "species:synthral", "species:psion"]
+  }
+]

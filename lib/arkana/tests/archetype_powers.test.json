@@ -1,0 +1,82 @@
+[
+  {
+    "id": "strigoi_life_cradle_of_hunger",
+    "name": "Cradle of Hunger",
+    "desc": "Touch can sap energy, leaving mortals weak as if struck by days of exhaustion.",
+    "cost": 3,
+    "species": "strigoi",
+    "arch": "life",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "physical"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2", "debuff_exhaustion"]
+    }
+  },
+  {
+    "id": "strigoi_life_blood_seed",
+    "name": "Blood Seed",
+    "desc": "Plant a blood seed of desire in a mortal; supernatural yearning until accepted or spurned.",
+    "cost": 4,
+    "species": "strigoi",
+    "arch": "life",
+    "abilityType": ["attack"],
+    "tags": ["control", "mental", "charm"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_desire"]
+    }
+  },
+  {
+    "id": "veilborn_echoes_memory_weave",
+    "name": "Memory Weave",
+    "desc": "Access and weave memories into illusions or shared experiences.",
+    "cost": 3,
+    "species": "veilborn",
+    "arch": "echoes",
+    "abilityType": ["ability"],
+    "tags": ["utility", "mental"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10"]
+    }
+  },
+  {
+    "id": "gaki_death_soul_drain",
+    "name": "Soul Drain",
+    "desc": "Drain life energy and soul fragments from target.",
+    "cost": 4,
+    "species": "gaki",
+    "arch": "death",
+    "abilityType": ["attack"],
+    "tags": ["damage", "debuff", "necrotic"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 5,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_necrotic_3", "debuff_physical_minus_2"]
+    }
+  },
+  {
+    "id": "human_arcanist_energy_bolt",
+    "name": "Arcane Energy Bolt",
+    "desc": "Fire a bolt of pure magical energy.",
+    "cost": 2,
+    "species": "human",
+    "arch": "arcanist",
+    "abilityType": ["attack"],
+    "tags": ["damage", "energy"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 30,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_mental_2"]
+    }
+  }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "school_elemental",
+    "name": "Elemental Magic",
+    "desc": "School of elemental manipulation",
+    "cost": 3,
+    "section": "Elemental Arts",
+    "type": "school"
+  },
+  {
+    "id": "weave_fire_bolt",
+    "name": "Fire Bolt",
+    "desc": "Launch a bolt of flame",
+    "cost": 1,
+    "section": "Elemental Arts",
+    "type": "weave"
+  },
+  {
+    "id": "weave_ice_shield",
+    "name": "Ice Shield",
+    "desc": "Create a protective shield of ice",
+    "cost": 1,
+    "section": "Elemental Arts",
+    "type": "weave"
+  },
+  {
+    "id": "school_illusion",
+    "name": "Illusion Magic",
+    "desc": "School of illusions and deception",
+    "cost": 3,
+    "section": "Mind Arts",
+    "type": "school"
+  },
+  {
+    "id": "weave_minor_illusion",
+    "name": "Minor Illusion",
+    "desc": "Create a small illusory image",
+    "cost": 1,
+    "section": "Mind Arts",
+    "type": "weave"
+  },
+  {
+    "id": "school_technomancy",
+    "name": "Technomancy",
+    "desc": "School of technological magic",
+    "cost": 3,
+    "section": "Technomancy",
+    "type": "school"
+  },
+  {
+    "id": "weave_data_spike",
+    "name": "Data Spike",
+    "desc": "Inject hostile code into systems",
+    "cost": 1,
+    "section": "Technomancy",
+    "type": "weave"
+  }
+]

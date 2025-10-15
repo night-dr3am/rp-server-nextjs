@@ -22,17 +22,26 @@ let cybernetics: Cybernetic[] = [];
 let magicSchools: MagicSchool[] = [];
 let effectsMap: Map<string, EffectDefinition> = new Map();
 
+// Determine if running in test mode
+function isTestMode(): boolean {
+  return process.env.NODE_ENV === 'test';
+}
+
 // Load all data function
 export async function loadAllData(): Promise<void> {
   try {
+    const testMode = isTestMode();
+    const basePath = testMode ? './tests/' : './';
+    const fileSuffix = testMode ? '.test.json' : '';
+
     const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData] = await Promise.all([
-      import('./flaws3.json').then(m => m.default),
-      import('./common_powers2.json').then(m => m.default),
-      import('./perks2.json').then(m => m.default),
-      import('./archetype_powers4.json').then(m => m.default),
-      import('./cybernetics2.json').then(m => m.default),
-      import('./magic_schools8.json').then(m => m.default),
-      import('./effects.json').then(m => m.default)
+      import(`${basePath}flaws${testMode ? '' : '3'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}common_powers${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}perks${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}archetype_powers${testMode ? '' : '4'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}cybernetics${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`).then(m => m.default),
+      import(`${basePath}effects${fileSuffix}`).then(m => m.default)
     ]);
 
     flaws = flawsData;

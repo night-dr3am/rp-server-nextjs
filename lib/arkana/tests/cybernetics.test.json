@@ -1,0 +1,56 @@
+[
+  {
+    "id": "cyber_enhanced_vision",
+    "name": "Enhanced Vision Package",
+    "desc": "Cybernetic eye upgrades for improved vision",
+    "cost": 2,
+    "section": "Sensory Mods",
+    "slotType": "eyes",
+    "slots": 1
+  },
+  {
+    "id": "cyber_neural_processor",
+    "name": "Neural Processor",
+    "desc": "Cognitive enhancement through neural implants",
+    "cost": 3,
+    "section": "Combat/Utility Mods",
+    "slotType": "brain",
+    "slots": 1
+  },
+  {
+    "id": "cyber_reinforced_skeleton",
+    "name": "Reinforced Skeleton",
+    "desc": "Bone lacing for increased durability",
+    "cost": 4,
+    "section": "Augmented Strength/Durability",
+    "slotType": "body",
+    "slots": 2
+  },
+  {
+    "id": "cyber_dermal_armor",
+    "name": "Dermal Armor Plating",
+    "desc": "Subdermal armor plates for protection",
+    "cost": 3,
+    "section": "Augmented Strength/Durability",
+    "slotType": "skin",
+    "slots": 2
+  },
+  {
+    "id": "cyber_reflex_boost",
+    "name": "Reflex Booster",
+    "desc": "Enhanced reaction time through nervous system mods",
+    "cost": 2,
+    "section": "Street-Level Popular Mods",
+    "slotType": "nerves",
+    "slots": 1
+  },
+  {
+    "id": "cyber_hacking_suite",
+    "name": "Integrated Hacking Suite",
+    "desc": "Built-in tools for digital intrusion",
+    "cost": 3,
+    "section": "Stealth/Infiltration - Hacking",
+    "slotType": "arm",
+    "slots": 1
+  }
+]
