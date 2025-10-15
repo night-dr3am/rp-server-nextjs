@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerInfoSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import type { CommonPower, ArchetypePower } from '@/lib/arkana/types';
+import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,53 +56,74 @@ export async function POST(request: NextRequest) {
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
     const allArchPowers = getAllArchPowers();
+    const allPerks = getAllPerks();
+    const allCybernetics = getAllCybernetics();
+    const allMagicSchools = getAllMagicSchools();
 
-    // Find the power by ID or name
-    let power: CommonPower | ArchetypePower | undefined = undefined;
+    // Find the ability by ID or name (search in all ability types)
+    let ability: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool | undefined = undefined;
+
     if (power_id) {
-      power = allCommonPowers.find((p: CommonPower) => p.id === power_id) ||
-              allArchPowers.find((p: ArchetypePower) => p.id === power_id);
+      // Search by ID: common powers → archetype powers → perks → cybernetics → magic weaves
+      ability = allCommonPowers.find((p: CommonPower) => p.id === power_id) ||
+                allArchPowers.find((p: ArchetypePower) => p.id === power_id) ||
+                allPerks.find((p: Perk) => p.id === power_id) ||
+                allCybernetics.find((c: Cybernetic) => c.id === power_id) ||
+                allMagicSchools.find((m: MagicSchool) => m.id === power_id);
     } else if (power_name) {
-      power = allCommonPowers.find((p: CommonPower) => p.name.toLowerCase() === power_name.toLowerCase()) ||
-              allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === power_name.toLowerCase());
+      // Search by name (case-insensitive): common powers → archetype powers → perks → cybernetics → magic weaves
+      const lowerName = power_name.toLowerCase();
+      ability = allCommonPowers.find((p: CommonPower) => p.name.toLowerCase() === lowerName) ||
+                allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === lowerName) ||
+                allPerks.find((p: Perk) => p.name.toLowerCase() === lowerName) ||
+                allCybernetics.find((c: Cybernetic) => c.name.toLowerCase() === lowerName) ||
+                allMagicSchools.find((m: MagicSchool) => m.name.toLowerCase() === lowerName);
     }
 
-    if (!power) {
+    if (!ability) {
       return NextResponse.json(
-        { success: false, error: 'Power not found' },
+        { success: false, error: 'Ability not found' },
         { status: 404 }
       );
     }
 
-    // Verify the player owns this power
-    const userCommonPowerIds = player.arkanaStats.commonPowers || [];
-    const userArchPowerIds = player.arkanaStats.archetypePowers || [];
-    const ownsPower = userCommonPowerIds.includes(power.id) || userArchPowerIds.includes(power.id);
+    // Verify the player owns this ability (check all ability types with type casting)
+    const userCommonPowerIds = (player.arkanaStats.commonPowers as string[]) || [];
+    const userArchPowerIds = (player.arkanaStats.archetypePowers as string[]) || [];
+    const userPerkIds = (player.arkanaStats.perks as string[]) || [];
+    const userCyberneticIds = (player.arkanaStats.cybernetics as string[]) || [];
+    const userMagicWeaveIds = (player.arkanaStats.magicWeaves as string[]) || [];
 
-    if (!ownsPower) {
+    const ownsAbility = userCommonPowerIds.includes(ability.id) ||
+                        userArchPowerIds.includes(ability.id) ||
+                        userPerkIds.includes(ability.id) ||
+                        userCyberneticIds.includes(ability.id) ||
+                        userMagicWeaveIds.includes(ability.id);
+
+    if (!ownsAbility) {
       return NextResponse.json(
-        { success: false, error: 'Player does not own this power' },
+        { success: false, error: 'Player does not own this ability' },
         { status: 403 }
       );
     }
 
-    // Return power info
+    // Return ability info
     return NextResponse.json({
       success: true,
       data: {
-        id: power.id,
-        name: encodeForLSL(power.name),
-        description: encodeForLSL(power.desc || ''),
-        targetType: power.targetType || 'single',
-        baseStat: power.baseStat || 'Mental',
-        range: power.range || 20,
-        effects: power.effects || {},
-        abilityType: power.abilityType || []
+        id: ability.id,
+        name: encodeForLSL(ability.name),
+        description: encodeForLSL(ability.desc || ''),
+        targetType: ability.targetType || 'single',
+        baseStat: ability.baseStat || 'Mental',
+        range: ability.range || 20,
+        effects: ability.effects || {},
+        abilityType: ability.abilityType || []
       }
     });
 
   } catch (error: unknown) {
-    console.error('Error fetching power info:', error);
+    console.error('Error fetching ability info:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

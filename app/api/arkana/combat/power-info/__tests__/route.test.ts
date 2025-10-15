@@ -165,7 +165,7 @@ describe('/api/arkana/combat/power-info', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'Player does not own this power');
+      expectError(data, 'Player does not own this ability');
       expect(response.status).toBe(403);
     });
 
@@ -198,7 +198,7 @@ describe('/api/arkana/combat/power-info', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'Power not found');
+      expectError(data, 'Ability not found');
       expect(response.status).toBe(404);
     });
 
