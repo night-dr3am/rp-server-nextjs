@@ -119,6 +119,9 @@ export async function POST(request: NextRequest) {
       magicSchools: characterData.magicSchools || [],
       magicWeaves: characterData.magicWeaves || [],
       cyberneticAugments: allCyberneticAugments,
+      skills: characterData.skills || [],
+      skillsAllocatedPoints: characterData.skillsAllocatedPoints || 5,
+      skillsSpentPoints: characterData.skillsSpentPoints || 0,
       registrationCompleted: isCompleteCharacter
     };
 

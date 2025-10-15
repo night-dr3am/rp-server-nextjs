@@ -200,6 +200,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       'commonPowers', 'archetypePowers', 'perks',
       'magicSchools', 'magicWeaves',
       'cybernetics', 'cyberneticAugments',
+      'skills', 'skillsAllocatedPoints', 'skillsSpentPoints',
       'credits', 'chips', 'xp',
       'arkanaRole'
     ];
