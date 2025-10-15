@@ -108,6 +108,18 @@ export function loadCyberneticByName(cyberName: string): Cybernetic | null {
 }
 
 /**
+ * Load a perk by name (case-insensitive search)
+ *
+ * @param perkName - Perk name to search for
+ * @returns Perk object or null if not found
+ */
+export function loadPerkByName(perkName: string): Perk | null {
+  const allPerks = getAllPerks();
+  const lowerName = perkName.toLowerCase();
+  return allPerks.find(p => p.name.toLowerCase() === lowerName) || null;
+}
+
+/**
  * Check if user owns a perk
  *
  * @param userPerks - Array of perk IDs the user owns

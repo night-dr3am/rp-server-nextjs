@@ -43,5 +43,20 @@
     "species": "veilborn",
     "arch": null,
     "tags": ["utility", "passive"]
+  },
+  {
+    "id": "spliced_bioelectric_resonance",
+    "name": "Bioelectric Resonance",
+    "desc": "Sense/manipulate bioelectric currents; emit shock (6+Mental) once/scene.",
+    "cost": 5,
+    "species": "spliced",
+    "arch": "chimeric",
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 5,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_physical_3"]
+    }
   }
 ]

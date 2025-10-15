@@ -54,5 +54,19 @@
     "cost": 1,
     "section": "Technomancy",
     "type": "weave"
+  },
+  {
+    "id": "enchant_sleep",
+    "name": "Effect Creature: Sleep",
+    "desc": "Target sleeps for 2 turns. Roll Mental vs Mental Defense to resist. Requires Enchant Creature.",
+    "section": "Enchantment",
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "damage_physical_3"]
+    }
   }
 ]

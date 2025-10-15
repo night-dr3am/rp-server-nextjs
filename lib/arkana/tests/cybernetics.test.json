@@ -52,5 +52,20 @@
     "section": "Stealth/Infiltration - Hacking",
     "slotType": "arm",
     "slots": 1
+  },
+  {
+    "id": "cyb_razorjack_interface",
+    "name": "Razorjack Interface",
+    "desc": "Deployable blades or claws; solid melee weapon upgrade.",
+    "cost": 3,
+    "type": "combat",
+    "section": "Combat/Utility Mods",
+    "abilityType": ["attack"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_3"]
+    }
   }
 ]

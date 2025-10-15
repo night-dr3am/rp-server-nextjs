@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
-import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
-import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
+import { getPassiveEffects, passiveEffectsToActiveFormat, loadPerk, loadPerkByName, loadCybernetic, loadCyberneticByName, loadMagicWeave, loadMagicWeaveByName } from '@/lib/arkana/abilityUtils';
+import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -111,6 +111,9 @@ export async function POST(request: NextRequest) {
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
     const allArchPowers = getAllArchPowers();
+    const allPerks = getAllPerks();
+    const allCybernetics = getAllCybernetics();
+    const allMagicSchools = getAllMagicSchools();
 
     // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
     const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
@@ -139,14 +142,23 @@ export async function POST(request: NextRequest) {
     const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerCombinedEffects);
     const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
 
-    // Find the power
-    let power: CommonPower | ArchetypePower | undefined = undefined;
+    // Find the ability (search all 5 ability types: common powers, archetype powers, perks, cybernetics, magic weaves)
+    let power: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool | undefined = undefined;
+
     if (power_id) {
+      // Search by ID in all ability types
       power = allCommonPowers.find((p: CommonPower) => p.id === power_id) ||
-              allArchPowers.find((p: ArchetypePower) => p.id === power_id);
+              allArchPowers.find((p: ArchetypePower) => p.id === power_id) ||
+              allPerks.find((p: Perk) => p.id === power_id) ||
+              allCybernetics.find((c: Cybernetic) => c.id === power_id) ||
+              allMagicSchools.find((m: MagicSchool) => m.id === power_id);
     } else if (power_name) {
+      // Search by name (case-insensitive) in all ability types
       power = allCommonPowers.find((p: CommonPower) => p.name.toLowerCase() === power_name.toLowerCase()) ||
-              allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === power_name.toLowerCase());
+              allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === power_name.toLowerCase()) ||
+              allPerks.find((p: Perk) => p.name.toLowerCase() === power_name.toLowerCase()) ||
+              allCybernetics.find((c: Cybernetic) => c.name.toLowerCase() === power_name.toLowerCase()) ||
+              allMagicSchools.find((m: MagicSchool) => m.name.toLowerCase() === power_name.toLowerCase());
     }
 
     if (!power) {
@@ -156,10 +168,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify ownership
+    // Verify ownership across all ability types
     const userCommonPowerIds = (attacker.arkanaStats.commonPowers as string[]) || [];
     const userArchPowerIds = (attacker.arkanaStats.archetypePowers as string[]) || [];
-    const ownsPower = userCommonPowerIds.includes(power.id) || userArchPowerIds.includes(power.id);
+    const userPerkIds = (attacker.arkanaStats.perks as string[]) || [];
+    const userCyberneticIds = (attacker.arkanaStats.cybernetics as string[]) || [];
+    const userMagicWeaveIds = (attacker.arkanaStats.magicWeaves as string[]) || [];
+
+    const ownsPower = userCommonPowerIds.includes(power.id) ||
+                      userArchPowerIds.includes(power.id) ||
+                      userPerkIds.includes(power.id) ||
+                      userCyberneticIds.includes(power.id) ||
+                      userMagicWeaveIds.includes(power.id);
 
     if (!ownsPower) {
       return NextResponse.json(

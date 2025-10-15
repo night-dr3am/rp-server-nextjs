@@ -37,6 +37,9 @@ describe('/api/arkana/combat/power-attack', () => {
     hitPoints: number;
     commonPowers?: string[];
     archetypePowers?: string[];
+    perks?: string[];
+    cybernetics?: string[];
+    magicWeaves?: string[];
   }) {
     const { user } = await createTestUser('arkana');
 
@@ -484,6 +487,213 @@ describe('/api/arkana/combat/power-attack', () => {
         expect(decodedMessage).toContain('0 damage dealt');
         expect(decodedMessage).toContain('Target:');
       }
+    });
+  });
+
+  describe('Extended Ability Types Tests', () => {
+    it('should execute attack with a cybernetic', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Cyber Warrior',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 4,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: [],
+        archetypePowers: [],
+        cybernetics: ['cyb_razorjack_interface'] // Cybernetic with attack effects
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'cyb_razorjack_interface',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.powerUsed).toBe('Razorjack Interface');
+      expect(data.data.attackSuccess).toMatch(/^(true|false)$/);
+      expect(data.data.message).toBeDefined();
+      expect(data.data.target.uuid).toBe(target.slUuid);
+    });
+
+    it('should execute attack with a magic weave (enchant_sleep - critical test case)', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Enchanter',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: [],
+        magicWeaves: ['enchant_sleep'] // Magic weave with attack effects
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'enchant_sleep',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.powerUsed).toBe('Effect Creature: Sleep');
+      expect(data.data.attackSuccess).toMatch(/^(true|false)$/);
+      expect(data.data.message).toBeDefined();
+      expect(data.data.target.uuid).toBe(target.slUuid);
+    });
+
+    it('should execute attack with a perk', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Spliced Fighter',
+        race: 'spliced',
+        archetype: 'chimeric',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 12,
+        commonPowers: [],
+        archetypePowers: [],
+        perks: ['spliced_bioelectric_resonance'] // Perk with attack effects
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'spliced_bioelectric_resonance',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.powerUsed).toBe('Bioelectric Resonance');
+      expect(data.data.attackSuccess).toMatch(/^(true|false)$/);
+      expect(data.data.message).toBeDefined();
+      expect(data.data.target.uuid).toBe(target.slUuid);
+    });
+
+    it('should return 403 when attacker does not own the magic weave', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'No Magic',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: [],
+        magicWeaves: [] // Doesn't own enchant_sleep
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target Player',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'enchant_sleep',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Attacker does not own this power');
+      expect(response.status).toBe(403);
     });
   });
 });
