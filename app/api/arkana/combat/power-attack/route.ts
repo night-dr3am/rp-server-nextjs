@@ -5,7 +5,7 @@ import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
-import { getPassiveEffects, passiveEffectsToActiveFormat, loadPerk, loadPerkByName, loadCybernetic, loadCyberneticByName, loadMagicWeave, loadMagicWeaveByName } from '@/lib/arkana/abilityUtils';
+import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
 // Build human-readable effect message
