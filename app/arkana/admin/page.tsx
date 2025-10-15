@@ -9,6 +9,8 @@ import {
   type ArchetypePower,
   type Cybernetic,
   type MagicSchool,
+  type Skill,
+  type CharacterSkill,
   loadAllData,
   flawsForRace,
   perksForRace,
@@ -18,7 +20,8 @@ import {
   canUseMagic,
   magicSchoolsAllGrouped,
   groupCyberneticsBySection,
-  getAllFlaws
+  getAllFlaws,
+  getAllSkills
 } from '@/lib/arkanaData';
 
 interface User {
@@ -64,6 +67,9 @@ interface EditDataForm {
   hitPoints: number;
   health: number;
   status: number;
+  skills: CharacterSkill[];
+  skillsAllocatedPoints: number;
+  skillsSpentPoints: number;
   flaws: Set<string>;
   commonPowers: Set<string>;
   archetypePowers: Set<string>;
@@ -93,6 +99,9 @@ interface ArkanaStatsData {
   mental: number;
   perception: number;
   hitPoints: number;
+  skills: unknown;
+  skillsAllocatedPoints?: number;
+  skillsSpentPoints?: number;
   inherentPowers: string[];
   weaknesses: string[];
   flaws: unknown;
@@ -151,6 +160,7 @@ function AdminDashboardContent() {
 
   // Arkana data state
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
   const [availableCommonPowers, setAvailableCommonPowers] = useState<CommonPower[]>([]);
@@ -160,7 +170,7 @@ function AdminDashboardContent() {
 
   // UI state
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [currentTab, setCurrentTab] = useState<string>('flaws');
+  const [currentTab, setCurrentTab] = useState<string>('skills');
 
   // Verify admin access
   useEffect(() => {
@@ -202,6 +212,7 @@ function AdminDashboardContent() {
     const loadData = async () => {
       try {
         await loadAllData();
+        setAvailableSkills(getAllSkills());
         setDataLoaded(true);
       } catch (err) {
         console.error('Failed to load arkana data:', err);
@@ -376,6 +387,10 @@ function AdminDashboardContent() {
           // Current health
           health: result.data.stats?.health || result.data.arkanaStats.hitPoints,
           status: result.data.stats?.status || 0,
+          // Skills
+          skills: (result.data.arkanaStats.skills as CharacterSkill[]) || [],
+          skillsAllocatedPoints: result.data.arkanaStats.skillsAllocatedPoints || 5,
+          skillsSpentPoints: result.data.arkanaStats.skillsSpentPoints || 0,
           // Flaws
           flaws: flawIds,
           // Powers (convert arrays to Sets)
@@ -427,6 +442,9 @@ function AdminDashboardContent() {
       // Convert Sets back to Arrays for API submission
       const submissionData = {
         ...editData,
+        skills: editData.skills || [],
+        skillsAllocatedPoints: editData.skillsAllocatedPoints || 5,
+        skillsSpentPoints: editData.skillsSpentPoints || 0,
         flaws: Array.from(editData.flaws || []),
         commonPowers: Array.from(editData.commonPowers || []),
         archetypePowers: Array.from(editData.archetypePowers || []),
@@ -568,6 +586,7 @@ function AdminDashboardContent() {
     }
 
     const tabs = [
+      { id: 'skills', name: 'Skills' },
       { id: 'flaws', name: 'Flaws' },
       { id: 'common', name: 'Common Powers' },
       { id: 'archetype', name: 'Archetype Powers' },
@@ -614,6 +633,109 @@ function AdminDashboardContent() {
 
         {/* Tab Content */}
         <div className="min-h-[300px]">
+          {currentTab === 'skills' && (
+            <div className="space-y-3">
+              <h4 className="text-md font-bold text-cyan-300">Skills</h4>
+              <p className="text-cyan-300 text-sm mb-3">
+                Adjust skill levels for this character (0-3 levels per skill). Note: Admins can freely modify without point restrictions.
+              </p>
+              <div className="text-sm text-cyan-300 mb-3">
+                Total Allocated Points: {editData.skillsAllocatedPoints || 5} • Spent: {editData.skillsSpentPoints || 0}
+              </div>
+
+              {availableSkills.length > 0 ? (
+                availableSkills.map(skill => {
+                  const characterSkill = editData.skills?.find(s => s.skill_id === skill.id);
+                  const currentLevel = characterSkill ? characterSkill.level : 0;
+
+                  const updateSkillLevel = (delta: number) => {
+                    const newLevel = currentLevel + delta;
+                    if (newLevel < 0 || newLevel > 3) return;
+
+                    const updatedSkills = [...(editData.skills || [])];
+                    const existingIndex = updatedSkills.findIndex(s => s.skill_id === skill.id);
+
+                    let newSpentPoints = editData.skillsSpentPoints || 0;
+
+                    if (newLevel === 0) {
+                      if (existingIndex >= 0) {
+                        updatedSkills.splice(existingIndex, 1);
+                        newSpentPoints -= currentLevel;
+                      }
+                    } else {
+                      if (existingIndex >= 0) {
+                        updatedSkills[existingIndex] = { skill_id: skill.id, skill_name: skill.name, level: newLevel };
+                      } else {
+                        updatedSkills.push({ skill_id: skill.id, skill_name: skill.name, level: newLevel });
+                      }
+                      newSpentPoints = newSpentPoints - currentLevel + newLevel;
+                    }
+
+                    setEditData(prev => ({
+                      ...prev,
+                      skills: updatedSkills,
+                      skillsSpentPoints: newSpentPoints
+                    }));
+                  };
+
+                  const getTypeBadgeColor = (type: string): string => {
+                    switch (type) {
+                      case 'required': return 'bg-red-900 text-red-300';
+                      case 'automatic': return 'bg-blue-900 text-blue-300';
+                      case 'simple_roll': return 'bg-green-900 text-green-300';
+                      case 'situational': return 'bg-yellow-900 text-yellow-300';
+                      case 'special': return 'bg-purple-900 text-purple-300';
+                      default: return 'bg-gray-700 text-gray-300';
+                    }
+                  };
+
+                  return (
+                    <div key={skill.id} className="p-3 bg-gray-900 border border-cyan-500 rounded">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-cyan-300">{skill.name}</span>
+                            <span className={`px-2 py-1 rounded text-xs ${getTypeBadgeColor(skill.type)}`}>
+                              {skill.type.replace('_', ' ')}
+                            </span>
+                            {currentLevel > 0 && (
+                              <span className="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">
+                                Level {currentLevel}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-400 text-sm mb-1">{skill.description}</p>
+                          <p className="text-cyan-200 text-xs italic">Mechanic: {skill.mechanic}</p>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          <button
+                            onClick={() => updateSkillLevel(-1)}
+                            disabled={currentLevel <= 0}
+                            className="w-8 h-8 bg-red-600 text-white rounded disabled:bg-gray-600 disabled:text-gray-400 hover:bg-red-700"
+                          >
+                            −
+                          </button>
+                          <span className="w-8 text-center text-lg font-bold text-cyan-400">
+                            {currentLevel}
+                          </span>
+                          <button
+                            onClick={() => updateSkillLevel(1)}
+                            disabled={currentLevel >= 3}
+                            className="w-8 h-8 bg-green-600 text-white rounded disabled:bg-gray-600 disabled:text-gray-400 hover:bg-green-700"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-400">No skills data loaded.</p>
+              )}
+            </div>
+          )}
+
           {currentTab === 'flaws' && (
             <div className="space-y-3">
               <h4 className="text-md font-bold text-cyan-300">Flaws</h4>

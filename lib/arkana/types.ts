@@ -155,6 +155,21 @@ export interface MagicSchool {
   effects?: PowerEffects;   // Effects structure
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  type: 'required' | 'automatic' | 'simple_roll' | 'situational' | 'special';
+  maxLevel: number;
+  mechanic: string;
+}
+
+export interface CharacterSkill {
+  skill_id: string;
+  skill_name: string;
+  level: number;
+}
+
 // Character model interface matching arkana-data-main
 export interface CharacterModel {
   page: number;
@@ -178,6 +193,10 @@ export interface CharacterModel {
   };
   cyberSlots: number;
   flaws: Set<string>;
+  // Skills System
+  skills: CharacterSkill[];
+  skillsAllocatedPoints: number;
+  skillsSpentPoints: number;
   // Separate Sets for each power/ability type
   commonPowers: Set<string>;
   archetypePowers: Set<string>;

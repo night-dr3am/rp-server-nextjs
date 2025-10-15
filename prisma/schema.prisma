@@ -208,6 +208,11 @@ model ArkanaStats {
   cybernetics            Json?     // [{type: "Arm", slots: 2, augments: ["Interface"]}]
   cyberneticAugments     String[]  @default([]) @map("cybernetic_augments")
 
+  // Skills System
+  skills                 Json?     @default("[]")  // Array of {skill_id: string, skill_name: string, level: number}
+  skillsAllocatedPoints  Int       @default(5) @map("skills_allocated_points")
+  skillsSpentPoints      Int       @default(0) @map("skills_spent_points")
+
   // Game Economy
   credits                Int       @default(0)
   chips                  Int       @default(0)

@@ -16,6 +16,7 @@ import {
   type ArchetypePower,
   type Cybernetic,
   type MagicSchool,
+  type Skill,
   loadAllData,
   flawsForRace,
   perksForRace,
@@ -31,7 +32,8 @@ import {
   getSchoolWeaves,
   getSchoolIdsForArcanist,
   getSchoolName,
-  getWeaveName
+  getWeaveName,
+  getAllSkills
 } from '@/lib/arkanaData';
 
 export default function ArkanaCharacterCreation() {
@@ -71,6 +73,10 @@ export default function ArkanaCharacterCreation() {
     },
     cyberSlots: 0,
     flaws: new Set<string>(),
+    // Skills System
+    skills: [],
+    skillsAllocatedPoints: 5,
+    skillsSpentPoints: 0,
     // Separate Sets for each power/ability type
     commonPowers: new Set<string>(),
     archetypePowers: new Set<string>(),
@@ -92,6 +98,7 @@ export default function ArkanaCharacterCreation() {
   const [availableArchPowers, setAvailableArchPowers] = useState<ArchetypePower[]>([]);
   const [availableCybernetics, setAvailableCybernetics] = useState<Cybernetic[]>([]);
   const [availableMagicSchools, setAvailableMagicSchools] = useState<Record<string, MagicSchool[]>>({});
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
 
   // UI state for collapsible sections
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -115,6 +122,7 @@ export default function ArkanaCharacterCreation() {
       try {
         // Load arkana data first
         await loadAllData();
+        setAvailableSkills(getAllSkills());
         setDataLoaded(true);
 
         // Then validate token
@@ -294,6 +302,9 @@ export default function ArkanaCharacterCreation() {
       availableFlaws.find(f => f.id === flawId)?.name || flawId
     ).filter(Boolean);
 
+    // Skills summary
+    const skillsSummary = characterModel.skills.map(s => `${s.skill_name} (${s.level})`);
+
     // Combine all powers/perks/cybernetics for display
     const powersSummary: string[] = [];
 
@@ -346,6 +357,7 @@ export default function ArkanaCharacterCreation() {
       `**Race / Archetype:** ${characterModel.race || '-'} / ${characterModel.arch || '-'}\n` +
       `**Stats:** Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})\n` +
       `**Flaws:** ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${flawPointsGained})\n` +
+      `**Skills:** ${skillsSummary.length ? skillsSummary.join(', ') : 'None'} (Skill Points spent: ${characterModel.skillsSpentPoints}/${characterModel.skillsAllocatedPoints})\n` +
       `**Common Powers/Perks/Arch/Cyber:** ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Power Points spent: ${powersPts})\n` +
       `**Cybernetic Slots:** ${characterModel.cyberSlots || 0} (Power Points spent: ${cyberSlotPts})\n` +
       `**Magic Schools:** ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}\n` +
@@ -395,6 +407,9 @@ export default function ArkanaCharacterCreation() {
       const flawsSummary = Array.from(characterModel.flaws).map(flawId =>
         availableFlaws.find(f => f.id === flawId)?.name || flawId
       ).filter(Boolean);
+
+      // Skills summary
+      const skillsSummary = characterModel.skills.map(s => `${s.skill_name} (${s.level})`);
 
       // Combine all powers/perks/cybernetics for display
       const powersSummary: string[] = [];
@@ -449,6 +464,7 @@ export default function ArkanaCharacterCreation() {
         `Race / Archetype: ${characterModel.race || '-'} / ${characterModel.arch || '-'}\n` +
         `Stats: Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})\n` +
         `Flaws: ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${totalPowerPoints - 15})\n` +
+        `Skills: ${skillsSummary.length ? skillsSummary.join(', ') : 'None'} (Skill Points spent: ${characterModel.skillsSpentPoints}/${characterModel.skillsAllocatedPoints})\n` +
         `Common Powers/Perks/Arch/Cyber: ${powersSummary.length ? powersSummary.join(', ') : 'None'}\n` +
         `Cybernetic Slots: ${characterModel.cyberSlots || 0}\n` +
         `Magic Schools: ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}\n` +
@@ -471,6 +487,7 @@ export default function ArkanaCharacterCreation() {
         background: characterModel.identity.background || '',
         stats: `Phys: ${characterModel.stats.phys}, Dex: ${characterModel.stats.dex}, Mental: ${characterModel.stats.mental}, Perc: ${characterModel.stats.perc}`,
         flaws: flawsSummary.join(', '),
+        skills: skillsSummary.join(', '),
         powers: powersSummary.join(', '),
         cyberSlots: String(characterModel.cyberSlots || 0),
         magicSchools: magicSchoolsSummary.join(', '),
@@ -541,6 +558,11 @@ export default function ArkanaCharacterCreation() {
         magicSchools: Array.from(characterModel.magicSchools),
         magicWeaves: Array.from(characterModel.magicWeaves),
 
+        // Skills System
+        skills: characterModel.skills,
+        skillsAllocatedPoints: characterModel.skillsAllocatedPoints,
+        skillsSpentPoints: characterModel.skillsSpentPoints,
+
         // Additional arkana-data-main specific fields
         cyberSlots: characterModel.cyberSlots,
         freeMagicSchool: characterModel.freeMagicSchool,
@@ -603,6 +625,7 @@ export default function ArkanaCharacterCreation() {
     'Race & Archetype',
     'Stats Allocation',
     'Optional Flaws',
+    'Skills Selection',
     'Powers, Perks, Augmentations, Magic, and Hacking',
     'Summary'
   ];
@@ -891,6 +914,139 @@ export default function ArkanaCharacterCreation() {
   };
 
   const renderStep5 = () => {
+    // Skills Selection Step
+    const skillsRemaining = characterModel.skillsAllocatedPoints - characterModel.skillsSpentPoints;
+
+    // Helper to get current level of a skill
+    const getSkillLevel = (skillId: string): number => {
+      const skill = characterModel.skills.find(s => s.skill_id === skillId);
+      return skill ? skill.level : 0;
+    };
+
+    // Helper to update skill level
+    const updateSkillLevel = (skillId: string, skillName: string, delta: number) => {
+      const currentLevel = getSkillLevel(skillId);
+      const newLevel = currentLevel + delta;
+
+      // Validate: level must be 0-3
+      if (newLevel < 0 || newLevel > 3) return;
+
+      // Calculate new total spent
+      const currentSpent = characterModel.skillsSpentPoints;
+      const newSpent = currentSpent + delta;
+
+      // Validate: can't exceed allocated points
+      if (newSpent < 0 || newSpent > characterModel.skillsAllocatedPoints) return;
+
+      // Update skills array
+      const updatedSkills = [...characterModel.skills];
+      const existingIndex = updatedSkills.findIndex(s => s.skill_id === skillId);
+
+      if (newLevel === 0) {
+        // Remove skill if level is 0
+        if (existingIndex >= 0) {
+          updatedSkills.splice(existingIndex, 1);
+        }
+      } else {
+        // Update or add skill
+        if (existingIndex >= 0) {
+          updatedSkills[existingIndex] = { skill_id: skillId, skill_name: skillName, level: newLevel };
+        } else {
+          updatedSkills.push({ skill_id: skillId, skill_name: skillName, level: newLevel });
+        }
+      }
+
+      // Update character model
+      setCharacterModel(prev => ({
+        ...prev,
+        skills: updatedSkills,
+        skillsSpentPoints: newSpent
+      }));
+    };
+
+    // Get badge color for skill type
+    const getTypeBadgeColor = (type: string): string => {
+      switch (type) {
+        case 'required': return 'bg-red-900 text-red-300';
+        case 'automatic': return 'bg-blue-900 text-blue-300';
+        case 'simple_roll': return 'bg-green-900 text-green-300';
+        case 'situational': return 'bg-yellow-900 text-yellow-300';
+        case 'special': return 'bg-purple-900 text-purple-300';
+        default: return 'bg-gray-700 text-gray-300';
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-cyan-400 mb-6">Skills Selection</h2>
+        <div className="mb-4">
+          <p className="text-cyan-300 mb-2">
+            Allocate skill points to build your character&apos;s expertise (each skill: 0-3 levels, 1 point per level)
+          </p>
+          <div className="text-xl font-bold text-cyan-400">
+            Skill Points Remaining: {skillsRemaining} / {characterModel.skillsAllocatedPoints}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {availableSkills.map(skill => {
+            const currentLevel = getSkillLevel(skill.id);
+            const canIncrease = currentLevel < 3 && skillsRemaining > 0;
+            const canDecrease = currentLevel > 0;
+
+            return (
+              <div key={skill.id} className="p-4 bg-gray-900 border border-cyan-500 rounded">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="font-medium text-cyan-300">{skill.name}</span>
+                      <span className={`px-2 py-1 rounded text-xs ${getTypeBadgeColor(skill.type)}`}>
+                        {skill.type.replace('_', ' ')}
+                      </span>
+                      {currentLevel > 0 && (
+                        <span className="px-2 py-1 bg-green-900 text-green-300 rounded text-xs">
+                          Level {currentLevel}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-400 text-sm mb-1">{skill.description}</p>
+                    <p className="text-cyan-200 text-xs italic">Mechanic: {skill.mechanic}</p>
+                  </div>
+                  <div className="flex items-center space-x-2 ml-4">
+                    <button
+                      onClick={() => updateSkillLevel(skill.id, skill.name, -1)}
+                      disabled={!canDecrease}
+                      className="w-8 h-8 bg-red-600 text-white rounded disabled:bg-gray-600 disabled:text-gray-400"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center text-xl font-bold text-cyan-400">
+                      {currentLevel}
+                    </span>
+                    <button
+                      onClick={() => updateSkillLevel(skill.id, skill.name, 1)}
+                      disabled={!canIncrease}
+                      className="w-8 h-8 bg-green-600 text-white rounded disabled:bg-gray-600 disabled:text-gray-400"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {availableSkills.length === 0 && (
+          <div className="p-4 bg-gray-900 border border-yellow-500 rounded">
+            <p className="text-yellow-300">No skills data loaded. Please refresh the page.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderStep6 = () => {
     const totalBudget = getPowerPointsTotal();
     const spentPoints = getPowerPointsSpent();
     const remainingPoints = getPowerPointsRemaining();
@@ -1526,8 +1682,8 @@ export default function ArkanaCharacterCreation() {
     );
   };
 
-  const renderStep6 = () => {
-    // Power points system
+  const renderStep7 = () => {
+    // Summary Step - Power points system
     const totalPowerPoints = getPowerPointsTotal();
     const spentPowerPoints = getPowerPointsSpent();
     const remainingPowerPoints = getPowerPointsRemaining();
@@ -1540,6 +1696,9 @@ export default function ArkanaCharacterCreation() {
     const flawsSummary = Array.from(characterModel.flaws).map(flawId =>
       availableFlaws.find(f => f.id === flawId)?.name || flawId
     ).filter(Boolean);
+
+    // Skills summary
+    const skillsSummary = characterModel.skills.map(s => `${s.skill_name} (${s.level})`);
 
     // Combine all powers/perks/cybernetics for display
     const powersSummary: string[] = [];
@@ -1598,6 +1757,7 @@ export default function ArkanaCharacterCreation() {
         `Race: ${characterModel.race || '-'} / ${characterModel.arch || '—'}`,
         `Stats: Phys ${characterModel.stats.phys} (HP ${characterModel.stats.phys * 5}), Dex ${characterModel.stats.dex}, Mental ${characterModel.stats.mental}, Perc ${characterModel.stats.perc} (Stat Points spent: ${statPointsSpent})`,
         `Flaws: ${flawsSummary.length ? flawsSummary.join(', ') : 'None'} (Power Points gained: ${flawPointsGained})`,
+        `Skills: ${skillsSummary.length ? skillsSummary.join(', ') : 'None'} (Skill Points spent: ${characterModel.skillsSpentPoints}/${characterModel.skillsAllocatedPoints})`,
         `Common Powers/Perks/Arch/Cyber: ${powersSummary.length ? powersSummary.join(', ') : 'None'} (Power Points spent: ${powersPts})`,
         `Cybernetic Slots: ${characterModel.cyberSlots || 0} (Power Points spent: ${cyberSlotPts})`,
         `Magic Schools: ${magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}`
@@ -1658,6 +1818,7 @@ export default function ArkanaCharacterCreation() {
             <div><strong className="text-cyan-300">Race:</strong> {characterModel.race || '-'} <span className="text-gray-400">/ {characterModel.arch || '—'}</span></div>
             <div><strong className="text-cyan-300">Stats:</strong> Phys {characterModel.stats.phys} (HP {characterModel.stats.phys * 5}), Dex {characterModel.stats.dex}, Mental {characterModel.stats.mental}, Perc {characterModel.stats.perc} <span className="text-gray-400">(Stat Points spent: {statPointsSpent})</span></div>
             <div><strong className="text-cyan-300">Flaws:</strong> {flawsSummary.length ? flawsSummary.join(', ') : 'None'} <span className="text-gray-400">(Power Points gained: {flawPointsGained})</span></div>
+            <div><strong className="text-cyan-300">Skills:</strong> {skillsSummary.length ? skillsSummary.join(', ') : 'None'} <span className="text-gray-400">(Skill Points spent: {characterModel.skillsSpentPoints}/{characterModel.skillsAllocatedPoints})</span></div>
             <div><strong className="text-cyan-300">Common Powers/Perks/Arch/Cyber:</strong> {powersSummary.length ? powersSummary.join(', ') : 'None'} <span className="text-gray-400">(Power Points spent: {powersPts})</span></div>
             <div><strong className="text-cyan-300">Cybernetic Slots:</strong> {characterModel.cyberSlots || 0} <span className="text-gray-400">(Power Points spent: {cyberSlotPts})</span></div>
             <div><strong className="text-cyan-300">Magic Schools:</strong> {magicSchoolsSummary.length ? magicSchoolsSummary.join(', ') : 'None'}</div>
@@ -1739,8 +1900,9 @@ export default function ArkanaCharacterCreation() {
       case 2: return renderStep2();
       case 3: return renderStep3();
       case 4: return renderStep4();
-      case 5: return renderStep5();
-      case 6: return renderStep6();
+      case 5: return renderStep5(); // Skills Selection
+      case 6: return renderStep6(); // Powers, Perks, Magic, Cybernetics
+      case 7: return renderStep7(); // Summary
       default: return renderStep1();
     }
   };
@@ -1750,6 +1912,9 @@ export default function ArkanaCharacterCreation() {
       case 1: return characterModel.identity.characterName && characterModel.identity.agentName;
       case 2: return characterModel.race && characterModel.arch;
       case 3: return characterModel.stats.pool === 0;
+      case 4: return true; // Flaws are optional
+      case 5: return true; // Skills are optional (can spend 0-5 points)
+      case 6: return true; // Powers are optional
       default: return true;
     }
   };
@@ -1758,7 +1923,7 @@ export default function ArkanaCharacterCreation() {
     if (targetStep === 1) return true; // Always can go back to identity
     if (targetStep === 2) return !!(characterModel.identity.characterName && characterModel.identity.agentName);
     if (targetStep === 3) return canNavigateToStep(2) && !!(characterModel.race && characterModel.arch);
-    if (targetStep >= 4) return canNavigateToStep(3); // Once race/arch selected, can navigate freely to 4-6
+    if (targetStep >= 4) return canNavigateToStep(3); // Once race/arch selected, can navigate freely to 4-7
     return false;
   };
 
@@ -1790,9 +1955,9 @@ export default function ArkanaCharacterCreation() {
             ← Back
           </button>
 
-          {currentStep < 6 ? (
+          {currentStep < 7 ? (
             <button
-              onClick={() => setCurrentStep(Math.min(6, currentStep + 1))}
+              onClick={() => setCurrentStep(Math.min(7, currentStep + 1))}
               disabled={!canGoNext()}
               className="px-6 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 disabled:bg-gray-600 disabled:text-gray-400"
             >

@@ -8,12 +8,15 @@ import {
   getAllPerks,
   getAllArchPowers,
   getAllCybernetics,
+  getAllSkills,
   getSchoolName,
   getWeaveName,
   type CommonPower,
   type Perk,
   type ArchetypePower,
-  type Cybernetic
+  type Cybernetic,
+  type Skill,
+  type CharacterSkill
 } from '@/lib/arkanaData';
 
 interface User {
@@ -52,6 +55,9 @@ interface ArkanaStats {
   mental: number;
   perception: number;
   hitPoints: number; // Maximum health
+  skills: unknown;
+  skillsAllocatedPoints?: number;
+  skillsSpentPoints?: number;
   inherentPowers: string[];
   weaknesses: string[];
   flaws: unknown;
@@ -126,6 +132,7 @@ export default function ArkanaProfilePage() {
 
   // Arkana data state
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [skillsData, setSkillsData] = useState<Skill[]>([]);
   const [commonPowersData, setCommonPowersData] = useState<CommonPower[]>([]);
   const [perksData, setPerksData] = useState<Perk[]>([]);
   const [archPowersData, setArchPowersData] = useState<ArchetypePower[]>([]);
@@ -166,6 +173,7 @@ export default function ArkanaProfilePage() {
     const loadData = async () => {
       try {
         await loadAllData();
+        setSkillsData(getAllSkills());
         setCommonPowersData(getAllCommonPowers());
         setPerksData(getAllPerks());
         setArchPowersData(getAllArchPowers());
@@ -452,6 +460,64 @@ export default function ArkanaProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Skills Section */}
+        {Array.isArray(arkanaStats.skills) && (arkanaStats.skills as CharacterSkill[]).length > 0 && (
+          <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6 mb-8">
+            <h3 className="text-xl font-bold text-cyan-400 mb-4">Skills</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {(arkanaStats.skills as CharacterSkill[]).map((characterSkill, idx) => {
+                const skillDef = dataLoaded ? skillsData.find(s => s.id === characterSkill.skill_id) : null;
+
+                const getTypeBadgeColor = (type: string): string => {
+                  switch (type) {
+                    case 'required': return 'bg-red-900 text-red-300';
+                    case 'automatic': return 'bg-blue-900 text-blue-300';
+                    case 'simple_roll': return 'bg-green-900 text-green-300';
+                    case 'situational': return 'bg-yellow-900 text-yellow-300';
+                    case 'special': return 'bg-purple-900 text-purple-300';
+                    default: return 'bg-gray-700 text-gray-300';
+                  }
+                };
+
+                return (
+                  <div key={idx} className="bg-gray-800 border border-cyan-600 rounded p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <p className="font-medium text-cyan-300">{characterSkill.skill_name}</p>
+                          {skillDef && (
+                            <span className={`px-2 py-1 rounded text-xs ${getTypeBadgeColor(skillDef.type)}`}>
+                              {skillDef.type.replace('_', ' ')}
+                            </span>
+                          )}
+                        </div>
+                        {skillDef && (
+                          <>
+                            <p className="text-xs text-gray-400 mb-1">{skillDef.description}</p>
+                            <p className="text-xs text-cyan-200 italic">{skillDef.mechanic}</p>
+                          </>
+                        )}
+                      </div>
+                      <div className="ml-3">
+                        <span className="px-3 py-1 bg-green-900 text-green-300 rounded font-bold text-sm">
+                          Lv {characterSkill.level}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {arkanaStats.skillsSpentPoints !== undefined && arkanaStats.skillsAllocatedPoints !== undefined && (
+              <div className="mt-4 pt-3 border-t border-cyan-700">
+                <p className="text-sm text-cyan-300">
+                  Skill Points: <span className="font-bold">{arkanaStats.skillsSpentPoints}</span> / {arkanaStats.skillsAllocatedPoints} allocated
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Powers & Abilities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

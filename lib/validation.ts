@@ -359,6 +359,17 @@ export const arkanaCharacterCreateSchema = Joi.object({
   mental: Joi.number().integer().min(1).max(5).required(),
   perception: Joi.number().integer().min(1).max(5).required(),
 
+  // Skills System
+  skills: Joi.array().items(
+    Joi.object({
+      skill_id: Joi.string().required(),
+      skill_name: Joi.string().required(),
+      level: Joi.number().integer().min(0).max(3).required()
+    })
+  ).default([]),
+  skillsAllocatedPoints: Joi.number().integer().min(0).max(20).default(5),
+  skillsSpentPoints: Joi.number().integer().min(0).max(20).default(0),
+
   // Powers and choices
   inherentPowers: Joi.array().items(Joi.string()).default([]),
   weaknesses: Joi.array().items(Joi.string()).default([]),
@@ -686,6 +697,17 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
   // Current health from userStats
   health: Joi.number().integer().min(0).max(100).optional(),
   status: Joi.number().integer().min(0).max(2).optional(), // Arkana: 0=RP, 1=OOC, 2=AFK
+
+  // Skills System
+  skills: Joi.array().items(
+    Joi.object({
+      skill_id: Joi.string().required(),
+      skill_name: Joi.string().required(),
+      level: Joi.number().integer().min(0).max(3).required()
+    })
+  ).optional(),
+  skillsAllocatedPoints: Joi.number().integer().min(0).max(20).optional(),
+  skillsSpentPoints: Joi.number().integer().min(0).max(20).optional(),
 
   // Powers and abilities
   inherentPowers: Joi.array().items(Joi.string()).optional(),

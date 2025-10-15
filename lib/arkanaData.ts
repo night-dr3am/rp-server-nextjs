@@ -15,7 +15,9 @@ export {
   type ArchetypePower,
   type Cybernetic,
   type MagicSchool,
-  type CharacterModel
+  type CharacterModel,
+  type Skill,
+  type CharacterSkill
 } from './arkana/types';
 
 export {
@@ -41,7 +43,10 @@ export {
   getAllPerks,
   getAllArchPowers,
   getAllCybernetics,
-  getAllMagicSchools
+  getAllMagicSchools,
+  getAllSkills,
+  getSkillById,
+  getSkillByName
 } from './arkana/dataLoader';
 
 // Legacy compatibility functions

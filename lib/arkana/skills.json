@@ -1,0 +1,138 @@
+[
+  {
+    "id": "skill_stealth",
+    "name": "Stealth",
+    "description": "Move unseen through shadows.",
+    "type": "situational",
+    "maxLevel": 3,
+    "mechanic": "Creates TN for Perception rolls, changes State"
+  },
+  {
+    "id": "skill_hack",
+    "name": "Hack",
+    "description": "Breach firewalls, override systems, or manipulate digital constructs.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for hacking, +1 bonus to Mental rolls"
+  },
+  {
+    "id": "skill_cybernetics",
+    "name": "Cybernetics",
+    "description": "Maintain, upgrade, implants and synthetic limbs.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for cybernetics work, +1 Mental roll"
+  },
+  {
+    "id": "skill_combat_arts",
+    "name": "Combat Arts",
+    "description": "Master martial techniques.",
+    "type": "automatic",
+    "maxLevel": 3,
+    "mechanic": "Automatically increases melee damage"
+  },
+  {
+    "id": "skill_ritualism",
+    "name": "Ritualism",
+    "description": "Perform complex rites, summon entities, or bind arcane forces.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for rituals, +1 to Magic rolls"
+  },
+  {
+    "id": "skill_deception",
+    "name": "Deception",
+    "description": "Lie, forge identities, or manipulate perception.",
+    "type": "simple_roll",
+    "maxLevel": 3,
+    "mechanic": "Grants +1 to Mental rolls, situational"
+  },
+  {
+    "id": "skill_engineering",
+    "name": "Engineering",
+    "description": "Build, repair, or modify tech — from drones to dimensional gates.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for engineering, +1 Mental roll"
+  },
+  {
+    "id": "skill_survival",
+    "name": "Survival",
+    "description": "Endure harsh zones, scavenge resources, or adapt to anomalies.",
+    "type": "situational",
+    "maxLevel": 3,
+    "mechanic": "+1 to Physical rolls, situational"
+  },
+  {
+    "id": "skill_charm",
+    "name": "Charm",
+    "description": "Influence others through charisma.",
+    "type": "simple_roll",
+    "maxLevel": 3,
+    "mechanic": "Grants +1 to Mental rolls, situational"
+  },
+  {
+    "id": "skill_medicine",
+    "name": "Medicine",
+    "description": "Heal wounds, treat curses, or stabilize cybernetic failures.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for healing, +2 to Heal levels"
+  },
+  {
+    "id": "skill_tracking",
+    "name": "Tracking",
+    "description": "Follow trails, digital footprints, or psychic echoes.",
+    "type": "simple_roll",
+    "maxLevel": 3,
+    "mechanic": "Grants +1 to Mental rolls, situational"
+  },
+  {
+    "id": "skill_tinkering",
+    "name": "Tinkering",
+    "description": "Improvise gadgets, traps, or arcane devices.",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for tinkering, +1 to Mental rolls"
+  },
+  {
+    "id": "skill_lore",
+    "name": "Lore",
+    "description": "Recall mythic history, faction secrets, or forbidden knowledge.",
+    "type": "simple_roll",
+    "maxLevel": 3,
+    "mechanic": "Grants +1 to Mental rolls, situational"
+  },
+  {
+    "id": "skill_athletics",
+    "name": "Athletics",
+    "description": "Run, climb, swim, and perform physical feats.",
+    "type": "situational",
+    "maxLevel": 3,
+    "mechanic": "Grants +1 to Physical and Dexterity rolls"
+  },
+  {
+    "id": "skill_firearms",
+    "name": "Firearms",
+    "description": "Handle pistols, rifles, and ranged weapons.",
+    "type": "automatic",
+    "maxLevel": 3,
+    "mechanic": "Automatically adds +2 damage to Ranged attacks"
+  },
+  {
+    "id": "skill_melee",
+    "name": "Melee",
+    "description": "Handle melee weapons, knives, swords, etc.",
+    "type": "automatic",
+    "maxLevel": 3,
+    "mechanic": "Automatically adds +1 damage to Melee attacks"
+  },
+  {
+    "id": "skill_linguistics",
+    "name": "Linguistics",
+    "description": "Understand and speak multiple languages or dialects.",
+    "type": "special",
+    "maxLevel": 3,
+    "mechanic": "Adds one language per skill level"
+  }
+]

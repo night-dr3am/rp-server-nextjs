@@ -7,7 +7,8 @@ import {
   Cybernetic,
   MagicSchool,
   CharacterModel,
-  EffectDefinition
+  EffectDefinition,
+  Skill
 } from './types';
 
 // Constants
@@ -20,6 +21,7 @@ let perks: Perk[] = [];
 let archPowers: ArchetypePower[] = [];
 let cybernetics: Cybernetic[] = [];
 let magicSchools: MagicSchool[] = [];
+let skills: Skill[] = [];
 let effectsMap: Map<string, EffectDefinition> = new Map();
 
 // Determine if running in test mode
@@ -34,14 +36,15 @@ export async function loadAllData(): Promise<void> {
     const basePath = testMode ? './tests/' : './';
     const fileSuffix = testMode ? '.test.json' : '';
 
-    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData] = await Promise.all([
+    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData] = await Promise.all([
       import(`${basePath}flaws${testMode ? '' : '3'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}common_powers${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}perks${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}archetype_powers${testMode ? '' : '4'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}cybernetics${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}effects${fileSuffix}`).then(m => m.default)
+      import(`${basePath}effects${fileSuffix}`).then(m => m.default),
+      import(`${basePath}skills${fileSuffix}`).then(m => m.default)
     ]);
 
     flaws = flawsData;
@@ -50,6 +53,7 @@ export async function loadAllData(): Promise<void> {
     archPowers = archData;
     cybernetics = cyberData;
     magicSchools = magicData;
+    skills = skillsData;
 
     // Load effects into map for fast lookup
     // Cast the JSON data to EffectDefinition array
@@ -293,6 +297,13 @@ export function getAllPerks(): Perk[] { return perks; }
 export function getAllArchPowers(): ArchetypePower[] { return archPowers; }
 export function getAllCybernetics(): Cybernetic[] { return cybernetics; }
 export function getAllMagicSchools(): MagicSchool[] { return magicSchools; }
+export function getAllSkills(): Skill[] { return skills; }
+export function getSkillById(id: string): Skill | undefined {
+  return skills.find(s => s.id === id);
+}
+export function getSkillByName(name: string): Skill | undefined {
+  return skills.find(s => lc(s.name) === lc(name));
+}
 export function getEffectDefinition(effectId: string): EffectDefinition | undefined {
   return effectsMap.get(effectId);
 }

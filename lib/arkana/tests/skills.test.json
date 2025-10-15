@@ -1,0 +1,26 @@
+[
+  {
+    "id": "skill_test_stealth",
+    "name": "Stealth",
+    "description": "Test stealth skill",
+    "type": "situational",
+    "maxLevel": 3,
+    "mechanic": "Creates TN for Perception rolls"
+  },
+  {
+    "id": "skill_test_combat",
+    "name": "Combat",
+    "description": "Test combat skill",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Roll d20 + Combat level"
+  },
+  {
+    "id": "skill_test_hacking",
+    "name": "Hacking",
+    "description": "Test hacking skill",
+    "type": "simple_roll",
+    "maxLevel": 3,
+    "mechanic": "Roll d20 + Mental + Hacking level"
+  }
+]
