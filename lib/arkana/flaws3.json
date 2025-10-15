@@ -223,14 +223,14 @@
     "id": "veil_veils_price",
     "name": "Veil’s Price",
     "desc": "Powers demand a toll: physical deterioration, bleeding, or loss of vitality.",
-    "cost": 5,
+    "cost": 4,
     "tags": ["race:veilborn"]
   },
   {
     "id": "veil_hollow_pulse",
     "name": "Hollow Pulse",
     "desc": "“Heartbeat” is faint and irregular, tied to the Veil rather than life.",
-    "cost": 5,
+    "cost": 1,
     "tags": ["race:veilborn"]
   },
   {
@@ -265,7 +265,7 @@
     "id": "sp_unshifting",
     "name": "Unshifting",
     "desc": "Hybrid or shifted form is permanent.",
-    "cost": 3,
+    "cost": 1,
     "tags": ["race:spliced"]
   },
   {
@@ -279,7 +279,7 @@
     "id": "sp_kill_switch",
     "name": "Kill Switch",
     "desc": "Hidden programming can override or kill you.",
-    "cost": 5,
+    "cost": 1,
     "tags": ["race:spliced"]
   },
   {
@@ -300,7 +300,7 @@
     "id": "v_blood_madness",
     "name": "Blood Madness",
     "desc": "Starvation drives you toward frenzy.",
-    "cost": 3,
+    "cost": 4,
     "tags": ["race:strigoi"]
   },
   {
@@ -314,7 +314,7 @@
     "id": "v_parasitic_reputation_strigoi",
     "name": "Parasitic Reputation",
     "desc": "Seen as parasitic predators, alliances suffer suspicion.",
-    "cost": 1,
+    "cost": 2,
     "tags": ["race:strigoi"]
   },
   {
@@ -349,14 +349,14 @@
     "id": "v_resonance_conflict_gaki",
     "name": "Resonance Conflict",
     "desc": "Feeding from Supernaturals risks corruption and madness.",
-    "cost": 2,
+    "cost": 4,
     "tags": ["race:gaki"]
   },
   {
     "id": "v_chi_hunger_gaki",
     "name": "Chi Hunger",
     "desc": "Mortal blood does not sustain you. Only supernatural Chi will.",
-    "cost": 3,
+    "cost": 4,
     "tags": ["race:gaki"]
   }
 ]
