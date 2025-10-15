@@ -13,7 +13,14 @@
     "desc": "Link to device sensors. Roll 1d20 + Mental vs TN12 to detect info remotely. Lasts 1 turn.",
     "section": "Technomancy",
     "species": "synthral",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_device_sync"]
+    }
   },
   {
     "id": "technomancy_build_device",
@@ -21,7 +28,14 @@
     "desc": "Creates a usable device from materials. Lasts 1 scene. Can store a single weave effect; roll 1d20 + Mental to activate.",
     "section": "Technomancy",
     "species": "synthral",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_device_creation"]
+    }
   },
   {
     "id": "technomancy_laser",
@@ -29,7 +43,14 @@
     "desc": "Deals 6 + Mental damage to target within line of sight. TN12 to hit. Range: 15 meters.",
     "section": "Technomancy",
     "species": "synthral",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 15,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_energy_6"]
+    }
   },
   {
     "id": "technomancy_hack_computer",
@@ -37,7 +58,14 @@
     "desc": "Access info on a device. Roll 1d20 + Mental vs device defense (10 + modifier). Success = full access.",
     "section": "Technomancy",
     "species": "synthral",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_tech_hack"]
+    }
   },
   {
     "id": "technomancy_speak_machinery",
@@ -45,7 +73,14 @@
     "desc": "Communicate with a device. Device answers 3 questions before effect fades. Mental roll not opposed.",
     "section": "Technomancy",
     "species": "synthral",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 5,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_tech_control"]
+    }
   },
 
   {
@@ -60,140 +95,280 @@
     "name": "Enchant Item",
     "desc": "Embed a spell function into an item. 5 charges max; effect disappears after expended. Requires casting Mental roll 1d20 + Mental vs TN12 to apply.",
     "section": "Enchantment",
-    "cost": 4
+    "cost": 4,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_enchant_item"]
+    }
   },
   {
     "id": "enchant_creature",
     "name": "Enchant Creature",
     "desc": "Target gains spell function for 2 turns. Mental roll vs target Mental Defense (10 + mod).",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_mental"]
+    }
   },
   {
     "id": "enchant_strength",
     "name": "Enhance Creature: Strength",
     "desc": "+2 Strength rolls for 2 turns. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_physical_2_2turns"]
+    }
   },
   {
     "id": "enchant_speed",
     "name": "Enhance Creature: Speed",
     "desc": "+2 Dexterity rolls for 2 turns. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_dexterity_2_2turns"]
+    }
   },
   {
     "id": "enchant_mind",
     "name": "Enhance Creature: Mind",
     "desc": "+2 Mental rolls for 2 turns. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_mental_2_2turns"]
+    }
   },
   {
     "id": "enchant_endurance",
     "name": "Enhance Creature: Endurance",
     "desc": "+2 Endurance rolls for 2 turns. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_physical_2_2turns"]
+    }
   },
   {
     "id": "enchant_sleep",
     "name": "Effect Creature: Sleep",
     "desc": "Target sleeps for 2 turns. Roll Mental vs Mental Defense to resist. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_sleep"]
+    }
   },
   {
     "id": "enchant_element",
     "name": "Enhance Item: Element",
     "desc": "Adds element to item (fire, ice, etc.). Requires Create Element and Enchant Item.",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_elemental_weapon"]
+    }
   },
   {
     "id": "enchant_recall",
     "name": "Enchant Item: Recall",
     "desc": "Returns item to caster automatically. 3 charges. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_item_recall"]
+    }
   },
   {
     "id": "enchant_light",
     "name": "Enchant Item: Light",
     "desc": "Object glows for 6 turns or until dismissed. Requires Create Barrier and Enchant Item.",
     "section": "Enchantment",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_item_light"]
+    }
   },
   {
     "id": "enchant_storage",
     "name": "Enchant Item: Storage",
     "desc": "Pocket-space container. Up to 3 small items. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_pocket_storage"]
+    }
   },
   {
     "id": "enchant_bind",
     "name": "Effect Creature: Bind",
     "desc": "Restrict movement 1–2 turns. Mental roll vs Mental Defense to resist. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_restrain"]
+    }
   },
   {
     "id": "enchant_confuse",
     "name": "Effect Creature: Confuse",
     "desc": "Misjudge actions for 2 turns. Mental vs Mental Defense. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_confusion_memory"]
+    }
   },
   {
     "id": "enchant_silence",
     "name": "Effect Creature: Silence",
     "desc": "Target cannot speak or cast vocal spells for 2 turns. Mental vs Mental Defense. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "control_silence"]
+    }
   },
   {
     "id": "enchant_hex",
     "name": "Effect Creature: Hex",
     "desc": "Reduce one stat by 2 for 2 turns. Mental vs Mental Defense. Requires Enchant Creature.",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "enemy",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_mental", "debuff_physical_minus_2"]
+    }
   },
   {
     "id": "enchant_flight",
     "name": "Enhance Item: Flight",
     "desc": "Item levitates/glides 5 turns. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_item_flight"]
+    }
   },
   {
     "id": "enchant_echo",
     "name": "Enhance Item: Echo",
     "desc": "Records one sound, replayable once. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_item_echo"]
+    }
   },
   {
     "id": "enchant_link",
     "name": "Enhance Item: Link",
     "desc": "Link two items for synchronized effect. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_item_link"]
+    }
   },
   {
     "id": "enchant_illusion",
     "name": "Enhance Item: Illusion",
     "desc": "Shifting appearance for 5 turns or until dispelled. Requires Enchant Item.",
     "section": "Enchantment",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_item_illusion"]
+    }
   },
   {
     "id": "enchant_permanence",
     "name": "Permanence",
     "desc": "Makes an enchantment permanent. Must be applied at creation with another weave.",
     "section": "Enchantment",
-    "cost": 5
+    "cost": 5,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_permanence"]
+    }
   },
 
   {
@@ -208,42 +383,84 @@
     "name": "Conjure Weapon",
     "desc": "Summons weapon to hand. Lasts 3 turns. Mental vs TN12 to conjure.",
     "section": "Conjuration",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "buff_physical_2"]
+    }
   },
   {
     "id": "conjure_armor",
     "name": "Conjure Armor",
     "desc": "+2 Defense rolls for 2 turns. Mental vs TN12 to cast.",
     "section": "Conjuration",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "defense_damage_reduction_2_2turns"]
+    }
   },
   {
     "id": "conjure_familiar",
     "name": "Conjure Familiar",
     "desc": "Minor spirit/drone assists, granting +1 to one stat for 3 turns. Mental vs TN12 to summon.",
     "section": "Conjuration",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "buff_stat_choice_1"]
+    }
   },
   {
     "id": "conjure_clone",
     "name": "Conjure Clone (Illusory)",
     "desc": "Illusory duplicate lasts 1 scene. Next attack against caster hits clone first, dissipating it.",
     "section": "Conjuration",
-    "cost": 4
+    "cost": 4,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_illusory_clone"]
+    }
   },
   {
     "id": "conjure_gateway",
     "name": "Conjure Gateway",
     "desc": "Teleport portal, up to 3 creatures, vanishes after 1 turn. Mental vs TN12 to open.",
     "section": "Conjuration",
-    "cost": 5
+    "cost": 5,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "all_allies",
+    "range": 20,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_teleport_portal"]
+    }
   },
   {
     "id": "conjure_swarm",
     "name": "Conjure Swarm",
     "desc": "Summon cloud of minor entities. Enemies in area take –1 to physical/mental rolls for 2 turns. Mental vs TN12 to cast.",
     "section": "Conjuration",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 15,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "debuff_attack_minus_1"]
+    }
   },
 
   {
@@ -258,42 +475,84 @@
     "name": "Animate Corpse",
     "desc": "Corpse follows commands. Lasts 1 scene. Mental roll vs TN12 to animate.",
     "section": "Necromancy",
-    "cost": 5
+    "cost": 5,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 5,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_summon_undead"]
+    }
   },
   {
     "id": "necromancy_raise_spirit",
     "name": "Raise Spirit",
     "desc": "Summon spirit. Lasts 1 scene. Mental roll vs TN12.",
     "section": "Necromancy",
-    "cost": 5
+    "cost": 5,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 5,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_summon_undead"]
+    }
   },
   {
     "id": "necromancy_drain",
     "name": "Drain",
     "desc": "Deals 6 + Mental to target, restoring same to caster. Mental vs TN12.",
     "section": "Necromancy",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_heal_6_mental"]
+    }
   },
   {
     "id": "necromancy_inflict_pain",
     "name": "Inflict Pain",
     "desc": "Deals 4 + Mental damage. Mental vs TN12.",
     "section": "Necromancy",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_necrotic_4_mental"]
+    }
   },
   {
     "id": "necromancy_empower_undead",
     "name": "Empower Corpse/Spirit",
     "desc": "Apply another weave to raised undead. Mental roll vs TN12 to succeed.",
     "section": "Necromancy",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "buff_mental_2"]
+    }
   },
   {
     "id": "necromancy_heal",
     "name": "Heal",
     "desc": "Restores 6 HP. Mental vs TN12.",
     "section": "Necromancy",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "ally",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "heal_6"]
+    }
   },
 
   {
@@ -308,28 +567,58 @@
     "name": "Create Element (Minor)",
     "desc": "6 damage + Mental to target, or create small effect (fire, ice, lightning, wind, water, earth). TN12.",
     "section": "Evocation",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["attack", "ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_elemental_6_mental"],
+      "ability": ["check_mental_vs_tn12", "utility_create_element_minor"]
+    }
   },
   {
     "id": "evocation_create_element_major",
     "name": "Create Element (Major)",
     "desc": "8 damage + Mental or medium-sized effect. TN12.",
     "section": "Evocation",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["attack", "ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_elemental_8_mental"],
+      "ability": ["check_mental_vs_tn12", "utility_create_element_minor"]
+    }
   },
   {
     "id": "evocation_shape_element_minor",
     "name": "Shape Element (Minor)",
     "desc": "Shape small elemental effect into ball, cone, ring, etc. Mental roll TN12 to shape.",
     "section": "Evocation",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_shape_element"]
+    }
   },
   {
     "id": "evocation_shape_element_major",
     "name": "Shape Element (Major)",
     "desc": "Shape moderate effect or elemental construct. Mental roll TN12.",
     "section": "Evocation",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 15,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_shape_element"]
+    }
   },
 
   {
@@ -344,35 +633,70 @@
     "name": "Create Barrier (Minor)",
     "desc": "Shield field, reduces damage by 2 for 2 turns. Mental vs TN12.",
     "section": "Abjuration",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "defense_damage_reduction_2_2turns"]
+    }
   },
   {
     "id": "abjuration_absorb",
     "name": "Absorb",
     "desc": "Absorb magical/elemental energy, store briefly to release. Mental vs TN12.",
     "section": "Abjuration",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_absorb_energy"]
+    }
   },
   {
     "id": "abjuration_seal",
     "name": "Seal",
     "desc": "Lock or suppress object, area, or entity. Mental vs TN12. Lasts until broken.",
     "section": "Abjuration",
-    "cost": 4
+    "cost": 4,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_seal_suppress"]
+    }
   },
   {
     "id": "abjuration_dispel",
     "name": "Dispel",
     "desc": "Remove ongoing magical effects. Mental vs TN12.",
     "section": "Abjuration",
-    "cost": 4
+    "cost": 4,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_dispel"]
+    }
   },
   {
     "id": "abjuration_damage",
     "name": "Damage",
     "desc": "Deals minor magical damage 6 + Mental. TN12.",
     "section": "Abjuration",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_magical_6_mental"]
+    }
   },
 
   {
@@ -387,62 +711,125 @@
     "name": "Veilglimpse",
     "desc": "Brief, fragmented vision of an immediate event about to occur (symbolic or cryptic).",
     "section": "Divination",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_veilglimpse"]
+    }
   },
   {
     "id": "divination_thread_sense",
     "name": "Thread-Sense",
-    "desc": "Feel the “tug” of fate around a person, place, or object; sense its importance or danger.",
+    "desc": "Feel the 'tug' of fate around a person, place, or object; sense its importance or danger.",
     "section": "Divination",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Perception",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_fate_sense"]
+    }
   },
   {
     "id": "divination_echo_of_whatisnt",
-    "name": "Echo of What-Isn’t",
+    "name": "Echo of What-Isn't",
     "desc": "Summon images of past events into the present; level of detail varies by roll.",
     "section": "Divination",
-    "cost": 4
+    "cost": 4,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn12", "utility_past_vision"]
+    }
   },
   {
     "id": "divination_beast_speaking",
     "name": "Beast-Speaking",
     "desc": "Communicate with any animal or beast natural or unnatural as long as it has the capability of speech, including Spliced in shifted form.",
     "section": "Divination",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_beast_speak"]
+    }
   },
   {
     "id": "divination_whisper_beyond",
     "name": "Whisper Beyond",
     "desc": "The voices of the veil and the hum of the ship whisper the meaning of any unknown languages the caster hears or reads for one scene.",
     "section": "Divination",
-    "cost": 1
+    "cost": 1,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_translate"]
+    }
   },
   {
     "id": "divination_moment_fracture",
     "name": "Moment Fracture",
-    "desc": "Time splinters for a second; you act with foresight (dodge, or act first once). Gain a +2 Modifier to TN’s in your favor, versus attacks against you, or gain initiative, for the following turn.",
+    "desc": "Time splinters for a second; you act with foresight (dodge, or act first once). Gain a +2 Modifier to TN's in your favor, versus attacks against you, or gain initiative, for the following turn.",
     "section": "Divination",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_defense_2_1turn"]
+    }
   },
   {
     "id": "divination_shard_of_truth",
     "name": "Shard of Truth",
     "desc": "See through one deception, glamour, or hidden layer of reality for the remainder of the scene.",
     "section": "Divination",
-    "cost": 3
+    "cost": 3,
+    "abilityType": ["ability"],
+    "baseStat": "Perception",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_perception_vs_tn12", "utility_truth_sight"]
+    }
   },
   {
     "id": "divination_omenmark",
     "name": "Omenmark",
     "desc": "Place a sigil that pulses through the firmament of the veil allowing the caster to divine its location at all times.",
     "section": "Divination",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "utility_location_mark"]
+    }
   },
   {
     "id": "divination_fate_ripple",
     "name": "Fate Ripple",
     "desc": "Divine the ill intent of others as well as sensing tainted or poisoned food or drink.",
     "section": "Divination",
-    "cost": 2
+    "cost": 2,
+    "abilityType": ["ability"],
+    "baseStat": "Perception",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "ability": ["check_perception_vs_tn10", "utility_detect_poison"]
+    }
   }
 ]

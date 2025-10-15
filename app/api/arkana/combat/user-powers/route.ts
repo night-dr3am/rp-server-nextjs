@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaUserPowersSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import type { CommonPower, ArchetypePower } from '@/lib/arkana/types';
+import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,17 +56,24 @@ export async function POST(request: NextRequest) {
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
     const allArchPowers = getAllArchPowers();
+    const allPerks = getAllPerks();
+    const allCybernetics = getAllCybernetics();
+    const allMagicSchools = getAllMagicSchools();
 
-    // Get user's power IDs
-    const userCommonPowerIds = player.arkanaStats.commonPowers || [];
-    const userArchPowerIds = player.arkanaStats.archetypePowers || [];
+    // Get user's ability IDs (powers, perks, cybernetics, magic)
+    const userCommonPowerIds = (player.arkanaStats.commonPowers as string[]) || [];
+    const userArchPowerIds = (player.arkanaStats.archetypePowers as string[]) || [];
+    const userPerkIds = (player.arkanaStats.perks as string[]) || [];
+    const userCyberneticIds = (player.arkanaStats.cybernetics as string[]) || [];
+    const userMagicWeaveIds = (player.arkanaStats.magicWeaves as string[]) || [];
 
-    // Filter powers based on type (attack or ability)
-    // Memory-optimized: return only id and name (details fetched via power-info)
+    // Filter abilities based on type (attack or ability)
+    // Memory-optimized: return only id, name, and abilityType (details fetched via power-info)
     const powerType = type || 'attack';
     const filteredPowers: Array<{
       id: string;
       name: string;
+      abilityType: string; // commonPower, archetypePower, perk, cybernetic, magicWeave
     }> = [];
 
     // Process common powers
@@ -75,7 +82,8 @@ export async function POST(request: NextRequest) {
       if (power && power.abilityType && power.abilityType.includes(powerType)) {
         filteredPowers.push({
           id: power.id,
-          name: power.name
+          name: power.name,
+          abilityType: 'commonPower'
         });
       }
     });
@@ -86,18 +94,56 @@ export async function POST(request: NextRequest) {
       if (power && power.abilityType && power.abilityType.includes(powerType)) {
         filteredPowers.push({
           id: power.id,
-          name: power.name
+          name: power.name,
+          abilityType: 'archetypePower'
         });
       }
     });
 
-    // Return the filtered list of powers (id and name only for memory optimization)
+    // Process perks (only those with attack or ability effects)
+    userPerkIds.forEach((perkId: string) => {
+      const perk = allPerks.find((p: Perk) => p.id === perkId);
+      if (perk && perk.abilityType && perk.abilityType.includes(powerType)) {
+        filteredPowers.push({
+          id: perk.id,
+          name: perk.name,
+          abilityType: 'perk'
+        });
+      }
+    });
+
+    // Process cybernetics (only those with attack or ability effects)
+    userCyberneticIds.forEach((cyberId: string) => {
+      const cyber = allCybernetics.find((c: Cybernetic) => c.id === cyberId);
+      if (cyber && cyber.abilityType && cyber.abilityType.includes(powerType)) {
+        filteredPowers.push({
+          id: cyber.id,
+          name: cyber.name,
+          abilityType: 'cybernetic'
+        });
+      }
+    });
+
+    // Process magic weaves (only those with attack or ability effects)
+    userMagicWeaveIds.forEach((weaveId: string) => {
+      const weave = allMagicSchools.find((m: MagicSchool) => m.id === weaveId);
+      if (weave && weave.abilityType && weave.abilityType.includes(powerType)) {
+        filteredPowers.push({
+          id: weave.id,
+          name: weave.name,
+          abilityType: 'magicWeave'
+        });
+      }
+    });
+
+    // Return the filtered list of abilities (id, name, and abilityType for routing)
     return NextResponse.json({
       success: true,
       data: {
         powers: filteredPowers.map(p => ({
           id: p.id,
-          name: encodeForLSL(p.name)
+          name: encodeForLSL(p.name),
+          abilityType: p.abilityType // Helps LSL route to correct activation endpoint
         }))
       }
     });

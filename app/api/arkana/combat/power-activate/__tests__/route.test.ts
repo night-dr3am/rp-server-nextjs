@@ -2074,7 +2074,7 @@ describe('/api/arkana/combat/power-activate', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'Power not found');
+      expectError(data, 'Ability not found');
       expect(response.status).toBe(404);
     });
 

@@ -5,7 +5,8 @@ import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
-import type { CommonPower, ArchetypePower, EffectResult, LiveStats } from '@/lib/arkana/types';
+import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
+import type { CommonPower, ArchetypePower, EffectResult } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -106,14 +107,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse liveStats for both attacker and target to include active effect modifiers
-    const attackerLiveStats = (attacker.arkanaStats.liveStats as LiveStats) || {};
-    const targetLiveStats = (target.arkanaStats.liveStats as LiveStats) || {};
-
-    // Load arkana data
+    // Load arkana data (needed for passive effects from perks/cybernetics/magic)
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
     const allArchPowers = getAllArchPowers();
+
+    // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
+    const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+    const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+
+    // Get passive effects from perks/cybernetics/magic
+    const attackerPassiveEffectIds = getPassiveEffects(
+      (attacker.arkanaStats.perks as string[]) || [],
+      (attacker.arkanaStats.cybernetics as string[]) || [],
+      (attacker.arkanaStats.magicWeaves as string[]) || []
+    );
+    const targetPassiveEffectIds = getPassiveEffects(
+      (target.arkanaStats.perks as string[]) || [],
+      (target.arkanaStats.cybernetics as string[]) || [],
+      (target.arkanaStats.magicWeaves as string[]) || []
+    );
+
+    // Convert passive effects to ActiveEffect format and combine with active effects
+    const attackerPassiveAsActive = passiveEffectsToActiveFormat(attackerPassiveEffectIds);
+    const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectIds);
+
+    const attackerCombinedEffects = [...attackerActiveEffects, ...attackerPassiveAsActive];
+    const targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
+
+    // Recalculate liveStats with both active and passive effects
+    const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerCombinedEffects);
+    const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
 
     // Find the power
     let power: CommonPower | ArchetypePower | undefined = undefined;
@@ -133,8 +157,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify ownership
-    const userCommonPowerIds = attacker.arkanaStats.commonPowers || [];
-    const userArchPowerIds = attacker.arkanaStats.archetypePowers || [];
+    const userCommonPowerIds = (attacker.arkanaStats.commonPowers as string[]) || [];
+    const userArchPowerIds = (attacker.arkanaStats.archetypePowers as string[]) || [];
     const ownsPower = userCommonPowerIds.includes(power.id) || userArchPowerIds.includes(power.id);
 
     if (!ownsPower) {
@@ -176,7 +200,7 @@ export async function POST(request: NextRequest) {
     // If attack failed on check, process turn and return miss
     if (!attackSuccess && attackEffects.some((e: string) => e.startsWith('check_'))) {
       // Process turn for attacker (decrement all effects) even on failure
-      const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+      // Note: attackerActiveEffects already defined above (without passive effects)
       const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
 
       await prisma.arkanaStats.update({
@@ -257,26 +281,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Update attacker's activeEffects and liveStats
-    let attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
+    // Note: attackerActiveEffects already defined above (without passive effects)
+    // We need a mutable copy for turn processing
 
     // Process turn for attacker FIRST (decrement all PRE-EXISTING effects by 1 turn)
     const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
-    attackerActiveEffects = turnProcessed.activeEffects;
+    let processedAttackerActiveEffects = turnProcessed.activeEffects;
 
     // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
-        attackerActiveEffects = applyActiveEffect(attackerActiveEffects, effectResult);
+        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult);
       }
     }
 
     // Recalculate liveStats with both decremented old effects AND new self-effects
-    const finalLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerActiveEffects);
+    const finalLiveStats = recalculateLiveStats(attacker.arkanaStats, processedAttackerActiveEffects);
 
     await prisma.arkanaStats.update({
       where: { userId: attacker.id },
       data: buildArkanaStatsUpdate({
-        activeEffects: attackerActiveEffects,
+        activeEffects: processedAttackerActiveEffects,
         liveStats: finalLiveStats
       })
     });

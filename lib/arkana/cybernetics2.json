@@ -5,7 +5,11 @@
     "desc": "Multi-spectrum sight (infrared, UV, etc.), wide utility.",
     "cost": 3,
     "type": "sensory",
-    "section": "Sensory Mods"
+    "section": "Sensory Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["utility_multispectrum_vision", "buff_perception_1"]
+    }
   },
   {
     "id": "cyb_echo_sense",
@@ -13,7 +17,11 @@
     "desc": "Sonar/pulse mapping; excellent for navigation.",
     "cost": 3,
     "type": "sensory",
-    "section": "Sensory Mods"
+    "section": "Sensory Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["utility_echolocation"]
+    }
   },
   {
     "id": "cyb_ghostlight_optics",
@@ -21,7 +29,11 @@
     "desc": "Low-light / thermal hybrid, strong for night/combat.",
     "cost": 2,
     "type": "sensory",
-    "section": "Sensory Mods"
+    "section": "Sensory Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_perception_1_lowlight", "utility_heat_vision"]
+    }
   },
   {
     "id": "cyb_clarity_node",
@@ -29,7 +41,11 @@
     "desc": "Anti-glare / image stabilizer; niche defensive utility.",
     "cost": 1,
     "type": "sensory",
-    "section": "Sensory Mods"
+    "section": "Sensory Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_perception_1"]
+    }
   },
   {
     "id": "cyb_street_eye_mkiv",
@@ -37,7 +53,11 @@
     "desc": "Basic starter sensory mod, cheap but common.",
     "cost": 1,
     "type": "sensory",
-    "section": "Sensory Mods"
+    "section": "Sensory Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_perception_1"]
+    }
   },
   {
     "id": "cyb_razorjack_interface",
@@ -45,7 +65,14 @@
     "desc": "Deployable blades or claws; solid melee weapon upgrade.",
     "cost": 3,
     "type": "combat",
-    "section": "Combat/Utility Mods"
+    "section": "Combat/Utility Mods",
+    "abilityType": ["attack"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_3"]
+    }
   },
   {
     "id": "cyb_impact_coil",
@@ -53,7 +80,14 @@
     "desc": "Shockwave-enhanced strikes; strong AoE knockback.",
     "cost": 4,
     "type": "combat",
-    "section": "Combat/Utility Mods"
+    "section": "Combat/Utility Mods",
+    "abilityType": ["attack"],
+    "baseStat": "Physical",
+    "targetType": "area",
+    "range": 5,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_force_3", "control_push"]
+    }
   },
   {
     "id": "cyb_grav_lock_anchors",
@@ -61,7 +95,11 @@
     "desc": "Adhesion to walls/ceilings; great infiltration/mobility.",
     "cost": 3,
     "type": "combat",
-    "section": "Combat/Utility Mods"
+    "section": "Combat/Utility Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["movement_wall_climbing"]
+    }
   },
   {
     "id": "cyb_pulse_injector",
@@ -69,7 +107,14 @@
     "desc": "Short-burst speed enhancer; versatile for Dex rolls/escapes.",
     "cost": 3,
     "type": "combat",
-    "section": "Combat/Utility Mods"
+    "section": "Combat/Utility Mods",
+    "abilityType": ["ability"],
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_dexterity_vs_tn10", "buff_dexterity_3"]
+    }
   },
   {
     "id": "cyb_wraith_grip",
@@ -77,7 +122,11 @@
     "desc": "Silent, vibration-dampened hands; strong stealth, lower combat.",
     "cost": 2,
     "type": "combat",
-    "section": "Combat/Utility Mods"
+    "section": "Combat/Utility Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_stealth_3_sound"]
+    }
   },
   {
     "id": "cyb_shadeskin",
@@ -85,7 +134,14 @@
     "desc": "Optical camouflage layer; high-end stealth, nearly invisible.",
     "cost": 4,
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_dexterity_vs_tn10", "buff_stealth_6"]
+    }
   },
   {
     "id": "cyb_veil_circuit",
@@ -93,7 +149,11 @@
     "desc": "Sound suppression dampeners; highly useful for stealth.",
     "cost": 3,
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_stealth_3_sound"]
+    }
   },
   {
     "id": "cyb_ghoststep_relay",
@@ -101,7 +161,11 @@
     "desc": "Noise-cancelled footfalls; useful but narrower than Veil Circuit.",
     "cost": 2,
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_stealth_2"]
+    }
   },
   {
     "id": "cyb_null_sigil",
@@ -109,7 +173,11 @@
     "desc": "Electronic signature masking; counters detection tech.",
     "cost": 3,
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["utility_electronic_masking"]
+    }
   },
   {
     "id": "cyb_cold_veins",
@@ -117,7 +185,11 @@
     "desc": "Thermal suppression mod; valuable for surveillance-heavy zones.",
     "cost": 2,
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_stealth_2"]
+    }
   },
   {
     "id": "cyb_titan_frame",
@@ -125,7 +197,11 @@
     "desc": "Reinforced bone plating; strong defense/durability.",
     "cost": 4,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["defense_damage_reduction_2"]
+    }
   },
   {
     "id": "cyb_servocore_overdrive",
@@ -133,7 +209,14 @@
     "desc": "Strength amplifier; huge melee upgrade.",
     "cost": 4,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["ability"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_physical_4_strength"]
+    }
   },
   {
     "id": "cyb_ironlung_node",
@@ -141,7 +224,11 @@
     "desc": "Respiratory boost / toxic filter; environmental survival.",
     "cost": 2,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["defense_environmental"]
+    }
   },
   {
     "id": "cyb_shock_spine",
@@ -149,7 +236,11 @@
     "desc": "Electrical discharge defense; strong deterrent/reactive damage.",
     "cost": 3,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["passive_reflect_damage_2_electric"]
+    }
   },
   {
     "id": "cyb_grinder_arm",
@@ -157,7 +248,14 @@
     "desc": "Industrial-grade crushing tool; brutal melee, bulky.",
     "cost": 4,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["attack"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_4"]
+    }
   },
   {
     "id": "cyb_carapace_full",
@@ -165,7 +263,11 @@
     "desc": "Full-body reinforcement; reduces damage by -3 points.",
     "cost": 5,
     "type": "durability",
-    "section": "Augmented Strength/Durability"
+    "section": "Augmented Strength/Durability",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["defense_damage_reduction_3"]
+    }
   },
   {
     "id": "cyb_meatjackers",
@@ -173,7 +275,14 @@
     "desc": "Combat prosthetic arms; common street-tier melee enhancement.",
     "cost": 2,
     "type": "street",
-    "section": "Street-Level Popular Mods"
+    "section": "Street-Level Popular Mods",
+    "abilityType": ["attack"],
+    "baseStat": "Physical",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_physical_vs_physical", "damage_physical_2"]
+    }
   },
   {
     "id": "cyb_glowsticks",
@@ -181,7 +290,11 @@
     "desc": "Cheap neon-lit limbs; cosmetic/intimidation, minimal combat use.",
     "cost": 1,
     "type": "street",
-    "section": "Street-Level Popular Mods"
+    "section": "Street-Level Popular Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_social_intimidation"]
+    }
   },
   {
     "id": "cyb_bonecrackers",
@@ -189,7 +302,14 @@
     "desc": "Overclocked hand mods; short-term melee buff, unstable.",
     "cost": 2,
     "type": "street",
-    "section": "Street-Level Popular Mods"
+    "section": "Street-Level Popular Mods",
+    "abilityType": ["ability"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_physical_vs_tn10", "buff_physical_2"]
+    }
   },
   {
     "id": "cyb_spiderjoints",
@@ -197,7 +317,11 @@
     "desc": "Multi-angle bending prosthetics; useful for odd escapes/infiltration.",
     "cost": 2,
     "type": "street",
-    "section": "Street-Level Popular Mods"
+    "section": "Street-Level Popular Mods",
+    "abilityType": ["passive"],
+    "effects": {
+      "passive": ["buff_dexterity_2"]
+    }
   },
   {
     "id": "hack_silkveil",
@@ -207,7 +331,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_shadowstep",
@@ -217,7 +348,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_nightloom",
@@ -227,7 +365,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_mutepatch",
@@ -237,7 +382,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "II",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_glasscloak",
@@ -247,7 +399,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "II",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_hushkit",
@@ -257,7 +416,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "III",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_fogline",
@@ -267,7 +433,14 @@
     "type": "hacking",
     "category": "stealth",
     "mk": "III",
-    "section": "Stealth/Infiltration - Hacking"
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_wardhalo",
@@ -277,7 +450,14 @@
     "type": "hacking",
     "category": "defense",
     "mk": "I",
-    "section": "Defensive/Countermeasures - Hacking"
+    "section": "Defensive/Countermeasures - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
+    }
   },
   {
     "id": "hack_glassguard",
@@ -287,7 +467,14 @@
     "type": "hacking",
     "category": "defense",
     "mk": "II",
-    "section": "Defensive/Countermeasures - Hacking"
+    "section": "Defensive/Countermeasures - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
+    }
   },
   {
     "id": "hack_mistscreen",
@@ -297,7 +484,14 @@
     "type": "hacking",
     "category": "defense",
     "mk": "II",
-    "section": "Defensive/Countermeasures - Hacking"
+    "section": "Defensive/Countermeasures - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
+    }
   },
   {
     "id": "hack_pulsefence",
@@ -307,7 +501,14 @@
     "type": "hacking",
     "category": "defense",
     "mk": "III",
-    "section": "Defensive/Countermeasures - Hacking"
+    "section": "Defensive/Countermeasures - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
+    }
   },
   {
     "id": "hack_brickwave",
@@ -317,7 +518,14 @@
     "type": "hacking",
     "category": "breach",
     "mk": "I",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "damage_breach"]
+    }
   },
   {
     "id": "hack_glassrend",
@@ -327,7 +535,14 @@
     "type": "hacking",
     "category": "breach",
     "mk": "I",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "damage_breach"]
+    }
   },
   {
     "id": "hack_thunderclasp",
@@ -337,7 +552,14 @@
     "type": "hacking",
     "category": "breach",
     "mk": "II",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_breach"]
+    }
   },
   {
     "id": "hack_clockmender",
@@ -347,7 +569,14 @@
     "type": "hacking",
     "category": "breach",
     "mk": "II",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_signalsmith",
@@ -357,7 +586,14 @@
     "type": "hacking",
     "category": "breach",
     "mk": "III",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
+    }
   },
   {
     "id": "hack_wreckline",
@@ -367,6 +603,13 @@
     "type": "hacking",
     "category": "breach",
     "mk": "III",
-    "section": "Breaching/Intrusion Protocols - Hacking"
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 0,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_breach"]
+    }
   }
 ]

@@ -105,6 +105,11 @@ export interface Perk {
   cost: number;
   species?: string;
   arch?: string;
+  abilityType?: string[];  // ["passive", "ability", "attack"]
+  baseStat?: string;        // For active perks (ability/attack)
+  targetType?: string;      // For active perks
+  range?: number;           // For active perks
+  effects?: PowerEffects;   // Effects structure
 }
 
 export interface ArchetypePower {
@@ -129,6 +134,11 @@ export interface Cybernetic {
   cost: number;
   type: string;
   section: string;
+  abilityType?: string[];  // ["passive", "ability", "attack"]
+  baseStat?: string;        // For active cybernetics (ability/attack)
+  targetType?: string;      // For active cybernetics
+  range?: number;           // For active cybernetics
+  effects?: PowerEffects;   // Effects structure
 }
 
 export interface MagicSchool {
@@ -138,6 +148,11 @@ export interface MagicSchool {
   section: string;
   species?: string;
   cost: number;
+  abilityType?: string[];  // ["ability", "attack"]
+  baseStat?: string;        // Usually "Mental" for magic
+  targetType?: string;      // Target type
+  range?: number;           // Range in meters
+  effects?: PowerEffects;   // Effects structure
 }
 
 // Character model interface matching arkana-data-main

@@ -153,7 +153,7 @@
         },
         "duration": {
           "type": "string",
-          "enum": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "scene", "permanent"],
+          "enum": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "turns:6", "scene", "permanent"],
           "description": "How long the effect lasts"
         },
         "checkStat": {
@@ -177,7 +177,7 @@
         },
         "damageType": {
           "type": "string",
-          "enum": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy"],
+          "enum": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy", "elemental", "breach"],
           "description": "Type of damage dealt"
         },
         "damageFormula": {
@@ -192,7 +192,7 @@
           "type": "string",
           "enum": [
             "stun", "paralyze", "sleep", "confusion", "fear", "bind",
-            "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion"
+            "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion", "seal"
           ],
           "description": "Type of control effect"
         },
@@ -215,9 +215,9 @@
     "stats": ["Physical", "Dexterity", "Mental", "Perception", "Stealth"],
     "targetType": ["single", "self", "area", "cone", "line", "all", "all_enemies", "all_allies"],
     "effectCategory": ["check", "damage", "stat_modifier", "control", "defense", "heal", "utility", "resource", "special"],
-    "damageType": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy"],
-    "controlType": ["stun", "paralyze", "sleep", "confusion", "fear", "bind", "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion"],
-    "duration": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "scene", "permanent"],
+    "damageType": ["physical", "mental", "fire", "ice", "lightning", "necrotic", "force", "poison", "energy", "elemental", "breach"],
+    "controlType": ["stun", "paralyze", "sleep", "confusion", "fear", "bind", "silence", "charm", "domination", "knockdown", "grapple", "push", "suggestion", "seal"],
+    "duration": ["immediate", "attack", "turns:1", "turns:2", "turns:3", "turns:5", "turns:6", "scene", "permanent"],
     "species": ["human", "strigoi", "gaki", "spliced", "veilborn", "synthral"]
   }
 }

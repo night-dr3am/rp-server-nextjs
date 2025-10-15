@@ -542,6 +542,7 @@ export const arkanaPowerActivateSchema = Joi.object({
   caster_uuid: uuidSchema,
   power_id: Joi.string().min(1).max(255).optional(),
   power_name: Joi.string().min(1).max(255).optional(),
+  ability_type: Joi.string().valid('commonPower', 'archetypePower', 'perk', 'cybernetic', 'magicWeave', 'auto').optional().default('auto'),
   target_uuid: Joi.string().uuid().allow('').optional(), // Optional for self/area powers, allow empty string
   nearby_uuids: Joi.array().items(Joi.string().uuid()).optional().default([]),
   universe: Joi.string().valid('arkana').required(),

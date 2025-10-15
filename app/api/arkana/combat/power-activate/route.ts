@@ -5,7 +5,8 @@ import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
-import type { CommonPower, ArchetypePower, EffectResult, LiveStats } from '@/lib/arkana/types';
+import { getPassiveEffects, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
+import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -137,55 +138,127 @@ export async function POST(request: NextRequest) {
       allPotentialTargets.push(...validNearby);
     }
 
-    // Parse liveStats for caster and target (if exists) to include active effect modifiers
-    const casterLiveStats = (caster.arkanaStats.liveStats as LiveStats) || {};
-    const targetLiveStats = target ? ((target.arkanaStats?.liveStats as LiveStats) || {}) : {};
-
-    // Load arkana data
+    // Load arkana data (needed for passive effects from perks/cybernetics/magic)
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
     const allArchPowers = getAllArchPowers();
 
-    // Find the power
-    let power: CommonPower | ArchetypePower | undefined = undefined;
-    if (power_id) {
-      power = allCommonPowers.find((p: CommonPower) => p.id === power_id) ||
-              allArchPowers.find((p: ArchetypePower) => p.id === power_id);
-    } else if (power_name) {
-      power = allCommonPowers.find((p: CommonPower) => p.name.toLowerCase() === power_name.toLowerCase()) ||
-              allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === power_name.toLowerCase());
+    // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
+    const casterActiveEffectsForLiveStats = parseActiveEffects(caster.arkanaStats.activeEffects);
+
+    // Get passive effects from perks/cybernetics/magic for caster
+    const casterPassiveEffectIds = getPassiveEffects(
+      (caster.arkanaStats.perks as string[]) || [],
+      (caster.arkanaStats.cybernetics as string[]) || [],
+      (caster.arkanaStats.magicWeaves as string[]) || []
+    );
+
+    // Convert passive effects to ActiveEffect format and combine with active effects
+    const casterPassiveAsActive = passiveEffectsToActiveFormat(casterPassiveEffectIds);
+    const casterCombinedEffects = [...casterActiveEffectsForLiveStats, ...casterPassiveAsActive];
+
+    // Recalculate caster liveStats with both active and passive effects
+    const casterLiveStats = recalculateLiveStats(caster.arkanaStats, casterCombinedEffects);
+
+    // Calculate target liveStats if target exists
+    let targetLiveStats: LiveStats = {};
+    if (target?.arkanaStats) {
+      const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+      const targetPassiveEffectIds = getPassiveEffects(
+        (target.arkanaStats.perks as string[]) || [],
+        (target.arkanaStats.cybernetics as string[]) || [],
+        (target.arkanaStats.magicWeaves as string[]) || []
+      );
+      const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectIds);
+      const targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
+      targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
     }
 
-    if (!power) {
+    // Find the ability (power, perk, cybernetic, or magic weave)
+    // ability_type can be: commonPower, archetypePower, perk, cybernetic, magicWeave
+    type Ability = CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool;
+    let ability: Ability | undefined = undefined;
+    let abilityTypeName = 'power'; // For error messages
+
+    const requestedAbilityType = value.ability_type || 'auto'; // Default to auto-detect
+
+    if (requestedAbilityType === 'perk' || requestedAbilityType === 'auto') {
+      if (power_id) {
+        ability = loadPerk(power_id) || undefined;
+      }
+      if (ability) abilityTypeName = 'perk';
+    }
+
+    if (!ability && (requestedAbilityType === 'cybernetic' || requestedAbilityType === 'auto')) {
+      if (power_id) {
+        ability = loadCybernetic(power_id) || undefined;
+      }
+      if (ability) abilityTypeName = 'cybernetic';
+    }
+
+    if (!ability && (requestedAbilityType === 'magicWeave' || requestedAbilityType === 'auto')) {
+      if (power_id) {
+        ability = loadMagicWeave(power_id) || undefined;
+      }
+      if (ability) abilityTypeName = 'magic weave';
+    }
+
+    if (!ability && (requestedAbilityType === 'commonPower' || requestedAbilityType === 'archetypePower' || requestedAbilityType === 'auto')) {
+      if (power_id) {
+        ability = allCommonPowers.find((p: CommonPower) => p.id === power_id) ||
+                  allArchPowers.find((p: ArchetypePower) => p.id === power_id);
+      } else if (power_name) {
+        ability = allCommonPowers.find((p: CommonPower) => p.name.toLowerCase() === power_name.toLowerCase()) ||
+                  allArchPowers.find((p: ArchetypePower) => p.name.toLowerCase() === power_name.toLowerCase());
+      }
+      if (ability) abilityTypeName = 'power';
+    }
+
+    if (!ability) {
       return NextResponse.json(
-        { success: false, error: 'Power not found' },
+        { success: false, error: `Ability not found (searched: ${requestedAbilityType})` },
         { status: 404 }
       );
     }
 
-    // Verify ownership
-    const userCommonPowerIds = caster.arkanaStats.commonPowers || [];
-    const userArchPowerIds = caster.arkanaStats.archetypePowers || [];
-    const ownsPower = userCommonPowerIds.includes(power.id) || userArchPowerIds.includes(power.id);
+    // Verify ownership based on ability type
+    const userPerks = (caster.arkanaStats.perks as string[]) || [];
+    const userCybernetics = (caster.arkanaStats.cybernetics as string[]) || [];
+    const userMagicWeaves = (caster.arkanaStats.magicWeaves as string[]) || [];
+    const userCommonPowerIds = (caster.arkanaStats.commonPowers as string[]) || [];
+    const userArchPowerIds = (caster.arkanaStats.archetypePowers as string[]) || [];
 
-    if (!ownsPower) {
+    const ownsAbility =
+      ownsPerk(userPerks, ability.id) ||
+      ownsCybernetic(userCybernetics, ability.id) ||
+      ownsMagicWeave(userMagicWeaves, ability.id) ||
+      userCommonPowerIds.includes(ability.id) ||
+      userArchPowerIds.includes(ability.id);
+
+    if (!ownsAbility) {
       return NextResponse.json(
-        { success: false, error: 'Caster does not own this power' },
+        { success: false, error: `Caster does not own this ${abilityTypeName}` },
         { status: 403 }
       );
     }
 
-    // Execute effects using ability effects (not attack effects)
-    const activateEffects = (power.effects?.ability && Array.isArray(power.effects.ability))
-      ? power.effects.ability
-      : [];
+    // Execute effects using ability effects (or attack effects for offensive abilities)
+    // For power-activate, we prefer 'ability' effects, but some perks/cybernetics might have 'attack' effects
+    let activateEffects: string[] = [];
+    if (ability.effects?.ability && Array.isArray(ability.effects.ability)) {
+      activateEffects = ability.effects.ability;
+    } else if (ability.effects?.attack && Array.isArray(ability.effects.attack)) {
+      // Some cybernetics/perks might have attack effects (e.g., offensive cybernetics)
+      activateEffects = ability.effects.attack;
+    }
+
     let activationSuccess = true;
     let rollDescription = '';
 
     // First, execute check effects to determine success (using effective stats)
     for (const effectId of activateEffects) {
       if (effectId.startsWith('check_')) {
-        const baseStatName = power.baseStat?.toLowerCase() || 'mental';
+        const baseStatName = ability.baseStat?.toLowerCase() || 'mental';
         let targetStatValue: number = 2;
 
         if (target && target.arkanaStats) {
@@ -223,15 +296,15 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           activationSuccess: 'false',
-          powerUsed: power.name,
-          powerBaseStat: power.baseStat || 'Mental',
+          powerUsed: ability.name,
+          powerBaseStat: ability.baseStat || 'Mental',
           rollInfo: rollDescription,
           affected: [],
           caster: {
             uuid: caster.slUuid,
             name: encodeForLSL(caster.arkanaStats.characterName)
           },
-          message: encodeForLSL(`${caster.arkanaStats.characterName} attempts ${power.name} - FAILED! ${rollDescription}`)
+          message: encodeForLSL(`${caster.arkanaStats.characterName} attempts ${ability.name} - FAILED! ${rollDescription}`)
         }
       });
     }
@@ -354,11 +427,11 @@ export async function POST(request: NextRequest) {
     // Build comprehensive message with effect details
     const casterName = caster.arkanaStats.characterName;
 
-    let message = `${casterName} activates ${power.name}`;
+    let message = `${casterName} activates ${ability.name}`;
 
-    if (power.targetType === 'area') {
+    if (ability.targetType === 'area') {
       message += ` affecting ${affectedUsersData.length} ${affectedUsersData.length === 1 ? 'target' : 'targets'}`;
-    } else if (power.targetType === 'self') {
+    } else if (ability.targetType === 'self') {
       message += ' on themselves';
     } else if (target?.arkanaStats) {
       message += ` on ${target.arkanaStats.characterName}`;
@@ -378,8 +451,8 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         activationSuccess: 'true',
-        powerUsed: power.name,
-        powerBaseStat: power.baseStat || 'Mental',
+        powerUsed: ability.name,
+        powerBaseStat: ability.baseStat || 'Mental',
         rollInfo: rollDescription,
         affected: affectedUsersData,
         caster: {
