@@ -3,7 +3,7 @@
     "id": "hum_stasis_degradation_hnp",
     "name": "Stasis Degradation",
     "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
-    "cost": 3,
+    "cost": 1,
     "tags": ["species:human_without_power"]
   },
   {
@@ -17,7 +17,7 @@
     "id": "hum_stasis_degradation_syn",
     "name": "Stasis Degradation",
     "desc": "Powers weakened after cryosleep; first activation after sleep rolls –2 to Stat modifier for activation until trained/adjusted (1–2 scenes).",
-    "cost": 3,
+    "cost": 1,
     "tags": ["species:synthral"]
   },
   {
@@ -68,7 +68,7 @@
   {
     "id": "hum_temporal_dislocation",
     "name": "Temporal Dislocation",
-    "desc": "(Psion only) Precognition may leave character distracted; –1 to Physical and Dex rolls during or immediately after visions.",
+    "desc": "(Psion only) Precognition may leave character distracted; –1 to Physical and Dex rolls during or immediately after visions. Roll Men:TN10 during stress to trigger.",
     "cost": 3,
     "tags": ["species:psion"]
   },
@@ -335,7 +335,7 @@
     "id": "v_blood_madness",
     "name": "Blood Madness",
     "desc": "Starvation drives you toward frenzy.",
-    "cost": 3,
+    "cost": 4,
     "tags": ["race:gaki"]
   },
   {
