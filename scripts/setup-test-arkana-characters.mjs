@@ -62,6 +62,13 @@ async function createTestCharacters() {
             magicWeaves: [],
             cybernetics: ['Neural Implant'],
             cyberneticAugments: ['Combat Processor'],
+            skills: [
+              { skill_id: 'skill_combat_arts', skill_name: 'Combat Arts', level: 2 },
+              { skill_id: 'skill_firearms', skill_name: 'Firearms', level: 2 },
+              { skill_id: 'skill_athletics', skill_name: 'Athletics', level: 1 }
+            ],
+            skillsAllocatedPoints: 5,
+            skillsSpentPoints: 5,
             credits: 500,
             chips: 50,
             xp: 0,
@@ -120,6 +127,14 @@ async function createTestCharacters() {
             magicWeaves: ['Fire', 'Force', 'Protection'],
             cybernetics: ['Admin Implant'],
             cyberneticAugments: ['Full System Access'],
+            skills: [
+              { skill_id: 'skill_lore', skill_name: 'Lore', level: 3 },
+              { skill_id: 'skill_ritualism', skill_name: 'Ritualism', level: 2 },
+              { skill_id: 'skill_hack', skill_name: 'Hack', level: 2 },
+              { skill_id: 'skill_engineering', skill_name: 'Engineering', level: 1 }
+            ],
+            skillsAllocatedPoints: 8,
+            skillsSpentPoints: 8,
             credits: 10000,
             chips: 1000,
             xp: 1000,
