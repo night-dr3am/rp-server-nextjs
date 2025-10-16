@@ -44,6 +44,9 @@ export default function ArkanaCharacterCreation() {
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
 
+  // Character creation constants
+  const MAX_FLAWS = 4;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -846,49 +849,87 @@ export default function ArkanaCharacterCreation() {
   };
 
   const renderStep4 = () => {
+    const selectedFlawsCount = characterModel.flaws.size;
     const flawPointsGained = Array.from(characterModel.flaws).reduce((sum, flawId) => {
       const flaw = availableFlaws.find(f => f.id === flawId);
       return sum + (flaw ? flaw.cost : 0);
     }, 0);
+    const isMaxFlawsReached = selectedFlawsCount >= MAX_FLAWS;
 
     return (
       <div className="space-y-6">
         <h2 className="text-3xl font-bold text-cyan-400 mb-6">Optional Flaws</h2>
-        <div className="mb-4">
-          <p className="text-cyan-300 mb-2">Select flaws to gain additional power points</p>
-          <div className="text-xl font-bold text-cyan-400">
-            Points from Flaws: {flawPointsGained}
+        <div className="mb-4 p-4 bg-gray-900 border border-cyan-500 rounded">
+          <p className="text-cyan-300 mb-3">Flaws are optional. You may select up to {MAX_FLAWS} flaws to gain additional power points for your character build.</p>
+          <div className="flex items-center justify-between">
+            <div className="text-xl font-bold text-cyan-400">
+              Points from Flaws: {flawPointsGained}
+            </div>
+            <div className="text-lg text-gray-400">
+              Selected: <span className={selectedFlawsCount >= MAX_FLAWS ? "text-cyan-400 font-semibold" : "text-gray-300"}>{selectedFlawsCount}</span> / {MAX_FLAWS}
+            </div>
           </div>
         </div>
 
+        {isMaxFlawsReached && (
+          <div className="p-4 bg-gray-800 border border-cyan-600 rounded">
+            <p className="text-cyan-300 text-sm">
+              Maximum flaws selected. Uncheck a flaw if you wish to select a different one.
+            </p>
+          </div>
+        )}
+
         <div className="space-y-3">
-          {availableFlaws.map(flaw => (
-            <div key={flaw.id} className="p-4 bg-gray-900 border border-cyan-500 rounded">
-              <label className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  checked={characterModel.flaws.has(flaw.id)}
-                  onChange={(e) => {
-                    const newFlaws = new Set(characterModel.flaws);
-                    if (e.target.checked) {
-                      newFlaws.add(flaw.id);
-                    } else {
-                      newFlaws.delete(flaw.id);
-                    }
-                    setCharacterModel(prev => ({ ...prev, flaws: newFlaws }));
-                  }}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-cyan-300">{flaw.name}</span>
-                    <span className="px-2 py-1 bg-green-900 text-green-300 rounded text-sm">+{flaw.cost}</span>
+          {availableFlaws.map(flaw => {
+            const isSelected = characterModel.flaws.has(flaw.id);
+            const isDisabled = !isSelected && isMaxFlawsReached;
+
+            return (
+              <div
+                key={flaw.id}
+                className={`p-4 bg-gray-900 border rounded ${
+                  isDisabled
+                    ? 'border-gray-700 opacity-60'
+                    : 'border-cyan-500'
+                }`}
+              >
+                <label className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    disabled={isDisabled}
+                    onChange={(e) => {
+                      const newFlaws = new Set(characterModel.flaws);
+                      if (e.target.checked) {
+                        newFlaws.add(flaw.id);
+                      } else {
+                        newFlaws.delete(flaw.id);
+                      }
+                      setCharacterModel(prev => ({ ...prev, flaws: newFlaws }));
+                    }}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <span className={`font-medium ${isDisabled ? 'text-gray-500' : 'text-cyan-300'}`}>
+                        {flaw.name}
+                      </span>
+                      <span className={`px-2 py-1 rounded text-sm ${
+                        isDisabled
+                          ? 'bg-gray-800 text-gray-500'
+                          : 'bg-green-900 text-green-300'
+                      }`}>
+                        +{flaw.cost}
+                      </span>
+                    </div>
+                    <p className={`text-sm mt-1 ${isDisabled ? 'text-gray-600' : 'text-gray-400'}`}>
+                      {flaw.desc}
+                    </p>
                   </div>
-                  <p className="text-gray-400 text-sm mt-1">{flaw.desc}</p>
-                </div>
-              </label>
-            </div>
-          ))}
+                </label>
+              </div>
+            );
+          })}
         </div>
 
         {availableFlaws.length === 0 && characterModel.race && (
