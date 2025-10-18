@@ -230,17 +230,26 @@ export function recalculateLiveStats(
 
 /**
  * Process turn for effects: decrement turns, remove expired, recalculate live stats
+ * Scene effects are NOT decremented - they remain at turnsLeft: 999 until scene ends
+ * Only turn-based effects (duration starts with "turns:") are decremented
  */
 export function processEffectsTurn(
   activeEffects: ActiveEffect[],
   baseStats: ArkanaStats
 ): { activeEffects: ActiveEffect[]; liveStats: LiveStats } {
-  // Decrement all effects and remove expired ones
+  // Decrement turn-based effects only; scene effects remain unchanged
   const updatedEffects = activeEffects
-    .map(effect => ({
-      ...effect,
-      turnsLeft: effect.turnsLeft - 1
-    }))
+    .map(effect => {
+      // Don't decrement scene effects - they stay at turnsLeft: 999
+      if (effect.duration === 'scene') {
+        return effect;
+      }
+      // Decrement turn-based effects
+      return {
+        ...effect,
+        turnsLeft: effect.turnsLeft - 1
+      };
+    })
     .filter(effect => effect.turnsLeft > 0);
 
   // Recalculate live stats with updated effects

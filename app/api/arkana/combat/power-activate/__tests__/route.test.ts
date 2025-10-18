@@ -404,7 +404,7 @@ describe('/api/arkana/combat/power-activate', () => {
   });
 
   describe('2. Turn Processing Tests (activeEffects System)', () => {
-    it('2.1 should decrement all active effects by 1 turn', async () => {
+    it('2.1 should decrement turn-based effects but not scene effects', async () => {
       const caster = await createArkanaTestUser({
         characterName: 'Buffed Caster',
         race: 'human',
@@ -428,7 +428,7 @@ describe('/api/arkana/combat/power-activate', () => {
             effectId: 'buff_physical_1',
             name: 'Physical Bonus +1',
             duration: 'scene',
-            turnsLeft: 2,
+            turnsLeft: 999, // Scene effects stay at 999
             appliedAt: new Date().toISOString()
           }
         ],
@@ -460,8 +460,8 @@ describe('/api/arkana/combat/power-activate', () => {
 
       const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
       expect(activeEffects).toHaveLength(2);
-      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
-      expect(activeEffects[1].turnsLeft).toBe(1); // 2 - 1
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1 (turn-based effect decrements)
+      expect(activeEffects[1].turnsLeft).toBe(999); // Scene effect does NOT decrement
     });
 
     it('2.2 should remove expired effects after turn processing', async () => {
@@ -567,7 +567,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
       const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
       expect(activeEffects).toHaveLength(1);
-      expect(activeEffects[0].turnsLeft).toBe(998); // 999 - 1
+      expect(activeEffects[0].turnsLeft).toBe(999); // Scene effects do NOT decrement
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
       expect(liveStats.Stealth).toBe(3); // Still active
@@ -589,22 +589,22 @@ describe('/api/arkana/combat/power-activate', () => {
           {
             effectId: 'buff_dexterity_3',
             name: 'Dexterity Bonus +3',
-            duration: 'turns:2',
-            turnsLeft: 1, // Expires
+            duration: 'turns:1',
+            turnsLeft: 1, // Expires (turn-based)
             appliedAt: new Date().toISOString()
           },
           {
             effectId: 'buff_physical_1',
             name: 'Physical Bonus +1',
-            duration: 'scene',
-            turnsLeft: 1, // Expires
+            duration: 'turns:1',
+            turnsLeft: 1, // Expires (turn-based)
             appliedAt: new Date().toISOString()
           },
           {
             effectId: 'buff_stealth_3',
             name: 'Stealth Bonus +3',
             duration: 'scene',
-            turnsLeft: 3, // Persists
+            turnsLeft: 999, // Persists (scene effect)
             appliedAt: new Date().toISOString()
           }
         ],
@@ -637,6 +637,7 @@ describe('/api/arkana/combat/power-activate', () => {
       const activeEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
       expect(activeEffects).toHaveLength(1);
       expect(activeEffects[0].effectId).toBe('buff_stealth_3');
+      expect(activeEffects[0].turnsLeft).toBe(999); // Scene effect unchanged
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
       expect(liveStats.Dexterity).toBeUndefined();
@@ -933,8 +934,8 @@ describe('/api/arkana/combat/power-activate', () => {
           {
             effectId: 'buff_physical_1',
             name: 'Physical Bonus +1',
-            duration: 'scene',
-            turnsLeft: 1, // Will expire
+            duration: 'turns:1',
+            turnsLeft: 1, // Will expire (turn-based effect)
             appliedAt: new Date().toISOString()
           }
         ],
