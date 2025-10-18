@@ -116,10 +116,14 @@ export function executeEffect(
 /**
  * Apply or update an active effect on a target
  * If the effect already exists, only update if new duration is longer
+ * @param currentEffects - Current active effects on the target
+ * @param effectResult - The effect result to apply
+ * @param casterName - Optional character name of who cast this effect (for display purposes)
  */
 export function applyActiveEffect(
   currentEffects: ActiveEffect[],
-  effectResult: EffectResult
+  effectResult: EffectResult,
+  casterName?: string
 ): ActiveEffect[] {
   const { effectDef } = effectResult;
 
@@ -148,7 +152,8 @@ export function applyActiveEffect(
     name: effectDef.name,
     duration: effectDef.duration || 'scene',
     turnsLeft,
-    appliedAt: new Date().toISOString()
+    appliedAt: new Date().toISOString(),
+    casterName  // Store caster name if provided
   };
 
   if (existingIndex >= 0) {
@@ -291,21 +296,24 @@ export function parseActiveEffects(jsonData: unknown): ActiveEffect[] {
 /**
  * Format LiveStats and ActiveEffects into ready-to-display LSL string
  * Groups effects by stat and shows effect names with durations
- * Format: "🔮 Effects: StatName Modifier(Effect1(duration), Effect2(duration))\n..."
+ * Also displays utility effects with caster information
+ *
+ * Format:
+ *   "🔮 Effects: StatName Modifier(Effect1(duration), Effect2(duration))\n..."
+ *   "🔧 Utilities: UtilityName by CasterName(duration), ..."
  *
  * Examples:
  *   "🔮 Effects: Mental -1 (Entropy Pulse(1 turn left), Emotional Thief(2 turns left))"
- *   "🔮 Effects: Physical +2 (Buff Strength(scene))\nStealth +3 (Shadowform(scene))"
+ *   "🔮 Effects: Physical +2 (Buff Strength(scene))\nStealth +3 (Shadowform(scene))\n🔧 Utilities: Remote Eavesdropping by Night Corvus(scene)"
  *
  * @param liveStats - Calculated stat modifiers
- * @param activeEffects - Active effects with durations
+ * @param activeEffects - Active effects with durations and caster info
  * @returns URL-encoded string ready for LSL (only needs llUnescapeURL)
  */
 export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: ActiveEffect[]): string {
-  // If no live stats, return empty string
-  if (!liveStats || Object.keys(liveStats).length === 0) {
-    return '';
-  }
+  const outputSections: string[] = [];
+
+  // === SECTION 1: Stat Modifiers ===
 
   // Group effects by the stats they modify
   const effectsByStat: { [statName: string]: { effects: Array<{ name: string; duration: string }>, totalModifier: number } } = {};
@@ -320,7 +328,7 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     }
   }
 
-  // Now match activeEffects to their stats
+  // Match stat_modifier activeEffects to their stats
   for (const activeEffect of activeEffects) {
     const effectDef = getEffectDefinition(activeEffect.effectId);
 
@@ -347,9 +355,8 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     }
   }
 
-  // Build the formatted string
+  // Build stat modifier lines
   const statLines: string[] = [];
-
   for (const [statName, data] of Object.entries(effectsByStat)) {
     const sign = data.totalModifier >= 0 ? '+' : '';
     const effectsList = data.effects.map(e => `${e.name}(${e.duration})`).join(', ');
@@ -362,12 +369,50 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     }
   }
 
-  if (statLines.length === 0) {
+  if (statLines.length > 0) {
+    outputSections.push('🔮 Effects: ' + statLines.join('\n'));
+  }
+
+  // === SECTION 2: Utility Effects ===
+
+  const utilityEffects: Array<{ name: string; caster: string; duration: string }> = [];
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'utility') {
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      utilityEffects.push({
+        name: activeEffect.name,
+        caster: activeEffect.casterName || 'Unknown',
+        duration: durationStr
+      });
+    }
+  }
+
+  if (utilityEffects.length > 0) {
+    const utilityList = utilityEffects
+      .map(u => `${u.name} by ${u.caster}(${u.duration})`)
+      .join(', ');
+    outputSections.push('🔧 Utilities: ' + utilityList);
+  }
+
+  // If no effects at all, return empty string
+  if (outputSections.length === 0) {
     return '';
   }
 
-  // Join all stat lines with newlines and add the prefix
-  const formattedString = '🔮 Effects: ' + statLines.join('\n');
+  // Join all sections with newlines
+  const formattedString = outputSections.join('\n');
 
   // URL-encode for LSL transmission (use encodeURIComponent for proper encoding)
   return encodeURIComponent(formattedString);

@@ -196,5 +196,35 @@
     "effects": {
       "ability": ["check_mental_vs_tn10"]
     }
+  },
+  {
+    "id": "test_utility_sensor_sweep",
+    "name": "Test Sensor Sweep",
+    "desc": "Test power: Activates multiple sensory utilities at once (no check)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["utility", "perception"],
+    "baseStat": "Perception",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["utility_test_eavesdrop", "utility_test_detect_magic"]
+    }
+  },
+  {
+    "id": "test_utility_mind_link",
+    "name": "Test Mind Link",
+    "desc": "Test power: Establish telepathic link with target (no check)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["utility", "communication"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["utility_test_telepathy"]
+    }
   }
 ]

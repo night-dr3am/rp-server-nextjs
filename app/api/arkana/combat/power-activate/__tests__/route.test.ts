@@ -2502,4 +2502,313 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(updatedTarget).toBeDefined();
     });
   });
+
+  describe('Utility Effects Tests', () => {
+    it('should apply utility effects with caster name to targets', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Night Corvus',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_utility_sensor_sweep'],
+        archetypePowers: []
+      });
+
+      const target1 = await createArkanaTestUser({
+        characterName: 'Target One',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const target2 = await createArkanaTestUser({
+        characterName: 'Target Two',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_utility_sensor_sweep',
+        nearby_uuids: [target1.slUuid, target2.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify target1 received utility effects with caster name
+      const updatedTarget1 = await prisma.arkanaStats.findFirst({
+        where: { userId: target1.id }
+      });
+
+      const target1ActiveEffects = (updatedTarget1?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(target1ActiveEffects.length).toBeGreaterThan(0);
+
+      const eavesdropEffect = target1ActiveEffects.find(e => e.effectId === 'utility_test_eavesdrop');
+      expect(eavesdropEffect).toBeDefined();
+      expect(eavesdropEffect?.casterName).toBe('Night Corvus');
+      expect(eavesdropEffect?.turnsLeft).toBe(999); // scene duration
+
+      const detectMagicEffect = target1ActiveEffects.find(e => e.effectId === 'utility_test_detect_magic');
+      expect(detectMagicEffect).toBeDefined();
+      expect(detectMagicEffect?.casterName).toBe('Night Corvus');
+      expect(detectMagicEffect?.turnsLeft).toBe(3); // turns:3 duration
+    });
+
+    it('should include utility effects in liveStatsString formatted output', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      // Create user with both stat modifier and utility effects
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'debuff_mental_minus_1',
+          name: 'Mental Debuff -1',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Night Corvus'
+        },
+        {
+          effectId: 'utility_test_telepathy',
+          name: 'Test Telepathy',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        }
+      ];
+
+      const liveStats = { Mental: -1 };
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      // Should contain both sections
+      expect(decoded).toContain('🔮 Effects:');
+      expect(decoded).toContain('Mental -1');
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('Test Remote Eavesdropping by Night Corvus');
+      expect(decoded).toContain('scene');
+      expect(decoded).toContain('Test Telepathy by Bob');
+      expect(decoded).toContain('2 turns left');
+    });
+
+    it('should show utility effects with "Unknown" caster when casterName is missing', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString()
+          // No casterName field
+        }
+      ];
+
+      const liveStats = {};
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('Test Remote Eavesdropping by Unknown');
+    });
+
+    it('should format utility effects correctly in combat messages', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Telepath',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_utility_mind_link'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Receiver',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_utility_mind_link',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify utility effect was applied
+      const updatedTarget = await prisma.arkanaStats.findFirst({
+        where: { userId: target.id }
+      });
+
+      const activeEffects = (updatedTarget?.activeEffects || []) as unknown as ActiveEffect[];
+      const telepathyEffect = activeEffects.find(e => e.effectId === 'utility_test_telepathy');
+      expect(telepathyEffect).toBeDefined();
+      expect(telepathyEffect?.casterName).toBe('Telepath');
+      expect(telepathyEffect?.turnsLeft).toBe(2);
+    });
+
+    it('should handle multiple utility effects on same target from different casters', async () => {
+      const caster1 = await createArkanaTestUser({
+        characterName: 'Caster One',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_utility_mind_link'],
+        archetypePowers: []
+      });
+
+      const caster2 = await createArkanaTestUser({
+        characterName: 'Caster Two',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_utility_sensor_sweep'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Multi Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp1 = new Date().toISOString();
+      const signature1 = generateSignature(timestamp1, 'arkana');
+
+      // First caster applies utility
+      const request1Data = {
+        caster_uuid: caster1.slUuid,
+        power_id: 'test_utility_mind_link',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp1,
+        signature: signature1
+      };
+
+      let request = createMockPostRequest('/api/arkana/combat/power-activate', request1Data);
+      let response = await POST(request);
+      let data = await parseJsonResponse(response);
+      expectSuccess(data);
+
+      // Small delay to ensure different timestamp
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      const timestamp2 = new Date().toISOString();
+      const signature2 = generateSignature(timestamp2, 'arkana');
+
+      // Second caster applies different utility
+      const request2Data = {
+        caster_uuid: caster2.slUuid,
+        power_id: 'test_utility_sensor_sweep',
+        nearby_uuids: [target.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp2,
+        signature: signature2
+      };
+
+      request = createMockPostRequest('/api/arkana/combat/power-activate', request2Data);
+      response = await POST(request);
+      data = await parseJsonResponse(response);
+      expectSuccess(data);
+
+      // Verify target has utilities from both casters
+      const updatedTarget = await prisma.arkanaStats.findFirst({
+        where: { userId: target.id }
+      });
+
+      const activeEffects = (updatedTarget?.activeEffects || []) as unknown as ActiveEffect[];
+      expect(activeEffects.length).toBeGreaterThan(2);
+
+      const telepathyEffect = activeEffects.find(e => e.effectId === 'utility_test_telepathy');
+      expect(telepathyEffect).toBeDefined();
+      expect(telepathyEffect?.casterName).toBe('Caster One');
+
+      const eavesdropEffect = activeEffects.find(e => e.effectId === 'utility_test_eavesdrop');
+      expect(eavesdropEffect).toBeDefined();
+      expect(eavesdropEffect?.casterName).toBe('Caster Two');
+
+      const detectEffect = activeEffects.find(e => e.effectId === 'utility_test_detect_magic');
+      expect(detectEffect).toBeDefined();
+      expect(detectEffect?.casterName).toBe('Caster Two');
+    });
+  });
 });

@@ -36,6 +36,17 @@ function buildEffectMessage(result: EffectResult): string {
     return `Heals ${result.heal} HP`;
   }
 
+  if (def.category === 'utility') {
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    return `${def.name}${duration}`;
+  }
+
   // Fallback: use effect name
   return def.name;
 }
@@ -286,7 +297,7 @@ export async function POST(request: NextRequest) {
       let targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
 
       for (const effectResult of targetEffects) {
-        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult);
+        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult, attacker.arkanaStats.characterName);
       }
 
       const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetActiveEffects);
@@ -311,7 +322,7 @@ export async function POST(request: NextRequest) {
     // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
-        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult);
+        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult, attacker.arkanaStats.characterName);
       }
     }
 

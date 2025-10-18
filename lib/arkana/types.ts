@@ -69,6 +69,7 @@ export interface ActiveEffect {
   duration: string;        // Original duration (e.g., "turns:3", "scene")
   turnsLeft: number;       // Turns remaining
   appliedAt: string;       // ISO timestamp when effect was applied
+  casterName?: string;     // Character name of who cast this effect (optional, for display)
 }
 
 // Live Stats for dynamic calculations

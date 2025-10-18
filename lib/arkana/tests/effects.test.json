@@ -314,5 +314,35 @@
     "modifierType": "stat_value",
     "target": "enemy",
     "duration": "turns:3"
+  },
+  {
+    "id": "utility_test_eavesdrop",
+    "name": "Test Remote Eavesdropping",
+    "desc": "Test utility: Hear voices through vents, wires, or channels remotely",
+    "category": "utility",
+    "type": "sensory",
+    "utilityType": "perception",
+    "target": "area",
+    "duration": "scene"
+  },
+  {
+    "id": "utility_test_detect_magic",
+    "name": "Test Detect Magic",
+    "desc": "Test utility: Detect magical energy and spells",
+    "category": "utility",
+    "type": "sensory",
+    "utilityType": "perception",
+    "target": "area",
+    "duration": "turns:3"
+  },
+  {
+    "id": "utility_test_telepathy",
+    "name": "Test Telepathy",
+    "desc": "Test utility: Telepathic communication link",
+    "category": "utility",
+    "type": "communication",
+    "utilityType": "social",
+    "target": "single",
+    "duration": "turns:2"
   }
 ]

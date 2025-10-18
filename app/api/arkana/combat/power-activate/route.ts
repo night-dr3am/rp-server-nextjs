@@ -36,6 +36,17 @@ function buildEffectMessage(result: EffectResult): string {
     return `Heals ${result.heal} HP`;
   }
 
+  if (def.category === 'utility') {
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    return `${def.name}${duration}`;
+  }
+
   return def.name;
 }
 
@@ -386,9 +397,9 @@ export async function POST(request: NextRequest) {
         userActiveEffects = parseActiveEffects(affectedUser.arkanaStats.activeEffects);
       }
 
-      // Apply all new effects for this user
+      // Apply all new effects for this user (pass caster name for display)
       for (const effectResult of effectResults) {
-        userActiveEffects = applyActiveEffect(userActiveEffects, effectResult);
+        userActiveEffects = applyActiveEffect(userActiveEffects, effectResult, caster.arkanaStats.characterName);
       }
 
       // Recalculate liveStats
