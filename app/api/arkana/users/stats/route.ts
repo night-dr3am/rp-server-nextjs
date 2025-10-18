@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
     // Return user stats including Arkana character data
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
     // Return the updated stats in the same format as GET

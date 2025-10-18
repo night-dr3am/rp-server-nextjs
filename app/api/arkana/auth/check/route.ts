@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
     // Return user data with nested structure (consistent with GET_STATS endpoint)
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
-      liveStatsString = formatLiveStatsForLSL(liveStats);
+      liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
     // Return user data with nested structure (consistent with GET_STATS endpoint)

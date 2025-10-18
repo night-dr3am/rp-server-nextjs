@@ -289,28 +289,88 @@ export function parseActiveEffects(jsonData: unknown): ActiveEffect[] {
 }
 
 /**
- * Format LiveStats object into LSL-friendly string
- * Returns pipe-separated key:value pairs for display in HUD
- * Format: "stat1:value1|stat2:value2|..."
+ * Format LiveStats and ActiveEffects into ready-to-display LSL string
+ * Groups effects by stat and shows effect names with durations
+ * Format: "🔮 Effects: StatName Modifier(Effect1(duration), Effect2(duration))\n..."
+ *
  * Examples:
- *   "Stealth:+3|Physical:-1" (numeric modifiers with sign)
- *   "paralyzed:Paralyzed|Stealth:+2" (control effects as key:value)
+ *   "🔮 Effects: Mental -1 (Entropy Pulse(1 turn left), Emotional Thief(2 turns left))"
+ *   "🔮 Effects: Physical +2 (Buff Strength(scene))\nStealth +3 (Shadowform(scene))"
+ *
+ * @param liveStats - Calculated stat modifiers
+ * @param activeEffects - Active effects with durations
+ * @returns URL-encoded string ready for LSL (only needs llUnescapeURL)
  */
-export function formatLiveStatsForLSL(liveStats: LiveStats): string {
-  const parts: string[] = [];
+export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: ActiveEffect[]): string {
+  // If no live stats, return empty string
+  if (!liveStats || Object.keys(liveStats).length === 0) {
+    return '';
+  }
 
+  // Group effects by the stats they modify
+  const effectsByStat: { [statName: string]: { effects: Array<{ name: string; duration: string }>, totalModifier: number } } = {};
+
+  // First, identify all numeric stats in liveStats (these are stat modifiers)
   for (const [statName, value] of Object.entries(liveStats)) {
     if (typeof value === 'number') {
-      // Format numeric values with sign
-      const sign = value >= 0 ? '+' : '';
-      parts.push(`${statName}:${sign}${value}`);
-    } else if (typeof value === 'string') {
-      // Format string values (control effects)
-      parts.push(`${statName}:${value}`);
+      effectsByStat[statName] = {
+        effects: [],
+        totalModifier: value
+      };
     }
   }
 
-  return parts.join('|');
+  // Now match activeEffects to their stats
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'stat_modifier' && effectDef.stat) {
+      const statName = effectDef.stat;
+
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      // Add to the appropriate stat group
+      if (effectsByStat[statName]) {
+        effectsByStat[statName].effects.push({
+          name: activeEffect.name,
+          duration: durationStr
+        });
+      }
+    }
+  }
+
+  // Build the formatted string
+  const statLines: string[] = [];
+
+  for (const [statName, data] of Object.entries(effectsByStat)) {
+    const sign = data.totalModifier >= 0 ? '+' : '';
+    const effectsList = data.effects.map(e => `${e.name}(${e.duration})`).join(', ');
+
+    if (effectsList) {
+      statLines.push(`${statName} ${sign}${data.totalModifier} (${effectsList})`);
+    } else {
+      // If we have a modifier but no effect names (shouldn't happen, but handle it)
+      statLines.push(`${statName} ${sign}${data.totalModifier}`);
+    }
+  }
+
+  if (statLines.length === 0) {
+    return '';
+  }
+
+  // Join all stat lines with newlines and add the prefix
+  const formattedString = '🔮 Effects: ' + statLines.join('\n');
+
+  // URL-encode for LSL transmission (use encodeURIComponent for proper encoding)
+  return encodeURIComponent(formattedString);
 }
 
 /**

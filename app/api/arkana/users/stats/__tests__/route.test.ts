@@ -391,8 +391,13 @@ describe('/api/arkana/users/stats', () => {
     expect(data.data.user.slUuid).toBe(user.slUuid);
     expect(data.data.arkanaStats).toBeDefined();
     expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Debuffed Character');
-    // liveStatsString should contain Mental:-2 formatted for LSL
-    expect(data.data.arkanaStats.liveStatsString).toBe('Mental:-2');
+    // liveStatsString should be URL-encoded with new format including effect names and durations
+    const decodedLiveStats = decodeURIComponent(data.data.arkanaStats.liveStatsString);
+    expect(decodedLiveStats).toContain('🔮 Effects: Mental -2');
+    expect(decodedLiveStats).toContain('Mental Debuff -1');
+    expect(decodedLiveStats).toContain('2 turns left');
+    expect(decodedLiveStats).toContain('Entropy Disruption');
+    expect(decodedLiveStats).toContain('1 turn left');
   });
 });
 
