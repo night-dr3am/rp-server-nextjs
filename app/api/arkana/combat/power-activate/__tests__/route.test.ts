@@ -2811,4 +2811,284 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(detectEffect?.casterName).toBe('Caster Two');
     });
   });
+
+  describe('Special Effects Tests', () => {
+    it('should apply special effects with caster name to self', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Shadow Master',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_special_shadow_walk'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_special_shadow_walk',
+        // Self-targeted, no target_uuid
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify caster received special effect with their own name
+      const updatedCaster = await prisma.arkanaStats.findFirst({
+        where: { userId: caster.id }
+      });
+
+      const casterActiveEffects = (updatedCaster?.activeEffects || []) as unknown as ActiveEffect[];
+      const shadowformEffect = casterActiveEffects.find(e => e.effectId === 'special_test_shadowform');
+      expect(shadowformEffect).toBeDefined();
+      expect(shadowformEffect?.casterName).toBe('Shadow Master');
+      expect(shadowformEffect?.turnsLeft).toBe(999); // scene duration
+    });
+
+    it('should include special effects in liveStatsString formatted output', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      // Create user with stat modifier, utility, and special effects
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'debuff_mental_minus_1',
+          name: 'Mental Debuff -1',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        },
+        {
+          effectId: 'special_test_shadowform',
+          name: 'Test Shadowform',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Shadow Master'
+        }
+      ];
+
+      const liveStats = { Mental: -1 };
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      // Should contain all three sections
+      expect(decoded).toContain('🔮 Effects:');
+      expect(decoded).toContain('Mental -1');
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('Test Remote Eavesdropping by Bob');
+      expect(decoded).toContain('✨ Special:');
+      expect(decoded).toContain('Test Shadowform by Shadow Master');
+      expect(decoded).toContain('scene');
+    });
+
+    it('should show special effects with "Unknown" caster when casterName is missing', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'special_test_shadowform',
+          name: 'Test Shadowform',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString()
+          // No casterName field
+        }
+      ];
+
+      const liveStats = {};
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('✨ Special:');
+      expect(decoded).toContain('Test Shadowform by Unknown');
+    });
+
+    it('should handle multiple special effects from different casters', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Mist Walker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_special_group_mist'],
+        archetypePowers: []
+      });
+
+      const target1 = await createArkanaTestUser({
+        characterName: 'Target Alpha',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const target2 = await createArkanaTestUser({
+        characterName: 'Target Beta',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_special_group_mist',
+        nearby_uuids: [target1.slUuid, target2.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify both targets received special effect with caster name
+      const updatedTarget1 = await prisma.arkanaStats.findFirst({
+        where: { userId: target1.id }
+      });
+
+      const target1ActiveEffects = (updatedTarget1?.activeEffects || []) as unknown as ActiveEffect[];
+      const mistEffect1 = target1ActiveEffects.find(e => e.effectId === 'special_test_mist');
+      expect(mistEffect1).toBeDefined();
+      expect(mistEffect1?.casterName).toBe('Mist Walker');
+      expect(mistEffect1?.turnsLeft).toBe(3);
+
+      const updatedTarget2 = await prisma.arkanaStats.findFirst({
+        where: { userId: target2.id }
+      });
+
+      const target2ActiveEffects = (updatedTarget2?.activeEffects || []) as unknown as ActiveEffect[];
+      const mistEffect2 = target2ActiveEffects.find(e => e.effectId === 'special_test_mist');
+      expect(mistEffect2).toBeDefined();
+      expect(mistEffect2?.casterName).toBe('Mist Walker');
+      expect(mistEffect2?.turnsLeft).toBe(3);
+    });
+
+    it('should display all three effect categories together', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      // Create comprehensive set of effects covering all categories
+      const activeEffects: ActiveEffect[] = [
+        // Stat modifier
+        {
+          effectId: 'debuff_mental_minus_1',
+          name: 'Mental Debuff -1',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'buff_physical_1',
+          name: 'Physical Bonus +1',
+          duration: 'turns:3',
+          turnsLeft: 3,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        },
+        // Utility
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Charlie'
+        },
+        {
+          effectId: 'utility_test_telepathy',
+          name: 'Test Telepathy',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Diana'
+        },
+        // Special
+        {
+          effectId: 'special_test_shadowform',
+          name: 'Test Shadowform',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Shadow Master'
+        },
+        {
+          effectId: 'special_test_mimic',
+          name: 'Test Power Mimic',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Mimic'
+        }
+      ];
+
+      const liveStats = { Mental: -1, Physical: 1 };
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      // Verify all three sections exist
+      expect(decoded).toContain('🔮 Effects:');
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('✨ Special:');
+
+      // Verify stat modifiers
+      expect(decoded).toContain('Mental -1');
+      expect(decoded).toContain('Physical +1');
+
+      // Verify utilities
+      expect(decoded).toContain('Test Remote Eavesdropping by Charlie');
+      expect(decoded).toContain('Test Telepathy by Diana');
+
+      // Verify special effects
+      expect(decoded).toContain('Test Shadowform by Shadow Master');
+      expect(decoded).toContain('Test Power Mimic by Mimic');
+    });
+  });
 });

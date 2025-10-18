@@ -226,5 +226,35 @@
     "effects": {
       "ability": ["utility_test_telepathy"]
     }
+  },
+  {
+    "id": "test_special_shadow_walk",
+    "name": "Test Shadow Walk",
+    "desc": "Test power: Transform into shadow form (no check)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["special", "transformation"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["special_test_shadowform"]
+    }
+  },
+  {
+    "id": "test_special_group_mist",
+    "name": "Test Group Mist",
+    "desc": "Test power: Transform group into mist (no check)",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["special", "transformation"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["special_test_mist"]
+    }
   }
 ]

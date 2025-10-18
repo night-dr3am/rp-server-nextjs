@@ -295,16 +295,16 @@ export function parseActiveEffects(jsonData: unknown): ActiveEffect[] {
 
 /**
  * Format LiveStats and ActiveEffects into ready-to-display LSL string
- * Groups effects by stat and shows effect names with durations
- * Also displays utility effects with caster information
+ * Groups effects by category and shows effect names with durations and caster info
  *
  * Format:
  *   "🔮 Effects: StatName Modifier(Effect1(duration), Effect2(duration))\n..."
  *   "🔧 Utilities: UtilityName by CasterName(duration), ..."
+ *   "✨ Special: SpecialName by CasterName(duration), ..."
  *
  * Examples:
  *   "🔮 Effects: Mental -1 (Entropy Pulse(1 turn left), Emotional Thief(2 turns left))"
- *   "🔮 Effects: Physical +2 (Buff Strength(scene))\nStealth +3 (Shadowform(scene))\n🔧 Utilities: Remote Eavesdropping by Night Corvus(scene)"
+ *   "🔮 Effects: Physical +2 (Buff Strength(scene))\n🔧 Utilities: Remote Eavesdropping by Night Corvus(scene)\n✨ Special: Shadowform by Alice(scene)"
  *
  * @param liveStats - Calculated stat modifiers
  * @param activeEffects - Active effects with durations and caster info
@@ -404,6 +404,39 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
       .map(u => `${u.name} by ${u.caster}(${u.duration})`)
       .join(', ');
     outputSections.push('🔧 Utilities: ' + utilityList);
+  }
+
+  // === SECTION 3: Special Effects ===
+
+  const specialEffects: Array<{ name: string; caster: string; duration: string }> = [];
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'special') {
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      specialEffects.push({
+        name: activeEffect.name,
+        caster: activeEffect.casterName || 'Unknown',
+        duration: durationStr
+      });
+    }
+  }
+
+  if (specialEffects.length > 0) {
+    const specialList = specialEffects
+      .map(s => `${s.name} by ${s.caster}(${s.duration})`)
+      .join(', ');
+    outputSections.push('✨ Special: ' + specialList);
   }
 
   // If no effects at all, return empty string

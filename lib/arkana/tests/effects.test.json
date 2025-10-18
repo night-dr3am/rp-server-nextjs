@@ -344,5 +344,32 @@
     "utilityType": "social",
     "target": "single",
     "duration": "turns:2"
+  },
+  {
+    "id": "special_test_shadowform",
+    "name": "Test Shadowform",
+    "desc": "Test special: Transform into living shadow",
+    "category": "special",
+    "type": "shapeshift",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "special_test_mist",
+    "name": "Test Mist Form",
+    "desc": "Test special: Dissolve into mist",
+    "category": "special",
+    "type": "shapeshift",
+    "target": "area",
+    "duration": "turns:3"
+  },
+  {
+    "id": "special_test_mimic",
+    "name": "Test Power Mimic",
+    "desc": "Test special: Copy observed power",
+    "category": "special",
+    "type": "copy",
+    "target": "single",
+    "duration": "turns:2"
   }
 ]
