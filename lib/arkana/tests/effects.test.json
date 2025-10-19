@@ -401,5 +401,65 @@
     "damageReduction": 2,
     "target": "self",
     "duration": "turns:3"
+  },
+  {
+    "id": "effect_test_scene_buff",
+    "name": "Test Scene Buff",
+    "desc": "Test: Generic scene-based buff for deactivation testing",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Physical",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "effect_test_scene_buff_1",
+    "name": "Test Scene Buff 1",
+    "desc": "Test: Scene-based buff variant 1 for deactivation testing",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Dexterity",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "effect_test_scene_buff_2",
+    "name": "Test Scene Buff 2",
+    "desc": "Test: Scene-based buff variant 2 for deactivation testing",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "effect_test_turn_buff",
+    "name": "Test Turn Buff",
+    "desc": "Test: Turn-based buff for deactivation testing (should not be deactivatable)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Physical",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "effect_mental_boost",
+    "name": "Mental Boost",
+    "desc": "Test: Mental stat boost for deactivation testing",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "scene"
   }
 ]

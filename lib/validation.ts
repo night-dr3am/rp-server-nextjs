@@ -582,6 +582,21 @@ export const arkanaEndSceneSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const arkanaUserActiveEffectsSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaDeactivateActiveEffectSchema = Joi.object({
+  player_uuid: uuidSchema,
+  effect_id: Joi.string().min(1).max(255).required(),
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // Crafting system validation schemas
 export const recipeUpsertSchema = Joi.object({
   name: Joi.string().min(1).max(255).required(),
