@@ -305,8 +305,10 @@ describe('/api/arkana/combat/power-info', () => {
 
       const detailed = decodeURIComponent(data.data.detailedMessage);
 
-      // Should include cost, range, target metadata
-      expect(detailed).toContain('Cost:');
+      // Should NOT include cost in detailed message
+      expect(detailed).not.toContain('Cost:');
+
+      // Should include range and target metadata
       expect(detailed).toContain('Range:');
       expect(detailed).toContain('Target:');
 
@@ -351,9 +353,9 @@ describe('/api/arkana/combat/power-info', () => {
       expect(detailed).toContain('Emotion Theft');
       expect(detailed).toContain('Siphon dominant emotion');
 
-      // Should show stat modifiers with duration
-      expect(detailed).toMatch(/-1.*Mental/); // debuff
-      expect(detailed).toMatch(/\+1.*Mental/); // buff
+      // Should show stat modifiers with duration and target
+      expect(detailed).toMatch(/-1 Mental.*\[Enemy\]/); // debuff targeting enemy
+      expect(detailed).toMatch(/\+1 Mental.*\[Self\]/); // buff targeting self
     });
 
     it('should format utility and defense effects correctly', async () => {

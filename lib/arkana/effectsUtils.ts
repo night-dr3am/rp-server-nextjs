@@ -587,6 +587,25 @@ export function formatPowerDetailsForLSL(
   power: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool,
   mode: 'detailed' | 'brief'
 ): string {
+  // Helper function to format target label
+  const formatTargetLabel = (target?: string): string => {
+    if (!target) return '';
+
+    // Map target values to display labels
+    const targetMap: Record<string, string> = {
+      'enemy': 'Enemy',
+      'self': 'Self',
+      'ally': 'Ally',
+      'area': 'Area',
+      'all_enemies': 'All Enemies',
+      'all_allies': 'All Allies',
+      'single': 'Single'
+    };
+
+    const label = targetMap[target] || target;
+    return ` [${label}]`;
+  };
+
   // Helper function to format a single effect description
   const formatEffect = (effectId: string): string => {
     const effectDef = getEffectDefinition(effectId);
@@ -596,7 +615,8 @@ export function formatPowerDetailsForLSL(
     if (effectDef.category === 'damage') {
       const dmgType = effectDef.damageType || 'damage';
       const formula = effectDef.damageFormula || '';
-      return `${formula} ${dmgType} damage`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `${formula} ${dmgType} damage${targetLabel}`;
     }
 
     if (effectDef.category === 'stat_modifier') {
@@ -609,7 +629,8 @@ export function formatPowerDetailsForLSL(
       } else if (effectDef.duration === 'scene') {
         duration = ' (scene)';
       }
-      return `${sign}${effectDef.modifier} ${stat}${duration}`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `${sign}${effectDef.modifier} ${stat}${duration}${targetLabel}`;
     }
 
     if (effectDef.category === 'control') {
@@ -621,12 +642,14 @@ export function formatPowerDetailsForLSL(
       } else if (effectDef.duration === 'scene') {
         duration = ' (scene)';
       }
-      return `${controlType}${duration}`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `${controlType}${duration}${targetLabel}`;
     }
 
     if (effectDef.category === 'heal') {
       const healFormula = effectDef.healFormula || 'heals';
-      return `Heals ${healFormula} HP`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `Heals ${healFormula} HP${targetLabel}`;
     }
 
     if (effectDef.category === 'utility') {
@@ -637,7 +660,8 @@ export function formatPowerDetailsForLSL(
       } else if (effectDef.duration === 'scene') {
         duration = ' (scene)';
       }
-      return `${effectDef.name}${duration}`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `${effectDef.name}${duration}${targetLabel}`;
     }
 
     if (effectDef.category === 'special') {
@@ -648,7 +672,8 @@ export function formatPowerDetailsForLSL(
       } else if (effectDef.duration === 'scene') {
         duration = ' (scene)';
       }
-      return `${effectDef.name}${duration}`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `${effectDef.name}${duration}${targetLabel}`;
     }
 
     if (effectDef.category === 'defense') {
@@ -660,11 +685,13 @@ export function formatPowerDetailsForLSL(
       } else if (effectDef.duration === 'scene') {
         duration = ' (scene)';
       }
-      return `Damage Reduction -${reduction}${duration}`;
+      const targetLabel = formatTargetLabel(effectDef.target);
+      return `Damage Reduction -${reduction}${duration}${targetLabel}`;
     }
 
     // Fallback: return effect name
-    return effectDef.name;
+    const targetLabel = formatTargetLabel(effectDef.target);
+    return effectDef.name + targetLabel;
   };
 
   // Collect all effects from the power
@@ -694,11 +721,10 @@ export function formatPowerDetailsForLSL(
     message = `⚡ ${power.name}\n`;
     message += `${power.desc}\n\n`;
 
-    // Add power metadata
-    const costStr = power.cost !== undefined ? `Cost: ${power.cost}` : '';
+    // Add power metadata (without cost)
     const rangeStr = power.range !== undefined ? `Range: ${power.range}m` : '';
     const targetStr = power.targetType ? `Target: ${power.targetType}` : '';
-    const metadataParts = [costStr, rangeStr, targetStr].filter(s => s.length > 0);
+    const metadataParts = [rangeStr, targetStr].filter(s => s.length > 0);
     if (metadataParts.length > 0) {
       message += metadataParts.join(' | ') + '\n';
     }
