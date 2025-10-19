@@ -486,6 +486,39 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     outputSections.push(`🛡️ Defense: Damage Reduction -${totalDamageReduction} (${effectsList})`);
   }
 
+  // === SECTION 5: Control Effects ===
+
+  const controlEffects: Array<{ name: string; caster: string; duration: string }> = [];
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'control') {
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      controlEffects.push({
+        name: activeEffect.name,
+        caster: activeEffect.casterName || 'Unknown',
+        duration: durationStr
+      });
+    }
+  }
+
+  if (controlEffects.length > 0) {
+    const controlList = controlEffects
+      .map(c => `${c.name} by ${c.caster}(${c.duration})`)
+      .join(', ');
+    outputSections.push('⛓️ Control: ' + controlList);
+  }
+
   // If no effects at all, return empty string
   if (outputSections.length === 0) {
     return '';

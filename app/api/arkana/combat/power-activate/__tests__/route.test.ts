@@ -1051,7 +1051,8 @@ describe('/api/arkana/combat/power-activate', () => {
       expectSuccess(data);
       // Chi Step uses Dexterity check (stat 1 = -2 modifier)
       // Format is "d20+modifier=total" so with -2 it's "d20+-2=total"
-      expect(data.data.rollInfo).toMatch(/Roll: \d+\+-2=\d+ vs TN:10/);
+      // -? allows for negative totals when roll is 1-2
+      expect(data.data.rollInfo).toMatch(/Roll: \d+\+-2=-?\d+ vs TN:10/);
     });
 
     it('4.3 Stat Modifier Effects - buff_dexterity_3', async () => {
@@ -2810,6 +2811,110 @@ describe('/api/arkana/combat/power-activate', () => {
       const detectEffect = activeEffects.find(e => e.effectId === 'utility_test_detect_magic');
       expect(detectEffect).toBeDefined();
       expect(detectEffect?.casterName).toBe('Caster Two');
+    });
+  });
+
+  describe('Control Effects Tests', () => {
+    it('should include control effects in liveStatsString formatted output', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_test_stun',
+          name: 'Test Stunning Strike',
+          duration: 'turns:1',
+          turnsLeft: 1,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'control_test_fear',
+          name: 'Test Terrifying Presence',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        }
+      ];
+
+      const liveStats = {};
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('⛓️ Control:');
+      expect(decoded).toContain('Test Stunning Strike by Alice(1 turn left)');
+      expect(decoded).toContain('Test Terrifying Presence by Bob(2 turns left)');
+    });
+
+    it('should format control effects with scene duration correctly', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_test_silence',
+          name: 'Test Mystic Silence',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Wizard'
+        }
+      ];
+
+      const liveStats = {};
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('⛓️ Control:');
+      expect(decoded).toContain('Test Mystic Silence by Wizard(scene)');
+    });
+
+    it('should display control effects alongside other effect categories', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+      await loadAllData();
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'buff_mental_1_turn',
+          name: 'Mental Buff +1 (1 turn)',
+          duration: 'turns:1',
+          turnsLeft: 1,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'control_paralyze',
+          name: 'Paralytic Effect',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        },
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Charlie'
+        }
+      ];
+
+      const liveStats = { Mental: 1 };
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      // All sections should be present
+      expect(decoded).toContain('🔮 Effects:');
+      expect(decoded).toContain('Mental +1');
+      expect(decoded).toContain('⛓️ Control:');
+      expect(decoded).toContain('Paralytic Effect by Bob(2 turns left)');
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('Test Remote Eavesdropping by Charlie(scene)');
     });
   });
 

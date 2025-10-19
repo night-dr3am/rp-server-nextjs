@@ -461,5 +461,38 @@
     "modifierType": "roll_bonus",
     "target": "self",
     "duration": "scene"
+  },
+  {
+    "id": "control_test_stun",
+    "name": "Test Stunning Strike",
+    "desc": "Test control: Stuns target preventing all actions",
+    "category": "control",
+    "type": "stun",
+    "controlType": "stun",
+    "target": "enemy",
+    "duration": "turns:1",
+    "resistType": "Physical"
+  },
+  {
+    "id": "control_test_fear",
+    "name": "Test Terrifying Presence",
+    "desc": "Test control: Instills supernatural fear in target",
+    "category": "control",
+    "type": "fear",
+    "controlType": "fear",
+    "target": "enemy",
+    "duration": "turns:2",
+    "resistType": "Mental"
+  },
+  {
+    "id": "control_test_silence",
+    "name": "Test Mystic Silence",
+    "desc": "Test control: Prevents target from speaking or casting spells",
+    "category": "control",
+    "type": "silence",
+    "controlType": "silence",
+    "target": "enemy",
+    "duration": "scene",
+    "resistType": "Mental"
   }
 ]
