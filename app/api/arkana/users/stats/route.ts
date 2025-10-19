@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaStatsSchema, arkanaUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { sanitizeForLSL, encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, recalculateLiveStats, formatLiveStatsForLSL, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
 import { loadAllData } from '@/lib/arkana/dataLoader';
 
 // GET /api/arkana/users/stats - Retrieve Arkana user statistics
@@ -66,6 +66,16 @@ export async function GET(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(user.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(user.arkanaStats, activeEffects);
+
+      // Persist recalculated liveStats to database
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects,
+          liveStats
+        })
+      });
+
       liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
@@ -208,6 +218,16 @@ export async function POST(request: NextRequest) {
       await loadAllData();
       const activeEffects = parseActiveEffects(updatedUser.arkanaStats.activeEffects);
       const liveStats = recalculateLiveStats(updatedUser.arkanaStats, activeEffects);
+
+      // Persist recalculated liveStats to database
+      await prisma.arkanaStats.update({
+        where: { userId: updatedUser.id },
+        data: buildArkanaStatsUpdate({
+          activeEffects,
+          liveStats
+        })
+      });
+
       liveStatsString = formatLiveStatsForLSL(liveStats, activeEffects);
     }
 
