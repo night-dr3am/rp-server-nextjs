@@ -240,11 +240,11 @@ export const STAT_DESCRIPTIONS = {
 
 // Utility function for stat modifiers
 export function calculateStatModifier(statValue: number): number {
-  if (statValue === 0) return -3;
+  if (statValue <= 0) return -3;
   if (statValue === 1) return -2;
   if (statValue === 2) return 0;
   if (statValue === 3) return 2;
   if (statValue === 4) return 4;
-  if (statValue === 5) return 6;
+  if (statValue >= 5) return 6;
   return 0;
 }
