@@ -330,13 +330,13 @@ describe('/api/npc/task/complete', () => {
     });
 
     it('should reject request with invalid signature', async () => {
-      const timestamp = new Date().toISOString();
       const invalidSignature = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'; // Valid hex format but wrong signature
 
+      // Generate timestamp immediately before request to avoid expiration
       const requestData = {
         taskId: testTask.id,
         playerUuid: testUser.slUuid,
-        timestamp,
+        timestamp: new Date().toISOString(),
         signature: invalidSignature
       };
 

@@ -1,6 +1,6 @@
 import { getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { calculateStatModifier } from '@/lib/arkana/types';
-import type { EffectDefinition, EffectResult, ActiveEffect, LiveStats } from '@/lib/arkana/types';
+import type { EffectDefinition, EffectResult, ActiveEffect, LiveStats, CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool } from '@/lib/arkana/types';
 import type { ArkanaStats } from '@prisma/client';
 import liveStatsConfig from './liveStatsConfig.json';
 
@@ -574,4 +574,152 @@ export function clearSceneEffects(
     activeEffects: remainingEffects,
     liveStats
   };
+}
+
+/**
+ * Format power details for LSL display in dialogs
+ * Creates human-readable power description with effects breakdown
+ * @param power - The power/ability/perk/cybernetic/magic object
+ * @param mode - 'detailed' for target selection, 'brief' for confirmation
+ * @returns URL-encoded formatted string ready for LSL display
+ */
+export function formatPowerDetailsForLSL(
+  power: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool,
+  mode: 'detailed' | 'brief'
+): string {
+  // Helper function to format a single effect description
+  const formatEffect = (effectId: string): string => {
+    const effectDef = getEffectDefinition(effectId);
+    if (!effectDef) return effectId;
+
+    // Build effect description based on category
+    if (effectDef.category === 'damage') {
+      const dmgType = effectDef.damageType || 'damage';
+      const formula = effectDef.damageFormula || '';
+      return `${formula} ${dmgType} damage`;
+    }
+
+    if (effectDef.category === 'stat_modifier') {
+      const sign = (effectDef.modifier || 0) >= 0 ? '+' : '';
+      const stat = effectDef.stat || '';
+      let duration = '';
+      if (effectDef.duration?.startsWith('turns:')) {
+        const turns = effectDef.duration.split(':')[1];
+        duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+      } else if (effectDef.duration === 'scene') {
+        duration = ' (scene)';
+      }
+      return `${sign}${effectDef.modifier} ${stat}${duration}`;
+    }
+
+    if (effectDef.category === 'control') {
+      const controlType = effectDef.controlType || 'control';
+      let duration = '';
+      if (effectDef.duration?.startsWith('turns:')) {
+        const turns = effectDef.duration.split(':')[1];
+        duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+      } else if (effectDef.duration === 'scene') {
+        duration = ' (scene)';
+      }
+      return `${controlType}${duration}`;
+    }
+
+    if (effectDef.category === 'heal') {
+      const healFormula = effectDef.healFormula || 'heals';
+      return `Heals ${healFormula} HP`;
+    }
+
+    if (effectDef.category === 'utility') {
+      let duration = '';
+      if (effectDef.duration?.startsWith('turns:')) {
+        const turns = effectDef.duration.split(':')[1];
+        duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+      } else if (effectDef.duration === 'scene') {
+        duration = ' (scene)';
+      }
+      return `${effectDef.name}${duration}`;
+    }
+
+    if (effectDef.category === 'special') {
+      let duration = '';
+      if (effectDef.duration?.startsWith('turns:')) {
+        const turns = effectDef.duration.split(':')[1];
+        duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+      } else if (effectDef.duration === 'scene') {
+        duration = ' (scene)';
+      }
+      return `${effectDef.name}${duration}`;
+    }
+
+    if (effectDef.category === 'defense') {
+      const reduction = effectDef.damageReduction || 0;
+      let duration = '';
+      if (effectDef.duration?.startsWith('turns:')) {
+        const turns = effectDef.duration.split(':')[1];
+        duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+      } else if (effectDef.duration === 'scene') {
+        duration = ' (scene)';
+      }
+      return `Damage Reduction -${reduction}${duration}`;
+    }
+
+    // Fallback: return effect name
+    return effectDef.name;
+  };
+
+  // Collect all effects from the power
+  const effects = power.effects || {};
+  const allEffectIds: string[] = [];
+
+  // Combine all effect types (attack, ability, passive, onHit, onDefense)
+  if (effects.attack) allEffectIds.push(...effects.attack);
+  if (effects.ability) allEffectIds.push(...effects.ability);
+  if (effects.passive) allEffectIds.push(...effects.passive);
+  if (effects.onHit) allEffectIds.push(...effects.onHit);
+  if (effects.onDefense) allEffectIds.push(...effects.onDefense);
+
+  // Remove duplicates
+  const uniqueEffectIds = Array.from(new Set(allEffectIds));
+
+  // Format effect descriptions
+  const effectDescriptions = uniqueEffectIds
+    .map(formatEffect)
+    .filter(desc => desc.length > 0);
+
+  // Build message based on mode
+  let message = '';
+
+  if (mode === 'detailed') {
+    // Detailed format for target selection dialog
+    message = `⚡ ${power.name}\n`;
+    message += `${power.desc}\n\n`;
+
+    // Add power metadata
+    const costStr = power.cost !== undefined ? `Cost: ${power.cost}` : '';
+    const rangeStr = power.range !== undefined ? `Range: ${power.range}m` : '';
+    const targetStr = power.targetType ? `Target: ${power.targetType}` : '';
+    const metadataParts = [costStr, rangeStr, targetStr].filter(s => s.length > 0);
+    if (metadataParts.length > 0) {
+      message += metadataParts.join(' | ') + '\n';
+    }
+
+    // Add effects section
+    if (effectDescriptions.length > 0) {
+      message += '\nEffects:\n';
+      effectDescriptions.forEach(desc => {
+        message += `• ${desc}\n`;
+      });
+    }
+  } else {
+    // Brief format for confirmation dialog
+    const costStr = power.cost !== undefined ? ` (Cost: ${power.cost})` : '';
+    message = `⚡ ${power.name}${costStr}`;
+
+    if (effectDescriptions.length > 0) {
+      message += `\n${effectDescriptions.join(', ')}`;
+    }
+  }
+
+  // URL-encode for LSL transmission
+  return encodeURIComponent(message.trim());
 }

@@ -100,6 +100,8 @@ describe('/api/arkana/combat/power-info', () => {
       expect(data.data.baseStat).toBeDefined();
       expect(data.data.range).toBeDefined();
       expect(data.data.effects).toBeDefined();
+      expect(data.data.detailedMessage).toBeDefined();
+      expect(data.data.confirmMessage).toBeDefined();
     });
 
     it('should return power info by power_name', async () => {
@@ -220,6 +222,187 @@ describe('/api/arkana/combat/power-info', () => {
 
       expectError(data, 'Player not found in Arkana universe');
       expect(response.status).toBe(404);
+    });
+
+    it('should return URL-encoded detailedMessage and confirmMessage', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Strigoi Fighter',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'strigoi_hypnosis',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Both messages should be URL-encoded strings
+      expect(typeof data.data.detailedMessage).toBe('string');
+      expect(typeof data.data.confirmMessage).toBe('string');
+
+      // Decode messages
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+      const confirm = decodeURIComponent(data.data.confirmMessage);
+
+      // Detailed message should contain power name and emoji
+      expect(detailed).toContain('⚡');
+      expect(detailed).toContain('Hypnosis');
+
+      // Confirm message should be briefer
+      expect(confirm).toContain('⚡');
+      expect(confirm).toContain('Hypnosis');
+    });
+
+    it('should include effect details in detailedMessage', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Strigoi Fighter',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'strigoi_hypnosis',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+
+      // Should include cost, range, target metadata
+      expect(detailed).toContain('Cost:');
+      expect(detailed).toContain('Range:');
+      expect(detailed).toContain('Target:');
+
+      // Should include effects section
+      expect(detailed).toContain('Effects:');
+    });
+
+    it('should format detailedMessage with power metadata and effects', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Veilborn',
+        race: 'veilborn',
+        archetype: 'Emotion',
+        physical: 2,
+        dexterity: 3,
+        mental: 6,
+        perception: 4,
+        hitPoints: 14,
+        commonPowers: ['veil_emotion_theft'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'veil_emotion_theft',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+
+      // Should include power name and description
+      expect(detailed).toContain('Emotion Theft');
+      expect(detailed).toContain('Siphon dominant emotion');
+
+      // Should show stat modifiers with duration
+      expect(detailed).toMatch(/-1.*Mental/); // debuff
+      expect(detailed).toMatch(/\+1.*Mental/); // buff
+    });
+
+    it('should format utility and defense effects correctly', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Test User',
+        race: 'human',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['test_defense_harden_skin', 'test_utility_sensor_sweep'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+
+      // Test defense power
+      const defenseRequest = createMockPostRequest('/api/arkana/combat/power-info', {
+        player_uuid: player.slUuid,
+        power_id: 'test_defense_harden_skin',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: generateSignature(timestamp, 'arkana')
+      });
+
+      const defenseResponse = await POST(defenseRequest);
+      const defenseData = await parseJsonResponse(defenseResponse);
+
+      const defenseDetailed = decodeURIComponent(defenseData.data.detailedMessage);
+      expect(defenseDetailed).toContain('Damage Reduction');
+      expect(defenseDetailed).toMatch(/-3/);
+
+      // Test utility power
+      const utilityRequest = createMockPostRequest('/api/arkana/combat/power-info', {
+        player_uuid: player.slUuid,
+        power_id: 'test_utility_sensor_sweep',
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: generateSignature(new Date().toISOString(), 'arkana')
+      });
+
+      const utilityResponse = await POST(utilityRequest);
+      const utilityData = await parseJsonResponse(utilityResponse);
+
+      const utilityDetailed = decodeURIComponent(utilityData.data.detailedMessage);
+      expect(utilityDetailed).toContain('Sensor Sweep');
+      expect(utilityDetailed).toMatch(/eavesdrop|detect magic/i);
     });
   });
 

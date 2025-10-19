@@ -4,6 +4,7 @@ import { arkanaPowerInfoSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { formatPowerDetailsForLSL } from '@/lib/arkana/effectsUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -107,6 +108,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate formatted messages for LSL dialogs
+    const detailedMessage = formatPowerDetailsForLSL(ability, 'detailed');
+    const confirmMessage = formatPowerDetailsForLSL(ability, 'brief');
+
     // Return ability info
     return NextResponse.json({
       success: true,
@@ -118,7 +123,9 @@ export async function POST(request: NextRequest) {
         baseStat: ability.baseStat || 'Mental',
         range: ability.range || 20,
         effects: ability.effects || {},
-        abilityType: ability.abilityType || []
+        abilityType: ability.abilityType || [],
+        detailedMessage: detailedMessage,
+        confirmMessage: confirmMessage
       }
     });
 
