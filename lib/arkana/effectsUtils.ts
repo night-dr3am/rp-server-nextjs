@@ -310,10 +310,11 @@ export function parseActiveEffects(jsonData: unknown): ActiveEffect[] {
  *   "🔮 Effects: StatName Modifier(Effect1(duration), Effect2(duration))\n..."
  *   "🔧 Utilities: UtilityName by CasterName(duration), ..."
  *   "✨ Special: SpecialName by CasterName(duration), ..."
+ *   "🛡️ Defense: Damage Reduction -X (EffectName(duration), ...)"
  *
  * Examples:
  *   "🔮 Effects: Mental -1 (Entropy Pulse(1 turn left), Emotional Thief(2 turns left))"
- *   "🔮 Effects: Physical +2 (Buff Strength(scene))\n🔧 Utilities: Remote Eavesdropping by Night Corvus(scene)\n✨ Special: Shadowform by Alice(scene)"
+ *   "🔮 Effects: Physical +2 (Buff Strength(scene))\n🔧 Utilities: Remote Eavesdropping by Night Corvus(scene)\n✨ Special: Shadowform by Alice(scene)\n🛡️ Defense: Damage Reduction -5 (Hardened Carapace(2 turns left))"
  *
  * @param liveStats - Calculated stat modifiers
  * @param activeEffects - Active effects with durations and caster info
@@ -448,6 +449,43 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     outputSections.push('✨ Special: ' + specialList);
   }
 
+  // === SECTION 4: Defense Effects ===
+
+  const defenseEffects: Array<{ name: string; reduction: number; duration: string }> = [];
+  let totalDamageReduction = 0;
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'defense' && effectDef.type === 'reduction') {
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      const reduction = effectDef.damageReduction || 0;
+      totalDamageReduction += reduction;
+
+      defenseEffects.push({
+        name: activeEffect.name,
+        reduction: reduction,
+        duration: durationStr
+      });
+    }
+  }
+
+  if (defenseEffects.length > 0) {
+    const effectsList = defenseEffects
+      .map(d => `${d.name}(${d.duration})`)
+      .join(', ');
+    outputSections.push(`🛡️ Defense: Damage Reduction -${totalDamageReduction} (${effectsList})`);
+  }
+
   // If no effects at all, return empty string
   if (outputSections.length === 0) {
     return '';
@@ -489,6 +527,28 @@ export function getEffectiveStatModifier(
 
   // Calculate and return the final modifier for d20 rolls
   return calculateStatModifier(effectiveValue);
+}
+
+/**
+ * Calculate total damage reduction from active defense effects
+ * Sums all damage reduction values from defense/reduction type effects
+ * @param activeEffects - Current active effects on the character
+ * @returns Total damage reduction amount (minimum 0)
+ */
+export function calculateDamageReduction(activeEffects: ActiveEffect[]): number {
+  let totalReduction = 0;
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    // Check if this is a defense effect with reduction type
+    if (effectDef && effectDef.category === 'defense' && effectDef.type === 'reduction') {
+      const reduction = effectDef.damageReduction || 0;
+      totalReduction += reduction;
+    }
+  }
+
+  return Math.max(0, totalReduction);
 }
 
 /**

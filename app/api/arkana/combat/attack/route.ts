@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
 import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
     // Calculate damage if hit (base damage = 1 for now, can be expanded)
     let damage = 0;
     let newTargetHealth = target.stats.health;
+    let damageReduction = 0;
 
     if (isHit) {
       // Calculate damage based on attack type: 1 + attacker's effective stat modifier (includes buffs/debuffs)
@@ -147,16 +148,27 @@ export async function POST(request: NextRequest) {
       }
       // Ensure minimum 1 damage on successful hit
       damage = Math.max(1, damage);
-      newTargetHealth = Math.max(0, target.stats.health - damage);
 
-      // Update target's health
-      await prisma.userStats.update({
-        where: { userId: target.id },
-        data: {
-          health: newTargetHealth,
-          lastUpdated: new Date()
-        }
-      });
+      // Calculate damage reduction from target's defense effects
+      const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+      damageReduction = calculateDamageReduction(targetActiveEffects);
+      const damageAfterReduction = Math.max(0, damage - damageReduction);
+
+      newTargetHealth = Math.max(0, target.stats.health - damageAfterReduction);
+
+      // Update target's health only if damage was dealt after reduction
+      if (damageAfterReduction > 0) {
+        await prisma.userStats.update({
+          where: { userId: target.id },
+          data: {
+            health: newTargetHealth,
+            lastUpdated: new Date()
+          }
+        });
+      }
+
+      // Update damage variable to reflect actual damage dealt
+      damage = damageAfterReduction;
     }
 
     // Process turn for attacker (decrement all activeEffects by 1 turn)
@@ -174,9 +186,16 @@ export async function POST(request: NextRequest) {
     // Create result message
     const attackerName = attacker.arkanaStats.characterName;
     const targetName = target.arkanaStats.characterName;
-    const resultMessage = isHit
-      ? `${attackerName} hits ${targetName} for ${damage} damage! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`
-      : `${attackerName} misses ${targetName}! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
+    let resultMessage = '';
+    if (isHit) {
+      if (damageReduction > 0) {
+        resultMessage = `${attackerName} hits ${targetName} for ${damage} damage (${damageReduction} blocked by defenses)! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
+      } else {
+        resultMessage = `${attackerName} hits ${targetName} for ${damage} damage! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
+      }
+    } else {
+      resultMessage = `${attackerName} misses ${targetName}! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
+    }
 
     // Return detailed result
     return NextResponse.json({

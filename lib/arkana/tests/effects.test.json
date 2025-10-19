@@ -371,5 +371,35 @@
     "type": "copy",
     "target": "single",
     "duration": "turns:2"
+  },
+  {
+    "id": "defense_test_reduction_3",
+    "name": "Test Damage Reduction -3",
+    "desc": "Test defense: Reduces incoming damage by 3",
+    "category": "defense",
+    "type": "reduction",
+    "damageReduction": 3,
+    "target": "self",
+    "duration": "turns:2"
+  },
+  {
+    "id": "defense_test_reduction_5_scene",
+    "name": "Test Hardened Shell",
+    "desc": "Test defense: Reduces incoming damage by 5 for the scene",
+    "category": "defense",
+    "type": "reduction",
+    "damageReduction": 5,
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "defense_test_reduction_2",
+    "name": "Test Natural Armor",
+    "desc": "Test defense: Reduces incoming damage by 2",
+    "category": "defense",
+    "type": "reduction",
+    "damageReduction": 2,
+    "target": "self",
+    "duration": "turns:3"
   }
 ]

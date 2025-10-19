@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
@@ -45,6 +45,18 @@ function buildEffectMessage(result: EffectResult): string {
       duration = ' (scene)';
     }
     return `${def.name}${duration}`;
+  }
+
+  if (def.category === 'defense') {
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    const reduction = def.damageReduction || 0;
+    return `Damage Reduction -${reduction}${duration}`;
   }
 
   // Fallback: use effect name
@@ -274,10 +286,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Calculate damage reduction from target's defense effects
+    const damageReduction = calculateDamageReduction(targetCombinedEffects);
+    const damageAfterReduction = Math.max(0, totalDamage - damageReduction);
+
     // Apply damage to target health
     let newTargetHealth = target.stats.health;
-    if (totalDamage > 0) {
-      newTargetHealth = Math.max(0, target.stats.health - totalDamage);
+    if (damageAfterReduction > 0) {
+      newTargetHealth = Math.max(0, target.stats.health - damageAfterReduction);
       await prisma.userStats.update({
         where: { userId: target.id },
         data: { health: newTargetHealth, lastUpdated: new Date() }
@@ -343,8 +359,12 @@ export async function POST(request: NextRequest) {
 
     let message = `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription}`;
 
-    // Always show damage (even if 0)
-    message += ` - ${totalDamage} damage dealt`;
+    // Always show damage (even if 0), include damage reduction if present
+    if (damageReduction > 0) {
+      message += ` - ${damageAfterReduction} damage dealt (${damageReduction} blocked by defenses)`;
+    } else {
+      message += ` - ${totalDamage} damage dealt`;
+    }
 
     // Add effect messages (targetEffects and selfEffects already filtered above)
     if (targetEffects.length > 0) {
@@ -364,7 +384,7 @@ export async function POST(request: NextRequest) {
         powerUsed: power.name,
         powerBaseStat: power.baseStat || 'Mental',
         rollInfo: rollDescription,
-        totalDamage,
+        totalDamage: damageAfterReduction,  // Report damage after reduction
         affected: appliedEffects
           .filter(e => e.effectDef.target === 'enemy' || e.effectDef.target === 'single')
           .map(e => ({

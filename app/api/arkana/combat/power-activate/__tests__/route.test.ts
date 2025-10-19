@@ -3092,4 +3092,483 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(decoded).toContain('Test Power Mimic by Mimic');
     });
   });
+
+  // === DEFENSE EFFECT TESTS ===
+
+  describe('Defense Effects (Damage Reduction)', () => {
+    it('should apply defense effect and display in liveStatsString', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+
+      const caster = await createArkanaTestUser({
+        characterName: 'Tank',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20,
+        commonPowers: ['test_defense_harden_skin'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_defense_harden_skin',
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedCaster = await prisma.arkanaStats.findFirst({ where: { userId: caster.id } });
+      const activeEffects = updatedCaster?.activeEffects as ActiveEffect[];
+      const liveStats = updatedCaster?.liveStats as LiveStats;
+
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].effectId).toBe('defense_test_reduction_3');
+
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('🛡️ Defense:');
+      expect(decoded).toContain('Damage Reduction -3');
+      expect(decoded).toContain('Test Damage Reduction');
+    });
+
+    it('should stack multiple defense effects correctly', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Mega Tank',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 30,
+        commonPowers: [],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_3',
+            name: 'Test Damage Reduction -3',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'defense_test_reduction_2',
+            name: 'Test Natural Armor',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const { calculateDamageReduction, formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+
+      // Reload to get arkanaStats populated
+      const reloadedCaster = await prisma.arkanaStats.findFirst({ where: { userId: caster.id } });
+      const activeEffects = reloadedCaster?.activeEffects as ActiveEffect[];
+
+      const reduction = calculateDamageReduction(activeEffects);
+      expect(reduction).toBe(5); // 3 + 2
+
+      const formatted = formatLiveStatsForLSL({}, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('Damage Reduction -5');
+    });
+
+    it('should reduce damage to 0 but not below', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const attacker = await createArkanaTestUser({
+        characterName: 'Weak Attacker',
+        race: 'human',
+        archetype: 'Striker',
+        physical: 1,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        commonPowers: ['spliced_tail_slap'],  // Does 3 + Physical damage
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Armored Target',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20,
+        commonPowers: [],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_5_scene',
+            name: 'Test Hardened Shell',
+            duration: 'scene',
+            turnsLeft: 999,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      // Use power-attack route to test damage reduction
+      const { POST: PowerAttackPOST } = await import('@/app/api/arkana/combat/power-attack/route');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'spliced_tail_slap',
+        target_uuid: target.slUuid,
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await PowerAttackPOST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Damage should be reduced to 0 (tail slap does ~3 damage, defense blocks 5)
+      expect(data.data.totalDamage).toBe(0);
+
+      // Health should not change from initial value (100)
+      const updatedTarget = await prisma.user.findFirst({
+        where: { id: target.id },
+        include: { stats: true }
+      });
+      expect(updatedTarget?.stats?.health).toBe(100);  // Initial health for test users
+    });
+
+    it('should show blocked damage in attack message', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const attacker = await createArkanaTestUser({
+        characterName: 'Strong Attacker',
+        race: 'human',
+        archetype: 'Striker',
+        physical: 4,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 15,
+        commonPowers: ['spliced_tail_slap'],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Defended Target',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 25,
+        commonPowers: [],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_3',
+            name: 'Test Damage Reduction -3',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const { POST: PowerAttackPOST } = await import('@/app/api/arkana/combat/power-attack/route');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'spliced_tail_slap',
+        target_uuid: target.slUuid,
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await PowerAttackPOST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Only verify defense message if attack succeeded
+      if (data.data.attackSuccess === 'true') {
+        const message = decodeURIComponent(data.data.message);
+        expect(message).toContain('blocked by defenses');
+        expect(message).toMatch(/\d+ damage dealt \(\d+ blocked by defenses\)/);
+      }
+    });
+
+    it('should display scene-based defense effects with "scene" duration', async () => {
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'defense_test_reduction_5_scene',
+          name: 'Test Hardened Shell',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const formatted = formatLiveStatsForLSL({}, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('🛡️ Defense:');
+      expect(decoded).toContain('scene');
+      expect(decoded).not.toContain('999 turns');
+    });
+
+    it('should persist turn-based defense effects across multiple turns', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const caster = await createArkanaTestUser({
+        characterName: 'Persistent Defender',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20,
+        commonPowers: ['veil_entropy_pulse'],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_2',
+            name: 'Test Natural Armor',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_entropy_pulse',
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      await POST(request);
+
+      const updatedCaster = await prisma.arkanaStats.findFirst({ where: { userId: caster.id } });
+      const activeEffects = updatedCaster?.activeEffects as ActiveEffect[];
+
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].effectId).toBe('defense_test_reduction_2');
+      expect(activeEffects[0].turnsLeft).toBe(2); // 3 - 1
+    });
+
+    it('should NOT decrement scene-based defense effects', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const caster = await createArkanaTestUser({
+        characterName: 'Scene Defender',
+        race: 'human',
+        archetype: 'Defender',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20,
+        commonPowers: ['veil_entropy_pulse'],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_5_scene',
+            name: 'Test Hardened Shell',
+            duration: 'scene',
+            turnsLeft: 999,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veil_entropy_pulse',
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      await POST(request);
+
+      const updatedCaster = await prisma.arkanaStats.findFirst({ where: { userId: caster.id } });
+      const activeEffects = updatedCaster?.activeEffects as ActiveEffect[];
+
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].turnsLeft).toBe(999); // Scene effects don't decrement
+    });
+
+    it('should work with basic attack route damage reduction', async () => {
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      const attacker = await createArkanaTestUser({
+        characterName: 'Physical Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 4,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 15,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Armored Defender',
+        race: 'human',
+        archetype: 'Tank',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 25,
+        commonPowers: [],
+        archetypePowers: [],
+        activeEffects: [
+          {
+            effectId: 'defense_test_reduction_3',
+            name: 'Test Damage Reduction -3',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const { POST: AttackPOST } = await import('@/app/api/arkana/combat/attack/route');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await AttackPOST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // If hit, message should show damage reduction
+      if (data.data.isHit === 'true') {
+        const message = decodeURIComponent(data.data.message);
+        // Damage might be reduced to different amounts, but if reduction applied, message should show it
+        if (data.data.damage > 0 && data.data.damage < 5) {
+          expect(message).toContain('blocked by defenses');
+        }
+      }
+    });
+
+    it('should display all four effect categories together', async () => {
+      const { formatLiveStatsForLSL } = await import('@/lib/arkana/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'debuff_mental_minus_1',
+          name: 'Mental Debuff',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Alice'
+        },
+        {
+          effectId: 'utility_test_eavesdrop',
+          name: 'Test Remote Eavesdropping',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Bob'
+        },
+        {
+          effectId: 'special_test_shadowform',
+          name: 'Test Shadowform',
+          duration: 'scene',
+          turnsLeft: 999,
+          appliedAt: new Date().toISOString(),
+          casterName: 'Charlie'
+        },
+        {
+          effectId: 'defense_test_reduction_3',
+          name: 'Test Damage Reduction -3',
+          duration: 'turns:2',
+          turnsLeft: 2,
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const liveStats: LiveStats = { Mental: -1 };
+
+      const formatted = formatLiveStatsForLSL(liveStats, activeEffects);
+      const decoded = decodeURIComponent(formatted);
+
+      expect(decoded).toContain('🔮 Effects:');
+      expect(decoded).toContain('🔧 Utilities:');
+      expect(decoded).toContain('✨ Special:');
+      expect(decoded).toContain('🛡️ Defense:');
+
+      expect(decoded).toContain('Mental -1');
+      expect(decoded).toContain('Test Remote Eavesdropping by Bob');
+      expect(decoded).toContain('Test Shadowform by Charlie');
+      expect(decoded).toContain('Damage Reduction -3');
+    });
+  });
 });

@@ -256,5 +256,35 @@
     "effects": {
       "ability": ["special_test_mist"]
     }
+  },
+  {
+    "id": "test_defense_harden_skin",
+    "name": "Test Harden Skin",
+    "desc": "Test power: Harden skin to reduce damage (no check)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["defense", "protection"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["defense_test_reduction_3"]
+    }
+  },
+  {
+    "id": "test_defense_shell_armor",
+    "name": "Test Shell Armor",
+    "desc": "Test power: Create hardened shell armor for the scene (no check)",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["defense", "armor"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["defense_test_reduction_5_scene"]
+    }
   }
 ]
