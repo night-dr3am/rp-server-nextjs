@@ -2640,5 +2640,15 @@
     "utilityType": "social",
     "target": "area",
     "duration": "scene"
+  },
+  {
+    "id": "heal_drain_6",
+    "name": "Yang Chi Healing",
+    "desc": "Heals fixed amount based on Drain",
+    "category": "heal",
+    "type": "direct",
+    "healFormula": "6",
+    "target": "self",
+    "duration": "immediate"
   }
 ]

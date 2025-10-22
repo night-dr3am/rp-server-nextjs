@@ -509,7 +509,7 @@
     "targetType": "single",
     "range": 10,
     "effects": {
-      "attack": ["check_mental_vs_tn12", "damage_heal_4_mental"]
+      "attack": ["check_mental_vs_tn12", "damage_necrotic_4_mental", "heal_drain_6"]
     }
   },
   {
