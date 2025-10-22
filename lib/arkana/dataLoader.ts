@@ -23,6 +23,7 @@ let cybernetics: Cybernetic[] = [];
 let magicSchools: MagicSchool[] = [];
 let skills: Skill[] = [];
 let effectsMap: Map<string, EffectDefinition> = new Map();
+let worldObjectChecksMap: Map<string, EffectDefinition> = new Map();
 
 // Determine if running in test mode
 function isTestMode(): boolean {
@@ -36,7 +37,7 @@ export async function loadAllData(): Promise<void> {
     const basePath = testMode ? './tests/' : './';
     const fileSuffix = testMode ? '.test.json' : '';
 
-    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData] = await Promise.all([
+    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData, worldObjectChecksData] = await Promise.all([
       import(`${basePath}flaws${testMode ? '' : '3'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}common_powers${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}perks${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
@@ -44,7 +45,8 @@ export async function loadAllData(): Promise<void> {
       import(`${basePath}cybernetics${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}effects${fileSuffix}`).then(m => m.default),
-      import(`${basePath}skills${fileSuffix}`).then(m => m.default)
+      import(`${basePath}skills${fileSuffix}`).then(m => m.default),
+      import(`${basePath}worldObjectChecks${fileSuffix}`).then(m => m.default)
     ]);
 
     flaws = flawsData;
@@ -58,6 +60,9 @@ export async function loadAllData(): Promise<void> {
     // Load effects into map for fast lookup
     // Cast the JSON data to EffectDefinition array
     effectsMap = new Map((effectsData as EffectDefinition[]).map(e => [e.id, e]));
+
+    // Load worldObjectChecks into map for fast lookup
+    worldObjectChecksMap = new Map((worldObjectChecksData as EffectDefinition[]).map(e => [e.id, e]));
   } catch (error) {
     console.error('Failed to load Arkana data:', error);
     throw error;
@@ -306,4 +311,8 @@ export function getSkillByName(name: string): Skill | undefined {
 }
 export function getEffectDefinition(effectId: string): EffectDefinition | undefined {
   return effectsMap.get(effectId);
+}
+export function getWorldObjectCheck(checkId: string): EffectDefinition | undefined {
+  // First check worldObjectChecks, then fall back to effects.json for reusable checks
+  return worldObjectChecksMap.get(checkId) || effectsMap.get(checkId);
 }

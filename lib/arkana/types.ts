@@ -14,7 +14,7 @@ export interface EffectDefinition {
   id: string;
   name: string;
   desc: string;
-  category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'heal' | 'utility' | 'defense' | 'special';
+  category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'heal' | 'utility' | 'defense' | 'special' | 'ownership';
   type?: string;
 
   // Check-related fields
@@ -46,6 +46,9 @@ export interface EffectDefinition {
   // Defense fields
   defenseType?: string;
   damageReduction?: number;
+
+  // Ownership fields (for WorldObject checks)
+  requiresOwnership?: boolean;
 
   // Common fields
   target?: 'enemy' | 'self' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'single';

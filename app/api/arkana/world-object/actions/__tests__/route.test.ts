@@ -52,25 +52,19 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'locked', // Current state
           actions: [
             {
-              id: 'unlock_door',
-              label: 'Unlock Door',
-              showState: 'locked', // Matches current state
-              targetState: 'unlocked',
-              description: 'Attempt to unlock the door'
+              action: 'Unlock Door',
+              showStates: 'locked', // Matches current state
+              successState: 'unlocked'
             },
             {
-              id: 'lock_door',
-              label: 'Lock Door',
-              showState: 'unlocked', // Does NOT match
-              targetState: 'locked',
-              description: 'Lock the door securely'
+              action: 'Lock Door',
+              showStates: 'unlocked', // Does NOT match
+              successState: 'locked'
             },
             {
-              id: 'open_door',
-              label: 'Open Door',
-              showState: 'unlocked', // Does NOT match
-              targetState: 'open',
-              description: 'Open the unlocked door'
+              action: 'Open Door',
+              showStates: 'unlocked', // Does NOT match
+              successState: 'open'
             }
           ]
         }
@@ -88,11 +82,11 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.data.objectName).toBe('Secure Vault Door');
       expect(data.data.currentState).toBe('locked');
 
-      // CRITICAL: Should only return unlock_door
+      // CRITICAL: Should only return Unlock Door
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('unlock_door');
+      expect(data.data.actions[0].id).toBe('Unlock Door');
       expect(data.data.actions[0].label).toBe('Unlock Door');
-      expect(data.data.actions[0].description).toBe('Attempt to unlock the door');
+      expect(data.data.actions[0].description).toBe('Unlock Door');
     });
 
     it('should return lock_door AND open_door when state is "unlocked"', async () => {
@@ -107,26 +101,24 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'unlocked', // Current state
           actions: [
             {
-              id: 'unlock_door',
-              label: 'Unlock Door',
-              showState: 'locked' // Does NOT match
+              action: 'Unlock Door',
+              showStates: 'locked', // Does NOT match
+              successState: 'unlocked'
             },
             {
-              id: 'lock_door',
-              label: 'Lock Door',
-              showState: 'unlocked', // Matches
-              targetState: 'locked'
+              action: 'Lock Door',
+              showStates: 'unlocked', // Matches
+              successState: 'locked'
             },
             {
-              id: 'open_door',
-              label: 'Open Door',
-              showState: 'unlocked', // Matches
-              targetState: 'open'
+              action: 'Open Door',
+              showStates: 'unlocked', // Matches
+              successState: 'open'
             },
             {
-              id: 'close_door',
-              label: 'Close Door',
-              showState: 'open' // Does NOT match
+              action: 'Close Door',
+              showStates: 'open', // Does NOT match
+              successState: 'unlocked'
             }
           ]
         }
@@ -141,9 +133,9 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.currentState).toBe('unlocked');
 
-      // Should return 2 actions: lock_door and open_door
+      // Should return 2 actions: Lock Door and Open Door
       expect(data.data.actions).toHaveLength(2);
-      expect(data.data.actions.map((a: { id: string }) => a.id).sort()).toEqual(['lock_door', 'open_door'].sort());
+      expect(data.data.actions.map((a: { id: string }) => a.id).sort()).toEqual(['Lock Door', 'Open Door'].sort());
     });
 
     it('should return only close_door when state is "open"', async () => {
@@ -158,25 +150,24 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'open', // Current state
           actions: [
             {
-              id: 'unlock_door',
-              label: 'Unlock',
-              showState: 'locked'
+              action: 'Unlock',
+              showStates: 'locked',
+              successState: 'unlocked'
             },
             {
-              id: 'lock_door',
-              label: 'Lock',
-              showState: 'unlocked'
+              action: 'Lock',
+              showStates: 'unlocked',
+              successState: 'locked'
             },
             {
-              id: 'open_door',
-              label: 'Open',
-              showState: 'unlocked'
+              action: 'Open',
+              showStates: 'unlocked',
+              successState: 'open'
             },
             {
-              id: 'close_door',
-              label: 'Close Door',
-              showState: 'open', // Only this matches
-              description: 'Close the door'
+              action: 'Close Door',
+              showStates: 'open', // Only this matches
+              successState: 'closed'
             }
           ]
         }
@@ -191,7 +182,7 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.currentState).toBe('open');
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('close_door');
+      expect(data.data.actions[0].id).toBe('Close Door');
     });
 
     it('should return empty array if no actions match current state', async () => {
@@ -206,14 +197,14 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'broken', // Current state
           actions: [
             {
-              id: 'use',
-              label: 'Use',
-              showState: 'working' // Does NOT match
+              action: 'Use',
+              showStates: 'working', // Does NOT match
+              successState: 'used'
             },
             {
-              id: 'activate',
-              label: 'Activate',
-              showState: 'off' // Does NOT match
+              action: 'Activate',
+              showStates: 'off', // Does NOT match
+              successState: 'on'
             }
           ]
         }
@@ -243,27 +234,24 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'open', // Current state
           actions: [
             {
-              id: 'loot',
-              label: 'Loot Chest',
-              showState: 'open', // Matches
-              description: 'Take items from chest'
+              action: 'Loot Chest',
+              showStates: 'open', // Matches
+              successState: 'looted'
             },
             {
-              id: 'inspect',
-              label: 'Inspect Contents',
-              showState: 'open', // Also matches
-              description: 'Look inside the chest'
+              action: 'Inspect Contents',
+              showStates: 'open', // Also matches
+              successState: 'open'
             },
             {
-              id: 'close',
-              label: 'Close Chest',
-              showState: 'open', // Also matches
-              targetState: 'closed'
+              action: 'Close Chest',
+              showStates: 'open', // Also matches
+              successState: 'closed'
             },
             {
-              id: 'unlock',
-              label: 'Unlock',
-              showState: 'locked' // Does NOT match
+              action: 'Unlock',
+              showStates: 'locked', // Does NOT match
+              successState: 'open'
             }
           ]
         }
@@ -278,9 +266,9 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.currentState).toBe('open');
 
-      // Should return all 3 actions with showState="open"
+      // Should return all 3 actions with showStates="open"
       expect(data.data.actions).toHaveLength(3);
-      expect(data.data.actions.map((a: { id: string }) => a.id).sort()).toEqual(['close', 'inspect', 'loot'].sort());
+      expect(data.data.actions.map((a: { id: string }) => a.id).sort()).toEqual(['Close Chest', 'Inspect Contents', 'Loot Chest'].sort());
     });
 
     it('should handle lever with on/off states', async () => {
@@ -295,16 +283,14 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'off', // Current state
           actions: [
             {
-              id: 'flip_on',
-              label: 'Flip On',
-              showState: 'off', // Matches
-              targetState: 'on'
+              action: 'Flip On',
+              showStates: 'off', // Matches
+              successState: 'on'
             },
             {
-              id: 'flip_off',
-              label: 'Flip Off',
-              showState: 'on', // Does NOT match
-              targetState: 'off'
+              action: 'Flip Off',
+              showStates: 'on', // Does NOT match
+              successState: 'off'
             }
           ]
         }
@@ -319,7 +305,7 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.currentState).toBe('off');
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('flip_on');
+      expect(data.data.actions[0].id).toBe('Flip On');
 
       // Now change state to "on" and test again
       await prisma.worldObject.update({
@@ -341,7 +327,7 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.currentState).toBe('on');
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('flip_off');
+      expect(data.data.actions[0].id).toBe('Flip Off');
     });
 
     it('should return 404 if world object not found', async () => {
@@ -369,7 +355,7 @@ describe('/api/arkana/world-object/actions', () => {
           name: 'Test Door',
           type: 'door',
           state: 'locked',
-          actions: [{ id: 'unlock', label: 'Unlock', showState: 'locked' }]
+          actions: [{ action: 'Unlock', showStates: 'locked', successState: 'unlocked' }]
         }
       });
 
@@ -403,7 +389,7 @@ describe('/api/arkana/world-object/actions', () => {
           name: 'Test Door',
           type: 'door',
           state: 'locked',
-          actions: [{ id: 'unlock', label: 'Unlock', showState: 'locked' }]
+          actions: [{ action: 'Unlock', showStates: 'locked', successState: 'unlocked' }]
         }
       });
 
@@ -456,13 +442,9 @@ describe('/api/arkana/world-object/actions', () => {
           state: 'locked',
           actions: [
             {
-              id: 'unlock',
-              label: 'Unlock Door',
-              showState: 'locked',
-              targetState: 'unlocked',
-              description: 'Attempt to unlock',
-              requiresStat: { perception: 3 },
-              requiredGroup: 'admin'
+              action: 'Unlock Door',
+              showStates: 'locked',
+              successState: 'unlocked'
             }
           ]
         }
@@ -477,15 +459,13 @@ describe('/api/arkana/world-object/actions', () => {
       expect(data.success).toBe(true);
       expect(data.data.actions).toHaveLength(1);
 
-      // Should only have id, label, description
+      // Should only have id, label, description (action name used for all)
       const action = data.data.actions[0];
-      expect(action.id).toBe('unlock');
+      expect(action.id).toBe('Unlock Door');
       expect(action.label).toBe('Unlock Door');
-      expect(action.description).toBe('Attempt to unlock');
-      expect(action.showState).toBeUndefined();
-      expect(action.targetState).toBeUndefined();
-      expect(action.requiresStat).toBeUndefined();
-      expect(action.requiredGroup).toBeUndefined();
+      expect(action.description).toBe('Unlock Door');
+      expect(action.showStates).toBeUndefined();
+      expect(action.successState).toBeUndefined();
     });
   });
 });

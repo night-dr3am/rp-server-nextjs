@@ -38,18 +38,14 @@ describe('/api/arkana/world-object', () => {
         groups: [],
         actions: [
           {
-            id: 'unlock_door',
-            label: 'Unlock Door',
-            showState: 'locked',
-            targetState: 'unlocked',
-            description: 'Attempt to unlock the door'
+            action: 'Unlock Door',
+            showStates: 'locked',
+            successState: 'unlocked'
           },
           {
-            id: 'lock_door',
-            label: 'Lock Door',
-            showState: 'unlocked',
-            targetState: 'locked',
-            description: 'Lock the door securely'
+            action: 'Lock Door',
+            showStates: 'unlocked',
+            successState: 'locked'
           }
         ],
         timestamp,
@@ -69,7 +65,7 @@ describe('/api/arkana/world-object', () => {
       expect(data.data.type).toBe('door');
       expect(data.data.state).toBe('locked');
       expect(data.data.actions).toHaveLength(2);
-      expect(data.data.actions[0].id).toBe('unlock_door');
+      expect(data.data.actions[0].action).toBe('Unlock Door');
 
       // Verify object was created in database
       const dbObject = await prisma.worldObject.findUnique({
@@ -96,9 +92,9 @@ describe('/api/arkana/world-object', () => {
           state: 'open', // Current runtime state
           actions: [
             {
-              id: 'close',
-              label: 'Close',
-              showState: 'open'
+              action: 'Close',
+              showStates: 'open',
+              successState: 'closed'
             }
           ]
         }
@@ -116,9 +112,9 @@ describe('/api/arkana/world-object', () => {
         state: 'locked', // Notecard default - should be IGNORED
         actions: [
           {
-            id: 'unlock',
-            label: 'Unlock',
-            showState: 'locked'
+            action: 'Unlock',
+            showStates: 'locked',
+            successState: 'unlocked'
           }
         ],
         timestamp,
@@ -132,7 +128,7 @@ describe('/api/arkana/world-object', () => {
       expect(data.success).toBe(true);
       expect(data.data.state).toBe('open'); // PRESERVED, not reset to 'locked'
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('unlock');
+      expect(data.data.actions[0].action).toBe('Unlock');
 
       // Verify database preserved state
       const dbObject = await prisma.worldObject.findUnique({
@@ -158,28 +154,24 @@ describe('/api/arkana/world-object', () => {
         state: 'off',
         actions: [
           {
-            id: 'flip_on',
-            label: 'Flip On',
-            showState: 'off',
-            targetState: 'on'
+            action: 'Flip On',
+            showStates: 'off',
+            successState: 'on'
           },
           {
-            id: 'flip_off',
-            label: 'Flip Off',
-            showState: 'on',
-            targetState: 'off'
+            action: 'Flip Off',
+            showStates: 'on',
+            successState: 'off'
           },
           {
-            id: 'inspect',
-            label: 'Inspect',
-            showState: 'off',
-            description: 'Inspect the lever'
+            action: 'Inspect',
+            showStates: 'off',
+            successState: 'off'
           },
           {
-            id: 'repair',
-            label: 'Repair',
-            showState: 'broken',
-            targetState: 'off'
+            action: 'Repair',
+            showStates: 'broken',
+            successState: 'off'
           }
         ],
         timestamp,
@@ -202,7 +194,7 @@ describe('/api/arkana/world-object', () => {
         universe: 'arkana',
         name: 'Test Door',
         type: 'door',
-        actions: [{ id: 'test', label: 'Test', showState: 'default' }],
+        actions: [{ action: 'Test', showStates: 'default', successState: 'default' }],
         timestamp,
         signature: '0000000000000000000000000000000000000000000000000000000000000000' // Valid format, wrong value
       };
@@ -268,9 +260,9 @@ describe('/api/arkana/world-object', () => {
         // No description, location, owner, state, stats, groups
         actions: [
           {
-            id: 'use',
-            label: 'Use',
-            showState: 'default'
+            action: 'Use',
+            showStates: 'default',
+            successState: 'used'
           }
         ],
         timestamp,
@@ -299,7 +291,7 @@ describe('/api/arkana/world-object', () => {
           name: 'Reset Test Door',
           type: 'door',
           state: 'locked',
-          actions: [{ id: 'test', label: 'Test', showState: 'default' }]
+          actions: [{ action: 'Test', showStates: 'default', successState: 'default' }]
         }
       });
 
@@ -314,7 +306,7 @@ describe('/api/arkana/world-object', () => {
         type: 'door',
         state: 'locked', // Notecard default
         newState: 'open', // FORCE RESET
-        actions: [{ id: 'test', label: 'Test', showState: 'default' }],
+        actions: [{ action: 'Test', showStates: 'default', successState: 'default' }],
         timestamp,
         signature
       };
@@ -337,7 +329,7 @@ describe('/api/arkana/world-object', () => {
         name: 'New Door',
         type: 'door',
         state: 'locked', // Should be used for new object
-        actions: [{ id: 'unlock', label: 'Unlock', showState: 'locked' }],
+        actions: [{ action: 'Unlock', showStates: 'locked', successState: 'unlocked' }],
         timestamp,
         signature
       };
@@ -361,7 +353,7 @@ describe('/api/arkana/world-object', () => {
         type: 'door',
         state: 'locked', // Default
         newState: 'unlocked', // Override
-        actions: [{ id: 'test', label: 'Test', showState: 'default' }],
+        actions: [{ action: 'Test', showStates: 'default', successState: 'default' }],
         timestamp,
         signature
       };

@@ -65,20 +65,17 @@ export async function POST(request: NextRequest) {
     // Get current state of the world object
     const currentState = worldObject.state;
 
-    // Get all actions from the world object
+    // Get all actions from the world object (new format)
     const allActions = (worldObject.actions as Array<{
-      id: string;
-      label: string;
-      showState: string;
-      targetState?: string;
-      description?: string;
-      requiresStat?: Record<string, number>;
-      requiredGroup?: string;
-      requiredRole?: string;
+      action: string;           // Action name/ID
+      showStates: string;       // Comma-delimited states
+      skills?: string;          // Optional skill requirements
+      checks?: string;          // Optional check ID
+      successState: string;     // State on success
     }>) || [];
 
     // Filter actions based on current state
-    // CRITICAL: Only return actions where showState matches current object state
+    // CRITICAL: Only return actions where showStates includes current object state
     const availableActions: Array<{
       id: string;
       label: string;
@@ -86,16 +83,19 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     for (const action of allActions) {
-      // Check if this action's showState matches the current state
-      if (action.showState === currentState) {
+      // Check if current state is in the showStates (comma-delimited)
+      const validStates = action.showStates.split(',').map((s: string) => s.trim().toLowerCase());
+      const currentStateNormalized = currentState.toLowerCase();
+
+      if (validStates.includes(currentStateNormalized)) {
         // This action is available - add it to the response
         availableActions.push({
-          id: action.id,
-          label: action.label,
-          description: action.description
+          id: action.action,          // Use action name as ID
+          label: action.action,       // Use action name as label
+          description: action.action  // Use action name as description
         });
       }
-      // If showState doesn't match, skip this action (do not include in response)
+      // If showStates doesn't include current state, skip this action
     }
 
     return NextResponse.json({

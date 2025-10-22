@@ -316,14 +316,11 @@ export const worldObjectUpsertSchema = Joi.object({
   stats: Joi.object().optional().default({}),
   groups: Joi.array().optional().default([]),
   actions: Joi.array().items(Joi.object({
-    id: Joi.string().required(),
-    label: Joi.string().required(),
-    showState: Joi.string().required(),
-    targetState: Joi.string().optional(),
-    description: Joi.string().optional(),
-    requiresStat: Joi.object().optional(),
-    requiredGroup: Joi.string().optional(),
-    requiredRole: Joi.string().optional()
+    action: Joi.string().required(),                      // Action name/label
+    showStates: Joi.string().required(),                  // Comma-delimited states
+    skills: Joi.string().optional(),                      // Pipe-delimited OR skill requirements
+    checks: Joi.string().optional(),                      // Check ID from worldObjectChecks.json
+    successState: Joi.string().required()                 // State on success
   })).min(1).required(),
   timestamp: timestampSchema,
   signature: signatureSchema
@@ -332,6 +329,15 @@ export const worldObjectUpsertSchema = Joi.object({
 export const worldObjectActionsSchema = Joi.object({
   objectId: Joi.string().min(1).max(255).required(),
   playerUuid: uuidSchema.required(),
+  universe: Joi.string().valid('arkana').default('arkana'),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const worldObjectPerformActionSchema = Joi.object({
+  playerUuid: uuidSchema.required(),
+  objectId: Joi.string().min(1).max(255).required(),
+  actionId: Joi.string().min(1).max(100).required(),
   universe: Joi.string().valid('arkana').default('arkana'),
   timestamp: timestampSchema,
   signature: signatureSchema

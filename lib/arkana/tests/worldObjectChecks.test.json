@@ -1,0 +1,36 @@
+[
+  {
+    "id": "check_mental_vs_tn12",
+    "name": "Mental Check vs TN 12",
+    "desc": "Roll 1d20 + Mental modifier vs TN 12",
+    "category": "check",
+    "checkStat": "Mental",
+    "checkVs": "fixed",
+    "checkTN": 12
+  },
+  {
+    "id": "check_mental_vs_tn10",
+    "name": "Mental Check vs TN 10",
+    "desc": "Roll 1d20 + Mental modifier vs TN 10",
+    "category": "check",
+    "checkStat": "Mental",
+    "checkVs": "fixed",
+    "checkTN": 10
+  },
+  {
+    "id": "check_physical_vs_tn10",
+    "name": "Physical Check vs TN 10",
+    "desc": "Roll 1d20 + Physical modifier vs TN 10",
+    "category": "check",
+    "checkStat": "Physical",
+    "checkVs": "fixed",
+    "checkTN": 10
+  },
+  {
+    "id": "check_is_object_owner",
+    "name": "Ownership Check",
+    "desc": "Verify player is object owner",
+    "category": "ownership",
+    "requiresOwnership": true
+  }
+]
