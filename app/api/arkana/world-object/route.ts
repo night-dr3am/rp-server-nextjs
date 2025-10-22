@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { objectId, universe, name, description, location, owner, type, state, stats, groups, actions, timestamp, signature } = value;
+    const { objectId, universe, name, description, location, owner, type, state, newState, stats, groups, actions, timestamp, signature } = value;
 
     // Validate signature
     const signatureValidation = validateSignature(timestamp, signature, universe);
@@ -27,6 +27,16 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Check if object already exists to implement smart state handling
+    const existing = await prisma.worldObject.findUnique({
+      where: {
+        objectId_universe: {
+          objectId,
+          universe
+        }
+      }
+    });
 
     // Try to find existing world object or create new one
     const worldObject = await prisma.worldObject.upsert({
@@ -42,7 +52,10 @@ export async function POST(request: NextRequest) {
         location,
         owner,
         type,
-        state,
+        // SMART STATE LOGIC FOR UPDATE:
+        // - If newState provided: use it (force reset)
+        // - If no newState: preserve existing state (ignore notecard default)
+        state: newState || existing?.state || state || 'default',
         stats,
         groups,
         actions,
@@ -56,7 +69,9 @@ export async function POST(request: NextRequest) {
         location,
         owner,
         type,
-        state,
+        // SMART STATE LOGIC FOR CREATE:
+        // - Use newState if provided, else notecard default
+        state: newState || state || 'default',
         stats,
         groups,
         actions

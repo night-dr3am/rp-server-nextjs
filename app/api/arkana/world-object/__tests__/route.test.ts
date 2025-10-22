@@ -85,45 +85,40 @@ describe('/api/arkana/world-object', () => {
       expect(dbObject!.state).toBe('locked');
     });
 
-    it('should update existing world object successfully (upsert)', async () => {
-      // First create an object
+    it('should preserve state on re-registration (without newState)', async () => {
+      // Create object with state="open"
       await prisma.worldObject.create({
         data: {
-          objectId: 'CHEST_001',
+          objectId: 'DOOR_STATE_TEST',
           universe: 'arkana',
-          name: 'Old Chest',
-          type: 'chest',
-          state: 'locked',
+          name: 'State Test Door',
+          type: 'door',
+          state: 'open', // Current runtime state
           actions: [
             {
-              id: 'old_action',
-              label: 'Old Action',
-              showState: 'locked'
+              id: 'close',
+              label: 'Close',
+              showState: 'open'
             }
           ]
         }
       });
 
-      // Now update it via upsert
+      // Re-register with state="locked" in request (should be ignored)
       const timestamp = new Date().toISOString();
       const signature = generateSignature(timestamp, 'arkana');
 
       const updateData = {
-        objectId: 'CHEST_001',
+        objectId: 'DOOR_STATE_TEST',
         universe: 'arkana',
-        name: 'Updated Treasure Chest',
-        description: 'A chest full of treasures',
-        type: 'chest',
-        state: 'unlocked',
-        stats: { durability: 100 },
-        groups: ['admin'],
+        name: 'State Test Door',
+        type: 'door',
+        state: 'locked', // Notecard default - should be IGNORED
         actions: [
           {
-            id: 'open_chest',
-            label: 'Open Chest',
-            showState: 'unlocked',
-            targetState: 'open',
-            description: 'Open the chest'
+            id: 'unlock',
+            label: 'Unlock',
+            showState: 'locked'
           }
         ],
         timestamp,
@@ -135,25 +130,20 @@ describe('/api/arkana/world-object', () => {
       const data = await parseJsonResponse(response);
 
       expect(data.success).toBe(true);
-      expect(data.data.name).toBe('Updated Treasure Chest');
-      expect(data.data.description).toBe('A chest full of treasures');
-      expect(data.data.state).toBe('unlocked');
-      expect(data.data.stats).toEqual({ durability: 100 });
-      expect(data.data.groups).toEqual(['admin']);
+      expect(data.data.state).toBe('open'); // PRESERVED, not reset to 'locked'
       expect(data.data.actions).toHaveLength(1);
-      expect(data.data.actions[0].id).toBe('open_chest');
+      expect(data.data.actions[0].id).toBe('unlock');
 
-      // Verify database was updated
+      // Verify database preserved state
       const dbObject = await prisma.worldObject.findUnique({
         where: {
           objectId_universe: {
-            objectId: 'CHEST_001',
+            objectId: 'DOOR_STATE_TEST',
             universe: 'arkana'
           }
         }
       });
-      expect(dbObject!.name).toBe('Updated Treasure Chest');
-      expect(dbObject!.state).toBe('unlocked');
+      expect(dbObject!.state).toBe('open'); // Still 'open'
     });
 
     it('should handle multiple actions with different showStates', async () => {
@@ -298,6 +288,90 @@ describe('/api/arkana/world-object', () => {
       expect(data.data.description).toBeNull();
       expect(data.data.location).toBeNull();
       expect(data.data.owner).toBeNull();
+    });
+
+    it('should force state update when newState is provided', async () => {
+      // Create object with state="locked"
+      await prisma.worldObject.create({
+        data: {
+          objectId: 'DOOR_RESET_TEST',
+          universe: 'arkana',
+          name: 'Reset Test Door',
+          type: 'door',
+          state: 'locked',
+          actions: [{ id: 'test', label: 'Test', showState: 'default' }]
+        }
+      });
+
+      // Re-register with newState="open"
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const updateData = {
+        objectId: 'DOOR_RESET_TEST',
+        universe: 'arkana',
+        name: 'Reset Test Door',
+        type: 'door',
+        state: 'locked', // Notecard default
+        newState: 'open', // FORCE RESET
+        actions: [{ id: 'test', label: 'Test', showState: 'default' }],
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/world-object', updateData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expect(data.success).toBe(true);
+      expect(data.data.state).toBe('open'); // FORCED to 'open'
+    });
+
+    it('should use state for new object creation when newState not provided', async () => {
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const objectData = {
+        objectId: 'NEW_DOOR_001',
+        universe: 'arkana',
+        name: 'New Door',
+        type: 'door',
+        state: 'locked', // Should be used for new object
+        actions: [{ id: 'unlock', label: 'Unlock', showState: 'locked' }],
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/world-object', objectData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expect(data.success).toBe(true);
+      expect(data.data.state).toBe('locked');
+    });
+
+    it('should use newState for new object creation when provided', async () => {
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const objectData = {
+        objectId: 'NEW_DOOR_002',
+        universe: 'arkana',
+        name: 'New Door With Override',
+        type: 'door',
+        state: 'locked', // Default
+        newState: 'unlocked', // Override
+        actions: [{ id: 'test', label: 'Test', showState: 'default' }],
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/world-object', objectData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expect(data.success).toBe(true);
+      expect(data.data.state).toBe('unlocked'); // newState takes precedence
     });
   });
 });
