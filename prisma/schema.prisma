@@ -155,6 +155,27 @@ model Estate {
   @@map("estates")
 }
 
+// Arkana World Object - Interactive objects with state-based actions
+model WorldObject {
+  id          Int      @id @default(autoincrement())
+  objectId    String   @map("object_id")        // Unique identifier from LSL
+  universe    String   @default("arkana")       // Universe (arkana)
+  name        String                            // Display name
+  description String?                           // Description
+  location    String?                           // Location metadata
+  owner       String?                           // Owner SL UUID
+  type        String                            // Object type (door, chest, lever, etc.)
+  state       String   @default("default")      // Current state (unlocked, locked, open, closed, etc.)
+  stats       Json     @default("{}")           // Custom stats (HP, durability, etc.)
+  groups      Json     @default("[]")           // Allowed groups/roles
+  actions     Json     @default("[]")           // Available actions with conditions
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([objectId, universe])  // Composite unique constraint
+  @@map("world_objects")
+}
+
 // Arkana character creation data
 model ArkanaStats {
   id                     Int       @id @default(autoincrement())

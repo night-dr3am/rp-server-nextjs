@@ -302,6 +302,40 @@ export const estateInfoSchema = Joi.object({
   signature: signatureSchema
 });
 
+// World Object validation schemas
+export const worldObjectUpsertSchema = Joi.object({
+  objectId: Joi.string().min(1).max(255).required(),
+  universe: Joi.string().valid('arkana').default('arkana'),
+  name: Joi.string().min(1).max(255).required(),
+  description: Joi.string().max(1000).optional(),
+  location: Joi.string().max(255).optional(),
+  owner: uuidSchema.optional(),
+  type: Joi.string().min(1).max(100).required(),
+  state: Joi.string().min(1).max(100).default('default'),
+  stats: Joi.object().optional().default({}),
+  groups: Joi.array().optional().default([]),
+  actions: Joi.array().items(Joi.object({
+    id: Joi.string().required(),
+    label: Joi.string().required(),
+    showState: Joi.string().required(),
+    targetState: Joi.string().optional(),
+    description: Joi.string().optional(),
+    requiresStat: Joi.object().optional(),
+    requiredGroup: Joi.string().optional(),
+    requiredRole: Joi.string().optional()
+  })).min(1).required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const worldObjectActionsSchema = Joi.object({
+  objectId: Joi.string().min(1).max(255).required(),
+  playerUuid: uuidSchema.required(),
+  universe: Joi.string().valid('arkana').default('arkana'),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // Arkana character creation validation schemas
 export const arkanaRegisterSchema = Joi.object({
   sl_uuid: uuidSchema,

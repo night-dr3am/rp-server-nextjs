@@ -219,6 +219,7 @@ export async function cleanupDatabase(): Promise<void> {
     await prisma.userInventory.deleteMany()
     await prisma.rpItem.deleteMany()
     await prisma.profileToken.deleteMany()
+    await prisma.worldObject.deleteMany()
     await prisma.estate.deleteMany()
     await prisma.nPCTask.deleteMany()
     await prisma.nPC.deleteMany()

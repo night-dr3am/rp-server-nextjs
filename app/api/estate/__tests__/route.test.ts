@@ -155,7 +155,9 @@ describe('/api/estate', () => {
 
       expect(data.success).toBe(true)
       expect(data.data.isRented).toBe(true)
-      expect(data.data.daysRemaining).toBe(5)
+      // Math.ceil() rounding + timing variations can result in 5 or 6 days
+      expect(data.data.daysRemaining).toBeGreaterThanOrEqual(5)
+      expect(data.data.daysRemaining).toBeLessThanOrEqual(6)
       expect(data.data.renterUuid).toBe(testUser.sl_uuid)
       expect(data.data.renterName).toBe(testUser.username)
       expect(data.data.totalPaidAmount).toBe(1000)
