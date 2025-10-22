@@ -394,7 +394,7 @@ describe('/api/arkana/world-object/perform-action', () => {
             {
               action: 'Bypass',
               showStates: 'locked',
-              skills: 'skill_hack,1||skill_engineering,1', // Hacking OR Engineering
+              skills: 'skill_hack,1 OR skill_engineering,1', // Hacking OR Engineering
               successState: 'open'
             }
           ]
@@ -438,7 +438,7 @@ describe('/api/arkana/world-object/perform-action', () => {
             {
               action: 'Bypass',
               showStates: 'locked',
-              skills: 'skill_hack,1||skill_engineering,1', // Hacking OR Engineering
+              skills: 'skill_hack,1 OR skill_engineering,1', // Hacking OR Engineering
               successState: 'open'
             }
           ]
@@ -481,7 +481,7 @@ describe('/api/arkana/world-object/perform-action', () => {
             {
               action: 'Bypass',
               showStates: 'locked',
-              skills: 'skill_hack,1||skill_engineering,1', // Hacking OR Engineering
+              skills: 'skill_hack,1 OR skill_engineering,1', // Hacking OR Engineering
               successState: 'open'
             }
           ]

@@ -40,7 +40,7 @@
   {
     "id": "technomancy_laser",
     "name": "Laser",
-    "desc": "Deals 6 + Mental damage to target within line of sight. TN12 to hit. Range: 15 meters.",
+    "desc": "Deals 4 + Mental damage to target within line of sight. TN12 to hit. Range: 15 meters.",
     "section": "Technomancy",
     "species": "synthral",
     "cost": 2,
@@ -501,7 +501,7 @@
   {
     "id": "necromancy_drain",
     "name": "Drain",
-    "desc": "Deals 6 + Mental to target, restoring same to caster. Mental vs TN12.",
+    "desc": "Deals 4 + Mental to target, restoring same to caster. Mental vs TN12.",
     "section": "Necromancy",
     "cost": 3,
     "abilityType": ["attack"],
@@ -509,7 +509,7 @@
     "targetType": "single",
     "range": 10,
     "effects": {
-      "attack": ["check_mental_vs_tn12", "damage_heal_6_mental"]
+      "attack": ["check_mental_vs_tn12", "damage_heal_4_mental"]
     }
   },
   {
@@ -565,7 +565,7 @@
   {
     "id": "evocation_create_element_minor",
     "name": "Create Element (Minor)",
-    "desc": "6 damage + Mental to target, or create small effect (fire, ice, lightning, wind, water, earth). TN12.",
+    "desc": "4 damage + Mental to target, or create small effect (fire, ice, lightning, wind, water, earth). TN12.",
     "section": "Evocation",
     "cost": 1,
     "abilityType": ["attack", "ability"],
@@ -580,7 +580,7 @@
   {
     "id": "evocation_create_element_major",
     "name": "Create Element (Major)",
-    "desc": "8 damage + Mental or medium-sized effect. TN12.",
+    "desc": "4 damage + Mental or medium-sized effect. TN12.",
     "section": "Evocation",
     "cost": 3,
     "abilityType": ["attack", "ability"],
@@ -588,7 +588,7 @@
     "targetType": "single",
     "range": 20,
     "effects": {
-      "attack": ["check_mental_vs_tn12", "damage_elemental_8_mental"],
+      "attack": ["check_mental_vs_tn12", "damage_elemental_4_mental"],
       "ability": ["check_mental_vs_tn12", "utility_create_element_minor"]
     }
   },
@@ -687,7 +687,7 @@
   {
     "id": "abjuration_damage",
     "name": "Damage",
-    "desc": "Deals minor magical damage 6 + Mental. TN12.",
+    "desc": "Deals minor magical damage 2 + Mental. TN12.",
     "section": "Abjuration",
     "cost": 2,
     "abilityType": ["attack"],
@@ -695,7 +695,7 @@
     "targetType": "single",
     "range": 10,
     "effects": {
-      "attack": ["check_mental_vs_tn12", "damage_magical_6_mental"]
+      "attack": ["check_mental_vs_tn12", "damage_magical_2_mental"]
     }
   },
 

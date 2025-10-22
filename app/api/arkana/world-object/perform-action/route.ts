@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     // Validate skill requirements if defined
     if (action.skills) {
-      const skillRequirements = action.skills.split('||').map((s: string) => s.trim());
+      const skillRequirements = action.skills.split(' OR ').map((s: string) => s.trim());
       let hasRequiredSkill = false;
       const missingSkills: string[] = [];
 
