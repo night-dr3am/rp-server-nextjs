@@ -234,12 +234,12 @@ export async function POST(request: NextRequest) {
       if (rollInfo) {
         message = encodeForLSL(
           `${playerName} successfully performs ${actionId} on the ${worldObject.name}! ` +
-          `${rollInfo}. The object is now ${newState}.`
+          `${rollInfo}. The ${worldObject.name} is now ${newState}.`
         );
       } else {
         message = encodeForLSL(
           `${playerName} successfully performs ${actionId} on the ${worldObject.name}. ` +
-          `The object is now ${newState}.`
+          `The ${worldObject.name} is now ${newState}.`
         );
       }
     } else {
