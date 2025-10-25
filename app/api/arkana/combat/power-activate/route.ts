@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffects, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
@@ -291,16 +291,15 @@ export async function POST(request: NextRequest) {
 
     // If activation failed on check, still process turn and return failure
     if (!activationSuccess && activateEffects.some((e: string) => e.startsWith('check_'))) {
-      // Process turn for caster (decrement all effects) even on failure
+      // Process turn for caster (decrement all effects) and apply healing even on failure
       const casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
-      const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+      const turnProcessed = await processEffectsTurnAndApplyHealing(
+        caster as typeof caster & { arkanaStats: NonNullable<typeof caster.arkanaStats> },
+        casterActiveEffects,
+        0  // No immediate healing on failure
+      );
 
-      // Apply healing from turn processing (maxHP = Physical × 5)
-      // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
-      const currentHP = caster.stats?.health || 0;
-      const maxHP = caster.arkanaStats.physical * 5;
-      const newHP = Math.min(currentHP + turnProcessed.healingApplied, maxHP);
-
+      // Update ArkanaStats with decremented effects and updated liveStats
       await prisma.arkanaStats.update({
         where: { userId: caster.id },
         data: buildArkanaStatsUpdate({
@@ -308,14 +307,6 @@ export async function POST(request: NextRequest) {
           liveStats: turnProcessed.liveStats
         })
       });
-
-      // Update UserStats with new health value
-      if (caster.stats) {
-        await prisma.userStats.update({
-          where: { userId: caster.id },
-          data: { health: newHP }
-        });
-      }
 
       return NextResponse.json({
         success: true,
@@ -380,17 +371,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ALWAYS process caster's turn first (decrement all PRE-EXISTING effects)
+    // Calculate immediate healing for caster from self-effects BEFORE turn processing
+    // We need to know this upfront to pass to processEffectsTurnAndApplyHealing
+    const casterSelfEffects = appliedEffectsMap.get(caster.slUuid) || [];
+    let casterImmediateHealing = 0;
+    for (const effectResult of casterSelfEffects) {
+      if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
+        casterImmediateHealing += effectResult.heal;
+      }
+    }
+
+    // ALWAYS process caster's turn first (decrement all PRE-EXISTING effects) and apply all healing
     // This happens regardless of whether the caster receives new effects from this power
     let casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
-    const casterTurnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
+    const casterTurnProcessed = await processEffectsTurnAndApplyHealing(
+      caster as typeof caster & { arkanaStats: NonNullable<typeof caster.arkanaStats> },
+      casterActiveEffects,
+      casterImmediateHealing  // Apply immediate healing from self-effects
+    );
     casterActiveEffects = casterTurnProcessed.activeEffects;
-
-    // Calculate caster healing from turn processing (maxHP = Physical × 5)
-    // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
-    const casterCurrentHP = caster.stats?.health || 0;
-    const casterMaxHP = caster.arkanaStats.physical * 5;
-    const casterNewHP = Math.min(casterCurrentHP + casterTurnProcessed.healingApplied, casterMaxHP);
 
     // Track which users have been updated (to avoid duplicate processing)
     const updatedUsers = new Set<string>();
@@ -426,23 +425,22 @@ export async function POST(request: NextRequest) {
       const userLiveStats = recalculateLiveStats(affectedUser.arkanaStats, userActiveEffects);
 
       // Apply immediate healing from heal effects (if any)
-      // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
       let userNewHP = affectedUser.stats?.health || 0;
-      let immediateHealing = 0;
 
-      for (const effectResult of effectResults) {
-        if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
-          immediateHealing += effectResult.heal;
-        }
-      }
-
-      // If this is the caster, start with turn-based healing, then add immediate
+      // If this is the caster, healing was already applied by processEffectsTurnAndApplyHealing
       if (userUuid === caster.slUuid) {
-        userNewHP = casterNewHP + immediateHealing;
-        userNewHP = Math.min(userNewHP, affectedUser.arkanaStats.physical * 5);
-      } else if (immediateHealing > 0) {
-        // For non-casters, just add immediate healing
-        userNewHP = Math.min(userNewHP + immediateHealing, affectedUser.arkanaStats.physical * 5);
+        userNewHP = casterTurnProcessed.newHP;
+      } else {
+        // For non-casters, calculate and apply immediate healing
+        let immediateHealing = 0;
+        for (const effectResult of effectResults) {
+          if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
+            immediateHealing += effectResult.heal;
+          }
+        }
+        if (immediateHealing > 0) {
+          userNewHP = Math.min(userNewHP + immediateHealing, affectedUser.arkanaStats.hitPoints);
+        }
       }
 
       // Update database - update ArkanaStats for effects/liveStats and UserStats for current health
@@ -472,7 +470,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // If caster wasn't updated yet (no self-effects), update them now with just turn processing
+    // If caster wasn't updated yet (no self-effects), update them now with turn processing results
+    // Note: healing was already applied by processEffectsTurnAndApplyHealing
     if (!updatedUsers.has(caster.slUuid)) {
       await prisma.arkanaStats.update({
         where: { userId: caster.id },
@@ -481,14 +480,6 @@ export async function POST(request: NextRequest) {
           liveStats: casterTurnProcessed.liveStats
         })
       });
-
-      // Update UserStats with new health value
-      if (caster.stats) {
-        await prisma.userStats.update({
-          where: { userId: caster.id },
-          data: { health: casterNewHP }
-        });
-      }
     }
 
     // Build comprehensive message with effect details

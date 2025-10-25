@@ -584,5 +584,35 @@
     "healFormula": "10",
     "target": "self",
     "duration": "immediate"
+  },
+  {
+    "id": "check_mental_vs_tn12",
+    "name": "Mental Check vs TN 12",
+    "desc": "Roll 1d20 + Mental modifier vs TN 12",
+    "category": "check",
+    "checkStat": "Mental",
+    "checkVs": "fixed",
+    "checkTN": 12
+  },
+  {
+    "id": "damage_necrotic_4_mental",
+    "name": "Necrotic Damage 4 + Mental",
+    "desc": "Deals 4 + Mental modifier necrotic damage",
+    "category": "damage",
+    "type": "stat_based",
+    "damageType": "necrotic",
+    "damageFormula": "4 + Mental",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_drain_6",
+    "name": "Yang Chi Healing",
+    "desc": "Heals fixed amount based on Drain",
+    "category": "heal",
+    "type": "direct",
+    "healFormula": "6",
+    "target": "self",
+    "duration": "immediate"
   }
 ]

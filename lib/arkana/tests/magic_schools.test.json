@@ -68,5 +68,19 @@
     "effects": {
       "attack": ["check_mental_vs_mental", "damage_physical_3"]
     }
+  },
+  {
+    "id": "necromancy_drain",
+    "name": "Drain",
+    "desc": "Deals 4 + Mental to target, restoring same to caster. Mental vs TN12.",
+    "section": "Necromancy",
+    "cost": 3,
+    "abilityType": ["attack"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_tn12", "damage_necrotic_4_mental", "heal_drain_6"]
+    }
   }
 ]

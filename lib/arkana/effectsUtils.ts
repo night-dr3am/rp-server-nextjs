@@ -358,9 +358,9 @@ export async function processEffectsTurnAndApplyHealing(
   // Calculate total healing (turn-based + immediate)
   const totalHealing = turnResult.healingApplied + immediateHealing;
 
-  // Apply healing to health (capped at maxHP = Physical × 5)
+  // Apply healing to health (capped at maxHP from arkanaStats.hitPoints)
   const currentHP = user.stats?.health || 0;
-  const maxHP = user.arkanaStats.physical * 5;
+  const maxHP = user.arkanaStats.hitPoints;
   const newHP = Math.min(currentHP + totalHealing, maxHP);
 
   // Update UserStats.health if user has stats (regardless of healing amount)

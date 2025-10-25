@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
 import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -171,9 +171,13 @@ export async function POST(request: NextRequest) {
       damage = damageAfterReduction;
     }
 
-    // Process turn for attacker (decrement all activeEffects by 1 turn)
+    // Process turn for attacker (decrement all activeEffects by 1 turn) and apply healing
     const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
-    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+    const turnProcessed = await processEffectsTurnAndApplyHealing(
+      attacker as typeof attacker & { arkanaStats: NonNullable<typeof attacker.arkanaStats> },
+      attackerActiveEffects,
+      0  // No immediate healing from basic attacks
+    );
 
     await prisma.arkanaStats.update({
       where: { userId: attacker.id },
