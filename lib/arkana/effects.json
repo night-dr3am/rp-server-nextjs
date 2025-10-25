@@ -1972,12 +1972,23 @@
   },
   {
     "id": "damage_elemental_6_mental",
-    "name": "Elemental Damage +6 (Minor)",
+    "name": "Elemental Damage +6",
     "desc": "Deals 6 + Mental elemental damage (fire, ice, lightning, etc.)",
     "category": "damage",
     "type": "stat_based",
     "damageType": "elemental",
     "damageFormula": "6 + Mental",
+    "target": "single",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_elemental_4_mental",
+    "name": "Elemental Damage +4",
+    "desc": "Deals 4 + Mental elemental damage (fire, ice, lightning, etc.)",
+    "category": "damage",
+    "type": "stat_based",
+    "damageType": "elemental",
+    "damageFormula": "4 + Mental",
     "target": "single",
     "duration": "immediate"
   },
@@ -2098,6 +2109,17 @@
     "type": "stat_based",
     "damageType": "energy",
     "damageFormula": "6 + Mental",
+    "target": "single",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_magical_2_mental",
+    "name": "Magical Damage +2",
+    "desc": "Deals 2 + Mental magical damage (abjuration)",
+    "category": "damage",
+    "type": "stat_based",
+    "damageType": "energy",
+    "damageFormula": "2 + Mental",
     "target": "single",
     "duration": "immediate"
   },
