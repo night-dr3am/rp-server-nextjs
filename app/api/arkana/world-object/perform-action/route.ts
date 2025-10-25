@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
       skills?: string;
       checks?: string;
       successState: string;
+      notify?: string;  // Notification mode: "private", "local", or undefined (no notification)
     };
     const actions = worldObject.actions as WorldObjectAction[];
     const action = actions.find((a: WorldObjectAction) => a.action === actionId);
@@ -138,6 +139,7 @@ export async function POST(request: NextRequest) {
             objectName: worldObject.name,
             objectState: worldObject.state,
             message,
+            notify: action.notify || '',
             skillsMissing: missingSkills
           }
         });
@@ -174,7 +176,8 @@ export async function POST(request: NextRequest) {
               actionName: actionId,
               objectName: worldObject.name,
               objectState: worldObject.state,
-              message
+              message,
+              notify: action.notify || ''
             }
           });
         }
@@ -262,7 +265,8 @@ export async function POST(request: NextRequest) {
         objectName: worldObject.name,
         objectState: newState,
         ...(rollInfo && { rollInfo }), // Only include rollInfo if it's not empty
-        message
+        message,
+        notify: action.notify || ''
       }
     });
 
