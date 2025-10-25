@@ -34,10 +34,16 @@ async function createArkanaTestUser(arkanaStatsData: {
   }
 
   // Create userStats (global createTestUser doesn't create it for arkana universe)
+  // Use hitPoints parameter for backward compat (if health not specified, use hitPoints for current HP)
+  // Otherwise default to physical * 5
+  const physical = arkanaStatsData.physical || 3;
+  const maxHP = physical * 5;
+  const currentHP = arkanaStatsData.health ?? arkanaStatsData.hitPoints ?? maxHP;
+
   await prisma.userStats.create({
     data: {
       userId: user.id,
-      health: arkanaStatsData.health ?? 100,
+      health: currentHP,
       hunger: 100,
       thirst: 100,
       status: arkanaStatsData.status ?? 0,
@@ -54,11 +60,11 @@ async function createArkanaTestUser(arkanaStatsData: {
       agentName: 'TestAgent',
       race: 'human',
       archetype: 'Arcanist',
-      physical: arkanaStatsData.physical || 3,
+      physical: physical,
       dexterity: arkanaStatsData.dexterity || 3,
       mental: arkanaStatsData.mental || 3,
       perception: arkanaStatsData.perception || 3,
-      hitPoints: arkanaStatsData.hitPoints || 100,
+      hitPoints: maxHP,  // Always calculate from physical (hitPoints is MAX HP)
       statPointsPool: 0,
       statPointsSpent: 6,
       flaws: ['flaw_addiction'],
@@ -580,8 +586,9 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(data.data.currentHP).toBe(52);
     expect(decodeURIComponent(data.data.message)).toContain('Healed 2 HP');
 
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(52);
     const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(52);
     const effects = updatedStats?.activeEffects as ActiveEffect[];
     expect(effects[0].turnsLeft).toBe(2);
   });
@@ -613,8 +620,9 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(data.data.currentHP).toBe(85);
     expect(data.data.effectsRemaining).toBe(0);
 
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(85);
     const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(85);
     expect(updatedStats?.activeEffects).toEqual([]);
   });
 
@@ -645,8 +653,8 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(data.data.currentHP).toBe(100); // Capped at max (20 × 5)
     expect(decodeURIComponent(data.data.message)).toContain('Healed 5 HP'); // Actual healing was only 5
 
-    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(100);
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(100);
   });
 
   it('should stack multiple heal-over-time effects', async () => {
@@ -680,8 +688,8 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(decodedMessage).toContain('Test Heal Over Time +2');
     expect(decodedMessage).toContain('Test Scene Regeneration');
 
-    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(73);
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(73);
   });
 
   it('should apply scene-based heal effect every turn without decrementing', async () => {
@@ -714,8 +722,9 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expectSuccess(data);
     expect(data.data.healingApplied).toBe(1);
 
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(63); // 60 + 1 + 1 + 1
     const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(63); // 60 + 1 + 1 + 1
     const effects = updatedStats?.activeEffects as ActiveEffect[];
     expect(effects[0].turnsLeft).toBe(999); // Still 999
   });
@@ -768,8 +777,8 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(data.data.currentHP).toBe(100); // Still at max (20 × 5)
     expect(decodeURIComponent(data.data.message)).toContain('Healed 0 HP'); // Actual healing was 0
 
-    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(100);
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(100);
   });
 
   it('should heal player with low HP correctly', async () => {
@@ -791,7 +800,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     expect(data.data.currentHP).toBe(12);
     expect(decodeURIComponent(data.data.message)).toContain('Healed 2 HP from: Test Heal Over Time +2');
 
-    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
-    expect(updatedStats?.hitPoints).toBe(12);
+    const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+    expect(updatedUserStats?.health).toBe(12);
   });
 });

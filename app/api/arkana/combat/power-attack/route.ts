@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurn, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
@@ -244,7 +244,11 @@ export async function POST(request: NextRequest) {
     if (!attackSuccess && attackEffects.some((e: string) => e.startsWith('check_'))) {
       // Process turn for attacker (decrement all effects) even on failure
       // Note: attackerActiveEffects already defined above (without passive effects)
-      const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+      const turnProcessed = await processEffectsTurnAndApplyHealing(
+        attacker as typeof attacker & { arkanaStats: NonNullable<typeof attacker.arkanaStats> },
+        attackerActiveEffects,
+        0  // No immediate healing on miss
+      );
 
       await prisma.arkanaStats.update({
         where: { userId: attacker.id },
@@ -331,19 +335,31 @@ export async function POST(request: NextRequest) {
     // Note: attackerActiveEffects already defined above (without passive effects)
     // We need a mutable copy for turn processing
 
-    // Process turn for attacker FIRST (decrement all PRE-EXISTING effects by 1 turn)
-    const turnProcessed = processEffectsTurn(attackerActiveEffects, attacker.arkanaStats);
+    // Calculate immediate healing from self-effects (e.g., Drain, Life Tap) BEFORE processing turn
+    let immediateHealing = 0;
+    for (const effectResult of selfEffects) {
+      if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
+        immediateHealing += effectResult.heal;
+      }
+    }
+
+    // Process turn for attacker FIRST (decrement all PRE-EXISTING effects by 1 turn) and apply healing
+    const turnProcessed = await processEffectsTurnAndApplyHealing(
+      attacker as typeof attacker & { arkanaStats: NonNullable<typeof attacker.arkanaStats> },
+      attackerActiveEffects,
+      immediateHealing
+    );
     let processedAttackerActiveEffects = turnProcessed.activeEffects;
 
     // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
-        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult, attacker.arkanaStats.characterName);
+        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult, attacker.arkanaStats!.characterName);
       }
     }
 
     // Recalculate liveStats with both decremented old effects AND new self-effects
-    const finalLiveStats = recalculateLiveStats(attacker.arkanaStats, processedAttackerActiveEffects);
+    const finalLiveStats = recalculateLiveStats(attacker.arkanaStats!, processedAttackerActiveEffects);
 
     await prisma.arkanaStats.update({
       where: { userId: attacker.id },

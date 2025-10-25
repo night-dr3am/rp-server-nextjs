@@ -326,6 +326,62 @@ export function processEffectsTurn(
 }
 
 /**
+ * Process turn effects AND apply all healing to user's health in one atomic operation
+ * Combines turn-based healing (HoT) + immediate healing, then updates UserStats.health
+ * This keeps all effect processing and healing logic together in one place
+ *
+ * @param user - User object with stats and arkanaStats
+ * @param activeEffects - Current active effects to process
+ * @param immediateHealing - Optional immediate healing from new effects (default: 0)
+ * @returns Updated effects, liveStats, total healing applied, heal effect names, and new HP value
+ */
+export async function processEffectsTurnAndApplyHealing(
+  user: {
+    id: string;
+    stats: { health: number; userId: string } | null;
+    arkanaStats: ArkanaStats;
+  },
+  activeEffects: ActiveEffect[],
+  immediateHealing: number = 0
+): Promise<{
+  activeEffects: ActiveEffect[];
+  liveStats: LiveStats;
+  healingApplied: number;
+  healEffectNames: string[];
+  newHP: number;
+}> {
+  const { prisma } = await import('@/lib/prisma');
+
+  // Process turn effects (decrement, calculate HoT healing)
+  const turnResult = processEffectsTurn(activeEffects, user.arkanaStats);
+
+  // Calculate total healing (turn-based + immediate)
+  const totalHealing = turnResult.healingApplied + immediateHealing;
+
+  // Apply healing to health (capped at maxHP = Physical × 5)
+  const currentHP = user.stats?.health || 0;
+  const maxHP = user.arkanaStats.physical * 5;
+  const newHP = Math.min(currentHP + totalHealing, maxHP);
+
+  // Update UserStats.health if user has stats (regardless of healing amount)
+  // This ensures the database always reflects the current state
+  if (user.stats) {
+    await prisma.userStats.update({
+      where: { userId: user.id },
+      data: { health: newHP }
+    });
+  }
+
+  return {
+    activeEffects: turnResult.activeEffects,
+    liveStats: turnResult.liveStats,
+    healingApplied: totalHealing,
+    healEffectNames: turnResult.healEffectNames,
+    newHP
+  };
+}
+
+/**
  * Filter effects by target type
  */
 export function getEffectsByTarget(

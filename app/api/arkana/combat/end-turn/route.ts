@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaEndTurnSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,22 +59,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse activeEffects and process turn
+    // Parse activeEffects, process turn, and apply healing in one operation
     const activeEffects = parseActiveEffects(player.arkanaStats.activeEffects);
-    const turnProcessed = processEffectsTurn(activeEffects, player.arkanaStats);
-
-    // Apply healing from heal effects (capped at maxHP = Physical × 5)
-    const currentHP = player.arkanaStats.hitPoints;
+    const currentHP = player.stats?.health || 0;
     const maxHP = player.arkanaStats.physical * 5;
-    const newHP = Math.min(currentHP + turnProcessed.healingApplied, maxHP);
 
-    // Update database with new activeEffects, liveStats, and hitPoints
+    const turnProcessed = await processEffectsTurnAndApplyHealing(
+      player as typeof player & { arkanaStats: NonNullable<typeof player.arkanaStats> },
+      activeEffects,
+      0  // No immediate healing in end-turn
+    );
+
+    // Update database with new activeEffects and liveStats
     await prisma.arkanaStats.update({
       where: { userId: player.id },
       data: buildArkanaStatsUpdate({
         activeEffects: turnProcessed.activeEffects,
-        liveStats: turnProcessed.liveStats,
-        hitPoints: newHP
+        liveStats: turnProcessed.liveStats
       })
     });
 
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
     let message = `Turn ended. ${effectsRemaining} active effects remaining.`;
 
     if (turnProcessed.healingApplied > 0) {
-      const actualHealing = newHP - currentHP;
+      const actualHealing = turnProcessed.newHP - currentHP;
       message += ` Healed ${actualHealing} HP from: ${turnProcessed.healEffectNames.join(', ')}.`;
     }
 
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
         playerName: encodeForLSL(playerName),
         effectsRemaining,
         healingApplied: turnProcessed.healingApplied,
-        currentHP: newHP,
+        currentHP: turnProcessed.newHP,
         maxHP: maxHP,
         message: encodeForLSL(message)
       }
