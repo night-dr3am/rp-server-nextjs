@@ -295,6 +295,12 @@ export async function POST(request: NextRequest) {
       const casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
       const turnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
 
+      // Apply healing from turn processing (maxHP = Physical × 5)
+      // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
+      const currentHP = caster.stats?.health || 0;
+      const maxHP = caster.arkanaStats.physical * 5;
+      const newHP = Math.min(currentHP + turnProcessed.healingApplied, maxHP);
+
       await prisma.arkanaStats.update({
         where: { userId: caster.id },
         data: buildArkanaStatsUpdate({
@@ -302,6 +308,14 @@ export async function POST(request: NextRequest) {
           liveStats: turnProcessed.liveStats
         })
       });
+
+      // Update UserStats with new health value
+      if (caster.stats) {
+        await prisma.userStats.update({
+          where: { userId: caster.id },
+          data: { health: newHP }
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -372,6 +386,12 @@ export async function POST(request: NextRequest) {
     const casterTurnProcessed = processEffectsTurn(casterActiveEffects, caster.arkanaStats);
     casterActiveEffects = casterTurnProcessed.activeEffects;
 
+    // Calculate caster healing from turn processing (maxHP = Physical × 5)
+    // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
+    const casterCurrentHP = caster.stats?.health || 0;
+    const casterMaxHP = caster.arkanaStats.physical * 5;
+    const casterNewHP = Math.min(casterCurrentHP + casterTurnProcessed.healingApplied, casterMaxHP);
+
     // Track which users have been updated (to avoid duplicate processing)
     const updatedUsers = new Set<string>();
 
@@ -405,7 +425,27 @@ export async function POST(request: NextRequest) {
       // Recalculate liveStats
       const userLiveStats = recalculateLiveStats(affectedUser.arkanaStats, userActiveEffects);
 
-      // Update database
+      // Apply immediate healing from heal effects (if any)
+      // Use UserStats.health for current HP, ArkanaStats.hitPoints is max HP
+      let userNewHP = affectedUser.stats?.health || 0;
+      let immediateHealing = 0;
+
+      for (const effectResult of effectResults) {
+        if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
+          immediateHealing += effectResult.heal;
+        }
+      }
+
+      // If this is the caster, start with turn-based healing, then add immediate
+      if (userUuid === caster.slUuid) {
+        userNewHP = casterNewHP + immediateHealing;
+        userNewHP = Math.min(userNewHP, affectedUser.arkanaStats.physical * 5);
+      } else if (immediateHealing > 0) {
+        // For non-casters, just add immediate healing
+        userNewHP = Math.min(userNewHP + immediateHealing, affectedUser.arkanaStats.physical * 5);
+      }
+
+      // Update database - update ArkanaStats for effects/liveStats and UserStats for current health
       await prisma.arkanaStats.update({
         where: { userId: affectedUser.id },
         data: buildArkanaStatsUpdate({
@@ -413,6 +453,14 @@ export async function POST(request: NextRequest) {
           liveStats: userLiveStats
         })
       });
+
+      // Update UserStats with new health value
+      if (affectedUser.stats) {
+        await prisma.userStats.update({
+          where: { userId: affectedUser.id },
+          data: { health: userNewHP }
+        });
+      }
 
       updatedUsers.add(userUuid);
 
@@ -433,6 +481,14 @@ export async function POST(request: NextRequest) {
           liveStats: casterTurnProcessed.liveStats
         })
       });
+
+      // Update UserStats with new health value
+      if (caster.stats) {
+        await prisma.userStats.update({
+          where: { userId: caster.id },
+          data: { health: casterNewHP }
+        });
+      }
     }
 
     // Build comprehensive message with effect details

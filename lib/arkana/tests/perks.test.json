@@ -58,5 +58,65 @@
     "effects": {
       "attack": ["check_mental_vs_mental", "damage_physical_3"]
     }
+  },
+  {
+    "id": "perk_test_self_heal",
+    "name": "Test Self Heal",
+    "desc": "Test perk for immediate self-healing",
+    "cost": 1,
+    "species": null,
+    "arch": null,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["heal_test_immediate_3"]
+    }
+  },
+  {
+    "id": "perk_test_hot",
+    "name": "Test HoT",
+    "desc": "Test perk for heal-over-time effects",
+    "cost": 1,
+    "species": null,
+    "arch": null,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["heal_test_over_time_2"]
+    }
+  },
+  {
+    "id": "perk_test_buff",
+    "name": "Test Buff with HoT",
+    "desc": "Test perk that applies buffs and processes existing HoT",
+    "cost": 1,
+    "species": null,
+    "arch": null,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["buff_mental_1"]
+    }
+  },
+  {
+    "id": "perk_test_overheal",
+    "name": "Test Overheal Cap",
+    "desc": "Test perk for healing cap at maxHP",
+    "cost": 1,
+    "species": null,
+    "arch": null,
+    "abilityType": ["ability"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["heal_test_overheal_10"]
+    }
   }
 ]

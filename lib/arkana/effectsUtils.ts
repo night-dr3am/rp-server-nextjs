@@ -109,7 +109,41 @@ export function executeEffect(
     return { success: true, damage, effectDef };
   }
 
-  // Handle STAT_MODIFIER, CONTROL, HEAL, etc. - just return the definition
+  // Handle HEAL effects
+  if (effectDef.category === 'heal') {
+    let heal = 0;
+
+    if (effectDef.healFormula) {
+      const parts = effectDef.healFormula.split('+').map(p => p.trim());
+      heal = parseInt(parts[0]) || 0;
+
+      if (parts[1]) {
+        const statName = parts[1];
+        // Use effective stats if liveStats provided, otherwise use base stats
+        if (statName === 'Physical') {
+          heal += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'physical')
+            : calculateStatModifier(attacker.physical);
+        } else if (statName === 'Mental') {
+          heal += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'mental')
+            : calculateStatModifier(attacker.mental);
+        } else if (statName === 'Dexterity') {
+          heal += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'dexterity')
+            : calculateStatModifier(attacker.dexterity);
+        } else if (statName === 'Perception') {
+          heal += attackerLiveStats
+            ? getEffectiveStatModifier(attacker, attackerLiveStats, 'perception')
+            : calculateStatModifier(attacker.perception);
+        }
+      }
+    }
+
+    return { success: true, heal, effectDef };
+  }
+
+  // Handle STAT_MODIFIER, CONTROL, etc. - just return the definition
   return { success: true, effectDef };
 }
 
@@ -229,14 +263,42 @@ export function recalculateLiveStats(
 }
 
 /**
- * Process turn for effects: decrement turns, remove expired, recalculate live stats
+ * Process turn for effects: decrement turns, remove expired, recalculate live stats, apply healing
  * Scene effects are NOT decremented - they remain at turnsLeft: 999 until scene ends
  * Only turn-based effects (duration starts with "turns:") are decremented
+ * Heal effects with duration apply healing each turn BEFORE decrementing
  */
 export function processEffectsTurn(
   activeEffects: ActiveEffect[],
   baseStats: ArkanaStats
-): { activeEffects: ActiveEffect[]; liveStats: LiveStats } {
+): { activeEffects: ActiveEffect[]; liveStats: LiveStats; healingApplied: number; healEffectNames: string[] } {
+  // Calculate healing from active heal effects BEFORE decrementing
+  let totalHealing = 0;
+  const healEffectNames: string[] = [];
+
+  for (const effect of activeEffects) {
+    const effectDef = getEffectDefinition(effect.effectId);
+
+    if (effectDef && effectDef.category === 'heal' && effectDef.duration !== 'immediate') {
+      // Parse healFormula (similar to damage formula)
+      let healAmount = 0;
+
+      if (effectDef.healFormula) {
+        const parts = effectDef.healFormula.split('+').map(p => p.trim());
+        healAmount = parseInt(parts[0]) || 0;
+
+        // Note: For heal-over-time effects, we use base stats without modifiers
+        // since the effect definition already contains the heal amount
+        // If we want to add stat bonuses to healing, we can enhance this later
+      }
+
+      if (healAmount > 0) {
+        totalHealing += healAmount;
+        healEffectNames.push(effect.name);
+      }
+    }
+  }
+
   // Decrement turn-based effects only; scene effects remain unchanged
   const updatedEffects = activeEffects
     .map(effect => {
@@ -257,7 +319,9 @@ export function processEffectsTurn(
 
   return {
     activeEffects: updatedEffects,
-    liveStats
+    liveStats,
+    healingApplied: totalHealing,
+    healEffectNames
   };
 }
 
@@ -272,12 +336,13 @@ export function getEffectsByTarget(
 }
 
 /**
- * Build Prisma update data for arkanaStats with activeEffects and liveStats
+ * Build Prisma update data for arkanaStats with activeEffects, liveStats, and optional hitPoints
  * Uses Record<string, unknown> to avoid type casting issues with JSON fields
  */
 export function buildArkanaStatsUpdate(updates: {
   activeEffects?: ActiveEffect[];
   liveStats?: LiveStats;
+  hitPoints?: number;
 }): Record<string, unknown> {
   const data: Record<string, unknown> = {};
 
@@ -286,6 +351,10 @@ export function buildArkanaStatsUpdate(updates: {
   }
   if (updates.liveStats !== undefined) {
     data.liveStats = updates.liveStats;
+  }
+  // Only include hitPoints if it's a valid number
+  if (typeof updates.hitPoints === 'number' && !isNaN(updates.hitPoints)) {
+    data.hitPoints = updates.hitPoints;
   }
 
   return data;
@@ -486,7 +555,51 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     outputSections.push(`🛡️ Defense: Damage Reduction -${totalDamageReduction} (${effectsList})`);
   }
 
-  // === SECTION 5: Control Effects ===
+  // === SECTION 5: Heal Effects ===
+
+  const healEffects: Array<{ name: string; healPerTurn: number; duration: string }> = [];
+  let totalHealingPerTurn = 0;
+
+  for (const activeEffect of activeEffects) {
+    const effectDef = getEffectDefinition(activeEffect.effectId);
+
+    if (effectDef && effectDef.category === 'heal' && effectDef.duration !== 'immediate') {
+      // Format duration string
+      let durationStr = '';
+      if (activeEffect.turnsLeft === 999) {
+        durationStr = 'scene';
+      } else if (activeEffect.turnsLeft === 1) {
+        durationStr = '1 turn left';
+      } else {
+        durationStr = `${activeEffect.turnsLeft} turns left`;
+      }
+
+      // Calculate heal per turn from healFormula
+      let healPerTurn = 0;
+      if (effectDef.healFormula) {
+        const parts = effectDef.healFormula.split('+').map(p => p.trim());
+        healPerTurn = parseInt(parts[0]) || 0;
+      }
+
+      if (healPerTurn > 0) {
+        totalHealingPerTurn += healPerTurn;
+        healEffects.push({
+          name: activeEffect.name,
+          healPerTurn,
+          duration: durationStr
+        });
+      }
+    }
+  }
+
+  if (healEffects.length > 0) {
+    const effectsList = healEffects
+      .map(h => `${h.name}(${h.duration})`)
+      .join(', ');
+    outputSections.push(`💚 Healing: +${totalHealingPerTurn} HP/turn (${effectsList})`);
+  }
+
+  // === SECTION 6: Control Effects ===
 
   const controlEffects: Array<{ name: string; caster: string; duration: string }> = [];
 

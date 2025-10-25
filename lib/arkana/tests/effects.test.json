@@ -494,5 +494,95 @@
     "target": "enemy",
     "duration": "scene",
     "resistType": "Mental"
+  },
+  {
+    "id": "heal_test_immediate_3",
+    "name": "Test Immediate Heal +3",
+    "desc": "Instantly heals 3 HP",
+    "category": "heal",
+    "type": "direct",
+    "healFormula": "3",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_test_mental_bonus",
+    "name": "Test Mental-Based Heal",
+    "desc": "Heals 2 + Mental modifier HP",
+    "category": "heal",
+    "type": "stat_based",
+    "healFormula": "2 + Mental",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_test_over_time_2",
+    "name": "Test Heal Over Time +2",
+    "desc": "Heals 2 HP per turn for 3 turns",
+    "category": "heal",
+    "type": "regeneration",
+    "healFormula": "2",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "heal_test_scene_regeneration",
+    "name": "Test Scene Regeneration",
+    "desc": "Heals 1 HP per turn for the scene",
+    "category": "heal",
+    "type": "regeneration",
+    "healFormula": "1",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "heal_test_area_immediate",
+    "name": "Test Area Healing Wave",
+    "desc": "Heals all allies in area for 4 HP",
+    "category": "heal",
+    "type": "area",
+    "healFormula": "4",
+    "target": "all_allies",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_test_single_turn",
+    "name": "Test Quick Regeneration",
+    "desc": "Heals 5 HP on next turn only",
+    "category": "heal",
+    "type": "regeneration",
+    "healFormula": "5",
+    "target": "self",
+    "duration": "turns:1"
+  },
+  {
+    "id": "heal_test_high_value",
+    "name": "Test Major Healing",
+    "desc": "Heals 10 HP per turn",
+    "category": "heal",
+    "type": "regeneration",
+    "healFormula": "10",
+    "target": "ally",
+    "duration": "turns:1"
+  },
+  {
+    "id": "heal_test_physical_bonus",
+    "name": "Test Physical-Based Heal",
+    "desc": "Heals 3 + Physical modifier HP",
+    "category": "heal",
+    "type": "stat_based",
+    "healFormula": "3 + Physical",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_test_overheal_10",
+    "name": "Test Overheal +10",
+    "desc": "Instantly heals 10 HP (for testing maxHP cap)",
+    "category": "heal",
+    "type": "direct",
+    "healFormula": "10",
+    "target": "self",
+    "duration": "immediate"
   }
 ]

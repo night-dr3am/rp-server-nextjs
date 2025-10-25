@@ -63,25 +63,41 @@ export async function POST(request: NextRequest) {
     const activeEffects = parseActiveEffects(player.arkanaStats.activeEffects);
     const turnProcessed = processEffectsTurn(activeEffects, player.arkanaStats);
 
-    // Update database with new activeEffects and liveStats
+    // Apply healing from heal effects (capped at maxHP = Physical × 5)
+    const currentHP = player.arkanaStats.hitPoints;
+    const maxHP = player.arkanaStats.physical * 5;
+    const newHP = Math.min(currentHP + turnProcessed.healingApplied, maxHP);
+
+    // Update database with new activeEffects, liveStats, and hitPoints
     await prisma.arkanaStats.update({
       where: { userId: player.id },
       data: buildArkanaStatsUpdate({
         activeEffects: turnProcessed.activeEffects,
-        liveStats: turnProcessed.liveStats
+        liveStats: turnProcessed.liveStats,
+        hitPoints: newHP
       })
     });
 
-    // Return success with effect count
+    // Return success with effect count and healing info
     const playerName = player.arkanaStats.characterName;
     const effectsRemaining = turnProcessed.activeEffects.length;
+
+    let message = `Turn ended. ${effectsRemaining} active effects remaining.`;
+
+    if (turnProcessed.healingApplied > 0) {
+      const actualHealing = newHP - currentHP;
+      message += ` Healed ${actualHealing} HP from: ${turnProcessed.healEffectNames.join(', ')}.`;
+    }
 
     return NextResponse.json({
       success: true,
       data: {
         playerName: encodeForLSL(playerName),
         effectsRemaining,
-        message: encodeForLSL(`Turn ended. ${effectsRemaining} active effects remaining.`)
+        healingApplied: turnProcessed.healingApplied,
+        currentHP: newHP,
+        maxHP: maxHP,
+        message: encodeForLSL(message)
       }
     });
 

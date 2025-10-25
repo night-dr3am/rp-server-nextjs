@@ -550,4 +550,248 @@ describe('POST /api/arkana/combat/end-turn', () => {
       expect(effect.duration).toBe('scene');
     });
   });
+
+  // === HEAL EFFECT TESTS ===
+
+  it('should apply heal-over-time effect each turn', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to support HP: 50 (maxHP = 100)
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 50 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const params = {
+      player_uuid: user.slUuid,
+      universe: 'arkana',
+      timestamp,
+      signature
+    };
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', params);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(2);
+    expect(data.data.currentHP).toBe(52);
+    expect(decodeURIComponent(data.data.message)).toContain('Healed 2 HP');
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(52);
+    const effects = updatedStats?.activeEffects as ActiveEffect[];
+    expect(effects[0].turnsLeft).toBe(2);
+  });
+
+  it('should remove heal effect after last turn and apply final healing', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_single_turn', name: 'Test Quick Regeneration', duration: 'turns:1', turnsLeft: 1, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to support HP: 80 (maxHP = 100)
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 80 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const params = {
+      player_uuid: user.slUuid,
+      universe: 'arkana',
+      timestamp,
+      signature
+    };
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', params);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(5);
+    expect(data.data.currentHP).toBe(85);
+    expect(data.data.effectsRemaining).toBe(0);
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(85);
+    expect(updatedStats?.activeEffects).toEqual([]);
+  });
+
+  it('should cap healing at maxHitPoints', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_high_value', name: 'Test Major Healing', duration: 'turns:1', turnsLeft: 1, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to get maxHP = 100
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 95 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const params = {
+      player_uuid: user.slUuid,
+      universe: 'arkana',
+      timestamp,
+      signature
+    };
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', params);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(10);
+    expect(data.data.currentHP).toBe(100); // Capped at max (20 × 5)
+    expect(decodeURIComponent(data.data.message)).toContain('Healed 5 HP'); // Actual healing was only 5
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(100);
+  });
+
+  it('should stack multiple heal-over-time effects', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() },
+      { effectId: 'heal_test_scene_regeneration', name: 'Test Scene Regeneration', duration: 'scene', turnsLeft: 999, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to support HP: 70 (maxHP = 100)
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 70 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const params = {
+      player_uuid: user.slUuid,
+      universe: 'arkana',
+      timestamp,
+      signature
+    };
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', params);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(3); // 2 + 1
+    expect(data.data.currentHP).toBe(73);
+    const decodedMessage = decodeURIComponent(data.data.message);
+    expect(decodedMessage).toContain('Healed 3 HP');
+    expect(decodedMessage).toContain('Test Heal Over Time +2');
+    expect(decodedMessage).toContain('Test Scene Regeneration');
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(73);
+  });
+
+  it('should apply scene-based heal effect every turn without decrementing', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_scene_regeneration', name: 'Test Scene Regeneration', duration: 'scene', turnsLeft: 999, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to support HP: 60 (maxHP = 100)
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 60 });
+
+    // First turn
+    let timestamp = new Date().toISOString();
+    let signature = generateSignature(timestamp, 'arkana');
+    let request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    await POST(request);
+
+    // Second turn
+    timestamp = new Date(Date.now() + 1000).toISOString();
+    signature = generateSignature(timestamp, 'arkana');
+    request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    await POST(request);
+
+    // Third turn
+    timestamp = new Date(Date.now() + 2000).toISOString();
+    signature = generateSignature(timestamp, 'arkana');
+    request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(1);
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(63); // 60 + 1 + 1 + 1
+    const effects = updatedStats?.activeEffects as ActiveEffect[];
+    expect(effects[0].turnsLeft).toBe(999); // Still 999
+  });
+
+  it('should work with mixed heal and buff effects', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() },
+      { effectId: 'buff_physical_1', name: 'Physical Boost', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to support HP: 50 (maxHP = 100)
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 50 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(2);
+    expect(data.data.currentHP).toBe(52);
+    expect(data.data.effectsRemaining).toBe(2);
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    const effects = updatedStats?.activeEffects as ActiveEffect[];
+    expect(effects).toHaveLength(2);
+    expect(effects.find(e => e.effectId === 'heal_test_over_time_2')?.turnsLeft).toBe(2);
+    expect(effects.find(e => e.effectId === 'buff_physical_1')?.turnsLeft).toBe(2);
+  });
+
+  it('should report zero healing when already at max HP', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+    ];
+
+    // Set physical: 20 to get maxHP = 100
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 100 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(2); // Attempted healing
+    expect(data.data.currentHP).toBe(100); // Still at max (20 × 5)
+    expect(decodeURIComponent(data.data.message)).toContain('Healed 0 HP'); // Actual healing was 0
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(100);
+  });
+
+  it('should heal player with low HP correctly', async () => {
+    const activeEffects: ActiveEffect[] = [
+      { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:2', turnsLeft: 2, appliedAt: new Date().toISOString() }
+    ];
+
+    const { user } = await createArkanaTestUser({ activeEffects, hitPoints: 10 });
+
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'arkana');
+
+    const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.healingApplied).toBe(2);
+    expect(data.data.currentHP).toBe(12);
+    expect(decodeURIComponent(data.data.message)).toContain('Healed 2 HP from: Test Heal Over Time +2');
+
+    const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+    expect(updatedStats?.hitPoints).toBe(12);
+  });
 });

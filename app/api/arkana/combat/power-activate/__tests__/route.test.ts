@@ -14,7 +14,7 @@ import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
 import type { ActiveEffect, LiveStats, ArkanaStats } from '@/lib/arkana/types';
 import { POST as PowerAttackPOST } from '../../power-attack/route';
-import { recalculateLiveStats } from '@/lib/arkana/effectsUtils';
+import { recalculateLiveStats, parseActiveEffects } from '@/lib/arkana/effectsUtils';
 
 describe('/api/arkana/combat/power-activate', () => {
   beforeAll(async () => {
@@ -41,6 +41,7 @@ describe('/api/arkana/combat/power-activate', () => {
     mental: number;
     perception: number;
     hitPoints: number;
+    health?: number; // Optional current HP (defaults to hitPoints if not specified)
     commonPowers?: string[];
     archetypePowers?: string[];
     activeEffects?: ActiveEffect[];
@@ -50,10 +51,11 @@ describe('/api/arkana/combat/power-activate', () => {
     const { user } = await createTestUser('arkana');
 
     // Create user stats with specified status (default 0 = RP mode)
+    // Use provided health value, or default to hitPoints (current HP = max HP at creation)
     await prisma.userStats.create({
       data: {
         userId: user.id,
-        health: 100,
+        health: arkanaStatsData.health !== undefined ? arkanaStatsData.health : arkanaStatsData.hitPoints,
         hunger: 100,
         thirst: 100,
         copperCoin: 100,
@@ -3361,12 +3363,12 @@ describe('/api/arkana/combat/power-activate', () => {
       // Damage should be reduced to 0 (tail slap does ~3 damage, defense blocks 5)
       expect(data.data.totalDamage).toBe(0);
 
-      // Health should not change from initial value (100)
+      // Health should not change from initial value (hitPoints = 20, since we didn't specify health)
       const updatedTarget = await prisma.user.findFirst({
         where: { id: target.id },
         include: { stats: true }
       });
-      expect(updatedTarget?.stats?.health).toBe(100);  // Initial health for test users
+      expect(updatedTarget?.stats?.health).toBe(20);  // Defaults to hitPoints (maxHP)
     });
 
     it('should show blocked damage in attack message', async () => {
@@ -3674,6 +3676,199 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(decoded).toContain('Test Remote Eavesdropping by Bob');
       expect(decoded).toContain('Test Shadowform by Charlie');
       expect(decoded).toContain('Damage Reduction -3');
+    });
+  });
+
+  // === HEAL EFFECT TESTS ===
+
+  describe('Heal Effects Tests', () => {
+    it('should apply immediate self-heal on activation', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Healer',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 11,  // maxHP = 11 × 5 = 55
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 55,  // MAX HP
+        health: 50,  // CURRENT HP
+        commonPowers: ['gaki_chi_manipulation'],
+        archetypePowers: []
+      });
+
+      // Update to add perks for heal test
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: { perks: ['perk_test_self_heal'] }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        caster_uuid: caster.slUuid,
+        universe: 'arkana',
+        power_id: 'perk_test_self_heal',
+        ability_type: 'perk',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Check UserStats.health for current HP
+      const updatedCasterStats = await prisma.userStats.findUnique({ where: { userId: caster.id } });
+      expect(updatedCasterStats?.health).toBe(53); // 50 + 3
+    });
+
+    it('should apply duration-based heal to activeEffects', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'HoTCaster',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 50,
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: { perks: ['perk_test_hot'] }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        caster_uuid: caster.slUuid,
+        universe: 'arkana',
+        power_id: 'perk_test_hot',
+        ability_type: 'perk',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const effects = parseActiveEffects(updatedCaster?.activeEffects);
+      expect(effects.some(e => e.effectId === 'heal_test_over_time_2')).toBe(true);
+      const healEffect = effects.find(e => e.effectId === 'heal_test_over_time_2');
+      expect(healEffect?.turnsLeft).toBe(3);
+    });
+
+    it('should process existing HoT effects during power activation', async () => {
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+      ];
+
+      const caster = await createArkanaTestUser({
+        characterName: 'ExistingHoT',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 11,  // maxHP = 11 × 5 = 55
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 55,  // MAX HP
+        health: 50,  // CURRENT HP
+        commonPowers: [],
+        archetypePowers: [],
+        activeEffects
+      });
+
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: { perks: ['perk_test_buff'] }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        caster_uuid: caster.slUuid,
+        universe: 'arkana',
+        power_id: 'perk_test_buff',
+        ability_type: 'perk',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Check UserStats.health for current HP
+      const updatedCasterStats = await prisma.userStats.findUnique({ where: { userId: caster.id } });
+      expect(updatedCasterStats?.health).toBe(52); // 50 + 2 from HoT
+
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const effects = parseActiveEffects(updatedCaster?.activeEffects);
+      const healEffect = effects.find(e => e.effectId === 'heal_test_over_time_2');
+      expect(healEffect?.turnsLeft).toBe(2); // Decremented from 3
+    });
+
+    it('should cap immediate healing at maxHitPoints', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'NearMaxHP',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 20,  // maxHP = 20 × 5 = 100
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        hitPoints: 100,  // NOTE: hitPoints in ArkanaStats is now MAX HP, not current HP
+        commonPowers: [],
+        archetypePowers: []
+      });
+
+      // Set current HP to 96 in UserStats (current HP is stored here)
+      await prisma.userStats.update({
+        where: { userId: caster.id },
+        data: { health: 96 }
+      });
+
+      await prisma.arkanaStats.update({
+        where: { userId: caster.id },
+        data: { perks: ['perk_test_overheal'] }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        caster_uuid: caster.slUuid,
+        universe: 'arkana',
+        power_id: 'perk_test_overheal',
+        ability_type: 'perk',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Check UserStats.health for current HP (should be capped at maxHP=100)
+      const updatedCasterStats = await prisma.userStats.findUnique({ where: { userId: caster.id } });
+      expect(updatedCasterStats?.health).toBe(100); // 96 + 10 = 106, capped at maxHP 100
     });
   });
 });
