@@ -22,5 +22,29 @@
     "type": "simple_roll",
     "maxLevel": 3,
     "mechanic": "Roll d20 + Mental + Hacking level"
+  },
+  {
+    "id": "skill_hack",
+    "name": "Hack",
+    "description": "Breach firewalls, override systems, or manipulate digital constructs",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for hacking, +1 bonus to Mental rolls"
+  },
+  {
+    "id": "skill_engineering",
+    "name": "Engineering",
+    "description": "Build, repair, or modify tech — from drones to dimensional gates",
+    "type": "required",
+    "maxLevel": 3,
+    "mechanic": "Required for engineering, +1 Mental roll"
+  },
+  {
+    "id": "skill_stealth",
+    "name": "Stealth",
+    "description": "Move unseen through shadows",
+    "type": "situational",
+    "maxLevel": 3,
+    "mechanic": "Creates TN for Perception rolls, changes State"
   }
 ]

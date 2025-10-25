@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { worldObjectPerformActionSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getWorldObjectCheck } from '@/lib/arkana/dataLoader';
+import { loadAllData, getWorldObjectCheck, getSkillById } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, parseActiveEffects, processEffectsTurn, recalculateLiveStats, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
 
@@ -114,20 +114,20 @@ export async function POST(request: NextRequest) {
           hasRequiredSkill = true;
           break;
         } else {
-          missingSkills.push(`${skillId} (level ${requiredLevel})`);
+          // Use user-friendly skill name instead of technical ID
+          const skillDef = getSkillById(skillId);
+          const skillName = skillDef ? skillDef.name : skillId;
+          missingSkills.push(`${skillName} (level ${requiredLevel})`);
         }
       }
 
       if (!hasRequiredSkill) {
         const playerName = player.arkanaStats.characterName || player.username;
         const skillsList = missingSkills.join(' OR ');
-        const currentSkillsDesc = playerSkills.length > 0
-          ? playerSkills.map((ps: PlayerSkill) => `${ps.skill_name} (${ps.level})`).join(', ')
-          : 'None';
 
         const message = encodeForLSL(
           `${playerName} cannot ${actionId.toLowerCase()} the ${worldObject.name}. ` +
-          `Missing required skills: ${skillsList}. Current skills: ${currentSkillsDesc}.`
+          `Missing required skills: ${skillsList}.`
         );
 
         return NextResponse.json({

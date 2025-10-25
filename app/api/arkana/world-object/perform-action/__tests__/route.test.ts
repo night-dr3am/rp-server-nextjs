@@ -317,9 +317,9 @@ describe('/api/arkana/world-object/perform-action', () => {
       const decodedMessage = decodeURIComponent(data.data.message);
       expect(decodedMessage).toContain('NoSkills');
       expect(decodedMessage).toContain('cannot');
-      expect(decodedMessage).toContain('skill_hack');
+      expect(decodedMessage).toContain('Hack'); // User-friendly name
       expect(data.data.skillsMissing).toBeDefined();
-      expect(data.data.skillsMissing).toContain('skill_hack (level 1)');
+      expect(data.data.skillsMissing).toContain('Hack (level 1)'); // User-friendly name
     });
 
     it('2.3 should fail when player has skill but insufficient level', async () => {
