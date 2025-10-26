@@ -734,6 +734,19 @@ export const arkanaAdminUserSearchSchema = Joi.object({
   limit: Joi.number().integer().min(5).max(100).optional().default(20)
 });
 
+export const arkanaAdminObjectSearchSchema = Joi.object({
+  token: Joi.string().required(),
+  search: Joi.string().min(1).max(255).optional().allow(''),
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(5).max(100).optional().default(20)
+});
+
+export const arkanaAdminObjectUpdateStateSchema = Joi.object({
+  token: Joi.string().required(),
+  objectId: Joi.string().min(1).max(255).required(),
+  state: Joi.string().min(1).max(100).required()
+});
+
 export const arkanaAdminUserUpdateSchema = Joi.object({
   token: Joi.string().required(),
 

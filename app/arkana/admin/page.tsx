@@ -49,6 +49,18 @@ interface User {
   lastActive: string;
 }
 
+interface WorldObject {
+  id: number;
+  objectId: string;
+  name: string;
+  type: string;
+  state: string;
+  description: string | null;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface EditDataForm {
   characterName: string;
   agentName: string;
@@ -150,6 +162,7 @@ function AdminDashboardContent() {
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'users' | 'objects'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -157,6 +170,13 @@ function AdminDashboardContent() {
   const [selectedUser, setSelectedUser] = useState<FullUserData | null>(null);
   const [editData, setEditData] = useState<Partial<EditDataForm>>({});
   const [saving, setSaving] = useState(false);
+
+  // Objects state
+  const [objects, setObjects] = useState<WorldObject[]>([]);
+  const [objectSearchTerm, setObjectSearchTerm] = useState('');
+  const [objectCurrentPage, setObjectCurrentPage] = useState(1);
+  const [objectTotalPages, setObjectTotalPages] = useState(1);
+  const [updatingObjectId, setUpdatingObjectId] = useState<string | null>(null);
 
   // Arkana data state
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -480,6 +500,66 @@ function AdminDashboardContent() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const fetchObjects = async (page = 1, search = '') => {
+    try {
+      const response = await fetch(
+        `/api/arkana/admin/world-objects?token=${token}&search=${encodeURIComponent(search)}&page=${page}&limit=20`
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setObjects(result.data.objects);
+        setObjectCurrentPage(result.data.pagination.currentPage);
+        setObjectTotalPages(result.data.pagination.totalPages);
+      }
+    } catch {
+      setError('Failed to fetch world objects');
+    }
+  };
+
+  const handleObjectSearch = () => {
+    setObjectCurrentPage(1);
+    fetchObjects(1, objectSearchTerm);
+  };
+
+  const handleObjectStateUpdate = async (objectId: string, newState: string) => {
+    setUpdatingObjectId(objectId);
+    try {
+      const response = await fetch('/api/arkana/admin/world-object/update-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, objectId, state: newState })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local state
+        setObjects(objects.map(obj =>
+          obj.objectId === objectId ? { ...obj, state: newState } : obj
+        ));
+      } else {
+        alert(`Failed to update state: ${result.error}`);
+      }
+    } catch {
+      alert('Failed to update object state');
+    } finally {
+      setUpdatingObjectId(null);
+    }
+  };
+
+  const STATE_OPTIONS: Record<string, string[]> = {
+    door: ['Open', 'Closed', 'Locked', 'Hacked'],
+    lever: ['On', 'Off'],
+    chest: ['Open', 'Closed', 'Locked'],
+    terminal: ['Active', 'Inactive', 'Hacked'],
+    default: ['default', 'active', 'inactive']
+  };
+
+  const getStateOptionsForType = (type: string): string[] => {
+    return STATE_OPTIONS[type.toLowerCase()] || STATE_OPTIONS.default;
   };
 
   const getHealthPercentage = (current: number, max: number) => {
@@ -1034,7 +1114,33 @@ function AdminDashboardContent() {
 
         {!selectedUser ? (
           <>
-            {/* Search Bar */}
+            {/* Tab Navigation */}
+            <div className="flex space-x-2 bg-gray-900 p-2 rounded-lg shadow-lg shadow-cyan-500/20 mb-6">
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`flex-1 px-6 py-3 rounded font-medium transition-colors ${
+                  activeTab === 'users'
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-gray-800 text-cyan-300 hover:bg-gray-700'
+                }`}
+              >
+                👥 Users Management
+              </button>
+              <button
+                onClick={() => setActiveTab('objects')}
+                className={`flex-1 px-6 py-3 rounded font-medium transition-colors ${
+                  activeTab === 'objects'
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-gray-800 text-cyan-300 hover:bg-gray-700'
+                }`}
+              >
+                🌍 Objects Management
+              </button>
+            </div>
+
+            {activeTab === 'users' ? (
+              <>
+                {/* Search Bar */}
             <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6 mb-6">
               <h2 className="text-xl font-bold text-cyan-400 mb-4">Search Users</h2>
               <div className="flex gap-4">
@@ -1134,6 +1240,111 @@ function AdminDashboardContent() {
                 </div>
               )}
             </div>
+          </>
+            ) : (
+              <>
+                {/* Objects Management Tab */}
+                {/* Search Bar */}
+                <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6 mb-6">
+                  <h2 className="text-xl font-bold text-cyan-400 mb-4">Search World Objects</h2>
+                  <div className="flex gap-4">
+                    <input
+                      type="text"
+                      placeholder="Search by object ID or name..."
+                      value={objectSearchTerm}
+                      onChange={(e) => setObjectSearchTerm(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleObjectSearch()}
+                      className="flex-1 px-4 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300"
+                    />
+                    <button
+                      onClick={handleObjectSearch}
+                      className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded font-medium"
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
+
+                {/* Object List */}
+                <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6">
+                  <h2 className="text-xl font-bold text-cyan-400 mb-4">World Objects ({objects.length})</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-cyan-700">
+                      <thead className="bg-gray-800">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">Object ID</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">Name</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">Type</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">State</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">Location</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-cyan-400 uppercase">Updated</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-gray-900 divide-y divide-cyan-800">
+                        {objects.map((obj) => (
+                          <tr key={obj.id} className="hover:bg-gray-800">
+                            <td className="px-4 py-3 text-sm">
+                              <div className="font-medium text-cyan-300">{obj.objectId}</div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-cyan-300">{obj.name}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className="px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs">
+                                {obj.type}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <select
+                                value={obj.state}
+                                onChange={(e) => handleObjectStateUpdate(obj.objectId, e.target.value)}
+                                disabled={updatingObjectId === obj.objectId}
+                                className="px-3 py-1 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300 disabled:opacity-50"
+                              >
+                                {getStateOptionsForType(obj.type).map(state => (
+                                  <option key={state} value={state}>
+                                    {state}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-400">
+                              {obj.location || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-400">
+                              {new Date(obj.updatedAt).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {objectTotalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-cyan-300">
+                        Page {objectCurrentPage} of {objectTotalPages}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => fetchObjects(objectCurrentPage - 1, objectSearchTerm)}
+                          disabled={objectCurrentPage === 1}
+                          className="px-3 py-2 border border-cyan-500 rounded text-sm text-cyan-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => fetchObjects(objectCurrentPage + 1, objectSearchTerm)}
+                          disabled={objectCurrentPage === objectTotalPages}
+                          className="px-3 py-2 border border-cyan-500 rounded text-sm text-cyan-300 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </>
         ) : (
           // User Editor
