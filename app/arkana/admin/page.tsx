@@ -212,7 +212,11 @@ function AdminDashboardContent() {
 
         if (result.success) {
           setIsVerified(true);
-          await fetchUsers();
+          // Auto-load both users and objects on admin dashboard load
+          await Promise.all([
+            fetchUsers(),
+            fetchObjects()
+          ]);
         } else {
           setError(result.error || 'Access denied');
         }
