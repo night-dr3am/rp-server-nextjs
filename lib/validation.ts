@@ -344,6 +344,13 @@ export const worldObjectPerformActionSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const worldObjectSyncSchema = Joi.object({
+  objectId: Joi.string().min(1).max(255).required(),
+  universe: Joi.string().valid('arkana').default('arkana'),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // Arkana character creation validation schemas
 export const arkanaRegisterSchema = Joi.object({
   sl_uuid: uuidSchema,
