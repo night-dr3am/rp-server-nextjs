@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { objectId, universe, name, description, location, owner, type, state, newState, stats, groups, actions, timestamp, signature } = value;
+    const { objectId, universe, name, description, location, owners, type, state, newState, stats, groups, actions, timestamp, signature } = value;
 
     // Validate signature
     const signatureValidation = validateSignature(timestamp, signature, universe);
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         name,
         description,
         location,
-        owner,
+        owners,
         type,
         // SMART STATE LOGIC FOR UPDATE:
         // - If newState provided: use it (force reset)
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         name,
         description,
         location,
-        owner,
+        owners,
         type,
         // SMART STATE LOGIC FOR CREATE:
         // - Use newState if provided, else notecard default
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
         name: worldObject.name,
         description: worldObject.description,
         location: worldObject.location,
-        owner: worldObject.owner,
+        owners: worldObject.owners,
         type: worldObject.type,
         state: worldObject.state,
         stats: worldObject.stats,

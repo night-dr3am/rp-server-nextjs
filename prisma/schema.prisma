@@ -163,7 +163,7 @@ model WorldObject {
   name        String                            // Display name
   description String?                           // Description
   location    String?                           // Location metadata
-  owner       String?                           // Owner SL UUID
+  owners      String[] @default([])             // Owner SL UUIDs (array for multiple owners)
   type        String                            // Object type (door, chest, lever, etc.)
   state       String   @default("default")      // Current state (unlocked, locked, open, closed, etc.)
   stats       Json     @default("{}")           // Custom stats (HP, durability, etc.)

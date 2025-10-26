@@ -309,7 +309,7 @@ export const worldObjectUpsertSchema = Joi.object({
   name: Joi.string().min(1).max(255).required(),
   description: Joi.string().max(1000).optional(),
   location: Joi.string().max(255).optional(),
-  owner: uuidSchema.optional(),
+  owners: Joi.array().items(uuidSchema).optional().default([]),
   type: Joi.string().min(1).max(100).required(),
   state: Joi.string().min(1).max(100).optional().default('default'),
   newState: Joi.string().min(1).max(100).optional(),

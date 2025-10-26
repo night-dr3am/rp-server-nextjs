@@ -257,7 +257,7 @@ describe('/api/arkana/world-object', () => {
         universe: 'arkana',
         name: 'Simple Object',
         type: 'misc',
-        // No description, location, owner, state, stats, groups
+        // No description, location, owners, state, stats, groups
         actions: [
           {
             action: 'Use',
@@ -279,7 +279,7 @@ describe('/api/arkana/world-object', () => {
       expect(data.data.groups).toEqual([]); // Default empty array
       expect(data.data.description).toBeNull();
       expect(data.data.location).toBeNull();
-      expect(data.data.owner).toBeNull();
+      expect(data.data.owners).toEqual([]); // Default empty owners array
     });
 
     it('should force state update when newState is provided', async () => {

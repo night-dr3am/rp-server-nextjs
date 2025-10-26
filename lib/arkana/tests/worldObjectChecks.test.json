@@ -29,7 +29,7 @@
   {
     "id": "check_is_object_owner",
     "name": "Ownership Check",
-    "desc": "Verify player is object owner",
+    "desc": "Verify player is authorized owner",
     "category": "ownership",
     "requiresOwnership": true
   }

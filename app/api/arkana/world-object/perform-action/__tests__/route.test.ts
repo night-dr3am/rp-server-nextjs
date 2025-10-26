@@ -690,7 +690,7 @@ describe('/api/arkana/world-object/perform-action', () => {
           name: 'Owned Door',
           type: 'door',
           state: 'closed',
-          owner: player.slUuid, // Player is owner
+          owners: [player.slUuid], // Player is owner (array format)
           actions: [
             {
               action: 'Lock',
@@ -744,7 +744,7 @@ describe('/api/arkana/world-object/perform-action', () => {
           name: 'Owned Door 2',
           type: 'door',
           state: 'closed',
-          owner: owner.slUuid, // Different owner
+          owners: [owner.slUuid], // Different owner (array format)
           actions: [
             {
               action: 'Lock',

@@ -162,11 +162,12 @@ export async function POST(request: NextRequest) {
 
       // Handle ownership check
       if (checkDef.category === 'ownership' && checkDef.requiresOwnership) {
-        if (worldObject.owner !== playerUuid) {
+        const owners = (worldObject.owners as string[]) || [];
+        if (!owners.includes(playerUuid)) {
           const playerName = player.arkanaStats.characterName || player.username;
           const message = encodeForLSL(
             `${playerName} cannot ${actionId.toLowerCase()} the ${worldObject.name}. ` +
-            `Only the owner can perform this action.`
+            `Only authorized owners can perform this action.`
           );
 
           return NextResponse.json({
