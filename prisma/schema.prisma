@@ -30,6 +30,7 @@ model User {
   rentingEstates Estate[]    @relation("EstateRenter")
   tenantEstates Estate[]    @relation("EstateTenants")
   arkanaStats  ArkanaStats?
+  goreanStats  GoreanStats?
   npcTasks     NPCTask[]
   craftings    Crafting[]
 
@@ -253,6 +254,84 @@ model ArkanaStats {
   user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("arkana_stats")
+}
+
+// Gorean character creation data - Multi-dimensional taxonomy
+model GoreanStats {
+  id                    Int       @id @default(autoincrement())
+  userId                String    @unique @map("user_id")
+
+  // Step 1: Identity & Background
+  characterName         String    @map("character_name")
+  agentName             String    @map("agent_name")  // Second Life name
+  title                 String?   @db.VarChar(512)
+  background            String?   @db.Text
+
+  // Step 2: Species Selection (35+ species including animals!)
+  species               String    // "human", "kurii", "larl", "tarn", "tabuk", etc.
+  speciesCategory       String    @map("species_category")  // "sapient", "feline", "avian", etc.
+  speciesVariant        String?   @map("species_variant")   // "black_larl", "northern_tabuk", "war_tarn", etc.
+
+  // Step 3: Culture/Origin
+  culture               String    // Primary cultural background
+  cultureType           String    @map("culture_type")  // "cityState", "northern", "nomadic", "animal", etc.
+
+  // Step 4: Status
+  status                String    // "freeMan", "freeWoman", "kajira", "kajirus", "wild", "domesticated", etc.
+  statusSubtype         String?   @map("status_subtype")  // Specific slave type or animal bond type
+
+  // Step 5: Caste/Role (varies by culture - castes for cities, roles for tribes)
+  casteRole             String?   @map("caste_role")  // Caste for cities, Role for tribal/animal
+  casteRoleType         String?   @map("caste_role_type")  // "highCaste", "lowCaste", "tribalRole", etc.
+
+  // Step 6: Region/City (optional)
+  region                String?   // Specific city, tribe, or geographic region
+  homeStoneName         String?   @map("home_stone_name")  // Name of Home Stone (if applicable)
+
+  // Step 7: Base Stats (1-5 range, similar to Arkana but 5 stats for Gor)
+  strength              Int       @default(1)  // Physical power, health, melee damage
+  agility               Int       @default(1)  // Speed, reflexes, dodge, ranged accuracy
+  intellect             Int       @default(1)  // Intelligence, reasoning, learning
+  perception            Int       @default(1)  // Awareness, tracking, intuition
+  charisma              Int       @default(1)  // Leadership, persuasion, animal handling
+  statPointsPool        Int       @default(10) @map("stat_points_pool")
+  statPointsSpent       Int       @default(0) @map("stat_points_spent")
+
+  // Derived Stats (calculated from base stats)
+  healthMax             Int       @default(5) @map("health_max")  // Strength × 5
+  hungerMax             Int       @default(100) @map("hunger_max")
+  thirstMax             Int       @default(100) @map("thirst_max")
+
+  // Current State (runtime values synced with UserStats for Gor universe)
+  healthCurrent         Int       @default(5) @map("health_current")
+  hungerCurrent         Int       @default(100) @map("hunger_current")
+  thirstCurrent         Int       @default(100) @map("thirst_current")
+
+  // Game Economy (Gor uses gold/silver/copper, not credits/chips)
+  goldCoin              Int       @default(0) @map("gold_coin")
+  silverCoin            Int       @default(0) @map("silver_coin")
+  copperCoin            Int       @default(0) @map("copper_coin")
+  xp                    Int       @default(0)
+
+  // Skills System (similar to Arkana)
+  skills                Json?     @default("[]")  // Array of {skill_id, skill_name, level}
+  skillsAllocatedPoints Int       @default(5) @map("skills_allocated_points")
+  skillsSpentPoints     Int       @default(0) @map("skills_spent_points")
+
+  // Active Effects System (same as Arkana for consistency)
+  activeEffects         Json?     @default("[]") @map("active_effects")  // Array of ActiveEffect objects
+  liveStats             Json?     @default("{}") @map("live_stats")      // Dynamic stat calculations
+
+  // Metadata
+  registrationCompleted Boolean   @default(false) @map("registration_completed")
+  gorRole               String    @default("player") @map("gor_role")  // "player" or "admin"
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("gorean_stats")
 }
 
 // NPC management for task givers and other interactive agents

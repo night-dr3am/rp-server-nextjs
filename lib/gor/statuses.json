@@ -1,0 +1,330 @@
+[
+  {
+    "id": "freeMan",
+      "name": "Free Man",
+      "category": "free",
+      "description": "Male citizen with full rights. Can own property, slaves, vote in some cities, bear arms. No restrictions on caste or mobility.",
+      "rights": [
+        "Own property and land",
+        "Own slaves (kajira/kajirus)",
+        "Vote in civic matters (some cities)",
+        "Bear arms and weapons",
+        "Travel freely",
+        "Companionship contracts",
+        "Participate in any caste",
+        "Legal standing in courts"
+      ],
+      "restrictions": [],
+      "applicableSpecies": ["human", "kurii"],
+      "culturalVariations": {
+        "southern_cities": "Full caste membership, formal social hierarchy",
+        "torvaldsland": "All men warriors, no formal castes",
+        "wagon_peoples": "All men warriors, clan specializations",
+        "red_savages": "Tribal membership, warrior societies",
+        "tahari_tribes": "Tribal confederations, askari status"
+      },
+      "popularityRating": 5
+    },
+    {
+      "id": "freeWoman",
+      "name": "Free Woman",
+      "category": "free",
+      "description": "Female citizen with rights that vary significantly by culture. Generally veiled in cities, more freedom in tribal cultures.",
+      "rights": [
+        "Own property (limited in most cities)",
+        "Companionship (renewable yearly contract)",
+        "Inheritance rights",
+        "Legal protection",
+        "Can petition to join most castes (exceptions: Initiates, Players, Assassins)",
+        "Can own slaves in some circumstances"
+      ],
+      "restrictions": [
+        "Must be veiled in public (most southern cities)",
+        "Limited mobility without male escort (southern cities)",
+        "Cannot join Initiates, Players, or Assassins castes",
+        "Subject to capture/enslavement in some contexts",
+        "Robes of Concealment required (southern cities)"
+      ],
+      "applicableSpecies": ["human"],
+      "culturalVariations": {
+        "southern_cities": "Heavily veiled, restricted movement, Robes of Concealment, protected but limited",
+        "torvaldsland": "More freedom, no veils, can carry weapons, higher status than south",
+        "tahari_tribes": "Varied - city dwellers veiled (haik), nomad women more freedom",
+        "red_savages": "Generally more freedom, but 'The Memory' means white women enslaved",
+        "wagon_peoples": "Significant restrictions, but some women hold power",
+        "panther_girls": "Complete freedom but outlaw status, eventually enslaved",
+        "red_hunters": "Equal partners in survival, high value, practical clothing"
+      },
+      "popularityRating": 4
+    },
+    {
+      "id": "kajira",
+      "name": "Kajira (Female Slave)",
+      "category": "slave",
+      "description": "Female slave, legal property with no rights. Only 2-3% of women on Gor are slaves. Marked with brand (usually Kef mark) and collar.",
+      "rights": [],
+      "restrictions": [
+        "Property status - no legal rights",
+        "Cannot own property",
+        "Must obey all commands",
+        "Can be bought, sold, traded, given away",
+        "Subject to discipline",
+        "Cannot refuse master's desires",
+        "Marked with brand (usually Kef mark on left thigh)",
+        "Collared (steel collar with master's name)",
+        "Can be killed by master (though wasteful)"
+      ],
+      "applicableSpecies": ["human"],
+      "subtypes": [
+        {
+          "id": "pleasure_slave",
+          "name": "Pleasure Slave",
+          "description": "Trained extensively for companionship, pleasure, and serving master's desires. Highest training, most valuable.",
+          "training": "Extensive pleasure training, dance, serving, submission"
+        },
+        {
+          "id": "tower_slave",
+          "name": "Tower Slave",
+          "description": "High-class city slave, often educated, used for household management or display.",
+          "training": "Household management, etiquette, possibly literacy"
+        },
+        {
+          "id": "kettle_slave",
+          "name": "Kettle Slave / Kettle Girl",
+          "description": "Kitchen and cooking work. Hard labor but essential household role.",
+          "training": "Cooking, food preparation, kitchen work"
+        },
+        {
+          "id": "work_slave",
+          "name": "Work Slave",
+          "description": "Manual labor - farming, cleaning, carrying. Hardest work, least prestigious.",
+          "training": "Minimal training, hard labor focus"
+        },
+        {
+          "id": "silk_slave",
+          "name": "Silk Slave / Silk Girl",
+          "description": "Pampered pleasure slave, often in wealthy households. 'Red silk' means non-virgin.",
+          "training": "Pleasure, pampering, luxury service"
+        },
+        {
+          "id": "passion_slave",
+          "name": "Passion Slave",
+          "description": "Intensely trained for overwhelming passion and emotional responses. Very valuable.",
+          "training": "Intense emotional and passion training"
+        },
+        {
+          "id": "state_slave",
+          "name": "State Slave",
+          "description": "Owned by city/state rather than individual. Used for public works, official duties.",
+          "training": "Varies by assignment"
+        },
+        {
+          "id": "bath_girl",
+          "name": "Bath Girl",
+          "description": "Works in public baths, bathing and serving customers.",
+          "training": "Bathing techniques, massage, serving"
+        },
+        {
+          "id": "paga_slave",
+          "name": "Paga Slave / Paga Girl",
+          "description": "Serves in paga taverns (like tavern wench). Serves drinks, food, and patrons.",
+          "training": "Serving, dancing, customer service"
+        },
+        {
+          "id": "camp_slave",
+          "name": "Camp Slave",
+          "description": "Used in military camps, traveling with armies. Hard conditions.",
+          "training": "Cooking, cleaning, serving warriors"
+        },
+        {
+          "id": "coin_girl",
+          "name": "Coin Girl",
+          "description": "Slave rented out by the hour on streets. Wears coin box chained to collar. Very low status.",
+          "training": "Minimal, street survival"
+        },
+        {
+          "id": "exotics",
+          "name": "Exotics",
+          "description": "Bred or selected for unusual characteristics - rare coloring, unique features, special abilities.",
+          "training": "Varies, often displayed for uniqueness"
+        }
+      ],
+      "virginityStatus": {
+        "white_silk": "Virgin slave (inexperienced)",
+        "red_silk": "Non-virgin slave (experienced)"
+      },
+      "popularityRating": 5
+    },
+    {
+      "id": "kajirus",
+      "name": "Kajirus (Male Slave)",
+      "category": "slave",
+      "description": "Male slave, much rarer than female slaves. Primarily used for heavy labor, though some special categories exist.",
+      "rights": [],
+      "restrictions": [
+        "Property status - no legal rights",
+        "Cannot own property",
+        "Must obey all commands",
+        "Can be bought, sold, traded",
+        "Subject to harsh discipline",
+        "Branded and collared",
+        "Can be killed by master",
+        "Generally lowest status in society"
+      ],
+      "applicableSpecies": ["human"],
+      "subtypes": [
+        {
+          "id": "work_slave",
+          "name": "Work Slave",
+          "description": "Most common male slave type. Galley rowers, mine workers, farm laborers, porters. Brutal hard labor.",
+          "training": "Minimal, hard labor focus",
+          "examples": ["Galley slaves", "Mine slaves", "Farm slaves", "Porters"]
+        },
+        {
+          "id": "silk_slave",
+          "name": "Silk Slave",
+          "description": "Certified woman's slave. Highly trained, pampered, expensive. Rare and prestigious for female owners.",
+          "training": "Extensive training in serving women, pleasure, household management",
+          "notes": "Very rare, expensive, status symbol for wealthy free women"
+        },
+        {
+          "id": "fighting_slave",
+          "name": "Fighting Slave / Gladiator",
+          "description": "Trained to fight in arena or as bodyguard. Can earn some prestige through victories.",
+          "training": "Combat training, weapons, tactics",
+          "notes": "Can sometimes earn freedom through arena victories"
+        },
+        {
+          "id": "exotic",
+          "name": "Exotic Male",
+          "description": "Unusual characteristics or special skills. Rare.",
+          "training": "Varies by specialty"
+        }
+      ],
+      "popularityRating": 2
+    },
+    {
+      "id": "outlaw",
+      "name": "Outlaw",
+      "category": "special",
+      "description": "Casteless criminal without Home Stone. Hunted by cities. If caught: impalement (in city), hanging (wilderness), or hamstringing.",
+      "rights": [],
+      "restrictions": [
+        "Cannot enter cities (death penalty if caught)",
+        "No legal protection",
+        "No caste membership",
+        "No Home Stone",
+        "Hunted by authorities"
+      ],
+      "penalties": {
+        "city_capture": "Impalement (slow death over hours/days)",
+        "wilderness_capture": "Hanging",
+        "alternative": "Hamstringing (crippling but survivable)"
+      },
+      "applicableSpecies": ["human", "kurii"],
+      "redemption": "Can petition for caste membership in distant city, or earn Home Stone through great deed",
+      "popularityRating": 3
+    },
+    {
+      "id": "captive",
+      "name": "Captive",
+      "category": "special",
+      "description": "Temporary status before being enslaved or ransomed. Not yet legally a slave but under control of captor.",
+      "rights": [
+        "Technically still free (not yet enslaved)",
+        "Can be ransomed back to home/family",
+        "May be able to negotiate release"
+      ],
+      "restrictions": [
+        "Bound and under guard",
+        "Will likely be enslaved if not ransomed",
+        "At mercy of captors",
+        "Limited time before enslavement decision"
+      ],
+      "applicableSpecies": ["human"],
+      "notes": "Transitional status, usually resolved within days to weeks",
+      "popularityRating": 2
+    },
+    {
+      "id": "wild",
+      "name": "Wild",
+      "category": "animal",
+      "description": "Untamed creature living by natural instincts. Follows natural behaviors, territory, hunting/grazing patterns.",
+      "rights": [],
+      "restrictions": [],
+      "characteristics": [
+        "Natural habitat and behaviors",
+        "Territory-based existence",
+        "Hunting or grazing natural prey",
+        "Mating seasons and rituals",
+        "Pack/pride/herd social structures (if applicable)",
+        "No sapient interference",
+        "Subject to hunting by sapients"
+      ],
+      "applicableSpecies": ["all_animals"],
+      "popularityRating": 4
+    },
+    {
+      "id": "domesticated",
+      "name": "Domesticated",
+      "category": "animal",
+      "description": "Trained or raised by sapients. Serves masters, performs tasks, follows commands. Property of owner.",
+      "rights": [],
+      "restrictions": [
+        "Property of owner",
+        "Must follow commands",
+        "Confined to master's lands/purposes",
+        "Can be sold or traded",
+        "Breeding controlled by master"
+      ],
+      "characteristics": [
+        "Trained to serve specific purposes",
+        "Loyal to master/trainer",
+        "Fed and sheltered by owner",
+        "Used for work, transport, combat, herding, etc.",
+        "May still retain some wild instincts",
+        "Breeding for desired traits"
+      ],
+      "applicableSpecies": [
+        "sleen", "tarn", "tharlarion", "kaiila", "bosk", "verr", "hurt",
+        "tarsk", "vulo", "prairie_sleen", "snow_sleen", "sea_sleen"
+      ],
+      "purposes": [
+        "Mount/transport",
+        "Guard/protection",
+        "Herding livestock",
+        "Hunting companion",
+        "Draft/labor",
+        "War beast",
+        "Food/wool/milk production"
+      ],
+      "popularityRating": 5
+    },
+    {
+      "id": "companion",
+      "name": "Companion",
+      "category": "animal",
+      "description": "Bonded deeply with specific sapient individual. Mutual loyalty, respect, partnership. Goes beyond simple domestication.",
+      "rights": [],
+      "restrictions": [],
+      "characteristics": [
+        "Deep personal bond with specific individual",
+        "Mutual loyalty and understanding",
+        "Will fight to death for companion",
+        "Companion understands animal's needs/signals",
+        "Animal understands companion's moods/commands",
+        "Partnership rather than pure ownership",
+        "Rare and special relationship",
+        "Often involves choosing each other"
+      ],
+      "applicableSpecies": ["sleen", "tarn", "kaiila", "larl"],
+      "examples": [
+        "Tarn-Tarnsman bond (mutual respect, tarn half-wild)",
+        "Warrior's sleen companion (hunting partner)",
+        "Red Savage's kaiila bond (spiritual connection)",
+        "Rare larl companion (extremely dangerous but possible)"
+      ],
+      "notes": "Most prestigious and rare animal relationship. Stories told of such bonds.",
+      "popularityRating": 4
+    }
+]

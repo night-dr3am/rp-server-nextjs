@@ -1,0 +1,460 @@
+// Caste/Tribal Role Selector Component for Gorean Character Creation
+import React, { useState, useMemo } from 'react';
+import {
+  CasteData,
+  TribalRole,
+  getCultureById,
+  getHighCastes,
+  getLowCastes,
+  getTribalRolesForCulture,
+  getCasteById,
+  getTribalRoleById
+} from '@/lib/gorData';
+import {
+  GoreanCard,
+  GoreanHeading,
+  GoreanBadge,
+  GoreanButton,
+  GoreanColors,
+  getCasteColorByRole
+} from './GoreanTheme';
+
+interface CasteSelectorProps {
+  selectedCultureId: string | undefined;
+  selectedCasteOrRole: string | undefined;
+  onSelectCasteOrRole: (casteOrRole: CasteData | TribalRole) => void;
+  className?: string;
+}
+
+export function CasteSelector({
+  selectedCultureId,
+  selectedCasteOrRole,
+  onSelectCasteOrRole,
+  className = ''
+}: CasteSelectorProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [showHighCastes, setShowHighCastes] = useState(true);
+  const [showLowCastes, setShowLowCastes] = useState(true);
+
+  const culture = selectedCultureId ? getCultureById(selectedCultureId) : undefined;
+  const usesCastes = culture?.hasCastes || false;
+
+  // Get available castes or tribal roles
+  const { highCastes, lowCastes, tribalRoles } = useMemo(() => {
+    if (!culture) {
+      return { highCastes: [], lowCastes: [], tribalRoles: [] };
+    }
+
+    if (usesCastes) {
+      return {
+        highCastes: getHighCastes(),
+        lowCastes: getLowCastes(),
+        tribalRoles: []
+      };
+    } else {
+      return {
+        highCastes: [],
+        lowCastes: [],
+        tribalRoles: getTribalRolesForCulture(selectedCultureId!)
+      };
+    }
+  }, [culture, selectedCultureId, usesCastes]);
+
+  // Filter castes/roles by search query
+  const filteredHighCastes = useMemo(() => {
+    if (!searchQuery) return highCastes;
+    const query = searchQuery.toLowerCase();
+    return highCastes.filter(caste =>
+      caste.name.toLowerCase().includes(query) ||
+      caste.description.toLowerCase().includes(query)
+    );
+  }, [highCastes, searchQuery]);
+
+  const filteredLowCastes = useMemo(() => {
+    if (!searchQuery) return lowCastes;
+    const query = searchQuery.toLowerCase();
+    return lowCastes.filter(caste =>
+      caste.name.toLowerCase().includes(query) ||
+      caste.description.toLowerCase().includes(query)
+    );
+  }, [lowCastes, searchQuery]);
+
+  const filteredTribalRoles = useMemo(() => {
+    if (!searchQuery) return tribalRoles;
+    const query = searchQuery.toLowerCase();
+    return tribalRoles.filter(role =>
+      role.name.toLowerCase().includes(query) ||
+      role.description.toLowerCase().includes(query)
+    );
+  }, [tribalRoles, searchQuery]);
+
+  const handleCasteClick = (caste: CasteData) => {
+    onSelectCasteOrRole(caste);
+  };
+
+  const handleRoleClick = (role: TribalRole) => {
+    onSelectCasteOrRole(role);
+  };
+
+  const toggleExpanded = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedItem(expandedItem === id ? null : id);
+  };
+
+  if (!selectedCultureId) {
+    return (
+      <div className={`text-center py-12 ${className}`}>
+        <p className="text-lg mb-2" style={{ color: GoreanColors.stone }}>
+          Please select a culture first
+        </p>
+        <p className="text-sm" style={{ color: GoreanColors.stoneLight }}>
+          Your culture determines whether you use castes or tribal roles.
+        </p>
+      </div>
+    );
+  }
+
+  // Render Caste System UI
+  if (usesCastes) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        {/* Header */}
+        <div>
+          <GoreanHeading level={2}>Choose Your Caste</GoreanHeading>
+          <p className="text-sm mt-2" style={{ color: GoreanColors.stone }}>
+            The Caste System defines your profession and social standing in Gorean society.
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search castes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+            style={{
+              borderColor: GoreanColors.stone,
+              backgroundColor: GoreanColors.cream,
+              color: GoreanColors.charcoal
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              style={{ color: GoreanColors.stone }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Toggle Sections */}
+        <div className="flex gap-4">
+          <GoreanButton
+            onClick={() => setShowHighCastes(!showHighCastes)}
+            variant={showHighCastes ? 'primary' : 'secondary'}
+            size="sm"
+          >
+            {showHighCastes ? '▼' : '▶'} High Castes ({filteredHighCastes.length})
+          </GoreanButton>
+          <GoreanButton
+            onClick={() => setShowLowCastes(!showLowCastes)}
+            variant={showLowCastes ? 'primary' : 'secondary'}
+            size="sm"
+          >
+            {showLowCastes ? '▼' : '▶'} Low Castes ({filteredLowCastes.length})
+          </GoreanButton>
+        </div>
+
+        {/* High Castes */}
+        {showHighCastes && filteredHighCastes.length > 0 && (
+          <div>
+            <GoreanHeading level={3} className="mb-4">High Castes</GoreanHeading>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredHighCastes.map(caste => {
+                const isSelected = selectedCasteOrRole === caste.id;
+                const isExpanded = expandedItem === caste.id;
+                const casteColor = caste.color || GoreanColors.stone;
+
+                return (
+                  <GoreanCard
+                    key={caste.id}
+                    selected={isSelected}
+                    hoverable
+                    onClick={() => handleCasteClick(caste)}
+                    className="p-4"
+                  >
+                    {/* Color Bar */}
+                    <div
+                      className="h-2 rounded-t-lg mb-3 -mx-4 -mt-4"
+                      style={{ backgroundColor: casteColor }}
+                    />
+
+                    {/* Header */}
+                    <div className="mb-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <GoreanHeading level={5} className="flex-1">
+                          {caste.name}
+                        </GoreanHeading>
+                        {isSelected && (
+                          <span className="text-xl ml-2" style={{ color: GoreanColors.bronze }}>
+                            ✓
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Color Badge */}
+                      {caste.color && (
+                        <GoreanBadge size="sm" color={casteColor}>
+                          {caste.name.split(' ')[0]} Color
+                        </GoreanBadge>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm mb-2" style={{ color: GoreanColors.charcoal }}>
+                      {caste.description}
+                    </p>
+
+                    {/* Expandable Details */}
+                    {isExpanded && caste.characteristics && caste.characteristics.length > 0 && (
+                      <div className="mt-3 pt-3 border-t-2" style={{ borderColor: GoreanColors.bronze }}>
+                        <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                          Characteristics:
+                        </p>
+                        <ul className="text-xs list-disc list-inside" style={{ color: GoreanColors.charcoal }}>
+                          {caste.characteristics.map((char, i) => (
+                            <li key={i}>{char}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Expand/Collapse Button */}
+                    {caste.characteristics && caste.characteristics.length > 0 && (
+                      <button
+                        onClick={(e) => toggleExpanded(caste.id, e)}
+                        className="text-xs font-semibold mt-2 flex items-center gap-1 hover:underline"
+                        style={{ color: GoreanColors.bronze }}
+                      >
+                        {isExpanded ? '▲ Less' : '▼ More'}
+                      </button>
+                    )}
+                  </GoreanCard>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Low Castes */}
+        {showLowCastes && filteredLowCastes.length > 0 && (
+          <div>
+            <GoreanHeading level={3} className="mb-4">Low Castes</GoreanHeading>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredLowCastes.map(caste => {
+                const isSelected = selectedCasteOrRole === caste.id;
+                const isExpanded = expandedItem === caste.id;
+
+                return (
+                  <GoreanCard
+                    key={caste.id}
+                    selected={isSelected}
+                    hoverable
+                    onClick={() => handleCasteClick(caste)}
+                    className="p-4"
+                  >
+                    {/* Header */}
+                    <div className="mb-3">
+                      <div className="flex items-start justify-between">
+                        <GoreanHeading level={5} className="flex-1">
+                          {caste.name}
+                        </GoreanHeading>
+                        {isSelected && (
+                          <span className="text-xl ml-2" style={{ color: GoreanColors.bronze }}>
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm mb-2" style={{ color: GoreanColors.charcoal }}>
+                      {caste.description}
+                    </p>
+
+                    {/* Expandable Details */}
+                    {isExpanded && caste.characteristics && caste.characteristics.length > 0 && (
+                      <div className="mt-3 pt-3 border-t-2" style={{ borderColor: GoreanColors.bronze }}>
+                        <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                          Characteristics:
+                        </p>
+                        <ul className="text-xs list-disc list-inside" style={{ color: GoreanColors.charcoal }}>
+                          {caste.characteristics.map((char, i) => (
+                            <li key={i}>{char}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Expand/Collapse Button */}
+                    {caste.characteristics && caste.characteristics.length > 0 && (
+                      <button
+                        onClick={(e) => toggleExpanded(caste.id, e)}
+                        className="text-xs font-semibold mt-2 flex items-center gap-1 hover:underline"
+                        style={{ color: GoreanColors.bronze }}
+                      >
+                        {isExpanded ? '▲ Less' : '▼ More'}
+                      </button>
+                    )}
+                  </GoreanCard>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* No Results */}
+        {searchQuery && filteredHighCastes.length === 0 && filteredLowCastes.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg" style={{ color: GoreanColors.stone }}>
+              No castes found matching &quot;{searchQuery}&quot;
+            </p>
+            <GoreanButton onClick={() => setSearchQuery('')} className="mt-4">
+              Clear Search
+            </GoreanButton>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Render Tribal Roles UI
+  return (
+    <div className={`space-y-6 ${className}`}>
+      {/* Header */}
+      <div>
+        <GoreanHeading level={2}>Choose Your Tribal Role</GoreanHeading>
+        <p className="text-sm mt-2" style={{ color: GoreanColors.stone }}>
+          Tribal roles define your position and duties within your tribe.
+        </p>
+      </div>
+
+      {/* Search Box */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search tribal roles..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+          style={{
+            borderColor: GoreanColors.stone,
+            backgroundColor: GoreanColors.cream,
+            color: GoreanColors.charcoal
+          }}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            style={{ color: GoreanColors.stone }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Tribal Roles Grid */}
+      {filteredTribalRoles.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-lg" style={{ color: GoreanColors.stone }}>
+            {searchQuery ? `No roles found matching "${searchQuery}"` : 'No tribal roles available for this culture'}
+          </p>
+          {searchQuery && (
+            <GoreanButton onClick={() => setSearchQuery('')} className="mt-4">
+              Clear Search
+            </GoreanButton>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTribalRoles.map(role => {
+            const isSelected = selectedCasteOrRole === role.id;
+            const isExpanded = expandedItem === role.id;
+
+            return (
+              <GoreanCard
+                key={role.id}
+                selected={isSelected}
+                hoverable
+                onClick={() => handleRoleClick(role)}
+                className="p-4"
+              >
+                {/* Header */}
+                <div className="mb-3">
+                  <div className="flex items-start justify-between mb-2">
+                    <GoreanHeading level={5} className="flex-1">
+                      {role.name}
+                    </GoreanHeading>
+                    {isSelected && (
+                      <span className="text-xl ml-2" style={{ color: GoreanColors.bronze }}>
+                        ✓
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    {role.gender && (
+                      <GoreanBadge size="sm" color={GoreanColors.stoneLight}>
+                        {role.gender}
+                      </GoreanBadge>
+                    )}
+                    {role.prestige && (
+                      <GoreanBadge size="sm" color={GoreanColors.gold}>
+                        Prestige
+                      </GoreanBadge>
+                    )}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm mb-2" style={{ color: GoreanColors.charcoal }}>
+                  {role.description}
+                </p>
+
+                {/* Expandable Details */}
+                {isExpanded && role.responsibilities && (
+                  <div className="mt-3 pt-3 border-t-2" style={{ borderColor: GoreanColors.bronze }}>
+                    <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                      Responsibilities:
+                    </p>
+                    <p className="text-xs" style={{ color: GoreanColors.charcoal }}>
+                      {role.responsibilities}
+                    </p>
+                  </div>
+                )}
+
+                {/* Expand/Collapse Button */}
+                {role.responsibilities && (
+                  <button
+                    onClick={(e) => toggleExpanded(role.id, e)}
+                    className="text-xs font-semibold mt-2 flex items-center gap-1 hover:underline"
+                    style={{ color: GoreanColors.bronze }}
+                  >
+                    {isExpanded ? '▲ Less' : '▼ More'}
+                  </button>
+                )}
+              </GoreanCard>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

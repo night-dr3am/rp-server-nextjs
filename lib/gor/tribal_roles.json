@@ -1,0 +1,384 @@
+{
+  "torvaldsland": [
+    {
+      "id": "jarl",
+      "name": "Jarl",
+      "description": "Leader or chieftain. Similar to Ubar. Rules hall and warriors. Can be challenged.",
+      "responsibilities": ["Lead warriors", "Settle disputes", "Organize raids", "Protect hall"],
+      "prestige": "high"
+    },
+    {
+      "id": "warrior_raider",
+      "name": "Warrior/Raider",
+      "description": "All free men are warriors, hunters, and seamen. Raid south in serpent ships for wealth and slaves.",
+      "responsibilities": ["Fight in raids", "Row ships", "Hunt", "Fish", "Defend hall"],
+      "prestige": "standard"
+    },
+    {
+      "id": "skald",
+      "name": "Skald",
+      "description": "Bard, singer, poet. Highly respected. Tell tales and sing songs. In high demand during fest-seasons.",
+      "responsibilities": ["Sing songs", "Tell tales", "Preserve history", "Entertain"],
+      "prestige": "high",
+      "notes": "May be kidnapped for fest-season, compensated with wealth"
+    },
+    {
+      "id": "rune_priest",
+      "name": "Rune-Priest",
+      "description": "Priest of Thor and Odin. Perform rites, keep calendars, use omen chips. White-robed, long-haired.",
+      "responsibilities": ["Religious ceremonies", "Keep calendars", "Read omens", "Paint rune stones"],
+      "prestige": "high",
+      "notes": "Worship of Thor/Odin considered heresy by Initiates"
+    },
+    {
+      "id": "farmer",
+      "name": "Farmer",
+      "description": "Work small farms in harsh land. Grow sa-tarna, tospits, vegetables. Raise bosk, verr, tarsk.",
+      "responsibilities": ["Farm small plots", "Raise animals", "Survive harsh climate"],
+      "prestige": "standard"
+    }
+  ],
+  "red_hunters": [
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "description": "All men are hunters. Hunt tabuk, sea sleen, whales, fish. Best hunters have most prestige but no formal leadership.",
+      "responsibilities": ["Hunt tabuk and sea animals", "Fish", "Provide food", "Protect tribe"],
+      "prestige": "varies_by_skill",
+      "notes": "Best hunters lead by example and prestige, not formal authority"
+    },
+    {
+      "id": "singer",
+      "name": "Singer",
+      "description": "All create and sing their own songs. Songs are personal property. Mystery where songs come from.",
+      "responsibilities": ["Create songs", "Sing", "Preserve culture through song"],
+      "prestige": "standard",
+      "notes": "Everyone expected to create own songs, not sing others' songs"
+    },
+    {
+      "id": "carver",
+      "name": "Carver",
+      "description": "All men carve ivory, bone, stone. Intricate animal carvings. Rounded (natural shapes), not made to stand upright.",
+      "responsibilities": ["Carve animals from ivory/bone", "Create art", "Trade carvings"],
+      "prestige": "standard",
+      "notes": "No word for 'art' or 'artist' in their language - everyone carves"
+    }
+  ],
+  "red_savages": [
+    {
+      "id": "chief",
+      "name": "Chief",
+      "description": "Tribal leader. Leads council of chiefs for tribal confederation. Earned through deeds and respect.",
+      "responsibilities": ["Lead tribe", "Council with other chiefs", "Settle disputes", "Lead in war"],
+      "prestige": "very_high"
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "description": "Fighter and hunter. Member of warrior society (All Comrades, Sleen Soldiers, Yellow-Kaiila Riders, etc.). Count coup for honor.",
+      "responsibilities": ["Fight enemies", "Hunt kailiauk", "Protect tribe", "Count coup", "Raid"],
+      "prestige": "high",
+      "notes": "Warrior societies have own initiation, dances, regalia"
+    },
+    {
+      "id": "medicine_chief",
+      "name": "Medicine Chief/Shaman",
+      "description": "Spiritual leader, healer, visionary. Performs rituals, interprets dreams, calls on spirits.",
+      "responsibilities": ["Heal sick/wounded", "Perform ceremonies", "Interpret visions", "Guide spiritually"],
+      "prestige": "very_high"
+    },
+    {
+      "id": "council_member",
+      "name": "Council Member",
+      "description": "Elder or respected warrior on tribal council. Advises chief, makes decisions.",
+      "responsibilities": ["Advise chief", "Vote on tribal matters", "Share wisdom"],
+      "prestige": "high"
+    },
+    {
+      "id": "kaiila_rider",
+      "name": "Kaiila Rider",
+      "description": "Master of kaiila (carnivorous mount). Essential for hunting kailiauk and warfare.",
+      "responsibilities": ["Ride kaiila", "Hunt from kaiila-back", "Fight mounted", "Care for kaiila"],
+      "prestige": "high"
+    }
+  ],
+  "wagon_peoples": [
+    {
+      "id": "ubar",
+      "name": "Ubar",
+      "description": "Tribal war leader. Elected during crisis, rules by decree until crisis ends. Can be challenged.",
+      "responsibilities": ["Lead in war", "Make decisions", "Unite tribe", "Can be overthrown if unfit"],
+      "prestige": "very_high",
+      "notes": "Sword loyalty sworn to Ubar. Can be dishonored and deposed."
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "description": "All free men are warriors. Kaiila cavalry, lance and bow. Defend bosk herds and wagons.",
+      "responsibilities": ["Fight enemies", "Defend bosk", "Raid if needed", "Guard wagons"],
+      "prestige": "standard"
+    },
+    {
+      "id": "healer_clan",
+      "name": "Healer (Clan)",
+      "description": "Specialized clan of healers. Treat wounds and illness. Respected and needed.",
+      "responsibilities": ["Heal wounded", "Treat illness", "Preserve medical knowledge"],
+      "prestige": "high"
+    },
+    {
+      "id": "torturer_clan",
+      "name": "Torturer (Clan)",
+      "description": "Specialized clan. Perform torture, executions, interrogations. Hired by Initiates sometimes.",
+      "responsibilities": ["Torture enemies", "Execute criminals", "Interrogate"],
+      "prestige": "feared",
+      "notes": "Not Assassins - do not kill for contracts, only torture/execute"
+    },
+    {
+      "id": "leather_worker_clan",
+      "name": "Leather Worker (Clan)",
+      "description": "Work with bosk hides for clothing, tents, harnesses, containers.",
+      "responsibilities": ["Tan hides", "Make clothing", "Create tents and harnesses"],
+      "prestige": "standard"
+    },
+    {
+      "id": "salt_hunter_clan",
+      "name": "Salt Hunter (Clan)",
+      "description": "Gather salt for preservation and trade. Dangerous work.",
+      "responsibilities": ["Gather salt", "Trade salt", "Preserve meat"],
+      "prestige": "standard"
+    },
+    {
+      "id": "camp_singer_clan",
+      "name": "Camp Singer/Skald (Clan)",
+      "description": "Oral historians, singers, poets. Preserve tribal history and legends.",
+      "responsibilities": ["Sing songs", "Tell history", "Entertain", "Preserve legends"],
+      "prestige": "high"
+    },
+    {
+      "id": "year_keeper_clan",
+      "name": "Year Keeper (Clan)",
+      "description": "Keep track of years, seasons, migrations. Chronologists of the tribe.",
+      "responsibilities": ["Track time", "Record years", "Predict seasons", "Guide migrations"],
+      "prestige": "high"
+    },
+    {
+      "id": "scarers_clan",
+      "name": "Scarers (Clan)",
+      "description": "Guide bosk herds by scaring them in right directions during migrations.",
+      "responsibilities": ["Guide bosk herds", "Scare animals safely", "Protect from stampedes"],
+      "prestige": "standard"
+    }
+  ],
+  "tahari_tribes": [
+    {
+      "id": "ubar_pasha",
+      "name": "Ubar / High Pasha",
+      "description": "Tribal leader. High Pasha commands vassal tribes. Leads in war and peace.",
+      "responsibilities": ["Lead tribe/confederation", "Command vassals", "Wage war", "Settle disputes"],
+      "prestige": "very_high"
+    },
+    {
+      "id": "askari",
+      "name": "Askari",
+      "description": "Warrior/soldier. Desert cavalry on sand kaiila. Skilled with scimitar and bow.",
+      "responsibilities": ["Fight enemies", "Guard oases", "Raid caravans", "Protect tribe"],
+      "prestige": "high"
+    },
+    {
+      "id": "merchant",
+      "name": "Merchant",
+      "description": "Trader in oases and cities (Tor, etc.). Caravan masters. Important for oasis economy.",
+      "responsibilities": ["Trade goods", "Lead caravans", "Manage wealth", "Connect oases"],
+      "prestige": "standard_to_high"
+    },
+    {
+      "id": "desert_raider",
+      "name": "Desert Raider",
+      "description": "Nomadic warrior living in hidden camps. No women/children at camps. Raids settlements and caravans.",
+      "responsibilities": ["Raid caravans", "Live in desert camps", "Fight in tribal wars"],
+      "prestige": "high",
+      "notes": "Raider camps have no free women or children"
+    },
+    {
+      "id": "oasis_farmer",
+      "name": "Oasis Farmer",
+      "description": "Farm dates and crops at oases. Provide food for tribe. Two growing seasons.",
+      "responsibilities": ["Grow dates and crops", "Maintain irrigation", "Trade produce"],
+      "prestige": "standard"
+    },
+    {
+      "id": "salt_ubar",
+      "name": "Salt Ubar / Guard of Dunes",
+      "description": "Controls salt districts and mines (e.g., Klima). Extremely powerful through salt monopoly. Veiled men.",
+      "responsibilities": ["Control salt trade", "Regulate access to mines", "Collect fees", "Keep records"],
+      "prestige": "very_high",
+      "notes": "Support from salt merchant fees. Men veiled (allegiance to no tribe, only salt)"
+    }
+  ],
+  "alars": [
+    {
+      "id": "chieftain",
+      "name": "Chieftain",
+      "description": "Leads Alar band. Makes decisions for nomadic group.",
+      "responsibilities": ["Lead band", "Decide migrations", "Lead in warfare", "Settle disputes"],
+      "prestige": "high"
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "description": "Fighter. Superb tharlarion cavalry. Wield francisca (war axe), spatha, sacramasax.",
+      "responsibilities": ["Fight mounted", "Raid settlements", "Defend band", "Master cavalry tactics"],
+      "prestige": "high"
+    },
+    {
+      "id": "herder",
+      "name": "Herder",
+      "description": "Tend bosk, verr, tarsk herds. Essential for nomadic survival.",
+      "responsibilities": ["Herd animals", "Protect livestock", "Provide food/materials"],
+      "prestige": "standard"
+    },
+    {
+      "id": "cavalry",
+      "name": "Tharlarion Cavalry",
+      "description": "Specialist medium-weight tharlarion riders. Elite mounted warriors.",
+      "responsibilities": ["Master tharlarion riding", "Cavalry charges", "Mounted combat"],
+      "prestige": "very_high"
+    }
+  ],
+  "rencers": [
+    {
+      "id": "ubar",
+      "name": "Ubar",
+      "description": "Island leader. Leads ~50-60 people on floating rence island.",
+      "responsibilities": ["Lead island community", "Settle disputes", "Organize defense"],
+      "prestige": "high"
+    },
+    {
+      "id": "grower_of_rence",
+      "name": "Grower of Rence",
+      "description": "All rencers grow rence plant. Used for everything: paper, food, boats, cloth, fuel.",
+      "responsibilities": ["Cultivate rence", "Harvest rence", "Make rence products"],
+      "prestige": "standard",
+      "notes": "Defining activity of rencer culture"
+    },
+    {
+      "id": "paper_maker",
+      "name": "Paper Maker",
+      "description": "Primary trade of rencers. Make paper from rence for trade.",
+      "responsibilities": ["Make rence paper", "Trade paper", "Supply cities"],
+      "prestige": "standard"
+    },
+    {
+      "id": "hunter_fisher",
+      "name": "Hunter/Fisher",
+      "description": "Hunt tabuk in delta, fish in marshes. Supplement rence-based diet.",
+      "responsibilities": ["Hunt tabuk", "Fish", "Trap marsh animals"],
+      "prestige": "standard"
+    }
+  ],
+  "panther_girls": [
+    {
+      "id": "band_leader",
+      "name": "Band Leader",
+      "description": "Leads women-only outlaw band. Strongest or most cunning woman.",
+      "responsibilities": ["Lead band", "Plan raids", "Settle disputes", "Defend territory"],
+      "prestige": "high",
+      "gender": "female"
+    },
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "description": "Hunt forest animals for food. Skilled with bow.",
+      "responsibilities": ["Hunt game", "Provide food", "Track prey"],
+      "prestige": "standard",
+      "gender": "female"
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "description": "Fight men who enter territory. Capture for ransom or enslavement.",
+      "responsibilities": ["Fight intruders", "Capture men", "Defend band"],
+      "prestige": "high",
+      "gender": "female"
+    },
+    {
+      "id": "scout",
+      "name": "Scout",
+      "description": "Watch for threats, track prey and enemies.",
+      "responsibilities": ["Scout territory", "Watch for threats", "Track movements"],
+      "prestige": "standard",
+      "gender": "female"
+    }
+  ],
+  "talunas": [
+    {
+      "id": "band_leader",
+      "name": "Band Leader",
+      "description": "Leads jungle outlaw band. Similar to Panther Girls but rainforest adapted.",
+      "responsibilities": ["Lead band", "Plan raids", "Defend territory"],
+      "prestige": "high",
+      "gender": "female"
+    },
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "description": "Hunt rainforest game. Skilled with blowgun, spear.",
+      "responsibilities": ["Hunt jungle animals", "Provide food", "Use blowguns/spears"],
+      "prestige": "standard",
+      "gender": "female"
+    },
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "description": "Fight intruders and capture for ransom.",
+      "responsibilities": ["Fight enemies", "Capture intruders", "Defend band"],
+      "prestige": "high",
+      "gender": "female"
+    }
+  ],
+  "schendi_tribes": [
+    {
+      "id": "chief",
+      "name": "Chief",
+      "description": "Village or tribal leader. Leads in peace and war.",
+      "responsibilities": ["Lead village/tribe", "Settle disputes", "Organize defense"],
+      "prestige": "high"
+    },
+    {
+      "id": "askari",
+      "name": "Askari",
+      "description": "Warrior. Defend village and fight tribal enemies.",
+      "responsibilities": ["Fight enemies", "Defend village", "Hunt dangerous animals"],
+      "prestige": "high"
+    },
+    {
+      "id": "fisherman",
+      "name": "Fisherman",
+      "description": "Fish rivers and coast. Primary protein source.",
+      "responsibilities": ["Fish rivers", "Provide food", "Navigate waters"],
+      "prestige": "standard"
+    },
+    {
+      "id": "farmer",
+      "name": "Farmer",
+      "description": "Grow tropical crops in jungle clearings.",
+      "responsibilities": ["Farm crops", "Clear jungle", "Harvest"],
+      "prestige": "standard"
+    },
+    {
+      "id": "drummer",
+      "name": "Drummer",
+      "description": "Communicate via drums across jungle. Send messages between villages.",
+      "responsibilities": ["Drum messages", "Maintain communication network", "Signal warnings"],
+      "prestige": "high",
+      "notes": "Drum communication essential in dense jungle"
+    },
+    {
+      "id": "trader",
+      "name": "Trader",
+      "description": "Trade with Schendi port city and other tribes.",
+      "responsibilities": ["Trade goods", "Travel to port", "Connect tribes to markets"],
+      "prestige": "standard"
+    }
+  ]
+}

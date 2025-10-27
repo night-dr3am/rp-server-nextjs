@@ -462,6 +462,126 @@ export const arkanaCharacterCreateSchema = Joi.object({
   return value;
 }, 'Stat point validation');
 
+// Gorean character creation validation schemas
+export const goreanRegisterSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const goreanCheckUserSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const goreanStatsSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const goreanUpdateStatsSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  health: Joi.number().integer().optional(), // Allow any value for clamping
+  hunger: Joi.number().integer().optional(), // Allow any value for clamping
+  thirst: Joi.number().integer().optional(), // Allow any value for clamping
+  goldCoin: currencySchema,
+  silverCoin: currencySchema,
+  copperCoin: currencySchema,
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const goreanCharacterCreateSchema = Joi.object({
+  // Identity
+  characterName: Joi.string().min(1).max(255).required(),
+  agentName: Joi.string().min(1).max(255).required(),
+  title: Joi.string().max(512).allow('').optional(),
+  background: Joi.string().allow('').optional(),
+
+  // Species (35+ species including animals!)
+  species: Joi.string().required(),
+  speciesCategory: Joi.string()
+    .valid('sapient', 'feline', 'canine_like', 'hooved', 'avian', 'reptilian', 'aquatic', 'small')
+    .required(),
+  speciesVariant: Joi.string().max(255).allow('').optional(),
+
+  // Culture/Origin
+  culture: Joi.string().required(),
+  cultureType: Joi.string()
+    .valid('cityState', 'northern', 'nomadic', 'marshForestJungle', 'special', 'animal')
+    .required(),
+
+  // Status
+  status: Joi.string().required(),
+  statusSubtype: Joi.string().max(255).allow('').optional(),
+
+  // Caste/Role (optional - depends on culture)
+  casteRole: Joi.string().max(255).allow('').optional(),
+  casteRoleType: Joi.string().max(100).allow('').optional(),
+
+  // Region
+  region: Joi.string().max(255).allow('').optional(),
+  homeStoneName: Joi.string().max(255).allow('').optional(),
+
+  // Base Stats (1-5 range, 5 stats for Gor)
+  strength: Joi.number().integer().min(1).max(5).required(),
+  agility: Joi.number().integer().min(1).max(5).required(),
+  intellect: Joi.number().integer().min(1).max(5).required(),
+  perception: Joi.number().integer().min(1).max(5).required(),
+  charisma: Joi.number().integer().min(1).max(5).required(),
+
+  // Skills System
+  skills: Joi.array().items(
+    Joi.object({
+      skill_id: Joi.string().required(),
+      skill_name: Joi.string().required(),
+      level: Joi.number().integer().min(0).max(5).required()
+    })
+  ).default([]),
+  skillsAllocatedPoints: Joi.number().integer().min(0).max(20).default(5),
+  skillsSpentPoints: Joi.number().integer().min(0).max(20).default(0),
+
+  // JWT token for authentication
+  token: Joi.string().required(),
+  universe: Joi.string().valid('gor').required()
+}).custom((value, helpers) => {
+  // Validate stat point allocation for Gorean stats (5 stats, 10 points total)
+  const baseStats = 5; // 1 point each in 5 stats
+  const allocated = value.strength + value.agility + value.intellect + value.perception + value.charisma;
+  const pointsUsed = allocated - baseStats;
+  const expectedPoints = 10; // Gorean characters get 10 stat points
+
+  if (pointsUsed !== expectedPoints) {
+    return helpers.message({ custom: `Stats must use exactly 10 points (each stat 1-5, total allocation = 10 + 5 base = 15). Currently using ${pointsUsed} points.` });
+  }
+
+  // Validate skills point spending
+  if (value.skills && value.skills.length > 0) {
+    let skillPointsSpent = 0;
+    for (const skill of value.skills) {
+      // Each skill level costs cumulative points: Level 1=1pt, Level 2=3pts, Level 3=6pts, Level 4=10pts, Level 5=15pts
+      const levelCost = (skill.level * (skill.level + 1)) / 2;
+      skillPointsSpent += levelCost;
+    }
+
+    if (skillPointsSpent !== value.skillsSpentPoints) {
+      return helpers.message({ custom: `Skill points calculation mismatch. Expected ${skillPointsSpent} but got ${value.skillsSpentPoints}` });
+    }
+
+    if (value.skillsSpentPoints > value.skillsAllocatedPoints) {
+      return helpers.message({ custom: `Cannot spend more skill points (${value.skillsSpentPoints}) than allocated (${value.skillsAllocatedPoints})` });
+    }
+  }
+
+  return value;
+}, 'Gorean stat and skill point validation');
+
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({
   npcId: Joi.string().min(1).max(255).required(),
