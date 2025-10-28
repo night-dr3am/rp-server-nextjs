@@ -8,6 +8,7 @@ import {
   SpeciesData,
   CultureData,
   StatusData,
+  StatusSubtype,
   CasteData,
   TribalRole,
   RegionData,
@@ -30,6 +31,7 @@ import {
 } from '@/components/gor/GoreanTheme';
 import { SpeciesSelector } from '@/components/gor/SpeciesSelector';
 import { CultureSelector } from '@/components/gor/CultureSelector';
+import { StatusSelector } from '@/components/gor/StatusSelector';
 import { CasteSelector } from '@/components/gor/CasteSelector';
 import { StatAllocator } from '@/components/gor/StatAllocator';
 import { SkillSelector } from '@/components/gor/SkillSelector';
@@ -118,36 +120,46 @@ export default function GoreanCharacterCreation() {
       ...prev,
       culture: culture.id,
       cultureType: culture.type,
-      // Reset role selections when culture changes
+      // Reset status and role selections when culture changes
+      status: undefined,
+      statusSubtype: undefined,
       casteRole: undefined,
       casteRoleType: undefined
     }));
   };
 
-  const updateStatus = (status: StatusData) => {
+  const updateStatus = (status: StatusData, subtype?: string) => {
     setCharacterModel(prev => ({
       ...prev,
       status: status.id,
-      statusSubtype: undefined // Reset subtype when main status changes
+      statusSubtype: subtype, // Set subtype if provided
+      // Reset role when status changes (status determines available roles)
+      casteRole: undefined,
+      casteRoleType: undefined
     }));
   };
 
-  // Reserved for future Status selector component
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _updateStatusSubtype = (subtype: string) => {
-    setCharacterModel(prev => ({
-      ...prev,
-      statusSubtype: subtype
-    }));
-  };
+  const updateCasteOrRole = (item: CasteData | TribalRole | StatusSubtype) => {
+    // Determine if this is a caste (has 'color' or 'type'), tribal role (has 'responsibilities'), or status subtype
+    const isCaste = 'color' in item || 'type' in item;
+    const isStatusSubtype = 'desc' in item || ('description' in item && !('characteristics' in item));
 
-  const updateCasteOrRole = (item: CasteData | TribalRole) => {
-    const isCaste = 'color' in item || 'responsibilities' in item;
-    setCharacterModel(prev => ({
-      ...prev,
-      casteRole: item.id,
-      casteRoleType: isCaste ? (item as CasteData).type : undefined
-    }));
+    if (isStatusSubtype) {
+      // This is a slave subtype - update statusSubtype instead of casteRole
+      setCharacterModel(prev => ({
+        ...prev,
+        statusSubtype: item.id,
+        casteRole: undefined,
+        casteRoleType: undefined
+      }));
+    } else {
+      // This is a caste or tribal role
+      setCharacterModel(prev => ({
+        ...prev,
+        casteRole: item.id,
+        casteRoleType: isCaste ? (item as CasteData).type : undefined
+      }));
+    }
   };
 
   const updateRegion = (region: RegionData) => {
@@ -430,40 +442,19 @@ export default function GoreanCharacterCreation() {
   );
 
   const renderStep4 = () => (
-    <GoreanScroll className="p-6">
-      <GoreanHeading level={2} className="mb-6">Step 4: Status</GoreanHeading>
-      <p className="text-sm mb-4" style={{ color: GoreanColors.stone }}>
-        Your status defines your social standing and legal rights in Gorean society.
-      </p>
-      {/* Status selector implementation would go here - for now, simple input */}
-      <div>
-        <label className="block text-sm font-semibold mb-2" style={{ color: GoreanColors.bronze }}>
-          Status *
-        </label>
-        <select
-          value={characterModel.status || ''}
-          onChange={(e) => updateStatus({ id: e.target.value, name: e.target.value } as StatusData)}
-          className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
-          style={{
-            borderColor: GoreanColors.stone,
-            backgroundColor: GoreanColors.cream,
-            color: GoreanColors.charcoal
-          }}
-        >
-          <option value="">Select Status...</option>
-          <option value="free_man">Free Man</option>
-          <option value="free_woman">Free Woman</option>
-          <option value="slave">Slave</option>
-          <option value="wild">Wild/Feral</option>
-        </select>
-      </div>
-    </GoreanScroll>
+    <StatusSelector
+      selectedSpeciesId={characterModel.species}
+      selectedStatus={characterModel.status}
+      selectedStatusSubtype={characterModel.statusSubtype}
+      onSelectStatus={updateStatus}
+    />
   );
 
   const renderStep5 = () => (
     <CasteSelector
       selectedCultureId={characterModel.culture}
-      selectedCasteOrRole={characterModel.casteRole}
+      selectedStatusId={characterModel.status}
+      selectedCasteOrRole={characterModel.casteRole || characterModel.statusSubtype}
       onSelectCasteOrRole={updateCasteOrRole}
     />
   );

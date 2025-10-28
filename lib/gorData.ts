@@ -4,6 +4,7 @@ import {
   SpeciesData,
   CultureData,
   StatusData,
+  StatusSubtype,
   CasteData,
   TribalRole,
   RegionData,
@@ -21,6 +22,7 @@ export {
   type SpeciesData,
   type CultureData,
   type StatusData,
+  type StatusSubtype,
   type CasteData,
   type TribalRole,
   type RegionData,
@@ -353,6 +355,105 @@ export function getTribalRolesForCulture(cultureId: string): TribalRole[] {
 export function getTribalRoleById(cultureId: string, roleId: string): TribalRole | undefined {
   const roles = tribalRoles[cultureId] || [];
   return roles.find(r => r.id === roleId);
+}
+
+/**
+ * Get castes filtered by status (and optionally gender)
+ * This enables status-based role selection during character creation
+ */
+export function getCastesForStatus(statusId: string, gender?: string): CasteData[] {
+  // Return empty array if data not loaded yet
+  if (!dataLoaded || !castes || castes.length === 0) {
+    return [];
+  }
+
+  if (!statusId) return castes;
+
+  return castes.filter(caste => {
+    // Safety check for caste object
+    if (!caste) return false;
+
+    // If no applicableStatuses specified, assume all statuses can use it (legacy data)
+    if (!caste.applicableStatuses || caste.applicableStatuses.length === 0) {
+      return true;
+    }
+
+    // Check if status is in the applicable list
+    const statusMatch = caste.applicableStatuses.some(s => lc(s) === lc(statusId));
+    if (!statusMatch) return false;
+
+    // If gender specified and caste has gender restriction, apply it
+    if (gender && caste.gender) {
+      // "both" or matching gender passes
+      if (caste.gender === 'both') return true;
+      if (caste.gender === 'male' && gender === 'male') return true;
+      if (caste.gender === 'female' && gender === 'female') return true;
+      if (caste.gender === 'mostly_male') return true; // Allow both but warn
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Get tribal roles filtered by status, culture, and optionally gender
+ * This enables status-based role selection for tribal cultures
+ */
+export function getTribalRolesForStatus(statusId: string, cultureId: string, gender?: string): TribalRole[] {
+  // Return empty array if data not loaded yet
+  if (!dataLoaded || !tribalRoles) {
+    return [];
+  }
+
+  if (!statusId || !cultureId) return [];
+
+  // Get roles for this culture
+  const roles = tribalRoles[cultureId] || [];
+
+  return roles.filter(role => {
+    // Safety check for role object
+    if (!role) return false;
+
+    // If no applicableStatuses specified, assume all statuses can use it (legacy data)
+    if (!role.applicableStatuses || role.applicableStatuses.length === 0) {
+      return true;
+    }
+
+    // Check if status is in the applicable list
+    const statusMatch = role.applicableStatuses.some(s => lc(s) === lc(statusId));
+    if (!statusMatch) return false;
+
+    // If gender specified and role has gender restriction, apply it
+    if (gender && role.gender) {
+      // "both" or matching gender passes
+      if (role.gender === 'both') return true;
+      if (role.gender === 'male' && gender === 'male') return true;
+      if (role.gender === 'female' && gender === 'female') return true;
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * Get slave subtypes as role options
+ * For slave statuses (kajira, kajirus), subtypes should be presented as "role" choices
+ * instead of city castes or tribal roles
+ */
+export function getSlaveSubtypesAsRoles(statusId: string): StatusSubtype[] {
+  // Return empty array if data not loaded yet
+  if (!dataLoaded || !statuses || statuses.length === 0) {
+    return [];
+  }
+
+  // Find the status
+  const status = statuses.find(s => lc(s.id) === lc(statusId));
+  if (!status) return [];
+
+  // Return subtypes if they exist
+  return status.subtypes || [];
 }
 
 // ============================================================================

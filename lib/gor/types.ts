@@ -159,6 +159,7 @@ export interface CasteData {
   subcastes?: string[];
   notes?: string;
   applicableSpecies: string[];
+  applicableStatuses?: string[]; // Which statuses can access this caste (e.g., ["freeMan", "freeWoman"])
   popularityRating?: number;
   bookReferences?: string[];
   parentCaste?: string;
@@ -171,6 +172,7 @@ export interface TribalRole {
   responsibilities?: string[];
   prestige?: string;
   gender?: string;
+  applicableStatuses?: string[]; // Which statuses can access this role (e.g., ["freeMan"], ["freeWoman"], ["kajira"])
   notes?: string;
   training?: string;
   examples?: string[];

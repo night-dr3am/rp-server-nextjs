@@ -5,14 +5,18 @@
       "name": "Jarl",
       "description": "Leader or chieftain. Similar to Ubar. Rules hall and warriors. Can be challenged.",
       "responsibilities": ["Lead warriors", "Settle disputes", "Organize raids", "Protect hall"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "warrior_raider",
       "name": "Warrior/Raider",
       "description": "All free men are warriors, hunters, and seamen. Raid south in serpent ships for wealth and slaves.",
       "responsibilities": ["Fight in raids", "Row ships", "Hunt", "Fish", "Defend hall"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "skald",
@@ -20,6 +24,8 @@
       "description": "Bard, singer, poet. Highly respected. Tell tales and sing songs. In high demand during fest-seasons.",
       "responsibilities": ["Sing songs", "Tell tales", "Preserve history", "Entertain"],
       "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "May be kidnapped for fest-season, compensated with wealth"
     },
     {
@@ -28,6 +34,8 @@
       "description": "Priest of Thor and Odin. Perform rites, keep calendars, use omen chips. White-robed, long-haired.",
       "responsibilities": ["Religious ceremonies", "Keep calendars", "Read omens", "Paint rune stones"],
       "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Worship of Thor/Odin considered heresy by Initiates"
     },
     {
@@ -35,7 +43,29 @@
       "name": "Farmer",
       "description": "Work small farms in harsh land. Grow sa-tarna, tospits, vegetables. Raise bosk, verr, tarsk.",
       "responsibilities": ["Farm small plots", "Raise animals", "Survive harsh climate"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "free_woman",
+      "name": "Free Woman of Torvaldsland",
+      "description": "Free women of the North. More freedom and higher status than southern Free Women. Can carry weapons, not veiled.",
+      "responsibilities": ["Manage hall", "Prepare food", "Weave and sew", "Defend home when men raid"],
+      "prestige": "high",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Northern women have significant rights and respect. Can divorce, inherit, carry weapons"
+    },
+    {
+      "id": "bondmaid",
+      "name": "Bondmaid",
+      "description": "Female slave in Torvaldsland. Work in halls, farms, serve masters. Wear brief kirtle, often barefoot. Can be branded and collared.",
+      "responsibilities": ["Serve in hall", "Cook and clean", "Serve master's desires", "Farm work"],
+      "prestige": "none",
+      "gender": "female",
+      "applicableStatuses": ["kajira"],
+      "notes": "Northern term for female slave. Less ornate than southern kajira but still property"
     }
   ],
   "red_hunters": [
@@ -45,6 +75,8 @@
       "description": "All men are hunters. Hunt tabuk, sea sleen, whales, fish. Best hunters have most prestige but no formal leadership.",
       "responsibilities": ["Hunt tabuk and sea animals", "Fish", "Provide food", "Protect tribe"],
       "prestige": "varies_by_skill",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Best hunters lead by example and prestige, not formal authority"
     },
     {
@@ -53,6 +85,8 @@
       "description": "All create and sing their own songs. Songs are personal property. Mystery where songs come from.",
       "responsibilities": ["Create songs", "Sing", "Preserve culture through song"],
       "prestige": "standard",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"],
       "notes": "Everyone expected to create own songs, not sing others' songs"
     },
     {
@@ -61,7 +95,19 @@
       "description": "All men carve ivory, bone, stone. Intricate animal carvings. Rounded (natural shapes), not made to stand upright.",
       "responsibilities": ["Carve animals from ivory/bone", "Create art", "Trade carvings"],
       "prestige": "standard",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"],
       "notes": "No word for 'art' or 'artist' in their language - everyone carves"
+    },
+    {
+      "id": "red_hunter_woman",
+      "name": "Red Hunter Woman",
+      "description": "Equal partners in survival. Prepare food, sew furs, maintain shelter. High value and respect in harsh polar environment.",
+      "responsibilities": ["Prepare food", "Sew clothing from furs", "Maintain shelter", "Support hunters"],
+      "prestige": "high",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Red Hunter women valued as equal partners for survival. Practical clothing, no veils"
     }
   ],
   "red_savages": [
@@ -70,7 +116,9 @@
       "name": "Chief",
       "description": "Tribal leader. Leads council of chiefs for tribal confederation. Earned through deeds and respect.",
       "responsibilities": ["Lead tribe", "Council with other chiefs", "Settle disputes", "Lead in war"],
-      "prestige": "very_high"
+      "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "warrior",
@@ -78,6 +126,8 @@
       "description": "Fighter and hunter. Member of warrior society (All Comrades, Sleen Soldiers, Yellow-Kaiila Riders, etc.). Count coup for honor.",
       "responsibilities": ["Fight enemies", "Hunt kailiauk", "Protect tribe", "Count coup", "Raid"],
       "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Warrior societies have own initiation, dances, regalia"
     },
     {
@@ -85,21 +135,37 @@
       "name": "Medicine Chief/Shaman",
       "description": "Spiritual leader, healer, visionary. Performs rituals, interprets dreams, calls on spirits.",
       "responsibilities": ["Heal sick/wounded", "Perform ceremonies", "Interpret visions", "Guide spiritually"],
-      "prestige": "very_high"
+      "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "council_member",
       "name": "Council Member",
       "description": "Elder or respected warrior on tribal council. Advises chief, makes decisions.",
       "responsibilities": ["Advise chief", "Vote on tribal matters", "Share wisdom"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "kaiila_rider",
       "name": "Kaiila Rider",
       "description": "Master of kaiila (carnivorous mount). Essential for hunting kailiauk and warfare.",
       "responsibilities": ["Ride kaiila", "Hunt from kaiila-back", "Fight mounted", "Care for kaiila"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "red_savage_woman",
+      "name": "Red Savage Woman",
+      "description": "Women of the Plains tribes. Work hides, prepare food, maintain camp. Subject to 'The Memory' - white women often enslaved.",
+      "responsibilities": ["Prepare hides", "Cook and preserve food", "Maintain camp", "Raise children"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Free women in Red Savage society. 'The Memory' causes enslavement of captured white women"
     }
   ],
   "wagon_peoples": [
@@ -109,6 +175,8 @@
       "description": "Tribal war leader. Elected during crisis, rules by decree until crisis ends. Can be challenged.",
       "responsibilities": ["Lead in war", "Make decisions", "Unite tribe", "Can be overthrown if unfit"],
       "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Sword loyalty sworn to Ubar. Can be dishonored and deposed."
     },
     {
@@ -116,14 +184,18 @@
       "name": "Warrior",
       "description": "All free men are warriors. Kaiila cavalry, lance and bow. Defend bosk herds and wagons.",
       "responsibilities": ["Fight enemies", "Defend bosk", "Raid if needed", "Guard wagons"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "healer_clan",
       "name": "Healer (Clan)",
       "description": "Specialized clan of healers. Treat wounds and illness. Respected and needed.",
       "responsibilities": ["Heal wounded", "Treat illness", "Preserve medical knowledge"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"]
     },
     {
       "id": "torturer_clan",
@@ -131,6 +203,8 @@
       "description": "Specialized clan. Perform torture, executions, interrogations. Hired by Initiates sometimes.",
       "responsibilities": ["Torture enemies", "Execute criminals", "Interrogate"],
       "prestige": "feared",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Not Assassins - do not kill for contracts, only torture/execute"
     },
     {
@@ -138,35 +212,55 @@
       "name": "Leather Worker (Clan)",
       "description": "Work with bosk hides for clothing, tents, harnesses, containers.",
       "responsibilities": ["Tan hides", "Make clothing", "Create tents and harnesses"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"]
     },
     {
       "id": "salt_hunter_clan",
       "name": "Salt Hunter (Clan)",
       "description": "Gather salt for preservation and trade. Dangerous work.",
       "responsibilities": ["Gather salt", "Trade salt", "Preserve meat"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "camp_singer_clan",
       "name": "Camp Singer/Skald (Clan)",
       "description": "Oral historians, singers, poets. Preserve tribal history and legends.",
       "responsibilities": ["Sing songs", "Tell history", "Entertain", "Preserve legends"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"]
     },
     {
       "id": "year_keeper_clan",
       "name": "Year Keeper (Clan)",
       "description": "Keep track of years, seasons, migrations. Chronologists of the tribe.",
       "responsibilities": ["Track time", "Record years", "Predict seasons", "Guide migrations"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"]
     },
     {
       "id": "scarers_clan",
       "name": "Scarers (Clan)",
       "description": "Guide bosk herds by scaring them in right directions during migrations.",
       "responsibilities": ["Guide bosk herds", "Scare animals safely", "Protect from stampedes"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "wagon_people_woman",
+      "name": "Wagon People Woman",
+      "description": "Free women of the Wagon Peoples. Maintain wagons and camps, prepare food, work leather and hides. Live nomadic life following bosk herds.",
+      "responsibilities": ["Maintain wagon homes", "Prepare bosk meat and milk", "Work leather", "Raise children", "Support clan activities"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Wagon People women live harsh nomadic life on the plains. Essential to clan survival"
     }
   ],
   "tahari_tribes": [
@@ -175,21 +269,27 @@
       "name": "Ubar / High Pasha",
       "description": "Tribal leader. High Pasha commands vassal tribes. Leads in war and peace.",
       "responsibilities": ["Lead tribe/confederation", "Command vassals", "Wage war", "Settle disputes"],
-      "prestige": "very_high"
+      "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "askari",
       "name": "Askari",
       "description": "Warrior/soldier. Desert cavalry on sand kaiila. Skilled with scimitar and bow.",
       "responsibilities": ["Fight enemies", "Guard oases", "Raid caravans", "Protect tribe"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "merchant",
       "name": "Merchant",
       "description": "Trader in oases and cities (Tor, etc.). Caravan masters. Important for oasis economy.",
       "responsibilities": ["Trade goods", "Lead caravans", "Manage wealth", "Connect oases"],
-      "prestige": "standard_to_high"
+      "prestige": "standard_to_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "desert_raider",
@@ -197,6 +297,8 @@
       "description": "Nomadic warrior living in hidden camps. No women/children at camps. Raids settlements and caravans.",
       "responsibilities": ["Raid caravans", "Live in desert camps", "Fight in tribal wars"],
       "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Raider camps have no free women or children"
     },
     {
@@ -204,7 +306,9 @@
       "name": "Oasis Farmer",
       "description": "Farm dates and crops at oases. Provide food for tribe. Two growing seasons.",
       "responsibilities": ["Grow dates and crops", "Maintain irrigation", "Trade produce"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "salt_ubar",
@@ -212,7 +316,19 @@
       "description": "Controls salt districts and mines (e.g., Klima). Extremely powerful through salt monopoly. Veiled men.",
       "responsibilities": ["Control salt trade", "Regulate access to mines", "Collect fees", "Keep records"],
       "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Support from salt merchant fees. Men veiled (allegiance to no tribe, only salt)"
+    },
+    {
+      "id": "tahari_woman",
+      "name": "Tahari Woman",
+      "description": "Free women of desert tribes. Live in tents and oasis settlements. Veiled and robed in desert tradition. Manage household, weave, prepare food.",
+      "responsibilities": ["Manage household", "Weave cloth and rugs", "Prepare food", "Raise children", "Maintain modesty"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Tahari free women heavily veiled and secluded. Desert culture very traditional"
     }
   ],
   "alars": [
@@ -221,28 +337,46 @@
       "name": "Chieftain",
       "description": "Leads Alar band. Makes decisions for nomadic group.",
       "responsibilities": ["Lead band", "Decide migrations", "Lead in warfare", "Settle disputes"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "warrior",
       "name": "Warrior",
       "description": "Fighter. Superb tharlarion cavalry. Wield francisca (war axe), spatha, sacramasax.",
       "responsibilities": ["Fight mounted", "Raid settlements", "Defend band", "Master cavalry tactics"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "herder",
       "name": "Herder",
       "description": "Tend bosk, verr, tarsk herds. Essential for nomadic survival.",
       "responsibilities": ["Herd animals", "Protect livestock", "Provide food/materials"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "cavalry",
       "name": "Tharlarion Cavalry",
       "description": "Specialist medium-weight tharlarion riders. Elite mounted warriors.",
       "responsibilities": ["Master tharlarion riding", "Cavalry charges", "Mounted combat"],
-      "prestige": "very_high"
+      "prestige": "very_high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "alar_woman",
+      "name": "Alar Woman",
+      "description": "Free women of the Alar bands. Maintain camps during migrations, prepare food, work hides, raise children. Follow nomadic warrior bands.",
+      "responsibilities": ["Maintain camps", "Prepare food", "Work hides and textiles", "Raise children", "Support band migrations"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Alar women live nomadic life following tharlarion cavalry bands"
     }
   ],
   "rencers": [
@@ -251,7 +385,9 @@
       "name": "Ubar",
       "description": "Island leader. Leads ~50-60 people on floating rence island.",
       "responsibilities": ["Lead island community", "Settle disputes", "Organize defense"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "grower_of_rence",
@@ -259,6 +395,8 @@
       "description": "All rencers grow rence plant. Used for everything: paper, food, boats, cloth, fuel.",
       "responsibilities": ["Cultivate rence", "Harvest rence", "Make rence products"],
       "prestige": "standard",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"],
       "notes": "Defining activity of rencer culture"
     },
     {
@@ -266,14 +404,28 @@
       "name": "Paper Maker",
       "description": "Primary trade of rencers. Make paper from rence for trade.",
       "responsibilities": ["Make rence paper", "Trade paper", "Supply cities"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "both",
+      "applicableStatuses": ["freeMan", "freeWoman"]
     },
     {
       "id": "hunter_fisher",
       "name": "Hunter/Fisher",
       "description": "Hunt tabuk in delta, fish in marshes. Supplement rence-based diet.",
       "responsibilities": ["Hunt tabuk", "Fish", "Trap marsh animals"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "rencer_woman",
+      "name": "Rencer Woman",
+      "description": "Free women of the rence islands. Work rence into cloth and products, prepare food, maintain floating island homes. Essential to marsh survival.",
+      "responsibilities": ["Weave rence cloth", "Prepare rence food", "Maintain island homes", "Make rence products", "Raise children"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Rencer women skilled in all uses of rence plant. Live on floating islands"
     }
   ],
   "panther_girls": [
@@ -283,7 +435,8 @@
       "description": "Leads women-only outlaw band. Strongest or most cunning woman.",
       "responsibilities": ["Lead band", "Plan raids", "Settle disputes", "Defend territory"],
       "prestige": "high",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     },
     {
       "id": "hunter",
@@ -291,7 +444,8 @@
       "description": "Hunt forest animals for food. Skilled with bow.",
       "responsibilities": ["Hunt game", "Provide food", "Track prey"],
       "prestige": "standard",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     },
     {
       "id": "warrior",
@@ -299,7 +453,8 @@
       "description": "Fight men who enter territory. Capture for ransom or enslavement.",
       "responsibilities": ["Fight intruders", "Capture men", "Defend band"],
       "prestige": "high",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     },
     {
       "id": "scout",
@@ -307,7 +462,8 @@
       "description": "Watch for threats, track prey and enemies.",
       "responsibilities": ["Scout territory", "Watch for threats", "Track movements"],
       "prestige": "standard",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     }
   ],
   "talunas": [
@@ -317,7 +473,8 @@
       "description": "Leads jungle outlaw band. Similar to Panther Girls but rainforest adapted.",
       "responsibilities": ["Lead band", "Plan raids", "Defend territory"],
       "prestige": "high",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     },
     {
       "id": "hunter",
@@ -325,7 +482,8 @@
       "description": "Hunt rainforest game. Skilled with blowgun, spear.",
       "responsibilities": ["Hunt jungle animals", "Provide food", "Use blowguns/spears"],
       "prestige": "standard",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     },
     {
       "id": "warrior",
@@ -333,7 +491,8 @@
       "description": "Fight intruders and capture for ransom.",
       "responsibilities": ["Fight enemies", "Capture intruders", "Defend band"],
       "prestige": "high",
-      "gender": "female"
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"]
     }
   ],
   "schendi_tribes": [
@@ -342,28 +501,36 @@
       "name": "Chief",
       "description": "Village or tribal leader. Leads in peace and war.",
       "responsibilities": ["Lead village/tribe", "Settle disputes", "Organize defense"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "askari",
       "name": "Askari",
       "description": "Warrior. Defend village and fight tribal enemies.",
       "responsibilities": ["Fight enemies", "Defend village", "Hunt dangerous animals"],
-      "prestige": "high"
+      "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "fisherman",
       "name": "Fisherman",
       "description": "Fish rivers and coast. Primary protein source.",
       "responsibilities": ["Fish rivers", "Provide food", "Navigate waters"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "farmer",
       "name": "Farmer",
       "description": "Grow tropical crops in jungle clearings.",
       "responsibilities": ["Farm crops", "Clear jungle", "Harvest"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
     },
     {
       "id": "drummer",
@@ -371,6 +538,8 @@
       "description": "Communicate via drums across jungle. Send messages between villages.",
       "responsibilities": ["Drum messages", "Maintain communication network", "Signal warnings"],
       "prestige": "high",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"],
       "notes": "Drum communication essential in dense jungle"
     },
     {
@@ -378,7 +547,19 @@
       "name": "Trader",
       "description": "Trade with Schendi port city and other tribes.",
       "responsibilities": ["Trade goods", "Travel to port", "Connect tribes to markets"],
-      "prestige": "standard"
+      "prestige": "standard",
+      "gender": "male",
+      "applicableStatuses": ["freeMan"]
+    },
+    {
+      "id": "schendi_woman",
+      "name": "Schendi Woman",
+      "description": "Free women of jungle tribes. Maintain village, prepare food, work crops, raise children. Adapt to tropical rainforest life.",
+      "responsibilities": ["Maintain village homes", "Prepare tropical foods", "Help with crops", "Raise children", "Weave and craft"],
+      "prestige": "standard",
+      "gender": "female",
+      "applicableStatuses": ["freeWoman"],
+      "notes": "Women of Schendi tribes live in jungle villages, adapted to tropical environment"
     }
   ]
 }

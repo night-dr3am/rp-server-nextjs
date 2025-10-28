@@ -3,10 +3,15 @@ import React, { useState, useMemo } from 'react';
 import {
   CasteData,
   TribalRole,
+  StatusSubtype,
   getCultureById,
+  getStatusById,
   getHighCastes,
   getLowCastes,
   getTribalRolesForCulture,
+  getCastesForStatus,
+  getTribalRolesForStatus,
+  getSlaveSubtypesAsRoles,
   getCasteById,
   getTribalRoleById
 } from '@/lib/gorData';
@@ -21,13 +26,15 @@ import {
 
 interface CasteSelectorProps {
   selectedCultureId: string | undefined;
+  selectedStatusId: string | undefined;
   selectedCasteOrRole: string | undefined;
-  onSelectCasteOrRole: (casteOrRole: CasteData | TribalRole) => void;
+  onSelectCasteOrRole: (casteOrRole: CasteData | TribalRole | StatusSubtype) => void;
   className?: string;
 }
 
 export function CasteSelector({
   selectedCultureId,
+  selectedStatusId,
   selectedCasteOrRole,
   onSelectCasteOrRole,
   className = ''
@@ -38,28 +45,50 @@ export function CasteSelector({
   const [showLowCastes, setShowLowCastes] = useState(true);
 
   const culture = selectedCultureId ? getCultureById(selectedCultureId) : undefined;
+  const status = selectedStatusId ? getStatusById(selectedStatusId) : undefined;
   const usesCastes = culture?.hasCastes || false;
 
-  // Get available castes or tribal roles
-  const { highCastes, lowCastes, tribalRoles } = useMemo(() => {
-    if (!culture) {
-      return { highCastes: [], lowCastes: [], tribalRoles: [] };
-    }
+  // Determine if this is a slave status (should show subtypes instead of castes/roles)
+  const isSlaveStatus = status?.category === 'slave';
 
-    if (usesCastes) {
-      return {
-        highCastes: getHighCastes(),
-        lowCastes: getLowCastes(),
-        tribalRoles: []
-      };
-    } else {
+  // Get available castes, tribal roles, or slave subtypes based on status
+  const { highCastes, lowCastes, tribalRoles, slaveSubtypes } = useMemo(() => {
+    // If slave status, return slave subtypes instead of castes/roles
+    if (isSlaveStatus && selectedStatusId) {
       return {
         highCastes: [],
         lowCastes: [],
-        tribalRoles: getTribalRolesForCulture(selectedCultureId!)
+        tribalRoles: [],
+        slaveSubtypes: getSlaveSubtypesAsRoles(selectedStatusId)
       };
     }
-  }, [culture, selectedCultureId, usesCastes]);
+
+    if (!culture || !selectedStatusId) {
+      return { highCastes: [], lowCastes: [], tribalRoles: [], slaveSubtypes: [] };
+    }
+
+    if (usesCastes) {
+      // Use status-based filtering for castes
+      const filteredCastes = getCastesForStatus(selectedStatusId);
+      const high = filteredCastes.filter(c => c.type === 'high');
+      const low = filteredCastes.filter(c => c.type === 'low' || !c.type);
+
+      return {
+        highCastes: high,
+        lowCastes: low,
+        tribalRoles: [],
+        slaveSubtypes: []
+      };
+    } else {
+      // Use status-based filtering for tribal roles
+      return {
+        highCastes: [],
+        lowCastes: [],
+        tribalRoles: getTribalRolesForStatus(selectedStatusId, selectedCultureId!),
+        slaveSubtypes: []
+      };
+    }
+  }, [culture, selectedCultureId, selectedStatusId, usesCastes, isSlaveStatus]);
 
   // Filter castes/roles by search query
   const filteredHighCastes = useMemo(() => {
@@ -89,6 +118,15 @@ export function CasteSelector({
     );
   }, [tribalRoles, searchQuery]);
 
+  const filteredSlaveSubtypes = useMemo(() => {
+    if (!searchQuery) return slaveSubtypes;
+    const query = searchQuery.toLowerCase();
+    return slaveSubtypes.filter(subtype =>
+      subtype.name.toLowerCase().includes(query) ||
+      (subtype.description || subtype.desc || '').toLowerCase().includes(query)
+    );
+  }, [slaveSubtypes, searchQuery]);
+
   const handleCasteClick = (caste: CasteData) => {
     onSelectCasteOrRole(caste);
   };
@@ -97,20 +135,168 @@ export function CasteSelector({
     onSelectCasteOrRole(role);
   };
 
+  const handleSubtypeClick = (subtype: StatusSubtype) => {
+    onSelectCasteOrRole(subtype);
+  };
+
   const toggleExpanded = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedItem(expandedItem === id ? null : id);
   };
 
-  if (!selectedCultureId) {
+  if (!selectedCultureId || !selectedStatusId) {
     return (
       <div className={`text-center py-12 ${className}`}>
         <p className="text-lg mb-2" style={{ color: GoreanColors.stone }}>
-          Please select a culture first
+          Please select a culture and status first
         </p>
         <p className="text-sm" style={{ color: GoreanColors.stoneLight }}>
-          Your culture determines whether you use castes or tribal roles.
+          Your culture and status determine available castes, tribal roles, or slave subtypes.
         </p>
+      </div>
+    );
+  }
+
+  // If slave status, show slave subtype selection UI
+  if (isSlaveStatus) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        {/* Header */}
+        <div>
+          <GoreanHeading level={2}>Choose Your Slave Subtype</GoreanHeading>
+          <p className="text-sm mt-2" style={{ color: GoreanColors.stone }}>
+            Slave subtypes define your specialization, training, and primary duties.
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search slave subtypes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:ring-2"
+            style={{
+              borderColor: GoreanColors.stone,
+              backgroundColor: GoreanColors.cream,
+              color: GoreanColors.charcoal
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              style={{ color: GoreanColors.stone }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Slave Subtypes Grid */}
+        {filteredSlaveSubtypes.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-lg" style={{ color: GoreanColors.stone }}>
+              {searchQuery ? `No subtypes found matching "${searchQuery}"` : 'No slave subtypes available'}
+            </p>
+            {searchQuery && (
+              <GoreanButton onClick={() => setSearchQuery('')} className="mt-4">
+                Clear Search
+              </GoreanButton>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSlaveSubtypes.map(subtype => {
+              const isSelected = selectedCasteOrRole === subtype.id;
+              const isExpanded = expandedItem === subtype.id;
+
+              return (
+                <GoreanCard
+                  key={subtype.id}
+                  selected={isSelected}
+                  hoverable
+                  onClick={() => handleSubtypeClick(subtype)}
+                  className="p-4"
+                >
+                  {/* Header */}
+                  <div className="mb-3">
+                    <div className="flex items-start justify-between mb-2">
+                      <GoreanHeading level={5} className="flex-1">
+                        {subtype.name}
+                      </GoreanHeading>
+                      {isSelected && (
+                        <span className="text-xl ml-2" style={{ color: GoreanColors.bronze }}>
+                          ✓
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm mb-2" style={{ color: GoreanColors.charcoal }}>
+                    {subtype.description || subtype.desc}
+                  </p>
+
+                  {/* Expandable Details */}
+                  {isExpanded && (
+                    <div className="mt-3 pt-3 border-t-2 space-y-2" style={{ borderColor: GoreanColors.bronze }}>
+                      {subtype.training && (
+                        <div>
+                          <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                            Training:
+                          </p>
+                          <p className="text-xs" style={{ color: GoreanColors.charcoal }}>
+                            {subtype.training}
+                          </p>
+                        </div>
+                      )}
+                      {subtype.notes && (
+                        <div>
+                          <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                            Notes:
+                          </p>
+                          <p className="text-xs" style={{ color: GoreanColors.charcoal }}>
+                            {subtype.notes}
+                          </p>
+                        </div>
+                      )}
+                      {subtype.examples && subtype.examples.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                            Examples:
+                          </p>
+                          <p className="text-xs italic" style={{ color: GoreanColors.stone }}>
+                            {subtype.examples.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Expand/Collapse Button */}
+                  {(subtype.training || subtype.notes || (subtype.examples && subtype.examples.length > 0)) && (
+                    <button
+                      onClick={(e) => toggleExpanded(subtype.id, e)}
+                      className="text-xs font-semibold mt-2 flex items-center gap-1 hover:underline"
+                      style={{ color: GoreanColors.bronze }}
+                    >
+                      {isExpanded ? '▲ Less' : '▼ More'}
+                    </button>
+                  )}
+                </GoreanCard>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Help Text */}
+        <div className="text-center text-sm" style={{ color: GoreanColors.stone }}>
+          <p>
+            Slave subtypes determine your primary role and training as a slave in Gorean society.
+          </p>
+        </div>
       </div>
     );
   }
