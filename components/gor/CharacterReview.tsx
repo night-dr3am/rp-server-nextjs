@@ -18,8 +18,7 @@ import {
   GoreanButton,
   GoreanScroll,
   GoreanDivider,
-  GoreanColors,
-  getCasteColorByRole
+  GoreanColors
 } from './GoreanTheme';
 
 interface CharacterReviewProps {

@@ -5,7 +5,7 @@ import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
-import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
+import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
 // Build human-readable effect message
@@ -142,21 +142,21 @@ export async function POST(request: NextRequest) {
     const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
     const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
 
-    // Get passive effects from perks/cybernetics/magic
-    const attackerPassiveEffectIds = getPassiveEffects(
+    // Get passive effects from perks/cybernetics/magic WITH source tracking
+    const attackerPassiveEffectsWithSource = getPassiveEffectsWithSource(
       (attacker.arkanaStats.perks as string[]) || [],
       (attacker.arkanaStats.cybernetics as string[]) || [],
       (attacker.arkanaStats.magicWeaves as string[]) || []
     );
-    const targetPassiveEffectIds = getPassiveEffects(
+    const targetPassiveEffectsWithSource = getPassiveEffectsWithSource(
       (target.arkanaStats.perks as string[]) || [],
       (target.arkanaStats.cybernetics as string[]) || [],
       (target.arkanaStats.magicWeaves as string[]) || []
     );
 
-    // Convert passive effects to ActiveEffect format and combine with active effects
-    const attackerPassiveAsActive = passiveEffectsToActiveFormat(attackerPassiveEffectIds);
-    const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectIds);
+    // Convert passive effects to ActiveEffect format (with source info) and combine with active effects
+    const attackerPassiveAsActive = passiveEffectsToActiveFormat(attackerPassiveEffectsWithSource);
+    const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectsWithSource);
 
     const attackerCombinedEffects = [...attackerActiveEffects, ...attackerPassiveAsActive];
     const targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
@@ -191,18 +191,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify ownership across all ability types
+    // Verify ownership across all ability types and determine source type
     const userCommonPowerIds = (attacker.arkanaStats.commonPowers as string[]) || [];
     const userArchPowerIds = (attacker.arkanaStats.archetypePowers as string[]) || [];
     const userPerkIds = (attacker.arkanaStats.perks as string[]) || [];
     const userCyberneticIds = (attacker.arkanaStats.cybernetics as string[]) || [];
     const userMagicWeaveIds = (attacker.arkanaStats.magicWeaves as string[]) || [];
 
-    const ownsPower = userCommonPowerIds.includes(power.id) ||
-                      userArchPowerIds.includes(power.id) ||
-                      userPerkIds.includes(power.id) ||
-                      userCyberneticIds.includes(power.id) ||
-                      userMagicWeaveIds.includes(power.id);
+    let powerSourceType: 'power' | 'perk' | 'cybernetic' | 'magic' = 'power';
+    let ownsPower = false;
+
+    if (userCommonPowerIds.includes(power.id) || userArchPowerIds.includes(power.id)) {
+      ownsPower = true;
+      powerSourceType = 'power';
+    } else if (userPerkIds.includes(power.id)) {
+      ownsPower = true;
+      powerSourceType = 'perk';
+    } else if (userCyberneticIds.includes(power.id)) {
+      ownsPower = true;
+      powerSourceType = 'cybernetic';
+    } else if (userMagicWeaveIds.includes(power.id)) {
+      ownsPower = true;
+      powerSourceType = 'magic';
+    }
 
     if (!ownsPower) {
       return NextResponse.json(
@@ -210,6 +221,13 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
+
+    // Create source info for effects tracking
+    const sourceInfo = {
+      sourceId: power.id,
+      sourceName: power.name,
+      sourceType: powerSourceType
+    };
 
     // Execute effects using structured data
     const attackEffects = (power.effects?.attack && Array.isArray(power.effects.attack))
@@ -333,7 +351,7 @@ export async function POST(request: NextRequest) {
       let targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
 
       for (const effectResult of targetEffects) {
-        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult, attacker.arkanaStats.characterName);
+        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult, attacker.arkanaStats.characterName, sourceInfo);
       }
 
       const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetActiveEffects);
@@ -370,7 +388,7 @@ export async function POST(request: NextRequest) {
     // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
       for (const effectResult of selfEffects) {
-        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult, attacker.arkanaStats!.characterName);
+        processedAttackerActiveEffects = applyActiveEffect(processedAttackerActiveEffects, effectResult, attacker.arkanaStats!.characterName, sourceInfo);
       }
     }
 

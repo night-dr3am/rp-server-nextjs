@@ -153,11 +153,17 @@ export function executeEffect(
  * @param currentEffects - Current active effects on the target
  * @param effectResult - The effect result to apply
  * @param casterName - Optional character name of who cast this effect (for display purposes)
+ * @param sourceInfo - Optional source tracking (power/perk/cybernetic/magic that caused this effect)
  */
 export function applyActiveEffect(
   currentEffects: ActiveEffect[],
   effectResult: EffectResult,
-  casterName?: string
+  casterName?: string,
+  sourceInfo?: {
+    sourceId: string;
+    sourceName: string;
+    sourceType: 'power' | 'perk' | 'cybernetic' | 'magic';
+  }
 ): ActiveEffect[] {
   const { effectDef } = effectResult;
 
@@ -187,7 +193,13 @@ export function applyActiveEffect(
     duration: effectDef.duration || 'scene',
     turnsLeft,
     appliedAt: new Date().toISOString(),
-    casterName  // Store caster name if provided
+    casterName,  // Store caster name if provided
+    // Include source info if provided
+    ...(sourceInfo && {
+      sourceId: sourceInfo.sourceId,
+      sourceName: sourceInfo.sourceName,
+      sourceType: sourceInfo.sourceType
+    })
   };
 
   if (existingIndex >= 0) {
@@ -496,9 +508,13 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
         durationStr = `${activeEffect.turnsLeft} turns left`;
       }
 
-      // Format effect name with type indicator
+      // Format effect name with type indicator and source tracking
       const typeIndicator = modifierType === 'roll_bonus' ? '[roll]' : '[stat]';
-      const effectName = `${activeEffect.name}${typeIndicator}`;
+      // Use source name if available, otherwise fall back to effect name
+      const baseName = activeEffect.sourceName
+        ? `${activeEffect.sourceName}[${activeEffect.sourceType}]`
+        : activeEffect.name;
+      const effectName = `${baseName}${typeIndicator}`;
 
       // Add to the appropriate stat group (including _rollbonus keys)
       const displayKey = modifierType === 'roll_bonus' ? `${statName}_rollbonus` : statName;
@@ -822,7 +838,11 @@ export function getDetailedStatCalculation(
           effectDef.stat === capitalizedName &&
           (effectDef.modifierType === 'stat_value' || !effectDef.modifierType)) {
         const modifier = effectDef.modifier || 0;
-        statValueEffects.push({ name: activeEffect.name, modifier });
+        // Use source name if available, otherwise fall back to effect name
+        const displayName = activeEffect.sourceName
+          ? `${activeEffect.sourceName}[${activeEffect.sourceType}]`
+          : activeEffect.name;
+        statValueEffects.push({ name: displayName, modifier });
         statValueTotal += modifier;
       }
     }
@@ -844,7 +864,11 @@ export function getDetailedStatCalculation(
           effectDef.stat === capitalizedName &&
           effectDef.modifierType === 'roll_bonus') {
         const modifier = effectDef.modifier || 0;
-        rollBonusEffects.push({ name: activeEffect.name, modifier });
+        // Use source name if available, otherwise fall back to effect name
+        const displayName = activeEffect.sourceName
+          ? `${activeEffect.sourceName}[${activeEffect.sourceType}]`
+          : activeEffect.name;
+        rollBonusEffects.push({ name: displayName, modifier });
         rollBonusTotal += modifier;
       }
     }

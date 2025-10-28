@@ -13,7 +13,9 @@ import {
   CharacterSkill,
   SpeciesCategory,
   CultureType,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   calculateGoreanStatModifier,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   calculateHealthMax
 } from './gor/types';
 

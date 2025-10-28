@@ -2,8 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   StatusData,
-  getStatusesForSpecies,
-  getStatusById
+  getStatusesForSpecies
 } from '@/lib/gorData';
 import {
   GoreanCard,
@@ -29,7 +28,6 @@ export function StatusSelector({
   className = ''
 }: StatusSelectorProps) {
   const [expandedStatus, setExpandedStatus] = useState<string | null>(null);
-  const [selectedSubtypeTemp, setSelectedSubtypeTemp] = useState<string | undefined>(undefined);
 
   // Get statuses applicable to selected species
   const availableStatuses = useMemo(() => {
@@ -45,14 +43,12 @@ export function StatusSelector({
     } else {
       // No subtypes, select directly
       onSelectStatus(status);
-      setSelectedSubtypeTemp(undefined);
     }
   };
 
   const handleSubtypeClick = (status: StatusData, subtypeId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     onSelectStatus(status, subtypeId);
-    setSelectedSubtypeTemp(subtypeId);
   };
 
   const toggleExpanded = (statusId: string, e: React.MouseEvent) => {

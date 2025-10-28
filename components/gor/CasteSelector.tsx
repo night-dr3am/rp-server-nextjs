@@ -6,22 +6,16 @@ import {
   StatusSubtype,
   getCultureById,
   getStatusById,
-  getHighCastes,
-  getLowCastes,
-  getTribalRolesForCulture,
   getCastesForStatus,
   getTribalRolesForStatus,
-  getSlaveSubtypesAsRoles,
-  getCasteById,
-  getTribalRoleById
+  getSlaveSubtypesAsRoles
 } from '@/lib/gorData';
 import {
   GoreanCard,
   GoreanHeading,
   GoreanBadge,
   GoreanButton,
-  GoreanColors,
-  getCasteColorByRole
+  GoreanColors
 } from './GoreanTheme';
 
 interface CasteSelectorProps {

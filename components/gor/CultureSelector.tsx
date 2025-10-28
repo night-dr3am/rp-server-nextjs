@@ -2,8 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   CultureData,
-  getCulturesForSpecies,
-  getCultureById
+  getCulturesForSpecies
 } from '@/lib/gorData';
 import {
   GoreanCard,

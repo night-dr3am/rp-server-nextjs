@@ -7,8 +7,7 @@ import {
   getSkillTypes,
   getSkillTypeDisplayName,
   calculateSkillCost,
-  calculateTotalSkillPoints,
-  DEFAULT_SKILL_POINTS
+  calculateTotalSkillPoints
 } from '@/lib/gorData';
 import {
   GoreanCard,

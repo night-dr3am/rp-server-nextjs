@@ -51,6 +51,86 @@ export function getPassiveEffects(
 }
 
 /**
+ * Get all passive effects with source information from perks, cybernetics, and magic weaves
+ * Enhanced version that tracks which ability grants each passive effect
+ * Used to apply passive modifiers to liveStats in combat with full source tracking
+ *
+ * @param perks - Array of perk IDs the user owns
+ * @param cybernetics - Array of cybernetic IDs the user owns
+ * @param magicWeaves - Array of magic weave IDs the user owns
+ * @returns Array of effects with source tracking (sourceId, sourceName, sourceType)
+ */
+export function getPassiveEffectsWithSource(
+  perks: string[],
+  cybernetics: string[],
+  magicWeaves: string[]
+): Array<{
+  effectId: string;
+  sourceId: string;
+  sourceName: string;
+  sourceType: 'perk' | 'cybernetic' | 'magic';
+}> {
+  const effectsWithSource: Array<{
+    effectId: string;
+    sourceId: string;
+    sourceName: string;
+    sourceType: 'perk' | 'cybernetic' | 'magic';
+  }> = [];
+
+  // Load all data
+  const allPerks = getAllPerks();
+  const allCybernetics = getAllCybernetics();
+  const allMagicSchools = getAllMagicSchools();
+
+  // Process perks with passive effects
+  perks.forEach(perkId => {
+    const perk = allPerks.find(p => p.id === perkId);
+    if (perk && perk.abilityType?.includes('passive') && perk.effects?.passive) {
+      perk.effects.passive.forEach(effectId => {
+        effectsWithSource.push({
+          effectId,
+          sourceId: perk.id,
+          sourceName: perk.name,
+          sourceType: 'perk'
+        });
+      });
+    }
+  });
+
+  // Process cybernetics with passive effects
+  cybernetics.forEach(cyberId => {
+    const cyber = allCybernetics.find(c => c.id === cyberId);
+    if (cyber && cyber.abilityType?.includes('passive') && cyber.effects?.passive) {
+      cyber.effects.passive.forEach(effectId => {
+        effectsWithSource.push({
+          effectId,
+          sourceId: cyber.id,
+          sourceName: cyber.name,
+          sourceType: 'cybernetic'
+        });
+      });
+    }
+  });
+
+  // Process magic weaves with passive effects
+  magicWeaves.forEach(weaveId => {
+    const weave = allMagicSchools.find(m => m.id === weaveId);
+    if (weave && weave.abilityType?.includes('passive') && weave.effects?.passive) {
+      weave.effects.passive.forEach(effectId => {
+        effectsWithSource.push({
+          effectId,
+          sourceId: weave.id,
+          sourceName: weave.name,
+          sourceType: 'magic'
+        });
+      });
+    }
+  });
+
+  return effectsWithSource;
+}
+
+/**
  * Load a perk by ID
  *
  * @param perkId - Perk ID to load
@@ -186,7 +266,7 @@ export function hasPassiveEffects(ability: Perk | Cybernetic | MagicSchool): boo
  * Convert passive effect IDs to ActiveEffect format for liveStats calculation
  * Passive effects are treated as permanent (999 turns)
  *
- * @param passiveEffectIds - Array of passive effect IDs
+ * @param passiveEffectIds - Array of passive effect IDs (legacy signature for backward compatibility)
  * @returns Array of ActiveEffect objects
  */
 export function passiveEffectsToActiveFormat(passiveEffectIds: string[]): Array<{
@@ -195,12 +275,79 @@ export function passiveEffectsToActiveFormat(passiveEffectIds: string[]): Array<
   duration: string;
   turnsLeft: number;
   appliedAt: string;
+}>;
+
+/**
+ * Convert passive effects with source info to ActiveEffect format for liveStats calculation
+ * Passive effects are treated as permanent (999 turns)
+ * Enhanced version that includes source tracking for better combat message display
+ *
+ * @param passiveEffects - Array of passive effects with source information
+ * @returns Array of ActiveEffect objects with source tracking
+ */
+export function passiveEffectsToActiveFormat(
+  passiveEffects: Array<{
+    effectId: string;
+    sourceId: string;
+    sourceName: string;
+    sourceType: 'perk' | 'cybernetic' | 'magic';
+  }>
+): Array<{
+  effectId: string;
+  name: string;
+  duration: string;
+  turnsLeft: number;
+  appliedAt: string;
+  sourceId: string;
+  sourceName: string;
+  sourceType: 'perk' | 'cybernetic' | 'magic';
+}>;
+
+/**
+ * Implementation with overload support for both legacy and enhanced usage
+ */
+export function passiveEffectsToActiveFormat(
+  passiveEffects: string[] | Array<{
+    effectId: string;
+    sourceId: string;
+    sourceName: string;
+    sourceType: 'perk' | 'cybernetic' | 'magic';
+  }>
+): Array<{
+  effectId: string;
+  name: string;
+  duration: string;
+  turnsLeft: number;
+  appliedAt: string;
+  sourceId?: string;
+  sourceName?: string;
+  sourceType?: 'perk' | 'cybernetic' | 'magic';
 }> {
-  return passiveEffectIds.map(effectId => ({
-    effectId,
-    name: effectId, // Will be resolved by effectsUtils
+  // Legacy path: array of strings (effect IDs only)
+  if (passiveEffects.length === 0 || typeof passiveEffects[0] === 'string') {
+    return (passiveEffects as string[]).map(effectId => ({
+      effectId,
+      name: effectId, // Will be resolved by effectsUtils
+      duration: 'permanent',
+      turnsLeft: 999, // Permanent passive effects
+      appliedAt: new Date().toISOString()
+    }));
+  }
+
+  // Enhanced path: array of objects with source info
+  return (passiveEffects as Array<{
+    effectId: string;
+    sourceId: string;
+    sourceName: string;
+    sourceType: 'perk' | 'cybernetic' | 'magic';
+  }>).map(effect => ({
+    effectId: effect.effectId,
+    name: effect.effectId, // Will be resolved by effectsUtils
     duration: 'permanent',
     turnsLeft: 999, // Permanent passive effects
-    appliedAt: new Date().toISOString()
+    appliedAt: new Date().toISOString(),
+    sourceId: effect.sourceId,
+    sourceName: effect.sourceName,
+    sourceType: effect.sourceType
   }));
 }

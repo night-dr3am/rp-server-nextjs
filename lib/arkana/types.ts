@@ -73,6 +73,9 @@ export interface ActiveEffect {
   turnsLeft: number;       // Turns remaining
   appliedAt: string;       // ISO timestamp when effect was applied
   casterName?: string;     // Character name of who cast this effect (optional, for display)
+  sourceId?: string;       // Power/Perk/Cybernetic/Magic ID that caused this effect (optional)
+  sourceName?: string;     // Display name of source ability (e.g., "Emotional Resonance", "Chi Manipulation")
+  sourceType?: 'power' | 'perk' | 'cybernetic' | 'magic';  // Type of source ability (optional)
 }
 
 // Live Stats for dynamic calculations

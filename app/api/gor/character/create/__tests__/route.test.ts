@@ -141,8 +141,6 @@ describe('POST /api/gor/character/create', () => {
   });
 
   it('should calculate healthMax correctly from strength', async () => {
-    const { token } = await createUserWithToken();
-
     const testCases = [
       { strength: 1, expectedHealth: 5 },
       { strength: 2, expectedHealth: 10 },
@@ -152,7 +150,7 @@ describe('POST /api/gor/character/create', () => {
     ];
 
     for (const testCase of testCases) {
-      const { user: newUser, token: newToken } = await createUserWithToken();
+      const { token: newToken } = await createUserWithToken();
       // Calculate other stats to always use exactly 10 points
       // strength + agility + intellect + perception + charisma = 15 (5 base + 10 points)
       const remainingPoints = 15 - testCase.strength;

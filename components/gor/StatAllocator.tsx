@@ -10,7 +10,6 @@ import {
 } from '@/lib/gorData';
 import {
   GoreanHeading,
-  GoreanBadge,
   GoreanButton,
   GoreanColors
 } from './GoreanTheme';
@@ -135,7 +134,6 @@ export function StatAllocator({ stats, onStatChange, className = '' }: StatAlloc
         {statsList.map(stat => {
           const canDecrease = stat.value > MIN_STAT_VALUE;
           const canIncrease = stat.value < MAX_STAT_VALUE && pool > 0;
-          const modifier = calculateGoreanStatModifier(stat.value);
           const modifierColor = getModifierColor(stat.value);
 
           return (
