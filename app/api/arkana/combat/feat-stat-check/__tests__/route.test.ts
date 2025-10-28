@@ -574,8 +574,8 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_physical_1',
-            name: 'Physical Bonus +1',
+            effectId: 'buff_physical_stat_1',
+            name: 'Physical Stat +1',
             duration: 'turns:3',
             turnsLeft: 3,
             appliedAt: new Date().toISOString()
@@ -722,8 +722,8 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_attack_2',
-            name: 'Attack Roll Buff +2',
+            effectId: 'buff_physical_stat_2',
+            name: 'Physical Stat +2',
             duration: 'turns:3',
             turnsLeft: 3,
             appliedAt: new Date().toISOString()

@@ -434,7 +434,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Dexterity: 3, Physical: 1 }
+        liveStats: { Dexterity_rollbonus: 3, Physical_rollbonus: 1 }
       });
 
       const timestamp = new Date().toISOString();
@@ -487,7 +487,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Dexterity: 3 }
+        liveStats: { Dexterity_rollbonus: 3 }
       });
 
       const timestamp = new Date().toISOString();
@@ -517,7 +517,7 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(activeEffects).toHaveLength(0); // Effect removed
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Dexterity).toBeUndefined(); // Stat bonus removed
+      expect(liveStats.Dexterity_rollbonus).toBeUndefined(); // Stat bonus removed
     });
 
     it('2.3 should persist scene duration effects through turn processing', async () => {
@@ -541,7 +541,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Stealth: 3 }
+        liveStats: { Stealth_rollbonus: 3 }
       });
 
       const timestamp = new Date().toISOString();
@@ -572,7 +572,7 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(activeEffects[0].turnsLeft).toBe(999); // Scene effects do NOT decrement
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Stealth).toBe(3); // Still active
+      expect(liveStats.Stealth_rollbonus).toBe(3); // Still active (roll_bonus type stored with _rollbonus suffix)
     });
 
     it('2.4 should handle multiple effects expiring in same turn', async () => {
@@ -610,7 +610,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Dexterity: 3, Physical: 1, Stealth: 3 }
+        liveStats: { Dexterity_rollbonus: 3, Physical_rollbonus: 1, Stealth_rollbonus: 3 }
       });
 
       const timestamp = new Date().toISOString();
@@ -642,9 +642,9 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(activeEffects[0].turnsLeft).toBe(999); // Scene effect unchanged
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Dexterity).toBeUndefined();
-      expect(liveStats.Physical).toBeUndefined();
-      expect(liveStats.Stealth).toBe(3); // Only this remains
+      expect(liveStats.Dexterity_rollbonus).toBeUndefined();
+      expect(liveStats.Physical_rollbonus).toBeUndefined();
+      expect(liveStats.Stealth_rollbonus).toBe(3); // Only this remains
     });
 
     it('2.5 should recalculate liveStats after turn processing', async () => {
@@ -675,7 +675,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Physical: 1, Mental: -1 }
+        liveStats: { Physical_rollbonus: 1, Mental_rollbonus: -1 }
       });
 
       const timestamp = new Date().toISOString();
@@ -702,8 +702,8 @@ describe('/api/arkana/combat/power-activate', () => {
       });
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Physical).toBe(1); // Still active
-      expect(liveStats.Mental).toBeUndefined(); // Expired and removed
+      expect(liveStats.Physical_rollbonus).toBe(1); // Still active
+      expect(liveStats.Mental_rollbonus).toBeUndefined(); // Expired and removed
     });
   });
 
@@ -748,7 +748,7 @@ describe('/api/arkana/combat/power-activate', () => {
         });
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats.Dexterity).toBe(3); // Chi Step applies +3 Dexterity
+        expect(liveStats.Dexterity_rollbonus).toBe(3); // Chi Step applies +3 Dexterity
       } else {
         console.log('Chi Step activation failed check, skipping stat modifier verification');
       }
@@ -792,7 +792,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
       // buff_physical_1 (+1) + buff_attack_2 (+2) = +3 Physical
-      expect(liveStats.Physical).toBe(3);
+      expect(liveStats.Physical_rollbonus).toBe(3);
     });
 
     it('3.3 should handle negative modifiers (debuffs)', async () => {
@@ -823,7 +823,7 @@ describe('/api/arkana/combat/power-activate', () => {
       });
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Physical).toBe(-2);
+      expect(liveStats.Physical).toBe(-2); // debuff_physical_minus_2 is stat_value type
     });
 
     it('3.4 should handle mixed positive and negative modifiers', async () => {
@@ -861,8 +861,9 @@ describe('/api/arkana/combat/power-activate', () => {
       });
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
-      // +1 + (-2) = -1
-      expect(liveStats.Physical).toBe(-1);
+      // Mixed modifierType: roll_bonus and stat_value don't combine
+      expect(liveStats.Physical_rollbonus).toBe(1); // buff_physical_1 (roll_bonus)
+      expect(liveStats.Physical).toBe(-2); // debuff_physical_minus_2 (stat_value)
     });
 
     it('3.5 should store control effects as string values', async () => {
@@ -917,7 +918,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
       // Stealth = 0 matches liveStatsConfig, should be removed
-      expect(liveStats.Stealth).toBeUndefined();
+      expect(liveStats.Stealth_rollbonus).toBeUndefined();
     });
 
     it('3.8 should clear liveStats when last effect is removed', async () => {
@@ -941,7 +942,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Physical: 1 }
+        liveStats: { Physical_rollbonus: 1 }
       });
 
       const timestamp = new Date().toISOString();
@@ -1102,7 +1103,7 @@ describe('/api/arkana/combat/power-activate', () => {
         expect(dexBuff?.turnsLeft).toBe(2); // Full duration (new effects applied AFTER turn processing)
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats.Dexterity).toBe(3);
+        expect(liveStats.Dexterity_rollbonus).toBe(3);
       } else {
         // Check failed, which is acceptable given the randomness
         console.log('Chi Step activation failed check, skipping effect verification');
@@ -1352,7 +1353,7 @@ describe('/api/arkana/combat/power-activate', () => {
       });
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Physical).toBe(3); // 1 + 2
+      expect(liveStats.Physical_rollbonus).toBe(3); // 1 + 2
     });
 
     it('5.4 buff and debuff on same stat net out', async () => {
@@ -1391,7 +1392,9 @@ describe('/api/arkana/combat/power-activate', () => {
       });
 
       const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Physical).toBe(-1); // 1 + (-2)
+      // Mixed modifierType: roll_bonus and stat_value don't combine
+      expect(liveStats.Physical_rollbonus).toBe(1); // buff_physical_1 (roll_bonus)
+      expect(liveStats.Physical).toBe(-2); // debuff_physical_minus_2 (stat_value)
     });
   });
 
@@ -1470,7 +1473,7 @@ describe('/api/arkana/combat/power-activate', () => {
         expect(casterBuff?.turnsLeft).toBe(2);
 
         const casterLiveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-        expect(casterLiveStats.Mental).toBe(2);
+        expect(casterLiveStats.Mental_rollbonus).toBe(2); // buff_mental_2_area is roll_bonus type
 
         // Verify nearby allies were buffed
         const updatedNearby1 = await prisma.arkanaStats.findFirst({
@@ -1651,7 +1654,7 @@ describe('/api/arkana/combat/power-activate', () => {
         expect(activeEffects.length).toBeGreaterThan(0);
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats.Dexterity).toBeDefined();
+        expect(liveStats.Dexterity_rollbonus).toBeDefined();
       } else {
         console.log('Chi Step activation failed check, skipping self-target verification');
       }
@@ -1793,7 +1796,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Dexterity: 3 }
+        liveStats: { Dexterity_rollbonus: 3 }
       });
 
       const target = await createArkanaTestUser({
@@ -1858,7 +1861,7 @@ describe('/api/arkana/combat/power-activate', () => {
             appliedAt: new Date().toISOString()
           }
         ],
-        liveStats: { Dexterity: 3 }
+        liveStats: { Dexterity_rollbonus: 3 }
       });
 
       const target = await createArkanaTestUser({
@@ -2382,7 +2385,7 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(activeEffects[0].turnsLeft).toBe(1); // Decremented
 
       const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-      expect(liveStats.Dexterity).toBe(3); // Recalculated
+      expect(liveStats.Dexterity_rollbonus).toBe(3); // Recalculated
     });
   });
 
@@ -2448,7 +2451,7 @@ describe('/api/arkana/combat/power-activate', () => {
         expect(activeEffects[0].turnsLeft).toBe(2); // Full duration (new effects applied AFTER turn processing)
 
         const liveStats = (updatedCaster?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats.Dexterity).toBe(3);
+        expect(liveStats.Dexterity_rollbonus).toBe(3);
       } else {
         // If activation failed, skip to second power test
         console.log('First power activation failed check, skipping effect verification');
@@ -2494,7 +2497,7 @@ describe('/api/arkana/combat/power-activate', () => {
         expect(activeEffects2[0].turnsLeft).toBe(1); // Decremented from 2 to 1
 
         const liveStats2 = (updatedCaster2?.liveStats || {}) as unknown as LiveStats;
-        expect(liveStats2.Dexterity).toBe(3); // Effect still active
+        expect(liveStats2.Dexterity_rollbonus).toBe(3); // Effect still active
       }
 
       // Step 6: Verify target was affected by second power

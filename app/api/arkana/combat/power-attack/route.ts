@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffects, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
@@ -234,7 +234,23 @@ export async function POST(request: NextRequest) {
         const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, targetStatValue, attackerLiveStats, targetLiveStats);
         if (result) {
           attackSuccess = result.success;
-          rollDescription = result.rollInfo || '';
+          // Get detailed calculation breakdown for the message
+          const baseStat = (power.baseStat?.toLowerCase() || 'mental') as 'physical' | 'dexterity' | 'mental' | 'perception';
+          const attackerCalc = getDetailedStatCalculation(
+            attacker.arkanaStats,
+            attackerLiveStats,
+            baseStat,
+            attackerCombinedEffects
+          );
+
+          // Extract d20 roll and total from the old rollInfo format
+          const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
+          if (rollMatch) {
+            const [, d20, , total, tn] = rollMatch;
+            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${total} vs TN:${tn}`;
+          } else {
+            rollDescription = result.rollInfo || '';
+          }
         }
         break;
       }

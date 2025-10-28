@@ -128,8 +128,8 @@ describe('/api/arkana/combat/attack', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_physical_1',
-            name: 'Physical Bonus +1',
+            effectId: 'buff_physical_stat_1',
+            name: 'Physical Stat +1',
             duration: 'turns:3',
             turnsLeft: 3, // Will decrement to 2 after action
             appliedAt: new Date().toISOString()
@@ -244,17 +244,17 @@ describe('/api/arkana/combat/attack', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_physical_1',
-            name: 'Physical Bonus +1',
+            effectId: 'buff_physical_stat_1',
+            name: 'Physical Stat +1',
             duration: 'scene',
-            turnsLeft: 5,
+            turnsLeft: 999,
             appliedAt: new Date().toISOString()
           },
           {
-            effectId: 'buff_attack_2',
-            name: 'Attack Roll Buff +2',
+            effectId: 'buff_physical_stat_2',
+            name: 'Physical Stat +2',
             duration: 'scene',
-            turnsLeft: 5,
+            turnsLeft: 999,
             appliedAt: new Date().toISOString()
           }
         ]
@@ -305,10 +305,10 @@ describe('/api/arkana/combat/attack', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_physical_1',
-            name: 'Physical Bonus +1',
+            effectId: 'buff_physical_stat_1',
+            name: 'Physical Stat +1',
             duration: 'scene',
-            turnsLeft: 5,
+            turnsLeft: 999,
             appliedAt: new Date().toISOString()
           },
           {
@@ -366,10 +366,10 @@ describe('/api/arkana/combat/attack', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_attack_2',
-            name: 'Attack Roll Buff +2',
+            effectId: 'buff_physical_stat_2',
+            name: 'Physical Stat +2',
             duration: 'scene',
-            turnsLeft: 5,
+            turnsLeft: 999,
             appliedAt: new Date().toISOString()
           }
         ]

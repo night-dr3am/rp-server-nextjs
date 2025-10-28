@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaPowerCheckSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurn, buildArkanaStatsUpdate, getEffectiveStatModifier, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
 import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -67,14 +67,23 @@ export async function POST(request: NextRequest) {
     // Determine success/failure
     const isSuccess = totalRoll >= targetNumber;
 
-    // Create result message
+    // Create result message with detailed calculation
     const playerName = player.arkanaStats.characterName;
+
+    // Get detailed calculation breakdown
+    const playerActiveEffects = parseActiveEffects(player.arkanaStats.activeEffects);
+    const playerCalc = getDetailedStatCalculation(
+      player.arkanaStats,
+      playerLiveStats,
+      'mental',
+      playerActiveEffects
+    );
+
     const resultMessage = isSuccess
-      ? `${playerName} succeeds on power check! (Roll: ${d20Roll}+${mentalMod}=${totalRoll} vs TN:${targetNumber})`
-      : `${playerName} fails power check. (Roll: ${d20Roll}+${mentalMod}=${totalRoll} vs TN:${targetNumber})`;
+      ? `${playerName} succeeds on power check! (Roll: d20(${d20Roll}) + ${playerCalc.formattedString} = ${totalRoll} vs TN:${targetNumber})`
+      : `${playerName} fails power check. (Roll: d20(${d20Roll}) + ${playerCalc.formattedString} = ${totalRoll} vs TN:${targetNumber})`;
 
     // Process turn for player (decrement all activeEffects by 1 turn)
-    const playerActiveEffects = parseActiveEffects(player.arkanaStats.activeEffects);
     const turnProcessed = processEffectsTurn(playerActiveEffects, player.arkanaStats);
 
     await prisma.arkanaStats.update({

@@ -218,20 +218,34 @@ export function recalculateLiveStats(
     .map(ae => getEffectDefinition(ae.effectId))
     .filter(def => def !== null) as EffectDefinition[];
 
-  // Apply stat modifiers
+  // Apply stat modifiers - distinguish between stat_value and roll_bonus types
   for (const effectDef of effectDefs) {
     if (effectDef.category === 'stat_modifier' && effectDef.stat) {
       const statName = effectDef.stat;
       const modifier = effectDef.modifier || 0;
+      const modifierType = effectDef.modifierType || 'stat_value'; // Default to stat_value for backward compatibility
 
-      // Initialize stat if not present
-      if (liveStats[statName] === undefined) {
-        liveStats[statName] = 0;
-      }
-
-      // Apply modifier (accumulate if multiple effects on same stat)
-      if (typeof liveStats[statName] === 'number') {
-        liveStats[statName] = (liveStats[statName] as number) + modifier;
+      if (modifierType === 'stat_value') {
+        // stat_value: Modifies base stat BEFORE tier calculation
+        // Stored as: liveStats[StatName] = accumulated modifier
+        // Example: liveStats.Physical = 3 (adds +3 to base Physical before calculating tier)
+        if (liveStats[statName] === undefined) {
+          liveStats[statName] = 0;
+        }
+        if (typeof liveStats[statName] === 'number') {
+          liveStats[statName] = (liveStats[statName] as number) + modifier;
+        }
+      } else if (modifierType === 'roll_bonus') {
+        // roll_bonus: Adds flat bonus AFTER base modifier is calculated
+        // Stored as: liveStats[StatName_rollbonus] = accumulated bonus
+        // Example: liveStats.Physical_rollbonus = 2 (adds +2 directly to roll after tier mod)
+        const rollKey = `${statName}_rollbonus`;
+        if (liveStats[rollKey] === undefined) {
+          liveStats[rollKey] = 0;
+        }
+        if (typeof liveStats[rollKey] === 'number') {
+          liveStats[rollKey] = (liveStats[rollKey] as number) + modifier;
+        }
       }
     }
 
@@ -464,11 +478,13 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
   }
 
   // Match stat_modifier activeEffects to their stats
+  // Now distinguish between stat_value and roll_bonus types in display
   for (const activeEffect of activeEffects) {
     const effectDef = getEffectDefinition(activeEffect.effectId);
 
     if (effectDef && effectDef.category === 'stat_modifier' && effectDef.stat) {
       const statName = effectDef.stat;
+      const modifierType = effectDef.modifierType || 'stat_value';
 
       // Format duration string
       let durationStr = '';
@@ -480,10 +496,15 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
         durationStr = `${activeEffect.turnsLeft} turns left`;
       }
 
-      // Add to the appropriate stat group
-      if (effectsByStat[statName]) {
-        effectsByStat[statName].effects.push({
-          name: activeEffect.name,
+      // Format effect name with type indicator
+      const typeIndicator = modifierType === 'roll_bonus' ? '[roll]' : '[stat]';
+      const effectName = `${activeEffect.name}${typeIndicator}`;
+
+      // Add to the appropriate stat group (including _rollbonus keys)
+      const displayKey = modifierType === 'roll_bonus' ? `${statName}_rollbonus` : statName;
+      if (effectsByStat[displayKey]) {
+        effectsByStat[displayKey].effects.push({
+          name: effectName,
           duration: durationStr
         });
       }
@@ -496,11 +517,14 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
     const sign = data.totalModifier >= 0 ? '+' : '';
     const effectsList = data.effects.map(e => `${e.name}(${e.duration})`).join(', ');
 
+    // Clean up display name (remove _rollbonus suffix for display)
+    const displayStatName = statName.replace('_rollbonus', ' Roll Bonus');
+
     if (effectsList) {
-      statLines.push(`${statName} ${sign}${data.totalModifier} (${effectsList})`);
+      statLines.push(`${displayStatName} ${sign}${data.totalModifier} (${effectsList})`);
     } else {
       // If we have a modifier but no effect names (shouldn't happen, but handle it)
-      statLines.push(`${statName} ${sign}${data.totalModifier}`);
+      statLines.push(`${displayStatName} ${sign}${data.totalModifier}`);
     }
   }
 
@@ -703,11 +727,16 @@ export function formatLiveStatsForLSL(liveStats: LiveStats, activeEffects: Activ
 /**
  * Get effective stat modifier by applying liveStats modifiers to base arkanaStats
  * and calculating the final modifier for combat rolls
+ *
+ * Handles two types of modifiers:
+ * 1. stat_value: Applied to base stat BEFORE tier calculation (non-linear)
+ * 2. roll_bonus: Applied AFTER tier calculation (linear)
+ *
  * Used in combat calculations to include buffs/debuffs
  * @param arkanaStats - Base character stats
  * @param liveStats - Current active effect modifiers
  * @param statName - Which stat to get (physical, dexterity, mental, perception)
- * @returns Final stat modifier for d20 rolls (includes buffs/debuffs)
+ * @returns Final stat modifier for d20 rolls (includes both types of buffs/debuffs)
  */
 export function getEffectiveStatModifier(
   arkanaStats: ArkanaStats,
@@ -715,20 +744,155 @@ export function getEffectiveStatModifier(
   statName: 'physical' | 'dexterity' | 'mental' | 'perception'
 ): number {
   const baseValue = arkanaStats[statName];
+  const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
 
-  // Apply liveStats modifier if present
+  // Step 1: Apply stat_value modifiers (stored in liveStats[StatName])
+  // These modify the base stat BEFORE calculating the tier modifier
   let effectiveValue = baseValue;
   if (liveStats) {
-    // LiveStats uses capitalized stat names (Physical, Dexterity, Mental, Perception)
-    const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
-    const liveModifier = typeof liveStats[capitalizedName] === 'number'
+    const statValueModifier = typeof liveStats[capitalizedName] === 'number'
       ? (liveStats[capitalizedName] as number)
       : 0;
-    effectiveValue = baseValue + liveModifier;
+    effectiveValue = baseValue + statValueModifier;
   }
 
-  // Calculate and return the final modifier for d20 rolls
-  return calculateStatModifier(effectiveValue);
+  // Step 2: Calculate tier modifier from effective stat value
+  const tierModifier = calculateStatModifier(effectiveValue);
+
+  // Step 3: Apply roll_bonus modifiers (stored in liveStats[StatName_rollbonus])
+  // These are added AFTER the tier calculation (flat bonus)
+  let rollBonus = 0;
+  if (liveStats) {
+    const rollBonusKey = `${capitalizedName}_rollbonus`;
+    rollBonus = typeof liveStats[rollBonusKey] === 'number'
+      ? (liveStats[rollBonusKey] as number)
+      : 0;
+  }
+
+  // Step 4: Return final combined modifier
+  return tierModifier + rollBonus;
+}
+
+/**
+ * Get detailed stat calculation breakdown for displaying in user messages
+ *
+ * Returns complete breakdown showing:
+ * - Base stat value
+ * - All stat_value effects with names and values
+ * - Effective stat after stat_value modifiers
+ * - Tier modifier calculated from effective stat
+ * - All roll_bonus effects with names and values
+ * - Final combined modifier
+ * - Formatted string ready for display
+ *
+ * Example format: "Physical[2 +Strength(3) =5](+2) +Targeting(1)"
+ *
+ * @param arkanaStats - Base character stats
+ * @param liveStats - Current active effect modifiers
+ * @param statName - Which stat to calculate (physical, dexterity, mental, perception)
+ * @param activeEffects - Active effects for extracting effect names
+ * @returns Detailed calculation breakdown object
+ */
+export function getDetailedStatCalculation(
+  arkanaStats: ArkanaStats,
+  liveStats: LiveStats | null | undefined,
+  statName: 'physical' | 'dexterity' | 'mental' | 'perception',
+  activeEffects: ActiveEffect[]
+): {
+  baseStat: number;
+  statValueEffects: Array<{ name: string; modifier: number }>;
+  effectiveStat: number;
+  tierModifier: number;
+  rollBonusEffects: Array<{ name: string; modifier: number }>;
+  finalModifier: number;
+  formattedString: string;
+} {
+  const baseValue = arkanaStats[statName];
+  const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
+
+  // Collect stat_value effects
+  const statValueEffects: Array<{ name: string; modifier: number }> = [];
+  let statValueTotal = 0;
+
+  if (liveStats) {
+    for (const activeEffect of activeEffects) {
+      const effectDef = getEffectDefinition(activeEffect.effectId);
+      if (effectDef &&
+          effectDef.category === 'stat_modifier' &&
+          effectDef.stat === capitalizedName &&
+          (effectDef.modifierType === 'stat_value' || !effectDef.modifierType)) {
+        const modifier = effectDef.modifier || 0;
+        statValueEffects.push({ name: activeEffect.name, modifier });
+        statValueTotal += modifier;
+      }
+    }
+  }
+
+  // Calculate effective stat and tier modifier
+  const effectiveStat = baseValue + statValueTotal;
+  const tierModifier = calculateStatModifier(effectiveStat);
+
+  // Collect roll_bonus effects
+  const rollBonusEffects: Array<{ name: string; modifier: number }> = [];
+  let rollBonusTotal = 0;
+
+  if (liveStats) {
+    for (const activeEffect of activeEffects) {
+      const effectDef = getEffectDefinition(activeEffect.effectId);
+      if (effectDef &&
+          effectDef.category === 'stat_modifier' &&
+          effectDef.stat === capitalizedName &&
+          effectDef.modifierType === 'roll_bonus') {
+        const modifier = effectDef.modifier || 0;
+        rollBonusEffects.push({ name: activeEffect.name, modifier });
+        rollBonusTotal += modifier;
+      }
+    }
+  }
+
+  // Calculate final modifier
+  const finalModifier = tierModifier + rollBonusTotal;
+
+  // Build formatted string
+  let formattedString = '';
+
+  // Start with stat name and brackets
+  if (statValueEffects.length > 0) {
+    // Has stat_value effects: "Physical[2 +Strength(3) +Buff(1) =6](+3)"
+    const effectsStr = statValueEffects
+      .map(e => {
+        const sign = e.modifier >= 0 ? '+' : '';
+        return `${sign}${e.name}(${e.modifier})`;
+      })
+      .join(' ');
+    const tierSign = tierModifier >= 0 ? '+' : '';
+    formattedString = `${capitalizedName}[${baseValue} ${effectsStr} =${effectiveStat}](${tierSign}${tierModifier})`;
+  } else {
+    // No stat_value effects: "Physical[2](+0)"
+    const tierSign = tierModifier >= 0 ? '+' : '';
+    formattedString = `${capitalizedName}[${baseValue}](${tierSign}${tierModifier})`;
+  }
+
+  // Add roll_bonus effects outside brackets
+  if (rollBonusEffects.length > 0) {
+    const bonusesStr = rollBonusEffects
+      .map(e => {
+        const sign = e.modifier >= 0 ? '+' : '';
+        return `${sign}${e.name}(${e.modifier})`;
+      })
+      .join(' ');
+    formattedString += ` ${bonusesStr}`;
+  }
+
+  return {
+    baseStat: baseValue,
+    statValueEffects,
+    effectiveStat,
+    tierModifier,
+    rollBonusEffects,
+    finalModifier,
+    formattedString
+  };
 }
 
 /**

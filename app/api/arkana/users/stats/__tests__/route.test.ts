@@ -373,7 +373,8 @@ describe('/api/arkana/users/stats', () => {
           }
         ],
         liveStats: {
-          Mental: -2
+          Mental: -1,            // debuff_mental_minus_1 (stat_value)
+          Mental_rollbonus: -1   // debuff_entropy_disruption (roll_bonus)
         }
       }
     });
@@ -393,7 +394,9 @@ describe('/api/arkana/users/stats', () => {
     expect(decodeURIComponent(data.data.arkanaStats.characterName)).toBe('Debuffed Character');
     // liveStatsString should be URL-encoded with new format including effect names and durations
     const decodedLiveStats = decodeURIComponent(data.data.arkanaStats.liveStatsString);
-    expect(decodedLiveStats).toContain('🔮 Effects: Mental -2');
+    // With modifierType distinction, stat_value and roll_bonus are shown separately
+    expect(decodedLiveStats).toContain('Mental -1');
+    expect(decodedLiveStats).toContain('Mental Roll Bonus -1');
     expect(decodedLiveStats).toContain('Mental Debuff -1');
     expect(decodedLiveStats).toContain('2 turns left');
     expect(decodedLiveStats).toContain('Entropy Disruption');

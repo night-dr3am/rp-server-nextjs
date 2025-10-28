@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
 import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -187,18 +187,35 @@ export async function POST(request: NextRequest) {
       })
     });
 
-    // Create result message
+    // Create result message with detailed calculation breakdown
     const attackerName = attacker.arkanaStats.characterName;
     const targetName = target.arkanaStats.characterName;
+
+    // Get detailed calculation for attacker's roll
+    const attackerCalc = getDetailedStatCalculation(
+      attacker.arkanaStats,
+      attackerLiveStats,
+      attack_type === 'physical' ? 'physical' : 'dexterity',
+      attackerActiveEffects
+    );
+
+    // Get detailed calculation for defender's TN
+    const defenderCalc = getDetailedStatCalculation(
+      target.arkanaStats,
+      targetLiveStats,
+      'dexterity',
+      parseActiveEffects(target.arkanaStats.activeEffects)
+    );
+
+    // Build message with detailed roll information
     let resultMessage = '';
     if (isHit) {
-      if (damageReduction > 0) {
-        resultMessage = `${attackerName} hits ${targetName} for ${damage} damage (${damageReduction} blocked by defenses)! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
-      } else {
-        resultMessage = `${attackerName} hits ${targetName} for ${damage} damage! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
-      }
+      const damageInfo = damageReduction > 0
+        ? ` for ${damage} damage (${damageReduction} blocked by defenses)`
+        : ` for ${damage} damage`;
+      resultMessage = `${attackerName} hits ${targetName}${damageInfo}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: 10+${defenderCalc.finalModifier}=${targetNumber})`;
     } else {
-      resultMessage = `${attackerName} misses ${targetName}! (Roll: ${d20Roll}+${attackerMod}=${attackRoll} vs TN:${targetNumber})`;
+      resultMessage = `${attackerName} misses ${targetName}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: 10+${defenderCalc.finalModifier}=${targetNumber})`;
     }
 
     // Return detailed result

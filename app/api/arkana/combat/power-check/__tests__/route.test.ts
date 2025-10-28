@@ -412,8 +412,8 @@ describe('/api/arkana/combat/power-check', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_mental_1_turn',
-            name: 'Mental Bonus +1 (1 turn)',
+            effectId: 'buff_mental_stat_1',
+            name: 'Mental Stat +1',
             duration: 'turns:3',
             turnsLeft: 3,
             appliedAt: new Date().toISOString()
@@ -502,15 +502,15 @@ describe('/api/arkana/combat/power-check', () => {
         hitPoints: 10,
         activeEffects: [
           {
-            effectId: 'buff_mental_1_turn',
-            name: 'Mental Bonus +1 (1 turn)',
+            effectId: 'buff_mental_stat_1',
+            name: 'Mental Stat +1',
             duration: 'turns:3',
             turnsLeft: 3,
             appliedAt: new Date().toISOString()
           },
           {
-            effectId: 'buff_mental_2_area',
-            name: 'Mental Bonus +2 (area)',
+            effectId: 'buff_mental_stat_2',
+            name: 'Mental Focus',
             duration: 'turns:2',
             turnsLeft: 2,
             appliedAt: new Date().toISOString()
