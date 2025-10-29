@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation, getDetailedDefenseCalculation } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
 
@@ -261,11 +261,21 @@ export async function POST(request: NextRequest) {
             attackerCombinedEffects
           );
 
+          // Get target's detailed defense calculation
+          // Use the defenseStat from result if available, otherwise default to baseStat
+          const defenseStat = result.defenseStat || baseStat;
+          const targetCalc = getDetailedDefenseCalculation(
+            target.arkanaStats,
+            targetLiveStats,
+            defenseStat,
+            targetCombinedEffects
+          );
+
           // Extract d20 roll and total from the old rollInfo format
           const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
           if (rollMatch) {
-            const [, d20, , total, tn] = rollMatch;
-            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${total} vs TN:${tn}`;
+            const [, d20, , total] = rollMatch;
+            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${total} vs TN: ${targetCalc.formattedString}`;
           } else {
             rollDescription = result.rollInfo || '';
           }

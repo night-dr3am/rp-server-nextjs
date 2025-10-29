@@ -1018,7 +1018,8 @@ describe('/api/arkana/combat/power-activate', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.rollInfo).toMatch(/Roll: \d+\+0=\d+ vs TN:10/);
+      // Updated to match new detailed TN format with full breakdown
+      expect(data.data.rollInfo).toMatch(/Roll: d20\(\d+\) \+ Mental\[2\]\(\+0\) = \d+ vs TN: 10 \+ Mental\[2\]\(\+0\) = 10/);
     });
 
     it('4.1 Check Effects - dexterity vs tn10', async () => {

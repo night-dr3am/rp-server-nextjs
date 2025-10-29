@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaCombatAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction, getDetailedStatCalculation } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, getEffectiveStatModifier, calculateDamageReduction, getDetailedStatCalculation, getDetailedDefenseCalculation } from '@/lib/arkana/effectsUtils';
 import type { LiveStats } from '@/lib/arkana/types';
 
 export async function POST(request: NextRequest) {
@@ -199,12 +199,13 @@ export async function POST(request: NextRequest) {
       attackerActiveEffects
     );
 
-    // Get detailed calculation for defender's TN
-    const defenderCalc = getDetailedStatCalculation(
+    // Get detailed calculation for defender's TN (using defense calculation function)
+    const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+    const defenderCalc = getDetailedDefenseCalculation(
       target.arkanaStats,
       targetLiveStats,
       'dexterity',
-      parseActiveEffects(target.arkanaStats.activeEffects)
+      targetActiveEffects
     );
 
     // Build message with detailed roll information
@@ -213,9 +214,9 @@ export async function POST(request: NextRequest) {
       const damageInfo = damageReduction > 0
         ? ` for ${damage} damage (${damageReduction} blocked by defenses)`
         : ` for ${damage} damage`;
-      resultMessage = `${attackerName} hits ${targetName}${damageInfo}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: 10+${defenderCalc.finalModifier}=${targetNumber})`;
+      resultMessage = `${attackerName} hits ${targetName}${damageInfo}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: ${defenderCalc.formattedString})`;
     } else {
-      resultMessage = `${attackerName} misses ${targetName}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: 10+${defenderCalc.finalModifier}=${targetNumber})`;
+      resultMessage = `${attackerName} misses ${targetName}! (Roll: d20(${d20Roll}) + ${attackerCalc.formattedString} = ${attackRoll} vs TN: ${defenderCalc.formattedString})`;
     }
 
     // Return detailed result

@@ -4,8 +4,8 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing } from '@/lib/arkana/effectsUtils';
-import { getPassiveEffects, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation } from '@/lib/arkana/effectsUtils';
+import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
@@ -157,15 +157,15 @@ export async function POST(request: NextRequest) {
     // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
     const casterActiveEffectsForLiveStats = parseActiveEffects(caster.arkanaStats.activeEffects);
 
-    // Get passive effects from perks/cybernetics/magic for caster
-    const casterPassiveEffectIds = getPassiveEffects(
+    // Get passive effects from perks/cybernetics/magic for caster WITH source tracking
+    const casterPassiveEffectsWithSource = getPassiveEffectsWithSource(
       (caster.arkanaStats.perks as string[]) || [],
       (caster.arkanaStats.cybernetics as string[]) || [],
       (caster.arkanaStats.magicWeaves as string[]) || []
     );
 
-    // Convert passive effects to ActiveEffect format and combine with active effects
-    const casterPassiveAsActive = passiveEffectsToActiveFormat(casterPassiveEffectIds);
+    // Convert passive effects to ActiveEffect format (with source info) and combine with active effects
+    const casterPassiveAsActive = passiveEffectsToActiveFormat(casterPassiveEffectsWithSource);
     const casterCombinedEffects = [...casterActiveEffectsForLiveStats, ...casterPassiveAsActive];
 
     // Recalculate caster liveStats with both active and passive effects
@@ -173,15 +173,16 @@ export async function POST(request: NextRequest) {
 
     // Calculate target liveStats if target exists
     let targetLiveStats: LiveStats = {};
+    let targetCombinedEffects: typeof casterCombinedEffects = [];
     if (target?.arkanaStats) {
       const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
-      const targetPassiveEffectIds = getPassiveEffects(
+      const targetPassiveEffectsWithSource = getPassiveEffectsWithSource(
         (target.arkanaStats.perks as string[]) || [],
         (target.arkanaStats.cybernetics as string[]) || [],
         (target.arkanaStats.magicWeaves as string[]) || []
       );
-      const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectIds);
-      const targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
+      const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectsWithSource);
+      targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
       targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
     }
 
@@ -283,7 +284,38 @@ export async function POST(request: NextRequest) {
         const result = executeEffect(effectId, caster.arkanaStats, target?.arkanaStats || caster.arkanaStats, targetStatValue, casterLiveStats, targetLiveStats);
         if (result) {
           activationSuccess = result.success;
-          rollDescription = result.rollInfo || '';
+
+          // Get detailed calculation breakdown for the message
+          const baseStat = baseStatName as 'physical' | 'dexterity' | 'mental' | 'perception';
+          const casterCalc = getDetailedStatCalculation(
+            caster.arkanaStats,
+            casterLiveStats,
+            baseStat,
+            casterCombinedEffects
+          );
+
+          // Get target's detailed defense calculation if target exists
+          if (target && target.arkanaStats) {
+            const defenseStat = result.defenseStat || baseStat;
+            const targetCalc = getDetailedDefenseCalculation(
+              target.arkanaStats,
+              targetLiveStats,
+              defenseStat,
+              targetCombinedEffects
+            );
+
+            // Extract d20 roll and total from the old rollInfo format
+            const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
+            if (rollMatch) {
+              const [, d20, , total] = rollMatch;
+              rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${total} vs TN: ${targetCalc.formattedString}`;
+            } else {
+              rollDescription = result.rollInfo || '';
+            }
+          } else {
+            // No target or fixed TN check
+            rollDescription = result.rollInfo || '';
+          }
         }
         break;
       }

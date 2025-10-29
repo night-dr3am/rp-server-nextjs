@@ -63,6 +63,7 @@ export interface EffectResult {
   damage?: number;
   heal?: number;
   rollInfo?: string;
+  defenseStat?: 'physical' | 'dexterity' | 'mental' | 'perception';  // Which stat was checked for defense (for detailed TN display)
 }
 
 // Active Effect tracking

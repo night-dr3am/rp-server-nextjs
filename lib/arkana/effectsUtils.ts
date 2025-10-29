@@ -68,10 +68,17 @@ export function executeEffect(
     const total = d20 + attackerMod;
     const success = total >= targetNumber;
 
+    // Determine which stat was used for defense (for detailed TN display)
+    let defenseStat: 'physical' | 'dexterity' | 'mental' | 'perception' | undefined = undefined;
+    if (effectDef.checkVs === 'enemy_stat' && effectDef.checkVsStat) {
+      defenseStat = effectDef.checkVsStat.toLowerCase() as 'physical' | 'dexterity' | 'mental' | 'perception';
+    }
+
     return {
       success,
       effectDef,
-      rollInfo: `Roll: ${d20}+${attackerMod}=${total} vs TN:${targetNumber}`
+      rollInfo: `Roll: ${d20}+${attackerMod}=${total} vs TN:${targetNumber}`,
+      defenseStat
     };
   }
 
@@ -915,6 +922,143 @@ export function getDetailedStatCalculation(
     tierModifier,
     rollBonusEffects,
     finalModifier,
+    formattedString
+  };
+}
+
+/**
+ * Get detailed defense calculation breakdown for displaying target's TN in combat messages
+ *
+ * Returns complete breakdown showing:
+ * - Base TN (always 10)
+ * - Target's base stat value
+ * - All stat_value effects with names and values
+ * - Effective stat after stat_value modifiers
+ * - Tier modifier calculated from effective stat
+ * - All roll_bonus effects with names and values
+ * - Final TN (10 + tier modifier + roll bonuses)
+ * - Formatted string ready for display
+ *
+ * Example format: "10 + Dexterity[4 +Agility(1) =5](+2) +Combat Reflexes[perk](1) = 13"
+ *
+ * @param arkanaStats - Base character stats
+ * @param liveStats - Current active effect modifiers
+ * @param statName - Which stat to calculate (physical, dexterity, mental, perception)
+ * @param activeEffects - Active effects for extracting effect names
+ * @returns Detailed defense calculation breakdown object
+ */
+export function getDetailedDefenseCalculation(
+  arkanaStats: ArkanaStats,
+  liveStats: LiveStats | null | undefined,
+  statName: 'physical' | 'dexterity' | 'mental' | 'perception',
+  activeEffects: ActiveEffect[]
+): {
+  baseTN: number;
+  baseStat: number;
+  statValueEffects: Array<{ name: string; modifier: number }>;
+  effectiveStat: number;
+  tierModifier: number;
+  rollBonusEffects: Array<{ name: string; modifier: number }>;
+  finalTN: number;
+  formattedString: string;
+} {
+  const baseValue = arkanaStats[statName];
+  const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
+  const baseTN = 10;
+
+  // Collect stat_value effects
+  const statValueEffects: Array<{ name: string; modifier: number }> = [];
+  let statValueTotal = 0;
+
+  if (liveStats) {
+    for (const activeEffect of activeEffects) {
+      const effectDef = getEffectDefinition(activeEffect.effectId);
+      if (effectDef &&
+          effectDef.category === 'stat_modifier' &&
+          effectDef.stat === capitalizedName &&
+          (effectDef.modifierType === 'stat_value' || !effectDef.modifierType)) {
+        const modifier = effectDef.modifier || 0;
+        // Use source name if available, otherwise fall back to effect name
+        const displayName = activeEffect.sourceName
+          ? `${activeEffect.sourceName}[${activeEffect.sourceType}]`
+          : activeEffect.name;
+        statValueEffects.push({ name: displayName, modifier });
+        statValueTotal += modifier;
+      }
+    }
+  }
+
+  // Calculate effective stat and tier modifier
+  const effectiveStat = baseValue + statValueTotal;
+  const tierModifier = calculateStatModifier(effectiveStat);
+
+  // Collect roll_bonus effects
+  const rollBonusEffects: Array<{ name: string; modifier: number }> = [];
+  let rollBonusTotal = 0;
+
+  if (liveStats) {
+    for (const activeEffect of activeEffects) {
+      const effectDef = getEffectDefinition(activeEffect.effectId);
+      if (effectDef &&
+          effectDef.category === 'stat_modifier' &&
+          effectDef.stat === capitalizedName &&
+          effectDef.modifierType === 'roll_bonus') {
+        const modifier = effectDef.modifier || 0;
+        // Use source name if available, otherwise fall back to effect name
+        const displayName = activeEffect.sourceName
+          ? `${activeEffect.sourceName}[${activeEffect.sourceType}]`
+          : activeEffect.name;
+        rollBonusEffects.push({ name: displayName, modifier });
+        rollBonusTotal += modifier;
+      }
+    }
+  }
+
+  // Calculate final TN
+  const finalTN = baseTN + tierModifier + rollBonusTotal;
+
+  // Build formatted string
+  let formattedString = '';
+
+  // Start with "10 + StatName[...]"
+  if (statValueEffects.length > 0) {
+    // Has stat_value effects: "10 + Dexterity[4 +Agility(1) =5](+2)"
+    const effectsStr = statValueEffects
+      .map(e => {
+        const sign = e.modifier >= 0 ? '+' : '';
+        return `${sign}${e.name}(${e.modifier})`;
+      })
+      .join(' ');
+    const tierSign = tierModifier >= 0 ? '+' : '';
+    formattedString = `${baseTN} + ${capitalizedName}[${baseValue} ${effectsStr} =${effectiveStat}](${tierSign}${tierModifier})`;
+  } else {
+    // No stat_value effects: "10 + Dexterity[4](+2)"
+    const tierSign = tierModifier >= 0 ? '+' : '';
+    formattedString = `${baseTN} + ${capitalizedName}[${baseValue}](${tierSign}${tierModifier})`;
+  }
+
+  // Add roll_bonus effects
+  if (rollBonusEffects.length > 0) {
+    const bonusesStr = rollBonusEffects
+      .map(e => {
+        const sign = e.modifier >= 0 ? '+' : '';
+        return `${sign}${e.name}(${e.modifier})`;
+      })
+      .join(' ');
+    formattedString += ` ${bonusesStr}`;
+  }
+
+  // Add final TN at the end
+  formattedString += ` = ${finalTN}`;
+
+  return {
+    baseTN,
+    baseStat: baseValue,
+    statValueEffects,
+    effectiveStat,
+    tierModifier,
+    rollBonusEffects,
+    finalTN,
     formattedString
   };
 }
