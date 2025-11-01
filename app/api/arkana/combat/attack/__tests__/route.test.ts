@@ -421,6 +421,321 @@ describe('/api/arkana/combat/attack', () => {
       // Target number: 10 + (-2) = 8, easier to hit
       expect(data.data.targetNumber).toBe(8);
     });
+
+    /**
+     * Roll Bonus Modifiers Tests
+     * roll_bonus modifierType adds/subtracts AFTER tier calculation (linear effect)
+     * Example: Physical[2](+0) + roll_bonus(+2) = final +2 modifier
+     */
+    it('1.6.1 should apply positive roll_bonus modifier to Physical attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Targeting Expert',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base (tier)
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_roll_2',
+            name: 'Targeting Bonus',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical_rollbonus: 2 } → Effective mod = 0 (tier) + 2 (roll) = +2
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2, // 0 modifier (defense)
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical[2](+0 tier) + roll_bonus(+2) = +2 final modifier
+      expect(data.data.attackerMod).toBe(2);
+
+      // Verify liveStats stored correctly
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Physical_rollbonus).toBe(2);
+      expect(liveStats.Physical).toBeUndefined(); // No stat_value modifier
+    });
+
+    it('1.6.2 should apply negative roll_bonus modifier (debuff) to Physical attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Distracted Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3, // +2 modifier base (tier)
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_physical_roll_minus_2',
+            name: 'Distracted',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Physical_rollbonus: -2 } → Effective mod = +2 (tier) + (-2) (roll) = 0
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical[3](+2 tier) + roll_penalty(-2) = 0 final modifier
+      expect(data.data.attackerMod).toBe(0);
+
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Physical_rollbonus).toBe(-2);
+    });
+
+    it('1.6.3 should apply roll_bonus debuff to Dexterity defense (lowers TN)', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3, // +2 modifier (good offense)
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Slowed Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 3, // +2 modifier base (tier)
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_dexterity_roll_minus_1',
+            name: 'Dexterity Roll Penalty -1',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Dexterity_rollbonus: -1 } → Effective Dex mod = +2 (tier) + (-1) (roll) = +1
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Attacker: Physical 3 → +2 modifier
+      expect(data.data.attackerMod).toBe(2);
+      // Defender: Dexterity[3](+2 tier) + roll_penalty(-1) = +1 modifier
+      expect(data.data.defenderMod).toBe(1);
+      // Target number: 10 + 1 = 11 (easier to hit than normal 12)
+      expect(data.data.targetNumber).toBe(11);
+    });
+
+    it('1.6.4 should combine stat_value and roll_bonus modifiers correctly', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Combined Buffs Attacker',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2, // 0 modifier base (tier)
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_stat_1',
+            name: 'Physical Stat +1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_physical_roll_2',
+            name: 'Targeting Bonus',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Physical: 1, Physical_rollbonus: 2 }
+        // → Effective Physical = 2 + 1 = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'physical',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Physical: (2 + 1) = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      expect(data.data.attackerMod).toBe(4);
+
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Physical).toBe(1); // stat_value modifier
+      expect(liveStats.Physical_rollbonus).toBe(2); // roll_bonus modifier
+    });
+
+    it('1.6.5 should apply roll_bonus to ranged attack damage calculation', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Precise Archer',
+        race: 'human',
+        archetype: 'Ranger',
+        physical: 2,
+        dexterity: 3, // +2 modifier base (tier)
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_dexterity_3',
+            name: 'Dexterity Bonus +3',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Dexterity_rollbonus: 3 } → Effective Dex mod = +2 (tier) + 3 (roll) = +5
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 0, // Very low defense (guarantees hit)
+        mental: 5,
+        perception: 3,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const attackData = {
+        attacker_uuid: attacker.slUuid,
+        target_uuid: target.slUuid,
+        attack_type: 'ranged',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Dexterity[3](+2 tier) + roll_bonus(+3) = +5 modifier
+      expect(data.data.attackerMod).toBe(5);
+
+      // Damage calculation uses effective modifier: 1 + 5 = 6 damage
+      if (data.data.isHit === 'true') {
+        expect(data.data.damage).toBe(6);
+        expect(data.data.target.healthBefore).toBe(100);
+        expect(data.data.target.healthAfter).toBe(94); // 100 - 6
+      }
+    });
   });
 
   describe('2. Turn Processing', () => {

@@ -579,6 +579,164 @@ describe('/api/arkana/combat/power-check', () => {
       // Mental stat recorded is base stat value
       expect(data.data.mentalStat).toBe(5);
     });
+
+    /**
+     * Roll Bonus Modifiers Tests (Section 1.5)
+     * roll_bonus modifierType adds/subtracts AFTER tier calculation (linear effect)
+     * Power checks use Mental stat exclusively with fixed TN of 12.
+     * Example: Mental[2](+0 tier) + roll_bonus(+2) = final +2 modifier
+     */
+    it('1.5.1 should apply positive roll_bonus modifier to power check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Focused Psion',
+        race: 'human',
+        archetype: 'Mentalist',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_roll_2',
+            name: 'Mental Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Mental_rollbonus: 2 } → Effective mod = 0 (tier) + 2 (roll) = +2
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental[2](+0 tier) + roll_bonus(+2) = +2 final modifier
+      expect(data.data.mentalMod).toBe(2);
+
+      // Verify liveStats stored correctly
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental_rollbonus).toBe(2);
+      expect(liveStats.Mental).toBeUndefined(); // No stat_value modifier
+    });
+
+    it('1.5.2 should apply negative roll_bonus modifier (debuff) to power check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Distracted Mage',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 3, // +2 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_mental_roll_minus_2',
+            name: 'Mental Roll Penalty -2',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental_rollbonus: -2 } → Effective mod = +2 (tier) + (-2) (roll) = 0
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental[3](+2 tier) + roll_penalty(-2) = 0 final modifier
+      expect(data.data.mentalMod).toBe(0);
+
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental_rollbonus).toBe(-2);
+    });
+
+    it('1.5.3 should combine stat_value and roll_bonus modifiers correctly for power check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Combined Buffs Mage',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_mental_stat_1',
+            name: 'Mental Stat +1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_mental_roll_2',
+            name: 'Mental Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental: 1, Mental_rollbonus: 2 }
+        // → Effective Mental = 2 + 1 = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const powerCheckData = {
+        player_uuid: player.slUuid,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-check', powerCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental: (2 + 1) = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      expect(data.data.mentalMod).toBe(4);
+
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental).toBe(1); // stat_value modifier
+      expect(liveStats.Mental_rollbonus).toBe(2); // roll_bonus modifier
+    });
   });
 
   describe('2. Turn Processing', () => {

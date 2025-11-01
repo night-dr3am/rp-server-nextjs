@@ -753,6 +753,218 @@ describe('/api/arkana/combat/feat-stat-check', () => {
       expect(data.data.statModifier).toBe(2);
       expect(data.data.targetNumber).toBe(15);
     });
+
+    /**
+     * Roll Bonus Modifiers Tests (Section 1.5)
+     * roll_bonus modifierType adds/subtracts AFTER tier calculation (linear effect)
+     * Example: Mental[2](+0 tier) + roll_bonus(+2) = final +2 modifier
+     */
+    it('1.5.1 should apply positive roll_bonus modifier to Physical stat check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Focused Warrior',
+        race: 'human',
+        archetype: 'Fighter',
+        physical: 2, // 0 modifier base (tier)
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_physical_roll_2',
+            name: 'Physical Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Physical_rollbonus: 2 } → Effective mod = 0 (tier) + 2 (roll) = +2
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const statCheckData = {
+        player_uuid: player.slUuid,
+        stat_type: 'physical',
+        target_number: 12,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/feat-stat-check', statCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Physical[2](+0 tier) + roll_bonus(+2) = +2 final modifier
+      expect(data.data.statModifier).toBe(2);
+
+      // Verify liveStats stored correctly
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Physical_rollbonus).toBe(2);
+      expect(liveStats.Physical).toBeUndefined(); // No stat_value modifier
+    });
+
+    it('1.5.2 should apply negative roll_bonus modifier (debuff) to Mental stat check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Distracted Mage',
+        race: 'human',
+        archetype: 'Mage',
+        physical: 2,
+        dexterity: 2,
+        mental: 3, // +2 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_mental_roll_minus_2',
+            name: 'Mental Roll Penalty -2',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental_rollbonus: -2 } → Effective mod = +2 (tier) + (-2) (roll) = 0
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const statCheckData = {
+        player_uuid: player.slUuid,
+        stat_type: 'mental',
+        target_number: 15,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/feat-stat-check', statCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Mental[3](+2 tier) + roll_penalty(-2) = 0 final modifier
+      expect(data.data.statModifier).toBe(0);
+
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental_rollbonus).toBe(-2);
+    });
+
+    it('1.5.3 should combine stat_value and roll_bonus modifiers correctly for Dexterity check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Combined Buffs Rogue',
+        race: 'human',
+        archetype: 'Rogue',
+        physical: 2,
+        dexterity: 2, // 0 modifier base (tier)
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_dexterity_stat_1',
+            name: 'Dexterity Stat +1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_dexterity_roll_2',
+            name: 'Dexterity Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Dexterity: 1, Dexterity_rollbonus: 2 }
+        // → Effective Dexterity = 2 + 1 = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const statCheckData = {
+        player_uuid: player.slUuid,
+        stat_type: 'dexterity',
+        target_number: 12,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/feat-stat-check', statCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Dexterity: (2 + 1) = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      expect(data.data.statModifier).toBe(4);
+
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Dexterity).toBe(1); // stat_value modifier
+      expect(liveStats.Dexterity_rollbonus).toBe(2); // roll_bonus modifier
+    });
+
+    it('1.5.4 should apply roll_bonus to Perception check', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Alert Scout',
+        race: 'human',
+        archetype: 'Ranger',
+        physical: 2,
+        dexterity: 3,
+        mental: 2,
+        perception: 3, // +2 modifier base (tier)
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'buff_perception_roll_1',
+            name: 'Heightened Senses +1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Perception_rollbonus: 1 } → Effective Perception mod = +2 (tier) + 1 (roll) = +3
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const statCheckData = {
+        player_uuid: player.slUuid,
+        stat_type: 'perception',
+        target_number: 14,
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/feat-stat-check', statCheckData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Perception[3](+2 tier) + roll_bonus(+1) = +3 modifier
+      expect(data.data.statModifier).toBe(3);
+
+      const updatedPlayer = await prisma.arkanaStats.findFirst({
+        where: { userId: player.id }
+      });
+      const liveStats = (updatedPlayer?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Perception_rollbonus).toBe(1);
+    });
   });
 
   describe('2. Turn Processing', () => {

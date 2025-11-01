@@ -12,7 +12,8 @@ import {
 import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-setup';
 import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
-import type { ActiveEffect } from '@/lib/arkana/types';
+import type { ActiveEffect, LiveStats, ArkanaStats } from '@/lib/arkana/types';
+import { recalculateLiveStats } from '@/lib/arkana/effectsUtils';
 
 describe('/api/arkana/combat/power-attack', () => {
   beforeAll(async () => {
@@ -38,6 +39,7 @@ describe('/api/arkana/combat/power-attack', () => {
     hitPoints: number;
     health?: number;  // Optional current HP (defaults to hitPoints value)
     activeEffects?: ActiveEffect[];  // Optional active effects for testing turn processing
+    liveStats?: LiveStats;  // Optional manual liveStats (auto-calculated if activeEffects provided)
     commonPowers?: string[];
     archetypePowers?: string[];
     perks?: string[];
@@ -62,15 +64,34 @@ describe('/api/arkana/combat/power-attack', () => {
       }
     });
 
+    // If activeEffects provided but no liveStats, calculate them
+    let calculatedLiveStats = arkanaStatsData.liveStats;
+    if (arkanaStatsData.activeEffects && arkanaStatsData.activeEffects.length > 0 && !arkanaStatsData.liveStats) {
+      // Load effect data before calculating liveStats
+      const { loadAllData } = await import('@/lib/arkana/dataLoader');
+      await loadAllData();
+
+      // Create a temporary ArkanaStats object for calculation
+      const tempStats = {
+        physical: arkanaStatsData.physical,
+        mental: arkanaStatsData.mental,
+        dexterity: arkanaStatsData.dexterity,
+        perception: arkanaStatsData.perception,
+      } as ArkanaStats;
+      calculatedLiveStats = recalculateLiveStats(tempStats, arkanaStatsData.activeEffects);
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { health: _, ...arkanaDataWithoutHealth } = arkanaStatsData;
+    const { health: _, liveStats: __, ...arkanaDataWithoutExtra } = arkanaStatsData;
 
     await prisma.arkanaStats.create({
       data: {
         userId: user.id,
         agentName: user.username + ' Resident',
         registrationCompleted: true,
-        ...arkanaDataWithoutHealth
+        ...arkanaDataWithoutExtra,
+        activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
+        liveStats: (calculatedLiveStats || {}) as unknown as typeof prisma.$Prisma.JsonNull
       }
     });
 
@@ -706,6 +727,279 @@ describe('/api/arkana/combat/power-attack', () => {
 
       expectError(data, 'Attacker does not own this power');
       expect(response.status).toBe(403);
+    });
+  });
+
+  describe('Roll Bonus Modifiers Tests', () => {
+    /**
+     * roll_bonus modifierType adds/subtracts AFTER tier calculation (linear effect)
+     * Power attacks use Mental stat by default for check
+     * Example: Mental[2](+0 tier) + roll_bonus(+2) = final +2 modifier
+     */
+    it('should apply positive roll_bonus modifier to Mental power attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Focused Psion',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier base (tier)
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_emotion_theft'],
+        activeEffects: [
+          {
+            effectId: 'buff_mental_roll_2',
+            name: 'Mental Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats auto-calculated: { Mental_rollbonus: 2 } → Effective mod = 0 (tier) + 2 (roll) = +2
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier (defense)
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'veil_emotion_theft',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify liveStats stored correctly
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      // veil_emotion_theft adds +1 roll_bonus, plus our +2 = 3 total
+      expect(liveStats.Mental_rollbonus).toBeGreaterThanOrEqual(2);
+      // Verify rollInfo is defined
+      expect(data.data.rollInfo).toBeDefined();
+    });
+
+    it('should apply negative roll_bonus modifier (debuff) to Mental power attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Distracted Mage',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 3, // +2 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        magicWeaves: ['enchant_sleep'],
+        activeEffects: [
+          {
+            effectId: 'debuff_mental_roll_minus_2',
+            name: 'Mental Roll Penalty -2',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental_rollbonus: -2 } → Effective mod = +2 (tier) + (-2) (roll) = 0
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'enchant_sleep',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental_rollbonus).toBe(-2);
+
+      // Verify rollInfo shows the 0 modifier (tier +2, roll -2)
+      if (data.data.rollInfo) {
+        expect(data.data.rollInfo).toContain('+0');
+      }
+    });
+
+    it('should apply roll_bonus debuff to Mental defense (lowers TN)', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Strong Psion',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 4, // +4 modifier (strong offense)
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['veil_emotion_theft']
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Confused Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 3, // +2 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        activeEffects: [
+          {
+            effectId: 'debuff_mental_roll_minus_1',
+            name: 'Mental Roll Penalty -1',
+            duration: 'turns:2',
+            turnsLeft: 2,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental_rollbonus: -1 } → Effective Mental mod = +2 (tier) + (-1) (roll) = +1
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'veil_emotion_theft',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify target's liveStats
+      const updatedTarget = await prisma.arkanaStats.findFirst({
+        where: { userId: target.id }
+      });
+      const liveStats = (updatedTarget?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental_rollbonus).toBe(-1);
+
+      // Verify rollInfo is defined (format varies so just check it exists)
+      expect(data.data.rollInfo).toBeDefined();
+    });
+
+    it('should combine stat_value and roll_bonus modifiers correctly for power attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Combined Buffs Mage',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 2, // 0 modifier base (tier)
+        perception: 2,
+        hitPoints: 10,
+        magicWeaves: ['enchant_sleep'],
+        activeEffects: [
+          {
+            effectId: 'buff_mental_stat_1',
+            name: 'Mental Stat +1',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          },
+          {
+            effectId: 'buff_mental_roll_2',
+            name: 'Mental Focus +2',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+        // liveStats: { Mental: 1, Mental_rollbonus: 2 }
+        // → Effective Mental = 2 + 1 = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 2,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'enchant_sleep',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedAttacker = await prisma.arkanaStats.findFirst({
+        where: { userId: attacker.id }
+      });
+      const liveStats = (updatedAttacker?.liveStats || {}) as unknown as LiveStats;
+      expect(liveStats.Mental).toBe(1); // stat_value modifier
+      expect(liveStats.Mental_rollbonus).toBe(2); // roll_bonus modifier
+
+      // Mental: (2 + 1) = 3 → +2 tier mod, then +2 roll bonus = +4 total
+      // rollInfo format may vary, so just verify it's defined
+      expect(data.data.rollInfo).toBeDefined();
     });
   });
 

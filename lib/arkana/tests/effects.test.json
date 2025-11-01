@@ -758,5 +758,113 @@
     "modifierType": "stat_value",
     "target": "self",
     "duration": "scene"
+  },
+  {
+    "id": "debuff_mental_roll_minus_1",
+    "name": "Mental Roll Penalty -1",
+    "desc": "Test: Reduces Mental rolls by -1 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Mental",
+    "modifier": -1,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "debuff_mental_roll_minus_2",
+    "name": "Mental Roll Penalty -2",
+    "desc": "Test: Reduces Mental rolls by -2 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Mental",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_dexterity_roll_minus_1",
+    "name": "Dexterity Roll Penalty -1",
+    "desc": "Test: Reduces Dexterity rolls by -1 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Dexterity",
+    "modifier": -1,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "debuff_dexterity_roll_minus_2",
+    "name": "Dexterity Roll Penalty -2",
+    "desc": "Test: Reduces Dexterity rolls by -2 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Dexterity",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_perception_roll_minus_1",
+    "name": "Perception Roll Penalty -1",
+    "desc": "Test: Reduces Perception rolls by -1 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Perception",
+    "modifier": -1,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "debuff_perception_roll_minus_2",
+    "name": "Perception Roll Penalty -2",
+    "desc": "Test: Reduces Perception rolls by -2 (roll_bonus type debuff)",
+    "category": "stat_modifier",
+    "type": "debuff",
+    "stat": "Perception",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_mental_roll_2",
+    "name": "Mental Focus +2",
+    "desc": "Test: Adds +2 to Mental rolls (roll_bonus type buff)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_dexterity_roll_2",
+    "name": "Dexterity Precision +2",
+    "desc": "Test: Adds +2 to Dexterity rolls (roll_bonus type buff)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Dexterity",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_perception_roll_1",
+    "name": "Heightened Senses +1",
+    "desc": "Test: Adds +1 to Perception rolls (roll_bonus type buff)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Perception",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
   }
 ]
