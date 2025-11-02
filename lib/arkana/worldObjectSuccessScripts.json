@@ -1,0 +1,9 @@
+[
+  {
+    "id": "increase_player_xp_by_one",
+    "name": "Increase Player XP by 1",
+    "desc": "Grant 1 XP to the player upon successful action completion",
+    "category": "xp_reward",
+    "xpAmount": 1
+  }
+]

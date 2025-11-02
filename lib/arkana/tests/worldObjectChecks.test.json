@@ -32,5 +32,13 @@
     "desc": "Verify player is authorized owner",
     "category": "ownership",
     "requiresOwnership": true
+  },
+  {
+    "id": "check_player_used_action_once",
+    "name": "One-Time Action Gate",
+    "desc": "Prevents player from performing action more than once on the same object",
+    "category": "event_gate",
+    "eventType": "WORLD_OBJECT_ACTION_USED",
+    "createEventOnSuccess": true
   }
 ]

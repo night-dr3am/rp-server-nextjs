@@ -14,7 +14,7 @@ export interface EffectDefinition {
   id: string;
   name: string;
   desc: string;
-  category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'heal' | 'utility' | 'defense' | 'special' | 'ownership';
+  category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'heal' | 'utility' | 'defense' | 'special' | 'ownership' | 'event_gate';
   type?: string;
 
   // Check-related fields
@@ -50,10 +50,25 @@ export interface EffectDefinition {
   // Ownership fields (for WorldObject checks)
   requiresOwnership?: boolean;
 
+  // Event gate fields (for one-time action checks)
+  eventType?: string;
+  createEventOnSuccess?: boolean;
+
   // Common fields
   target?: 'enemy' | 'self' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'single';
   duration?: string;
   resistType?: string;
+}
+
+// WorldObject Success Scripts (executed after successful action)
+export interface WorldObjectSuccessScript {
+  id: string;
+  name: string;
+  desc: string;
+  category: 'xp_reward' | 'item_grant' | 'state_change';
+  xpAmount?: number;
+  itemId?: string;
+  stateChange?: string;
 }
 
 // Result of executing an effect

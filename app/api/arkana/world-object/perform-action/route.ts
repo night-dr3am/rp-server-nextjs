@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { worldObjectPerformActionSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getWorldObjectCheck, getSkillById } from '@/lib/arkana/dataLoader';
+import { loadAllData, getWorldObjectCheck, getSkillById, getWorldObjectSuccessScript } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, parseActiveEffects, processEffectsTurn, recalculateLiveStats, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
 
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       showStates: string;
       skills?: string;
       checks?: string;
+      successScript?: string;  // Optional success script to execute after checks pass
       successState: string;
       notify?: string;  // Notification mode: "private", "local", or undefined (no notification)
     };
@@ -184,6 +185,44 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Handle event gate checks (one-time actions)
+      if (checkDef.category === 'event_gate') {
+        const eventType = checkDef.eventType || 'WORLD_OBJECT_ACTION_USED';
+
+        // Check if player has already performed this action on this object
+        const existingEvent = await prisma.event.findFirst({
+          where: {
+            userId: player.id,
+            type: eventType,
+            details: {
+              path: ['objectId'],
+              equals: objectId
+            }
+          }
+        });
+
+        if (existingEvent) {
+          const playerName = player.arkanaStats.characterName || player.username;
+          const message = encodeForLSL(
+            `${playerName} has already collected XP from this ${worldObject.name}.`
+          );
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              actionSuccess: 'false',
+              actionName: actionId,
+              objectName: worldObject.name,
+              objectState: worldObject.state,
+              message,
+              notify: action.notify || ''
+            }
+          });
+        }
+
+        // Event will be created after success (see below after state update)
+      }
+
       // Handle stat checks
       if (checkDef.category === 'check') {
         // Parse active effects and calculate live stats
@@ -235,16 +274,70 @@ export async function POST(request: NextRequest) {
         data: { state: newState }
       });
 
-      if (rollInfo) {
-        message = encodeForLSL(
-          `${playerName} successfully performs ${actionId} on the ${worldObject.name}! ` +
-          `${rollInfo}. The ${worldObject.name} is now ${newState}.`
-        );
+      // Create event record for event_gate checks
+      if (action.checks) {
+        const checkDef = getWorldObjectCheck(action.checks);
+        if (checkDef && checkDef.category === 'event_gate' && checkDef.createEventOnSuccess) {
+          const eventType = checkDef.eventType || 'WORLD_OBJECT_ACTION_USED';
+          await prisma.event.create({
+            data: {
+              userId: player.id,
+              type: eventType,
+              details: {
+                objectId,
+                objectName: worldObject.name,
+                actionId,
+                timestamp: new Date().toISOString()
+              }
+            }
+          });
+        }
+      }
+
+      // Execute success script if defined
+      let xpGained = 0;
+      if (action.successScript) {
+        const scriptDef = getWorldObjectSuccessScript(action.successScript);
+
+        if (!scriptDef) {
+          console.error(`Success script "${action.successScript}" not found`);
+        } else if (scriptDef.category === 'xp_reward') {
+          xpGained = scriptDef.xpAmount || 1;
+
+          await prisma.arkanaStats.update({
+            where: { id: player.arkanaStats.id },
+            data: {
+              xp: { increment: xpGained }
+            }
+          });
+        }
+      }
+
+      // Build success message
+      if (xpGained > 0) {
+        if (rollInfo) {
+          message = encodeForLSL(
+            `${playerName} successfully performs ${actionId} on the ${worldObject.name}! ` +
+            `Gained ${xpGained} XP! ${rollInfo}. The ${worldObject.name} is now ${newState}.`
+          );
+        } else {
+          message = encodeForLSL(
+            `${playerName} successfully performs ${actionId} on the ${worldObject.name}! ` +
+            `Gained ${xpGained} XP! The ${worldObject.name} is now ${newState}.`
+          );
+        }
       } else {
-        message = encodeForLSL(
-          `${playerName} successfully performs ${actionId} on the ${worldObject.name}. ` +
-          `The ${worldObject.name} is now ${newState}.`
-        );
+        if (rollInfo) {
+          message = encodeForLSL(
+            `${playerName} successfully performs ${actionId} on the ${worldObject.name}! ` +
+            `${rollInfo}. The ${worldObject.name} is now ${newState}.`
+          );
+        } else {
+          message = encodeForLSL(
+            `${playerName} successfully performs ${actionId} on the ${worldObject.name}. ` +
+            `The ${worldObject.name} is now ${newState}.`
+          );
+        }
       }
     } else {
       if (rollInfo) {

@@ -8,7 +8,8 @@ import {
   MagicSchool,
   CharacterModel,
   EffectDefinition,
-  Skill
+  Skill,
+  WorldObjectSuccessScript
 } from './types';
 
 // Constants
@@ -24,6 +25,7 @@ let magicSchools: MagicSchool[] = [];
 let skills: Skill[] = [];
 let effectsMap: Map<string, EffectDefinition> = new Map();
 let worldObjectChecksMap: Map<string, EffectDefinition> = new Map();
+let worldObjectSuccessScriptsMap: Map<string, WorldObjectSuccessScript> = new Map();
 
 // Determine if running in test mode
 function isTestMode(): boolean {
@@ -37,7 +39,7 @@ export async function loadAllData(): Promise<void> {
     const basePath = testMode ? './tests/' : './';
     const fileSuffix = testMode ? '.test.json' : '';
 
-    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData, worldObjectChecksData] = await Promise.all([
+    const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData, worldObjectChecksData, worldObjectSuccessScriptsData] = await Promise.all([
       import(`${basePath}flaws${testMode ? '' : '3'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}common_powers${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}perks${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
@@ -46,7 +48,8 @@ export async function loadAllData(): Promise<void> {
       import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`).then(m => m.default),
       import(`${basePath}effects${fileSuffix}`).then(m => m.default),
       import(`${basePath}skills${fileSuffix}`).then(m => m.default),
-      import(`${basePath}worldObjectChecks${fileSuffix}`).then(m => m.default)
+      import(`${basePath}worldObjectChecks${fileSuffix}`).then(m => m.default),
+      import(`${basePath}worldObjectSuccessScripts${fileSuffix}`).then(m => m.default)
     ]);
 
     flaws = flawsData;
@@ -63,6 +66,9 @@ export async function loadAllData(): Promise<void> {
 
     // Load worldObjectChecks into map for fast lookup
     worldObjectChecksMap = new Map((worldObjectChecksData as EffectDefinition[]).map(e => [e.id, e]));
+
+    // Load worldObjectSuccessScripts into map for fast lookup
+    worldObjectSuccessScriptsMap = new Map((worldObjectSuccessScriptsData as WorldObjectSuccessScript[]).map(s => [s.id, s]));
   } catch (error) {
     console.error('Failed to load Arkana data:', error);
     throw error;
@@ -315,4 +321,10 @@ export function getEffectDefinition(effectId: string): EffectDefinition | undefi
 export function getWorldObjectCheck(checkId: string): EffectDefinition | undefined {
   // First check worldObjectChecks, then fall back to effects.json for reusable checks
   return worldObjectChecksMap.get(checkId) || effectsMap.get(checkId);
+}
+export function getWorldObjectSuccessScript(scriptId: string): WorldObjectSuccessScript | undefined {
+  return worldObjectSuccessScriptsMap.get(scriptId);
+}
+export function getAllWorldObjectSuccessScripts(): WorldObjectSuccessScript[] {
+  return Array.from(worldObjectSuccessScriptsMap.values());
 }

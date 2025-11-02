@@ -95,5 +95,13 @@
     "desc": "Verify player is authorized owner",
     "category": "ownership",
     "requiresOwnership": true
+  },
+  {
+    "id": "check_player_used_action_once",
+    "name": "One-Time Action Check",
+    "desc": "Verify player has not used this action on this object before",
+    "category": "event_gate",
+    "eventType": "WORLD_OBJECT_ACTION_USED",
+    "createEventOnSuccess": true
   }
 ]

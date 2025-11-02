@@ -25,8 +25,6 @@ export default function MagicSchoolSection({
 }: MagicSchoolSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Check if any weave is selected
-  const hasSelectedWeaves = school.weaves.some(weave => selectedWeaves.has(weave.id));
   const ownedWeavesCount = school.weaves.filter(weave => weave.owned).length;
   const totalWeavesCount = school.weaves.length;
 
