@@ -226,7 +226,7 @@
     "category": "heal",
     "type": "area_aura",
     "healFormula": "1",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:3"
   },
   {
@@ -354,7 +354,7 @@
     "stat": "Mental",
     "modifier": 2,
     "modifierType": "roll_bonus",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:2"
   },
   {
@@ -383,7 +383,7 @@
     "category": "defense",
     "type": "protective_aura",
     "defenseType": "immunity",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "scene"
   },
   {
@@ -795,7 +795,7 @@
     "category": "heal",
     "type": "area_aura",
     "healFormula": "3",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "immediate"
   },
   {
@@ -1054,7 +1054,7 @@
     "category": "utility",
     "type": "communication",
     "utilityType": "social",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "permanent"
   },
   {
@@ -1688,7 +1688,7 @@
     "category": "utility",
     "type": "communication",
     "utilityType": "social",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "scene"
   },
   {
@@ -2345,7 +2345,7 @@
     "category": "utility",
     "type": "communication",
     "utilityType": "social",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "permanent"
   },
   {
@@ -2423,7 +2423,7 @@
     "category": "utility",
     "type": "movement",
     "utilityType": "movement",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:1"
   },
   {
