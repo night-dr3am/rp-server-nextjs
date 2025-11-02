@@ -1,5 +1,6 @@
 import { getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { calculateStatModifier } from '@/lib/arkana/types';
+import { filterUsersByGroup } from '@/lib/arkana/abilityUtils';
 import type { EffectDefinition, EffectResult, ActiveEffect, LiveStats, CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool } from '@/lib/arkana/types';
 import type { ArkanaStats } from '@prisma/client';
 import liveStatsConfig from './liveStatsConfig.json';
@@ -422,6 +423,81 @@ export function getEffectsByTarget(
   targetType: 'self' | 'enemy' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'single'
 ): EffectResult[] {
   return effects.filter(e => e.effectDef.target === targetType);
+}
+
+/**
+ * Determine which users should receive an effect based on target type and social groups
+ * Central function for all combat endpoints to maintain consistent targeting logic
+ * Integrates with social groups system to filter all_allies and all_enemies by group membership
+ *
+ * @param effectTarget - Effect's target type from EffectDefinition
+ * @param caster - The caster user object (must have groups field and arkanaStats)
+ * @param target - Primary target for single-target effects (optional)
+ * @param nearbyUsers - All potential nearby targets (excludes caster)
+ * @returns Array of users who should receive this effect
+ *
+ * @example
+ * // power-activate endpoint
+ * const applicableTargets = determineApplicableTargets(
+ *   effectDef.target, caster, target, allPotentialTargets
+ * );
+ *
+ * @example
+ * // power-attack endpoint
+ * const applicableTargets = determineApplicableTargets(
+ *   effectDef.target, attacker, target, allPotentialTargets
+ * );
+ */
+export function determineApplicableTargets<T extends {
+  arkanaStats: { id: number } | null;
+  slUuid: string;
+  groups?: unknown;
+}>(
+  effectTarget: 'self' | 'enemy' | 'ally' | 'area' | 'all_allies' | 'all_enemies' | 'single' | undefined,
+  caster: T,
+  target: T | null,
+  nearbyUsers: T[]
+): T[] {
+  const applicableTargets: T[] = [];
+
+  switch (effectTarget) {
+    case 'self':
+      // Only caster receives effect
+      applicableTargets.push(caster);
+      break;
+
+    case 'all_allies':
+      // Caster + nearby players in Allies group (filtered by social groups)
+      applicableTargets.push(caster);
+      const alliesNearby = filterUsersByGroup(caster.groups, nearbyUsers, 'Allies');
+      applicableTargets.push(...alliesNearby);
+      break;
+
+    case 'all_enemies':
+      // Nearby players in Enemies group (filtered by social groups, excludes caster)
+      const enemiesNearby = filterUsersByGroup(caster.groups, nearbyUsers, 'Enemies');
+      applicableTargets.push(...enemiesNearby);
+      break;
+
+    case 'area':
+      // True area effect: caster + ALL nearby (no group filtering)
+      applicableTargets.push(caster);
+      applicableTargets.push(...nearbyUsers);
+      break;
+
+    case 'enemy':
+    case 'single':
+    case 'ally':
+      // Single target effect
+      if (target) applicableTargets.push(target);
+      break;
+
+    default:
+      // Unknown or undefined target type: no targets
+      break;
+  }
+
+  return applicableTargets;
 }
 
 /**

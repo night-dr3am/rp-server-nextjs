@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
-import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools } from '@/lib/arkana/dataLoader';
+import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation, getDetailedDefenseCalculation } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
-import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult } from '@/lib/arkana/types';
+import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
 function buildEffectMessage(result: EffectResult): string {
@@ -130,6 +130,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Build allPotentialTargets array for multi-target attacks
+    type UserWithStats = typeof attacker;
+    const allPotentialTargets: UserWithStats[] = [target];
+
+    // Load nearby users for multi-target attacks (same pattern as power-activate)
+    if (value.nearby_uuids && Array.isArray(value.nearby_uuids) && value.nearby_uuids.length > 0) {
+      const nearbyUsers = await prisma.user.findMany({
+        where: {
+          slUuid: { in: value.nearby_uuids },
+          universe: 'arkana'
+        },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // Filter to registered, conscious users in RP mode (exclude attacker)
+      const validNearby = nearbyUsers.filter(u =>
+        u?.arkanaStats?.registrationCompleted &&
+        u.stats?.status === 0 &&
+        u.stats.health > 0 &&  // Must be conscious for attacks
+        u.slUuid !== attacker.slUuid &&
+        u.slUuid !== target.slUuid  // Don't duplicate target
+      );
+
+      allPotentialTargets.push(...validNearby);
+    }
+
     // Load arkana data (needed for passive effects from perks/cybernetics/magic)
     await loadAllData();
     const allCommonPowers = getAllCommonPowers();
@@ -233,8 +259,6 @@ export async function POST(request: NextRequest) {
     const attackEffects = (power.effects?.attack && Array.isArray(power.effects.attack))
       ? power.effects.attack
       : [];
-    const appliedEffects: EffectResult[] = [];
-    let totalDamage = 0;
     let attackSuccess = false;
     let rollDescription = '';
 
@@ -323,57 +347,140 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Attack succeeded - apply all non-check effects (using effective stats)
+    // Attack succeeded - apply all non-check effects to applicable targets (multi-target support)
+    // Map to track effects and damage per target
+    const appliedEffectsMap = new Map<string, { effects: EffectResult[], damage: number }>();
+
     for (const effectId of attackEffects) {
-      if (!effectId.startsWith('check_')) {
-        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, undefined, attackerLiveStats, targetLiveStats);
+      if (effectId.startsWith('check_')) continue;
+
+      const effectDef = getEffectDefinition(effectId);
+      if (!effectDef) continue;
+
+      // Determine applicable targets using centralized utility (supports social groups)
+      const applicableTargets = determineApplicableTargets(effectDef.target, attacker, target, allPotentialTargets);
+
+      // Execute effect for each applicable target
+      for (const applicableTarget of applicableTargets) {
+        if (!applicableTarget?.arkanaStats) continue;
+
+        // Calculate or reuse liveStats for this target
+        let currentTargetLiveStats: LiveStats = {};
+        if (applicableTarget.slUuid === target.slUuid) {
+          currentTargetLiveStats = targetLiveStats; // Reuse primary target's already-calculated stats
+        } else if (applicableTarget.slUuid === attacker.slUuid) {
+          currentTargetLiveStats = attackerLiveStats; // Reuse attacker's stats for self-effects
+        } else {
+          // Calculate fresh liveStats for other nearby targets
+          const activeEffects = parseActiveEffects(applicableTarget.arkanaStats.activeEffects);
+          const passiveEffects = getPassiveEffectsWithSource(
+            (applicableTarget.arkanaStats.perks as string[]) || [],
+            (applicableTarget.arkanaStats.cybernetics as string[]) || [],
+            (applicableTarget.arkanaStats.magicWeaves as string[]) || []
+          );
+          const combined = [...activeEffects, ...passiveEffectsToActiveFormat(passiveEffects)];
+          currentTargetLiveStats = recalculateLiveStats(applicableTarget.arkanaStats, combined);
+        }
+
+        // Execute effect on this target
+        const result = executeEffect(effectId, attacker.arkanaStats, applicableTarget.arkanaStats, undefined, attackerLiveStats, currentTargetLiveStats);
+
         if (result) {
-          appliedEffects.push(result);
-          if (result.damage) totalDamage += result.damage;
+          const key = applicableTarget.slUuid;
+          if (!appliedEffectsMap.has(key)) {
+            appliedEffectsMap.set(key, { effects: [], damage: 0 });
+          }
+          const entry = appliedEffectsMap.get(key)!;
+          entry.effects.push(result);
+          if (result.damage) entry.damage += result.damage;
         }
       }
     }
 
-    // Calculate damage reduction from target's defense effects
-    const damageReduction = calculateDamageReduction(targetCombinedEffects);
-    const damageAfterReduction = Math.max(0, totalDamage - damageReduction);
+    // Process ALL targets in appliedEffectsMap (damage + effects application)
+    // Track which users need database updates
+    const affectedTargets: Array<{
+      user: UserWithStats;
+      effectsForUser: EffectResult[];
+      damageDealt: number;
+      damageReduction: number;
+      healthBefore: number;
+      healthAfter: number;
+    }> = [];
 
-    // Apply damage to target health
-    let newTargetHealth = target.stats.health;
-    if (damageAfterReduction > 0) {
-      newTargetHealth = Math.max(0, target.stats.health - damageAfterReduction);
-      await prisma.userStats.update({
-        where: { userId: target.id },
-        data: { health: newTargetHealth, lastUpdated: new Date() }
-      });
-    }
+    for (const [uuid, entry] of appliedEffectsMap.entries()) {
+      const affectedUser = [attacker, ...allPotentialTargets].find(u => u.slUuid === uuid);
+      if (!affectedUser?.arkanaStats) continue;
 
-    // Process activeEffects and liveStats for target and attacker
-    const targetEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'enemy' || e.effectDef.target === 'single'
-    );
-    const selfEffects = appliedEffects.filter(e =>
-      e.effectDef.target === 'self'
-    );
+      // Get combined effects for damage reduction calculation
+      const userActiveEffects = parseActiveEffects(affectedUser.arkanaStats.activeEffects);
+      const userPassiveEffects = getPassiveEffectsWithSource(
+        (affectedUser.arkanaStats.perks as string[]) || [],
+        (affectedUser.arkanaStats.cybernetics as string[]) || [],
+        (affectedUser.arkanaStats.magicWeaves as string[]) || []
+      );
+      const userCombinedEffects = [...userActiveEffects, ...passiveEffectsToActiveFormat(userPassiveEffects)];
 
-    // Update target's activeEffects and liveStats
-    if (targetEffects.length > 0) {
-      let targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+      // Calculate damage reduction and apply damage
+      const damageReduction = calculateDamageReduction(userCombinedEffects);
+      const damageAfterReduction = Math.max(0, entry.damage - damageReduction);
+      const healthBefore = affectedUser.stats?.health || 0;
+      let healthAfter = healthBefore;
 
-      for (const effectResult of targetEffects) {
-        targetActiveEffects = applyActiveEffect(targetActiveEffects, effectResult, attacker.arkanaStats.characterName, sourceInfo);
+      // Apply damage to health (only if user has stats and damage > 0)
+      if (affectedUser.stats && damageAfterReduction > 0) {
+        healthAfter = Math.max(0, healthBefore - damageAfterReduction);
+        await prisma.userStats.update({
+          where: { userId: affectedUser.id },
+          data: { health: healthAfter, lastUpdated: new Date() }
+        });
       }
 
-      const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetActiveEffects);
+      // Apply non-damage effects to activeEffects
+      const nonSelfEffects = entry.effects.filter(e =>
+        e.effectDef.target !== 'self' && e.effectDef.category !== 'damage'
+      );
 
-      await prisma.arkanaStats.update({
-        where: { userId: target.id },
-        data: buildArkanaStatsUpdate({
-          activeEffects: targetActiveEffects,
-          liveStats: targetLiveStats
-        })
+      if (nonSelfEffects.length > 0) {
+        let updatedActiveEffects = userActiveEffects;
+
+        for (const effectResult of nonSelfEffects) {
+          updatedActiveEffects = applyActiveEffect(updatedActiveEffects, effectResult, attacker.arkanaStats.characterName, sourceInfo);
+        }
+
+        const updatedLiveStats = recalculateLiveStats(affectedUser.arkanaStats, updatedActiveEffects);
+
+        await prisma.arkanaStats.update({
+          where: { userId: affectedUser.id },
+          data: buildArkanaStatsUpdate({
+            activeEffects: updatedActiveEffects,
+            liveStats: updatedLiveStats
+          })
+        });
+      }
+
+      // Track this affected target for response
+      affectedTargets.push({
+        user: affectedUser,
+        effectsForUser: entry.effects,
+        damageDealt: damageAfterReduction,
+        damageReduction,
+        healthBefore,
+        healthAfter
       });
     }
+
+    // Extract legacy variables for backward compatibility with attacker processing below
+    const primaryTargetData = affectedTargets.find(t => t.user.slUuid === target.slUuid);
+    const totalDamage = primaryTargetData?.damageDealt || 0;
+    const newTargetHealth = primaryTargetData?.healthAfter || target.stats.health;
+
+    // Collect self-effects for attacker processing
+    const appliedEffects: EffectResult[] = [];
+    for (const entry of appliedEffectsMap.values()) {
+      appliedEffects.push(...entry.effects);
+    }
+    const selfEffects = appliedEffects.filter(e => e.effectDef.target === 'self');
 
     // Update attacker's activeEffects and liveStats
     // Note: attackerActiveEffects already defined above (without passive effects)
@@ -419,22 +526,32 @@ export async function POST(request: NextRequest) {
 
     let message = `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription}`;
 
-    // Always show damage (even if 0), include damage reduction if present
-    if (damageReduction > 0) {
-      message += ` - ${damageAfterReduction} damage dealt (${damageReduction} blocked by defenses)`;
+    // Always show damage for primary target (even if 0), include damage reduction if present
+    const primaryDamageReduction = primaryTargetData?.damageReduction || 0;
+    if (primaryDamageReduction > 0) {
+      message += ` - ${totalDamage} damage dealt (${primaryDamageReduction} blocked by defenses)`;
     } else {
       message += ` - ${totalDamage} damage dealt`;
     }
 
-    // Add effect messages (targetEffects and selfEffects already filtered above)
-    if (targetEffects.length > 0) {
-      const msgs = targetEffects.map(buildEffectMessage);
+    // Add effect messages for primary target
+    const primaryTargetEffects = primaryTargetData?.effectsForUser.filter(e => e.effectDef.target !== 'self') || [];
+    if (primaryTargetEffects.length > 0) {
+      const msgs = primaryTargetEffects.map(buildEffectMessage);
       message += `. Target: ${msgs.join(', ')}`;
     }
 
+    // Add self-effects message
     if (selfEffects.length > 0) {
       const msgs = selfEffects.map(buildEffectMessage);
       message += `. Attacker: ${msgs.join(', ')}`;
+    }
+
+    // Add multi-target summary if there are additional affected targets
+    const additionalTargets = affectedTargets.filter(t => t.user.slUuid !== target.slUuid && t.user.slUuid !== attacker.slUuid);
+    if (additionalTargets.length > 0) {
+      const names = additionalTargets.map(t => t.user.arkanaStats?.characterName || 'Unknown').join(', ');
+      message += `. Also affects: ${names}`;
     }
 
     return NextResponse.json({
@@ -444,13 +561,19 @@ export async function POST(request: NextRequest) {
         powerUsed: power.name,
         powerBaseStat: power.baseStat || 'Mental',
         rollInfo: rollDescription,
-        totalDamage: damageAfterReduction,  // Report damage after reduction
-        affected: appliedEffects
-          .filter(e => e.effectDef.target === 'enemy' || e.effectDef.target === 'single')
-          .map(e => ({
-            uuid: target.slUuid,
-            name: encodeForLSL(targetName),
-            effects: [buildEffectMessage(e)]
+        totalDamage,  // Primary target damage after reduction
+        affected: affectedTargets
+          .filter(t => t.user.slUuid !== attacker.slUuid)  // Exclude attacker from affected list
+          .map(t => ({
+            uuid: t.user.slUuid,
+            name: encodeForLSL(t.user.arkanaStats?.characterName || 'Unknown'),
+            damage: t.damageDealt,
+            healthBefore: t.healthBefore,
+            healthAfter: t.healthAfter,
+            isUnconscious: (t.healthAfter <= 0) ? 'true' : 'false',
+            effects: t.effectsForUser
+              .filter(e => e.effectDef.target !== 'self')
+              .map(buildEffectMessage)
           })),
         target: {
           uuid: target.slUuid,

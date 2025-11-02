@@ -866,5 +866,50 @@
     "modifierType": "roll_bonus",
     "target": "self",
     "duration": "turns:3"
+  },
+  {
+    "id": "damage_test_area_enemies_3",
+    "name": "Test AoE Damage to Enemies +3",
+    "desc": "Test: Deals 3 + Mental modifier damage to all enemies (social groups)",
+    "category": "damage",
+    "type": "stat_based",
+    "damageType": "psychic",
+    "damageFormula": "3 + Mental",
+    "target": "all_enemies",
+    "duration": "immediate"
+  },
+  {
+    "id": "debuff_test_area_enemies_physical",
+    "name": "Test AoE Physical Debuff to Enemies",
+    "desc": "Test: Reduces Physical stat by 1 for all enemies (social groups)",
+    "category": "stat_modifier",
+    "type": "stat_debuff",
+    "stat": "Physical",
+    "modifier": -1,
+    "modifierType": "stat_value",
+    "target": "all_enemies",
+    "duration": "turns:2"
+  },
+  {
+    "id": "heal_test_allies_regen_3",
+    "name": "Test HoT for Allies +3",
+    "desc": "Test: Heals 3 HP per turn for all allies (social groups)",
+    "category": "heal",
+    "type": "regeneration",
+    "healFormula": "3",
+    "target": "all_allies",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_test_physical_allies_2",
+    "name": "Test Physical Buff for Allies +2",
+    "desc": "Test: Grants +2 Physical roll bonus to all allies (social groups)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Physical",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "all_allies",
+    "duration": "turns:3"
   }
 ]

@@ -286,5 +286,65 @@
     "effects": {
       "ability": ["defense_test_reduction_5_scene"]
     }
+  },
+  {
+    "id": "test_aoe_blast",
+    "name": "Test AoE Blast",
+    "desc": "Test attack power: Psychic blast targeting all enemies in social groups",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["attack"],
+    "tags": ["damage", "mental", "aoe"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "damage_test_area_enemies_3", "debuff_test_area_enemies_physical"]
+    }
+  },
+  {
+    "id": "test_rally_cry",
+    "name": "Test Rally Cry",
+    "desc": "Test ability power: Buff all allies in social groups",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["buff", "support", "aoe"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["buff_test_physical_allies_2", "buff_mental_2_area"]
+    }
+  },
+  {
+    "id": "test_healing_wave",
+    "name": "Test Healing Wave",
+    "desc": "Test ability power: Heal all allies in social groups",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["heal", "support", "aoe"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 20,
+    "effects": {
+      "ability": ["heal_test_area_immediate", "heal_test_allies_regen_3"]
+    }
+  },
+  {
+    "id": "test_curse_field",
+    "name": "Test Curse Field",
+    "desc": "Test attack power: Curse all enemies in social groups with debuffs",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["attack"],
+    "tags": ["debuff", "mental", "aoe"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 15,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "debuff_test_area_enemies_physical", "debuff_mental_roll_minus_1"]
+    }
   }
 ]

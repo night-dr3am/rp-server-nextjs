@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
@@ -139,10 +139,11 @@ export async function POST(request: NextRequest) {
         include: { arkanaStats: true, stats: true }
       });
 
-      // Filter to only registered users in RP mode
+      // Filter to only registered users in RP mode and conscious (health > 0)
       const validNearby = nearbyUsers.filter(u =>
         u?.arkanaStats?.registrationCompleted &&
         u.stats?.status === 0 &&
+        (u.stats?.health || 0) > 0 && // Exclude unconscious users
         u.slUuid !== caster.slUuid // Exclude caster from nearby list
       );
 
@@ -366,25 +367,11 @@ export async function POST(request: NextRequest) {
       const effectDef = getEffectDefinition(effectId);
       if (!effectDef) continue;
 
-      // Determine which users should receive this effect
-      const applicableTargets: typeof allPotentialTargets = [];
-
-      if (effectDef.target === 'self') {
-        // Self effects go to caster only
-        applicableTargets.push({ ...caster, arkanaStats: caster.arkanaStats! });
-      } else if (effectDef.target === 'all_allies' || effectDef.target === 'area') {
-        // Area effects: caster + all nearby
-        applicableTargets.push({ ...caster, arkanaStats: caster.arkanaStats! });
-        applicableTargets.push(...allPotentialTargets);
-      } else if (effectDef.target === 'all_enemies') {
-        // Enemy area effects: all nearby (not caster)
-        applicableTargets.push(...allPotentialTargets);
-      } else if (effectDef.target === 'enemy' || effectDef.target === 'single' || effectDef.target === 'ally') {
-        // Single target effects
-        if (target) {
-          applicableTargets.push(target);
-        }
-      }
+      // Determine which users should receive this effect using centralized utility
+      // This now supports social groups filtering for all_allies and all_enemies
+      // Filter out nulls before passing to determineApplicableTargets
+      const validPotentialTargets = allPotentialTargets.filter((u): u is NonNullable<typeof u> => u !== null);
+      const applicableTargets = determineApplicableTargets(effectDef.target, caster, target, validPotentialTargets);
 
       // Apply effect to each applicable target
       for (const applicableTarget of applicableTargets) {

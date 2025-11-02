@@ -351,3 +351,45 @@ export function passiveEffectsToActiveFormat(
     sourceType: effect.sourceType
   }));
 }
+
+/**
+ * Filter users by social group membership
+ * Checks if users' arkanaStats.id is in caster's social groups (Allies or Enemies)
+ * Used by combat system to determine which nearby players should be affected by group-targeted powers
+ *
+ * @param casterGroups - Caster's User.groups JSON field (format: {"Allies": [arkanaId1, arkanaId2], "Enemies": [arkanaId3]})
+ * @param users - Array of users with arkanaStats to filter
+ * @param groupType - 'Allies' or 'Enemies'
+ * @returns Filtered array containing only users whose arkanaStats.id is in the specified group
+ *
+ * @example
+ * // Filter nearby users to only allies
+ * const caster = { groups: {"Allies": [101, 102], "Enemies": [103]} };
+ * const nearbyUsers = [user1, user2, user3]; // user1.arkanaStats.id=101, user2.arkanaStats.id=103
+ * const allies = filterUsersByGroup(caster.groups, nearbyUsers, 'Allies'); // Returns [user1]
+ */
+export function filterUsersByGroup<T extends { arkanaStats: { id: number } | null }>(
+  casterGroups: unknown,
+  users: T[],
+  groupType: 'Allies' | 'Enemies'
+): T[] {
+  // Safely parse groups JSON
+  let groups: Record<string, number[]> = {};
+  try {
+    if (casterGroups && typeof casterGroups === 'object') {
+      groups = casterGroups as Record<string, number[]>;
+    }
+  } catch (e) {
+    console.warn('Failed to parse caster groups:', e);
+    return [];
+  }
+
+  // Get arkana IDs for the specified group (default to empty array if group doesn't exist)
+  const groupMembers = groups[groupType] || [];
+  if (groupMembers.length === 0) return [];
+
+  // Filter users whose arkanaStats.id is in the group
+  return users.filter(user =>
+    user.arkanaStats && groupMembers.includes(user.arkanaStats.id)
+  );
+}
