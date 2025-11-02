@@ -686,6 +686,7 @@ export const arkanaPowerInfoSchema = Joi.object({
   player_uuid: uuidSchema,
   power_id: Joi.string().min(1).max(255).optional(),
   power_name: Joi.string().min(1).max(255).optional(),
+  use_mode: Joi.string().valid('attack', 'ability', 'all').optional().default('all'),
   universe: Joi.string().valid('arkana').required(),
   timestamp: timestampSchema,
   signature: signatureSchema

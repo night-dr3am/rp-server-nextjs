@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { player_uuid, power_id, power_name, universe, timestamp, signature } = value;
+    const { player_uuid, power_id, power_name, use_mode, universe, timestamp, signature } = value;
 
     // Validate signature for Arkana universe
     const signatureValidation = validateSignature(timestamp, signature, universe);
@@ -108,9 +108,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate formatted messages for LSL dialogs
-    const detailedMessage = formatPowerDetailsForLSL(ability, 'detailed');
-    const confirmMessage = formatPowerDetailsForLSL(ability, 'brief');
+    // Generate formatted messages for LSL dialogs with use_mode
+    const detailedMessage = formatPowerDetailsForLSL(ability, 'detailed', use_mode);
+    const confirmMessage = formatPowerDetailsForLSL(ability, 'brief', use_mode);
 
     // Return ability info
     return NextResponse.json({

@@ -1115,11 +1115,13 @@ export function clearSceneEffects(
  * Creates human-readable power description with effects breakdown
  * @param power - The power/ability/perk/cybernetic/magic object
  * @param mode - 'detailed' for target selection, 'brief' for confirmation
+ * @param useMode - 'attack' shows attack effects only, 'ability' shows ability effects only, 'all' shows all effects (default)
  * @returns URL-encoded formatted string ready for LSL display
  */
 export function formatPowerDetailsForLSL(
   power: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool,
-  mode: 'detailed' | 'brief'
+  mode: 'detailed' | 'brief',
+  useMode?: 'attack' | 'ability' | 'all'
 ): string {
   // Helper function to format target label
   const formatTargetLabel = (target?: string): string => {
@@ -1228,16 +1230,29 @@ export function formatPowerDetailsForLSL(
     return effectDef.name + targetLabel;
   };
 
-  // Collect all effects from the power
+  // Collect effects from the power based on useMode
   const effects = power.effects || {};
   const allEffectIds: string[] = [];
+  const actualUseMode = useMode || 'all';
 
-  // Combine all effect types (attack, ability, passive, onHit, onDefense)
-  if (effects.attack) allEffectIds.push(...effects.attack);
-  if (effects.ability) allEffectIds.push(...effects.ability);
-  if (effects.passive) allEffectIds.push(...effects.passive);
-  if (effects.onHit) allEffectIds.push(...effects.onHit);
-  if (effects.onDefense) allEffectIds.push(...effects.onDefense);
+  if (actualUseMode === 'all') {
+    // Show all effects (current behavior - backward compatible)
+    if (effects.attack) allEffectIds.push(...effects.attack);
+    if (effects.ability) allEffectIds.push(...effects.ability);
+    if (effects.passive) allEffectIds.push(...effects.passive);
+    if (effects.onHit) allEffectIds.push(...effects.onHit);
+    if (effects.onDefense) allEffectIds.push(...effects.onDefense);
+  } else if (actualUseMode === 'attack') {
+    // Show only attack effects
+    if (effects.attack) allEffectIds.push(...effects.attack);
+    // Always show passive effects regardless of mode
+    if (effects.passive) allEffectIds.push(...effects.passive);
+  } else if (actualUseMode === 'ability') {
+    // Show only ability effects
+    if (effects.ability) allEffectIds.push(...effects.ability);
+    // Always show passive effects regardless of mode
+    if (effects.passive) allEffectIds.push(...effects.passive);
+  }
 
   // Remove duplicates
   const uniqueEffectIds = Array.from(new Set(allEffectIds));

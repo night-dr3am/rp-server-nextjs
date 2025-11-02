@@ -461,5 +461,240 @@ describe('/api/arkana/combat/power-info', () => {
       const { error } = arkanaPowerInfoSchema.validate(payload);
       expect(error).toBeDefined();
     });
+
+    it('should accept use_mode parameter with valid values', () => {
+      const modes = ['attack', 'ability', 'all'];
+
+      modes.forEach(mode => {
+        const payload = {
+          player_uuid: generateTestUUID(),
+          power_id: 'some_power',
+          use_mode: mode,
+          universe: 'arkana',
+          timestamp: new Date().toISOString(),
+          signature: 'a'.repeat(64)
+        };
+
+        const { error } = arkanaPowerInfoSchema.validate(payload);
+        expect(error).toBeUndefined();
+      });
+    });
+
+    it('should default use_mode to "all" when not provided', () => {
+      const payload = {
+        player_uuid: generateTestUUID(),
+        power_id: 'some_power',
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'a'.repeat(64)
+      };
+
+      const { error, value } = arkanaPowerInfoSchema.validate(payload);
+      expect(error).toBeUndefined();
+      expect(value.use_mode).toBe('all');
+    });
+
+    it('should reject invalid use_mode value', () => {
+      const payload = {
+        player_uuid: generateTestUUID(),
+        power_id: 'some_power',
+        use_mode: 'invalid_mode',
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'a'.repeat(64)
+      };
+
+      const { error } = arkanaPowerInfoSchema.validate(payload);
+      expect(error).toBeDefined();
+    });
+  });
+
+  describe('Use Mode Filter Tests', () => {
+    it('should show only ability effects when use_mode is "ability" (Chi Manipulation example)', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Gaki Healer',
+        race: 'gaki',
+        archetype: 'Life',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 12,
+        commonPowers: ['gaki_chi_manipulation'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'gaki_chi_manipulation',
+        use_mode: 'ability',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+
+      // Should include ability effect (Chi Balance Restoration / cleanse)
+      expect(detailed).toMatch(/Chi Balance Restoration|Heals.*HP/i);
+
+      // Should NOT include attack effects (check or debuff)
+      expect(detailed).not.toContain('Mental Check vs Mental Defense');
+      expect(detailed).not.toMatch(/-1 Mental.*\(2 turns\)/);
+    });
+
+    it('should show only attack effects when use_mode is "attack" (Chi Manipulation example)', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Gaki Fighter',
+        race: 'gaki',
+        archetype: 'Life',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 12,
+        commonPowers: ['gaki_chi_manipulation'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'gaki_chi_manipulation',
+        use_mode: 'attack',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+
+      // Should include attack effects (check and debuff)
+      expect(detailed).toContain('Mental Check vs Mental Defense');
+      expect(detailed).toMatch(/-1 Mental.*\(2 turns\)/);
+
+      // Should NOT include ability effect (cleanse)
+      expect(detailed).not.toMatch(/Chi Balance Restoration|Heals.*HP/i);
+    });
+
+    it('should show all effects when use_mode is "all" or not specified', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Gaki Versatile',
+        race: 'gaki',
+        archetype: 'Life',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 12,
+        commonPowers: ['gaki_chi_manipulation'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      // Test with use_mode="all"
+      const requestDataAll = {
+        player_uuid: player.slUuid,
+        power_id: 'gaki_chi_manipulation',
+        use_mode: 'all',
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const requestAll = createMockPostRequest('/api/arkana/combat/power-info', requestDataAll);
+      const responseAll = await POST(requestAll);
+      const dataAll = await parseJsonResponse(responseAll);
+
+      expectSuccess(dataAll);
+
+      const detailedAll = decodeURIComponent(dataAll.data.detailedMessage);
+
+      // Should include BOTH attack and ability effects
+      expect(detailedAll).toContain('Mental Check vs Mental Defense');
+      expect(detailedAll).toMatch(/-1 Mental.*\(2 turns\)/);
+      expect(detailedAll).toMatch(/Chi Balance Restoration|Heals.*HP/i);
+
+      // Test without use_mode (defaults to "all")
+      const timestamp2 = new Date().toISOString();
+      const requestDataDefault = {
+        player_uuid: player.slUuid,
+        power_id: 'gaki_chi_manipulation',
+        universe: 'arkana',
+        timestamp: timestamp2,
+        signature: generateSignature(timestamp2, 'arkana')
+      };
+
+      const requestDefault = createMockPostRequest('/api/arkana/combat/power-info', requestDataDefault);
+      const responseDefault = await POST(requestDefault);
+      const dataDefault = await parseJsonResponse(responseDefault);
+
+      expectSuccess(dataDefault);
+
+      const detailedDefault = decodeURIComponent(dataDefault.data.detailedMessage);
+
+      // Should also include both attack and ability effects
+      expect(detailedDefault).toContain('Mental Check vs Mental Defense');
+      expect(detailedDefault).toMatch(/-1 Mental.*\(2 turns\)/);
+      expect(detailedDefault).toMatch(/Chi Balance Restoration|Heals.*HP/i);
+    });
+
+    it('should handle use_mode with powers that have no matching effect type', async () => {
+      const player = await createArkanaTestUser({
+        characterName: 'Strigoi Passive',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 4,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_wall_walking'],
+        archetypePowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      // strigoi_wall_walking has only passive effects, no attack effects
+      const requestData = {
+        player_uuid: player.slUuid,
+        power_id: 'strigoi_wall_walking',
+        use_mode: 'attack', // Even though power has no attack effects
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-info', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const detailed = decodeURIComponent(data.data.detailedMessage);
+
+      // Should still show passive effects even when use_mode is "attack"
+      expect(detailed).toMatch(/Wall.*Climbing/i);
+    });
   });
 });
