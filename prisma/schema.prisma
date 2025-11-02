@@ -19,6 +19,7 @@ model User {
   title        String?     @db.VarChar(512) // Optional RP title (max 512 chars)
   titleColor   String      @default("<1, 1, 1>") @map("title_color") // LSL color vector
   knownRecipes String[]    @default([]) @map("known_recipes") // Array of recipe shortNames
+  groups       Json?       @default("{}") @map("groups") // Social groups: {"Allies": [arkanaStats.id], "Enemies": [arkanaStats.id]}
   createdAt    DateTime    @default(now()) @map("created_at")
   lastActive   DateTime    @default(now()) @map("last_active")
 

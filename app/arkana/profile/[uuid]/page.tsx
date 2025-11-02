@@ -18,6 +18,8 @@ import {
   type Skill,
   type CharacterSkill
 } from '@/lib/arkanaData';
+import UserGroupList, { type GroupMember } from '@/components/arkana/UserGroupList';
+import UserSearchModal from '@/components/arkana/UserSearchModal';
 
 interface User {
   id: string;
@@ -137,6 +139,18 @@ export default function ArkanaProfilePage() {
   const [perksData, setPerksData] = useState<Perk[]>([]);
   const [archPowersData, setArchPowersData] = useState<ArchetypePower[]>([]);
   const [cyberneticsData, setCyberneticsData] = useState<Cybernetic[]>([]);
+
+  // Tab navigation state
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'social'>('dashboard');
+
+  // Social groups state
+  interface Groups {
+    [groupName: string]: GroupMember[];
+  }
+  const [groups, setGroups] = useState<Groups>({ Allies: [], Enemies: [] });
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [activeGroupName, setActiveGroupName] = useState<string>('');
 
   const fetchProfileData = useCallback(async () => {
     try {
@@ -282,6 +296,109 @@ export default function ArkanaProfilePage() {
     router.push(`/arkana/admin?token=${token}`);
   };
 
+  // Social groups functions
+  const fetchGroups = useCallback(async () => {
+    if (!uuid || !token) return;
+
+    setGroupsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/arkana/social/groups?player_uuid=${uuid}&universe=arkana&token=${token}&sessionId=${sessionId}`
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setGroups(result.data.groups || { Allies: [], Enemies: [] });
+      }
+    } catch (error) {
+      console.error('Failed to fetch groups:', error);
+    } finally {
+      setGroupsLoading(false);
+    }
+  }, [uuid, token, sessionId]);
+
+  const handleRemoveMember = async (groupName: string, arkanaId: number) => {
+    if (!uuid || !token) return;
+
+    try {
+      const response = await fetch('/api/arkana/social/groups/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_uuid: uuid,
+          universe: 'arkana',
+          group_name: groupName,
+          target_arkana_id: arkanaId,
+          token,
+          sessionId
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Refresh groups
+        await fetchGroups();
+      }
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+    }
+  };
+
+  const handleAddMember = async (arkanaId: number) => {
+    if (!uuid || !token || !activeGroupName) return;
+
+    try {
+      const response = await fetch('/api/arkana/social/groups/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_uuid: uuid,
+          universe: 'arkana',
+          group_name: activeGroupName,
+          target_arkana_id: arkanaId,
+          token,
+          sessionId
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Refresh groups and close modal
+        await fetchGroups();
+        setSearchModalOpen(false);
+      }
+    } catch (error) {
+      console.error('Failed to add member:', error);
+    }
+  };
+
+  const handleSearchUsers = async (searchTerm: string, page: number) => {
+    if (!uuid || !token) throw new Error('Missing UUID or token');
+
+    const response = await fetch(
+      `/api/arkana/social/users/search?player_uuid=${uuid}&universe=arkana&search=${encodeURIComponent(searchTerm)}&page=${page}&limit=20&token=${token}&sessionId=${sessionId}`
+    );
+
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to search users');
+    }
+
+    return result.data;
+  };
+
+  const openAddModal = (groupName: string) => {
+    setActiveGroupName(groupName);
+    setSearchModalOpen(true);
+  };
+
+  // Fetch groups when Social tab is activated
+  useEffect(() => {
+    if (activeTab === 'social') {
+      fetchGroups();
+    }
+  }, [activeTab, fetchGroups]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -341,6 +458,35 @@ export default function ArkanaProfilePage() {
           </div>
         )}
 
+        {/* Tab Navigation */}
+        <div className="mb-6 border-b border-cyan-500">
+          <nav className="flex space-x-4">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'dashboard'
+                  ? 'border-b-2 border-cyan-400 text-cyan-400'
+                  : 'text-cyan-500 hover:text-cyan-300'
+              }`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab('social')}
+              className={`px-4 py-2 font-medium transition-colors ${
+                activeTab === 'social'
+                  ? 'border-b-2 border-cyan-400 text-cyan-400'
+                  : 'text-cyan-500 hover:text-cyan-300'
+              }`}
+            >
+              Social
+            </button>
+          </nav>
+        </div>
+
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <>
         {/* Top Row - Character Info and Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Character Info Widget */}
@@ -761,6 +907,48 @@ export default function ArkanaProfilePage() {
             </div>
           )}
         </div>
+
+          </>
+        )}
+
+        {/* Social Tab */}
+        {activeTab === 'social' && (
+          <div className="space-y-6">
+            {groupsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto"></div>
+                <p className="mt-4 text-cyan-400">Loading social groups...</p>
+              </div>
+            ) : (
+              <>
+                {/* Allies Group */}
+                <UserGroupList
+                  groupName="Allies"
+                  members={groups.Allies || []}
+                  onRemove={(id) => handleRemoveMember('Allies', id)}
+                  onAddClick={() => openAddModal('Allies')}
+                />
+
+                {/* Enemies Group */}
+                <UserGroupList
+                  groupName="Enemies"
+                  members={groups.Enemies || []}
+                  onRemove={(id) => handleRemoveMember('Enemies', id)}
+                  onAddClick={() => openAddModal('Enemies')}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        {/* User Search Modal */}
+        <UserSearchModal
+          isOpen={searchModalOpen}
+          groupName={activeGroupName}
+          onClose={() => setSearchModalOpen(false)}
+          onAdd={handleAddMember}
+          onSearch={handleSearchUsers}
+        />
 
         <footer className="text-center text-cyan-400 text-sm mt-8">
           <p>Arkana RP Server - Character Profile System</p>

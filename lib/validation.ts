@@ -939,3 +939,39 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
   }
   return value;
 });
+
+// Arkana social groups validation schemas
+export const arkanaGetGroupsSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaAddToGroupSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  group_name: Joi.string().min(1).max(50).required(),
+  target_arkana_id: Joi.number().integer().positive().required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaRemoveFromGroupSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  group_name: Joi.string().min(1).max(50).required(),
+  target_arkana_id: Joi.number().integer().positive().required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const arkanaSearchUsersSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  search: Joi.string().max(100).optional().allow(''),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(50).default(20),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
