@@ -277,7 +277,7 @@
     "stat": "Mental",
     "modifier": 2,
     "modifierType": "roll_bonus",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:2"
   },
   {
@@ -322,7 +322,7 @@
     "category": "utility",
     "type": "sensory",
     "utilityType": "perception",
-    "target": "area",
+    "target": "area_and_self",
     "duration": "scene"
   },
   {
@@ -332,7 +332,7 @@
     "category": "utility",
     "type": "sensory",
     "utilityType": "perception",
-    "target": "area",
+    "target": "area_and_self",
     "duration": "turns:3"
   },
   {
@@ -360,7 +360,7 @@
     "desc": "Test special: Dissolve into mist",
     "category": "special",
     "type": "shapeshift",
-    "target": "area",
+    "target": "area_and_self",
     "duration": "turns:3"
   },
   {
@@ -542,7 +542,7 @@
     "category": "heal",
     "type": "area",
     "healFormula": "4",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "immediate"
   },
   {
@@ -897,7 +897,7 @@
     "category": "heal",
     "type": "regeneration",
     "healFormula": "3",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:2"
   },
   {
@@ -909,7 +909,67 @@
     "stat": "Physical",
     "modifier": 2,
     "modifierType": "roll_bonus",
-    "target": "all_allies",
+    "target": "all_allies_and_self",
     "duration": "turns:3"
+  },
+  {
+    "id": "buff_area_exclude_test",
+    "name": "Test Area Buff (Excludes Caster)",
+    "desc": "Test: Buffs all nearby users (excludes caster with area target)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "area",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_allies_exclude_test",
+    "name": "Test Allies Buff (Excludes Caster)",
+    "desc": "Test: Buffs all allies (excludes caster with all_allies target)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "all_allies",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_area_and_self_test",
+    "name": "Test Area + Self Buff",
+    "desc": "Test: Buffs all nearby users including caster (area_and_self target)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Physical",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "area_and_self",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_allies_and_self_test",
+    "name": "Test Allies + Self Buff",
+    "desc": "Test: Buffs all allies including caster (all_allies_and_self target)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Mental",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "all_allies_and_self",
+    "duration": "turns:2"
+  },
+  {
+    "id": "debuff_enemies_and_self_test",
+    "name": "Test Enemies + Self Debuff",
+    "desc": "Test: Debuffs all enemies including caster (all_enemies_and_self target)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Physical",
+    "modifier": -1,
+    "modifierType": "roll_bonus",
+    "target": "all_enemies_and_self",
+    "duration": "turns:2"
   }
 ]

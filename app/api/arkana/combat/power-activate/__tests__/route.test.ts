@@ -4429,4 +4429,448 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(farEffects.length).toBe(0);
     });
   });
+
+  describe('New Target Types Tests (_and_self variants)', () => {
+    it('should exclude caster from area effects (breaking change verification)', async () => {
+      // Test that 'area' now excludes caster (breaking change)
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_area_exclude_caster']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby 1',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_area_exclude_caster',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect only nearby1 (caster excluded)
+      expect(data.data.affected.length).toBe(1);
+      expect(data.data.affected[0].uuid).toBe(nearby1.slUuid);
+
+      // Verify caster was NOT affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = (updatedCaster?.activeEffects as unknown as ActiveEffect[]) || [];
+      expect(casterEffects.some(e => e.effectId === 'buff_area_exclude_test')).toBe(false);
+
+      // Verify nearby1 WAS affected
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'buff_area_exclude_test')).toBe(true);
+    });
+
+    it('should exclude caster from all_allies effects (breaking change verification)', async () => {
+      // Test that 'all_allies' now excludes caster (breaking change)
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_all_allies_exclude_caster']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Ally',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      // Set up social groups
+      const nearby1Stats = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      await prisma.user.update({
+        where: { id: caster.id },
+        data: {
+          groups: {
+            Allies: [nearby1Stats!.id],
+            Enemies: []
+          }
+        }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_all_allies_exclude_caster',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect only nearby1 (caster excluded)
+      expect(data.data.affected.length).toBe(1);
+      expect(data.data.affected[0].uuid).toBe(nearby1.slUuid);
+
+      // Verify caster was NOT affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = (updatedCaster?.activeEffects as unknown as ActiveEffect[]) || [];
+      expect(casterEffects.some(e => e.effectId === 'buff_allies_exclude_test')).toBe(false);
+
+      // Verify nearby1 WAS affected
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'buff_allies_exclude_test')).toBe(true);
+    });
+
+    it('should include caster in area_and_self effects', async () => {
+      // Test that 'area_and_self' includes caster (new behavior)
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_area_and_self']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby 1',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_area_and_self',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect caster + nearby1 (2 users)
+      expect(data.data.affected.length).toBe(2);
+
+      // Verify caster WAS affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = updatedCaster?.activeEffects as unknown as ActiveEffect[];
+      expect(casterEffects.some(e => e.effectId === 'buff_area_and_self_test')).toBe(true);
+
+      // Verify nearby1 WAS affected
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'buff_area_and_self_test')).toBe(true);
+    });
+
+    it('should include caster in all_allies_and_self effects', async () => {
+      // Test that 'all_allies_and_self' includes caster (new behavior)
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_all_allies_and_self']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Ally',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      // Set up social groups
+      const nearby1Stats = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      await prisma.user.update({
+        where: { id: caster.id },
+        data: {
+          groups: {
+            Allies: [nearby1Stats!.id],
+            Enemies: []
+          }
+        }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_all_allies_and_self',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect caster + nearby1 (2 users)
+      expect(data.data.affected.length).toBe(2);
+
+      // Verify caster WAS affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = updatedCaster?.activeEffects as unknown as ActiveEffect[];
+      expect(casterEffects.some(e => e.effectId === 'buff_allies_and_self_test')).toBe(true);
+
+      // Verify nearby1 WAS affected
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'buff_allies_and_self_test')).toBe(true);
+    });
+
+    it('should include caster in all_enemies_and_self effects', async () => {
+      // Test that 'all_enemies_and_self' includes caster (new behavior)
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_all_enemies_and_self']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Enemy',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      // Set up social groups (nearby1 as enemy)
+      const nearby1Stats = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      await prisma.user.update({
+        where: { id: caster.id },
+        data: {
+          groups: {
+            Allies: [],
+            Enemies: [nearby1Stats!.id]
+          }
+        }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_all_enemies_and_self',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect caster + nearby1 (2 users)
+      expect(data.data.affected.length).toBe(2);
+
+      // Verify caster WAS affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = updatedCaster?.activeEffects as unknown as ActiveEffect[];
+      expect(casterEffects.some(e => e.effectId === 'debuff_enemies_and_self_test')).toBe(true);
+
+      // Verify nearby1 WAS affected
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'debuff_enemies_and_self_test')).toBe(true);
+    });
+
+    it('should handle area_and_self with empty nearby list', async () => {
+      // Test that area_and_self with no nearby users affects only caster
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_area_and_self']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_area_and_self',
+        nearby_uuids: [], // Empty list
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect only caster (1 user)
+      expect(data.data.affected.length).toBe(1);
+      expect(data.data.affected[0].uuid).toBe(caster.slUuid);
+
+      // Verify caster WAS affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = updatedCaster?.activeEffects as unknown as ActiveEffect[];
+      expect(casterEffects.some(e => e.effectId === 'buff_area_and_self_test')).toBe(true);
+    });
+
+    it('should exclude caster from all_enemies effects (no change)', async () => {
+      // Test that 'all_enemies' still excludes caster (no change from original behavior)
+      // Using the existing test_aoe_blast power which has checks + damage
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'veilborn',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['test_aoe_blast']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Enemy',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: []
+      });
+
+      // Set up social groups (nearby1 as enemy)
+      const nearby1Stats = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      await prisma.user.update({
+        where: { id: caster.id },
+        data: {
+          groups: {
+            Allies: [],
+            Enemies: [nearby1Stats!.id]
+          }
+        }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_aoe_blast',
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp: timestamp,
+        signature: signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Should affect only nearby1 (caster excluded)
+      expect(data.data.affected.length).toBe(1);
+      expect(data.data.affected[0].uuid).toBe(nearby1.slUuid);
+
+      // Verify caster was NOT affected
+      const updatedCaster = await prisma.arkanaStats.findUnique({ where: { userId: caster.id } });
+      const casterEffects = (updatedCaster?.activeEffects as unknown as ActiveEffect[]) || [];
+      expect(casterEffects.some(e => e.effectId === 'debuff_test_area_enemies_physical')).toBe(false);
+
+      // Verify nearby1 WAS affected (has debuff)
+      const updatedNearby = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
+      const nearbyEffects = updatedNearby?.activeEffects as unknown as ActiveEffect[];
+      expect(nearbyEffects.some(e => e.effectId === 'debuff_test_area_enemies_physical')).toBe(true);
+    });
+  });
 });

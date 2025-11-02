@@ -453,7 +453,7 @@ export function determineApplicableTargets<T extends {
   slUuid: string;
   groups?: unknown;
 }>(
-  effectTarget: 'self' | 'enemy' | 'ally' | 'area' | 'all_allies' | 'all_enemies' | 'single' | undefined,
+  effectTarget: 'self' | 'enemy' | 'ally' | 'area' | 'all_allies' | 'all_enemies' | 'area_and_self' | 'all_allies_and_self' | 'all_enemies_and_self' | 'single' | undefined,
   caster: T,
   target: T | null,
   nearbyUsers: T[]
@@ -467,8 +467,7 @@ export function determineApplicableTargets<T extends {
       break;
 
     case 'all_allies':
-      // Caster + nearby players in Allies group (filtered by social groups)
-      applicableTargets.push(caster);
+      // Nearby players in Allies group (filtered by social groups, excludes caster)
       const alliesNearby = filterUsersByGroup(caster.groups, nearbyUsers, 'Allies');
       applicableTargets.push(...alliesNearby);
       break;
@@ -480,9 +479,28 @@ export function determineApplicableTargets<T extends {
       break;
 
     case 'area':
-      // True area effect: caster + ALL nearby (no group filtering)
+      // True area effect: ALL nearby (no group filtering, excludes caster)
+      applicableTargets.push(...nearbyUsers);
+      break;
+
+    case 'area_and_self':
+      // Area effect including caster: caster + ALL nearby (no group filtering)
       applicableTargets.push(caster);
       applicableTargets.push(...nearbyUsers);
+      break;
+
+    case 'all_allies_and_self':
+      // Caster + nearby players in Allies group (filtered by social groups)
+      applicableTargets.push(caster);
+      const alliesNearbySelf = filterUsersByGroup(caster.groups, nearbyUsers, 'Allies');
+      applicableTargets.push(...alliesNearbySelf);
+      break;
+
+    case 'all_enemies_and_self':
+      // Caster + nearby players in Enemies group (filtered by social groups)
+      applicableTargets.push(caster);
+      const enemiesNearbySelf = filterUsersByGroup(caster.groups, nearbyUsers, 'Enemies');
+      applicableTargets.push(...enemiesNearbySelf);
       break;
 
     case 'enemy':

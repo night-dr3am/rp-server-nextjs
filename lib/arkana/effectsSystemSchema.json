@@ -148,7 +148,7 @@
         },
         "target": {
           "type": "string",
-          "enum": ["self", "enemy", "ally", "area", "all_enemies", "all_allies"],
+          "enum": ["self", "enemy", "ally", "area", "all_enemies", "all_allies", "area_and_self", "all_enemies_and_self", "all_allies_and_self"],
           "description": "Who/what this effect targets"
         },
         "duration": {
