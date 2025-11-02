@@ -18,8 +18,16 @@ import {
   type Skill,
   type CharacterSkill
 } from '@/lib/arkanaData';
+import {
+  type ShopCybernetic,
+  type ShopMagicSchool,
+} from '@/lib/arkana/shopHelpers';
 import UserGroupList, { type GroupMember } from '@/components/arkana/UserGroupList';
 import UserSearchModal from '@/components/arkana/UserSearchModal';
+import ShopItemCard from '@/components/arkana/ShopItemCard';
+import ShopCategoryTabs from '@/components/arkana/ShopCategoryTabs';
+import MagicSchoolSection from '@/components/arkana/MagicSchoolSection';
+import PurchaseConfirmDialog from '@/components/arkana/PurchaseConfirmDialog';
 
 interface User {
   id: string;
@@ -141,7 +149,7 @@ export default function ArkanaProfilePage() {
   const [cyberneticsData, setCyberneticsData] = useState<Cybernetic[]>([]);
 
   // Tab navigation state
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'social'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'social' | 'shop'>('dashboard');
 
   // Social groups state
   interface Groups {
@@ -151,6 +159,27 @@ export default function ArkanaProfilePage() {
   const [groupsLoading, setGroupsLoading] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [activeGroupName, setActiveGroupName] = useState<string>('');
+
+  // Shop state
+  interface ShopData {
+    cybernetics: Record<string, ShopCybernetic[]>;
+    magicSchools: ShopMagicSchool[];
+    currentXp: number;
+    characterInfo: {
+      race: string;
+      archetype: string;
+      characterName: string;
+    };
+  }
+  const [shopData, setShopData] = useState<ShopData | null>(null);
+  const [shopLoading, setShopLoading] = useState(false);
+  const [shopError, setShopError] = useState<string | null>(null);
+  const [shopCategory, setShopCategory] = useState<'cybernetics' | 'magic'>('cybernetics');
+  const [selectedCybernetics, setSelectedCybernetics] = useState<Set<string>>(new Set());
+  const [selectedWeaves, setSelectedWeaves] = useState<Set<string>>(new Set());
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [purchaseProcessing, setPurchaseProcessing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   const fetchProfileData = useCallback(async () => {
     try {
@@ -399,6 +428,176 @@ export default function ArkanaProfilePage() {
     }
   }, [activeTab, fetchGroups]);
 
+  // Shop functions
+  const fetchShopData = useCallback(async () => {
+    if (!uuid || !token) return;
+
+    setShopLoading(true);
+    setShopError(null);
+    try {
+      const response = await fetch(
+        `/api/arkana/shop/items?sl_uuid=${uuid}&universe=arkana&token=${token}&sessionId=${sessionId}`
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setShopData(result.data);
+      } else {
+        setShopError(result.error || 'Failed to load shop items');
+      }
+    } catch (error) {
+      console.error('Failed to fetch shop data:', error);
+      setShopError('Failed to load shop items');
+    } finally {
+      setShopLoading(false);
+    }
+  }, [uuid, token, sessionId]);
+
+  const handleCyberneticToggle = (cyberneticId: string) => {
+    setSelectedCybernetics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cyberneticId)) {
+        newSet.delete(cyberneticId);
+      } else {
+        newSet.add(cyberneticId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleWeaveToggle = (weaveId: string) => {
+    setSelectedWeaves(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(weaveId)) {
+        newSet.delete(weaveId);
+      } else {
+        newSet.add(weaveId);
+      }
+      return newSet;
+    });
+  };
+
+  const getSelectedItemsWithCosts = () => {
+    if (!shopData) return { items: [], totalCost: 0 };
+
+    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' }> = [];
+
+    // Add selected cybernetics
+    Object.values(shopData.cybernetics).forEach(section => {
+      section.forEach(cyber => {
+        if (selectedCybernetics.has(cyber.id) && !cyber.owned) {
+          items.push({
+            id: cyber.id,
+            name: cyber.name,
+            xpCost: cyber.xpCost,
+            itemType: 'cybernetic'
+          });
+        }
+      });
+    });
+
+    // Add selected magic weaves
+    shopData.magicSchools.forEach(school => {
+      school.weaves.forEach(weave => {
+        if (selectedWeaves.has(weave.id) && !weave.owned) {
+          items.push({
+            id: weave.id,
+            name: weave.name,
+            xpCost: weave.xpCost,
+            itemType: 'magic_weave'
+          });
+        }
+      });
+    });
+
+    const totalCost = items.reduce((sum, item) => sum + item.xpCost, 0);
+
+    return { items, totalCost };
+  };
+
+  const handlePurchase = async () => {
+    const { items, totalCost } = getSelectedItemsWithCosts();
+
+    if (items.length === 0) return;
+
+    setPurchaseProcessing(true);
+    setPurchaseError(null);
+
+    try {
+      const purchases = items.map(item => ({
+        itemType: item.itemType,
+        itemId: item.id,
+        xpCost: item.xpCost
+      }));
+
+      const response = await fetch('/api/arkana/shop/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sl_uuid: uuid,
+          universe: 'arkana',
+          token,
+          sessionId,
+          purchases
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update profile data with new XP
+        if (profileData) {
+          setProfileData({
+            ...profileData,
+            arkanaStats: {
+              ...profileData.arkanaStats,
+              xp: result.data.updatedXp,
+              cyberneticAugments: [
+                ...profileData.arkanaStats.cyberneticAugments,
+                ...result.data.addedCybernetics
+              ],
+              magicWeaves: [
+                ...profileData.arkanaStats.magicWeaves,
+                ...result.data.addedMagicWeaves
+              ],
+              magicSchools: [
+                ...profileData.arkanaStats.magicSchools,
+                ...result.data.addedMagicSchools
+              ]
+            }
+          });
+        }
+
+        // Clear selections
+        setSelectedCybernetics(new Set());
+        setSelectedWeaves(new Set());
+
+        // Refresh shop data
+        await fetchShopData();
+
+        // Close dialog
+        setShowConfirmDialog(false);
+
+        // Show success message (could add a toast notification here)
+        alert(`Successfully purchased ${items.length} item(s) for ${totalCost} XP!`);
+      } else {
+        setPurchaseError(result.error || 'Failed to complete purchase');
+      }
+    } catch (error) {
+      console.error('Failed to purchase items:', error);
+      setPurchaseError('Failed to complete purchase');
+    } finally {
+      setPurchaseProcessing(false);
+    }
+  };
+
+  // Fetch shop data when Shop tab is activated
+  useEffect(() => {
+    if (activeTab === 'shop') {
+      fetchShopData();
+    }
+  }, [activeTab, fetchShopData]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -480,6 +679,21 @@ export default function ArkanaProfilePage() {
               }`}
             >
               Social
+            </button>
+            <button
+              onClick={() => setActiveTab('shop')}
+              className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'shop'
+                  ? 'border-b-2 border-cyan-400 text-cyan-400'
+                  : 'text-cyan-500 hover:text-cyan-300'
+              }`}
+            >
+              Shop for XP
+              {arkanaStats.xp > 0 && (
+                <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded-full animate-pulse">
+                  {arkanaStats.xp}
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -941,6 +1155,101 @@ export default function ArkanaProfilePage() {
           </div>
         )}
 
+        {/* Shop Tab */}
+        {activeTab === 'shop' && (
+          <div className="space-y-6">
+            {shopLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto"></div>
+                <p className="mt-4 text-cyan-400">Loading shop items...</p>
+              </div>
+            ) : shopError ? (
+              <div className="bg-red-900 border border-red-500 text-red-300 px-4 py-3 rounded">
+                <h3 className="font-bold mb-2">Error Loading Shop</h3>
+                <p>{shopError}</p>
+              </div>
+            ) : shopData ? (
+              <>
+                {/* Shop Category Tabs and XP Display */}
+                <ShopCategoryTabs
+                  activeCategory={shopCategory}
+                  onCategoryChange={setShopCategory}
+                  counts={{
+                    cybernetics: selectedCybernetics.size,
+                    magicWeaves: selectedWeaves.size
+                  }}
+                  currentXp={shopData.currentXp}
+                  selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                />
+
+                {/* Cybernetics Category */}
+                {shopCategory === 'cybernetics' && (
+                  <div className="space-y-6">
+                    {Object.entries(shopData.cybernetics).map(([section, items]) => (
+                      <div key={section}>
+                        <h3 className="text-xl font-bold text-cyan-400 mb-4 pb-2 border-b border-cyan-600">
+                          {section}
+                        </h3>
+                        <div className="space-y-3">
+                          {items.map((cyber) => (
+                            <ShopItemCard
+                              key={cyber.id}
+                              item={cyber}
+                              isSelected={selectedCybernetics.has(cyber.id)}
+                              onToggle={handleCyberneticToggle}
+                              currentXp={shopData.currentXp}
+                              selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Magic Category */}
+                {shopCategory === 'magic' && (
+                  <div className="space-y-4">
+                    {shopData.magicSchools.length === 0 ? (
+                      <div className="text-center py-8 bg-gray-800 border border-gray-700 rounded-lg">
+                        <p className="text-gray-400">
+                          Your character cannot use magic, or all available magic has been purchased.
+                        </p>
+                      </div>
+                    ) : (
+                      shopData.magicSchools.map((school) => (
+                        <MagicSchoolSection
+                          key={school.schoolId}
+                          school={school}
+                          selectedWeaves={selectedWeaves}
+                          onWeaveToggle={handleWeaveToggle}
+                          currentXp={shopData.currentXp}
+                          selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                        />
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Purchase Button (Fixed Bottom Right) */}
+                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0) && (
+                  <div className="fixed bottom-6 right-6 z-40">
+                    <button
+                      onClick={() => setShowConfirmDialog(true)}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg shadow-purple-500/50 hover:from-purple-500 hover:to-indigo-500 transition-all transform hover:scale-105 flex items-center gap-2"
+                    >
+                      <span>Review Purchase</span>
+                      <span className="px-2 py-1 bg-white text-purple-600 rounded-full text-sm">
+                        {getSelectedItemsWithCosts().totalCost} XP
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : null}
+          </div>
+        )}
+
         {/* User Search Modal */}
         <UserSearchModal
           isOpen={searchModalOpen}
@@ -949,6 +1258,22 @@ export default function ArkanaProfilePage() {
           onAdd={handleAddMember}
           onSearch={handleSearchUsers}
         />
+
+        {/* Purchase Confirm Dialog */}
+        {showConfirmDialog && (
+          <PurchaseConfirmDialog
+            selectedItems={getSelectedItemsWithCosts().items}
+            totalCost={getSelectedItemsWithCosts().totalCost}
+            currentXp={shopData?.currentXp || 0}
+            onConfirm={handlePurchase}
+            onCancel={() => {
+              setShowConfirmDialog(false);
+              setPurchaseError(null);
+            }}
+            isProcessing={purchaseProcessing}
+            error={purchaseError}
+          />
+        )}
 
         <footer className="text-center text-cyan-400 text-sm mt-8">
           <p>Arkana RP Server - Character Profile System</p>

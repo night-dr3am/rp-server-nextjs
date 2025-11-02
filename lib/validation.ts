@@ -975,3 +975,30 @@ export const arkanaSearchUsersSchema = Joi.object({
   timestamp: timestampSchema,
   signature: signatureSchema
 });
+
+// ========================================
+// Arkana XP Shop Validation Schemas
+// ========================================
+
+// GET /api/arkana/shop/items - Query parameters
+export const arkanaShopItemsRequestSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  token: Joi.string().required(),
+  sessionId: Joi.string().required()
+});
+
+// POST /api/arkana/shop/purchase - Purchase request
+export const arkanaShopPurchaseSchema = Joi.object({
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  token: Joi.string().required(),
+  sessionId: Joi.string().required(),
+  purchases: Joi.array().items(
+    Joi.object({
+      itemType: Joi.string().valid('cybernetic', 'magic_weave').required(),
+      itemId: Joi.string().required(),
+      xpCost: Joi.number().integer().min(0).required()
+    })
+  ).min(1).required()
+});

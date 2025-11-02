@@ -255,3 +255,36 @@ export function calculateStatModifier(statValue: number): number {
   if (statValue >= 5) return 6;
   return 0;
 }
+
+// ========================================
+// XP Shop Types
+// ========================================
+
+// Purchase request for a single item
+export interface ShopPurchaseItem {
+  itemType: 'cybernetic' | 'magic_weave';
+  itemId: string;
+  xpCost: number;
+}
+
+// Full purchase request
+export interface ShopPurchaseRequest {
+  sl_uuid: string;
+  universe: string;
+  token: string;
+  sessionId: string;
+  purchases: ShopPurchaseItem[];
+}
+
+// Purchase result
+export interface ShopPurchaseResult {
+  success: boolean;
+  data?: {
+    updatedXp: number;
+    addedCybernetics: string[];
+    addedMagicWeaves: string[];
+    addedMagicSchools: string[];
+    totalCost: number;
+  };
+  error?: string;
+}
