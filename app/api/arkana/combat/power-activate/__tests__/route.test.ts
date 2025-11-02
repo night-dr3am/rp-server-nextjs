@@ -4803,7 +4803,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
     it('should exclude caster from all_enemies effects (no change)', async () => {
       // Test that 'all_enemies' still excludes caster (no change from original behavior)
-      // Using the existing test_aoe_blast power which has checks + damage
+      // Using test_all_enemies_no_self ability (no check, deterministic)
       const caster = await createArkanaTestUser({
         characterName: 'Caster',
         race: 'veilborn',
@@ -4813,7 +4813,7 @@ describe('/api/arkana/combat/power-activate', () => {
         mental: 5,
         perception: 3,
         hitPoints: 10,
-        commonPowers: ['test_aoe_blast']
+        commonPowers: ['test_all_enemies_no_self']
       });
 
       const nearby1 = await createArkanaTestUser({
@@ -4845,7 +4845,7 @@ describe('/api/arkana/combat/power-activate', () => {
 
       const requestData = {
         caster_uuid: caster.slUuid,
-        power_id: 'test_aoe_blast',
+        power_id: 'test_all_enemies_no_self',
         nearby_uuids: [nearby1.slUuid],
         universe: 'arkana',
         timestamp: timestamp,

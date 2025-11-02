@@ -425,16 +425,16 @@
   {
     "id": "test_all_enemies_no_self",
     "name": "Test All Enemies (No Self)",
-    "desc": "Test attack: All enemies damage excluding caster (no check)",
+    "desc": "Test ability: All enemies debuff excluding caster (no check)",
     "cost": 2,
     "species": "human",
-    "abilityType": ["attack"],
-    "tags": ["damage"],
+    "abilityType": ["ability"],
+    "tags": ["debuff"],
     "baseStat": "Mental",
     "targetType": "area",
     "range": 10,
     "effects": {
-      "attack": ["damage_test_area_enemies_3"]
+      "ability": ["debuff_test_area_enemies_physical"]
     }
   }
 ]
