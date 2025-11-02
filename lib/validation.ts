@@ -996,7 +996,7 @@ export const arkanaShopPurchaseSchema = Joi.object({
   sessionId: Joi.string().required(),
   purchases: Joi.array().items(
     Joi.object({
-      itemType: Joi.string().valid('cybernetic', 'magic_weave').required(),
+      itemType: Joi.string().valid('cybernetic', 'magic_weave', 'magic_school').required(),
       itemId: Joi.string().required(),
       xpCost: Joi.number().integer().min(0).required()
     })

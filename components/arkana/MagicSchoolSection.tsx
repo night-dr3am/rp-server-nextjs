@@ -8,6 +8,8 @@ interface MagicSchoolSectionProps {
   school: ShopMagicSchool;
   selectedWeaves: Set<string>;
   onWeaveToggle: (weaveId: string) => void;
+  isSchoolSelected: boolean;
+  onSchoolToggle: (schoolId: string) => void;
   currentXp: number;
   selectedTotalCost: number;
 }
@@ -16,6 +18,8 @@ export default function MagicSchoolSection({
   school,
   selectedWeaves,
   onWeaveToggle,
+  isSchoolSelected,
+  onSchoolToggle,
   currentXp,
   selectedTotalCost,
 }: MagicSchoolSectionProps) {
@@ -26,31 +30,50 @@ export default function MagicSchoolSection({
   const ownedWeavesCount = school.weaves.filter(weave => weave.owned).length;
   const totalWeavesCount = school.weaves.length;
 
-  // Check if school will be auto-unlocked
-  const willUnlockSchool = !school.owned && hasSelectedWeaves;
+  // Check if school is accessible (owned or selected for purchase)
+  const isSchoolAccessible = school.owned || isSchoolSelected;
+
+  // Check if user can afford the school
+  const remainingXp = currentXp - selectedTotalCost;
+  const canAffordSchool = isSchoolSelected ? true : (remainingXp >= school.schoolCost);
 
   return (
     <div className="border border-gray-700 rounded-lg overflow-hidden">
       {/* School Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
+      <div
         className={`w-full p-4 flex items-center justify-between transition-colors ${
-          isExpanded ? 'bg-gradient-to-r from-purple-900 to-indigo-900' : 'bg-gray-800 hover:bg-gray-750'
+          isExpanded ? 'bg-gradient-to-r from-purple-900 to-indigo-900' : 'bg-gray-800'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">
+        <div className="flex items-center gap-3 flex-1">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-2xl hover:text-cyan-400 transition-colors"
+          >
             {isExpanded ? '▼' : '▶'}
-          </span>
-          <div className="text-left">
+          </button>
+
+          {/* School Purchase Checkbox (only if not owned) */}
+          {!school.owned && school.schoolCost > 0 && (
+            <input
+              type="checkbox"
+              checked={isSchoolSelected}
+              onChange={() => onSchoolToggle(school.schoolId)}
+              disabled={!canAffordSchool}
+              className="w-5 h-5 cursor-pointer"
+              title={canAffordSchool ? 'Select to purchase school' : 'Insufficient XP'}
+            />
+          )}
+
+          <div className="text-left flex-1">
             <h3 className="text-lg font-bold text-cyan-300">
               {school.schoolName}
               {school.owned && (
-                <span className="ml-2 text-xs text-green-400">✓ UNLOCKED</span>
+                <span className="ml-2 text-xs text-green-400">✓ OWNED</span>
               )}
-              {willUnlockSchool && (
-                <span className="ml-2 text-xs text-yellow-400 animate-pulse">
-                  🔓 Will Unlock
+              {isSchoolSelected && (
+                <span className="ml-2 text-xs text-purple-400 animate-pulse">
+                  ✓ Selected
                 </span>
               )}
             </h3>
@@ -58,6 +81,11 @@ export default function MagicSchoolSection({
             {school.species && (
               <p className="text-xs text-purple-400 mt-1">
                 Restricted to: {school.species}
+              </p>
+            )}
+            {!school.owned && !isSchoolSelected && (
+              <p className="text-xs text-yellow-400 mt-1">
+                ⚠️ Purchase school to unlock weaves
               </p>
             )}
           </div>
@@ -71,7 +99,8 @@ export default function MagicSchoolSection({
           </div>
           {school.schoolCost > 0 && !school.owned && (
             <div className={`px-3 py-1 rounded text-sm font-bold ${
-              willUnlockSchool ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-400'
+              isSchoolSelected ? 'bg-purple-600 text-white' :
+              canAffordSchool ? 'bg-gray-700 text-gray-300' : 'bg-gray-800 text-gray-500'
             }`}>
               {school.schoolCost} XP
             </div>
@@ -82,15 +111,15 @@ export default function MagicSchoolSection({
             </div>
           )}
         </div>
-      </button>
+      </div>
 
       {/* Weaves List */}
       {isExpanded && (
         <div className="p-4 bg-gray-900 space-y-3">
-          {willUnlockSchool && (
-            <div className="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded-lg">
-              <p className="text-sm text-yellow-200">
-                <strong>School Auto-Unlock:</strong> Purchasing your first weave from this school will automatically unlock the school at no additional cost.
+          {!isSchoolAccessible && (
+            <div className="mb-4 p-3 bg-orange-900 border border-orange-600 rounded-lg">
+              <p className="text-sm text-orange-200">
+                <strong>School Required:</strong> You must purchase this school ({school.schoolCost} XP) before you can buy its weaves. Check the box above to add the school to your cart.
               </p>
             </div>
           )}
@@ -100,16 +129,18 @@ export default function MagicSchoolSection({
               No weaves available for this school
             </p>
           ) : (
-            school.weaves.map(weave => (
-              <ShopItemCard
-                key={weave.id}
-                item={weave}
-                isSelected={selectedWeaves.has(weave.id)}
-                onToggle={onWeaveToggle}
-                currentXp={currentXp}
-                selectedTotalCost={selectedTotalCost}
-              />
-            ))
+            <div className={!isSchoolAccessible ? 'opacity-50 pointer-events-none' : ''}>
+              {school.weaves.map(weave => (
+                <ShopItemCard
+                  key={weave.id}
+                  item={weave}
+                  isSelected={selectedWeaves.has(weave.id)}
+                  onToggle={onWeaveToggle}
+                  currentXp={currentXp}
+                  selectedTotalCost={selectedTotalCost}
+                />
+              ))}
+            </div>
           )}
         </div>
       )}

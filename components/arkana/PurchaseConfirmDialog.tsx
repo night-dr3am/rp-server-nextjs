@@ -4,7 +4,7 @@ interface ShopItem {
   id: string;
   name: string;
   xpCost: number;
-  itemType: 'cybernetic' | 'magic_weave';
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school';
 }
 
 interface PurchaseConfirmDialogProps {
@@ -31,6 +31,7 @@ export default function PurchaseConfirmDialog({
 
   // Group items by type for display
   const cybernetics = selectedItems.filter(item => item.itemType === 'cybernetic');
+  const magicSchools = selectedItems.filter(item => item.itemType === 'magic_school');
   const magicWeaves = selectedItems.filter(item => item.itemType === 'magic_weave');
 
   return (
@@ -66,6 +67,31 @@ export default function PurchaseConfirmDialog({
             </div>
           )}
 
+          {/* Magic Schools Section */}
+          {magicSchools.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-cyan-400 mb-3">
+                Magic Schools ({magicSchools.length})
+              </h3>
+              <div className="space-y-2">
+                {magicSchools.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700"
+                  >
+                    <span className="text-gray-200">{item.name}</span>
+                    <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 p-3 bg-purple-900 border border-purple-600 rounded">
+                <p className="text-sm text-purple-200">
+                  <strong>Note:</strong> You must purchase magic schools before you can buy their weaves.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Magic Weaves Section */}
           {magicWeaves.length > 0 && (
             <div>
@@ -83,11 +109,6 @@ export default function PurchaseConfirmDialog({
                   </div>
                 ))}
               </div>
-              <div className="mt-3 p-3 bg-yellow-900 border border-yellow-600 rounded">
-                <p className="text-sm text-yellow-200">
-                  <strong>Note:</strong> Magic schools will be automatically unlocked when you purchase your first weave from that school.
-                </p>
-              </div>
             </div>
           )}
 
@@ -100,7 +121,7 @@ export default function PurchaseConfirmDialog({
               </div>
               <div className="flex items-center justify-between text-yellow-400">
                 <span>Total Cost:</span>
-                <span className="font-semibold">-{totalCost}</span>
+                <span className="font-semibold">{totalCost} XP</span>
               </div>
               <div className={`flex items-center justify-between text-lg font-bold border-t border-gray-700 pt-2 ${
                 canAfford ? 'text-green-400' : 'text-red-400'

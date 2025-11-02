@@ -262,7 +262,7 @@ export function calculateStatModifier(statValue: number): number {
 
 // Purchase request for a single item
 export interface ShopPurchaseItem {
-  itemType: 'cybernetic' | 'magic_weave';
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school';
   itemId: string;
   xpCost: number;
 }

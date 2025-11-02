@@ -235,7 +235,7 @@ export function isEligibleForMagicWeave(weaveId: string, race: string, archetype
  * @returns Validation result with error message if invalid
  */
 export function validatePurchaseItem(
-  itemType: 'cybernetic' | 'magic_weave',
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school',
   itemId: string,
   xpCost: number,
   race: string,
@@ -264,6 +264,25 @@ export function validatePurchaseItem(
       return { valid: false, error: `Invalid XP cost for ${weave.name}. Expected ${weave.cost}, got ${xpCost}`, actualCost: weave.cost };
     }
     return { valid: true, actualCost: weave.cost };
+  }
+
+  if (itemType === 'magic_school') {
+    const school = getMagicSchoolById(itemId);
+    if (!school) {
+      return { valid: false, error: `Magic school not found: ${itemId}` };
+    }
+    // Check if character can use magic at all
+    if (!canUseMagic(race, archetype)) {
+      return { valid: false, error: `Your race/archetype cannot use magic` };
+    }
+    // Check school eligibility (species-restricted schools like Technomancy)
+    if (school.species && lc(school.species) !== lc(archetype)) {
+      return { valid: false, error: `${school.name} is restricted to ${school.species} archetype` };
+    }
+    if (school.cost !== xpCost) {
+      return { valid: false, error: `Invalid XP cost for ${school.name}. Expected ${school.cost}, got ${xpCost}`, actualCost: school.cost };
+    }
+    return { valid: true, actualCost: school.cost };
   }
 
   return { valid: false, error: `Invalid item type: ${itemType}` };

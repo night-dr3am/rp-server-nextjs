@@ -177,6 +177,7 @@ export default function ArkanaProfilePage() {
   const [shopCategory, setShopCategory] = useState<'cybernetics' | 'magic'>('cybernetics');
   const [selectedCybernetics, setSelectedCybernetics] = useState<Set<string>>(new Set());
   const [selectedWeaves, setSelectedWeaves] = useState<Set<string>>(new Set());
+  const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set());
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [purchaseProcessing, setPurchaseProcessing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
@@ -466,12 +467,52 @@ export default function ArkanaProfilePage() {
   };
 
   const handleWeaveToggle = (weaveId: string) => {
+    if (!shopData) return;
+
     setSelectedWeaves(prev => {
       const newSet = new Set(prev);
       if (newSet.has(weaveId)) {
         newSet.delete(weaveId);
       } else {
         newSet.add(weaveId);
+
+        // Auto-select the school if not owned
+        const weaveSchool = shopData.magicSchools.find(school =>
+          school.weaves.some(w => w.id === weaveId)
+        );
+        if (weaveSchool && !weaveSchool.owned) {
+          setSelectedSchools(prevSchools => {
+            const newSchools = new Set(prevSchools);
+            newSchools.add(weaveSchool.schoolId);
+            return newSchools;
+          });
+        }
+      }
+      return newSet;
+    });
+  };
+
+  const handleSchoolToggle = (schoolId: string) => {
+    setSelectedSchools(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(schoolId)) {
+        newSet.delete(schoolId);
+
+        // Also deselect all weaves from this school
+        const school = shopData?.magicSchools.find(s => s.schoolId === schoolId);
+        if (school) {
+          setSelectedWeaves(prevWeaves => {
+            const newWeaves = new Set(prevWeaves);
+            school.weaves.forEach(weave => {
+              if (!weave.owned) {
+                newWeaves.delete(weave.id);
+              }
+            });
+            return newWeaves;
+          });
+        }
+      } else {
+        newSet.add(schoolId);
       }
       return newSet;
     });
@@ -480,7 +521,7 @@ export default function ArkanaProfilePage() {
   const getSelectedItemsWithCosts = () => {
     if (!shopData) return { items: [], totalCost: 0 };
 
-    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' }> = [];
+    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' | 'magic_school' }> = [];
 
     // Add selected cybernetics
     Object.values(shopData.cybernetics).forEach(section => {
@@ -494,6 +535,18 @@ export default function ArkanaProfilePage() {
           });
         }
       });
+    });
+
+    // Add selected magic schools
+    shopData.magicSchools.forEach(school => {
+      if (selectedSchools.has(school.schoolId) && !school.owned) {
+        items.push({
+          id: school.schoolId,
+          name: school.schoolName,
+          xpCost: school.schoolCost,
+          itemType: 'magic_school'
+        });
+      }
     });
 
     // Add selected magic weaves
@@ -1176,7 +1229,7 @@ export default function ArkanaProfilePage() {
                   onCategoryChange={setShopCategory}
                   counts={{
                     cybernetics: selectedCybernetics.size,
-                    magicWeaves: selectedWeaves.size
+                    magicWeaves: selectedWeaves.size + selectedSchools.size
                   }}
                   currentXp={shopData.currentXp}
                   selectedTotalCost={getSelectedItemsWithCosts().totalCost}
@@ -1223,6 +1276,8 @@ export default function ArkanaProfilePage() {
                           school={school}
                           selectedWeaves={selectedWeaves}
                           onWeaveToggle={handleWeaveToggle}
+                          isSchoolSelected={selectedSchools.has(school.schoolId)}
+                          onSchoolToggle={handleSchoolToggle}
                           currentXp={shopData.currentXp}
                           selectedTotalCost={getSelectedItemsWithCosts().totalCost}
                         />
@@ -1232,7 +1287,7 @@ export default function ArkanaProfilePage() {
                 )}
 
                 {/* Purchase Button (Fixed Bottom Right) */}
-                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0) && (
+                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0 || selectedSchools.size > 0) && (
                   <div className="fixed bottom-6 right-6 z-40">
                     <button
                       onClick={() => setShowConfirmDialog(true)}

@@ -133,7 +133,7 @@ describe('POST /api/arkana/shop/purchase', () => {
     expect(data.data.totalCost).toBe(4);
   });
 
-  it('should purchase magic weave and auto-unlock school', async () => {
+  it('should purchase magic weave with school', async () => {
     const { user, token } = await createTestUser('arkana');
 
     await prisma.arkanaStats.create({
@@ -150,7 +150,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         hitPoints: 10,
         xp: 400,
         cyberneticAugments: [],
-        magicSchools: [],
+        magicSchools: ['school_elemental'], // Already owns school
         magicWeaves: [],
         arkanaRole: 'player',
         registrationCompleted: true
@@ -178,7 +178,7 @@ describe('POST /api/arkana/shop/purchase', () => {
     expectSuccess(data);
     expect(data.data.updatedXp).toBe(399); // 400 - 1
     expect(data.data.addedMagicWeaves).toContain('weave_fire_bolt');
-    expect(data.data.addedMagicSchools).toContain('school_elemental'); // Auto-unlocked
+    expect(data.data.addedMagicSchools).toHaveLength(0); // School not re-added
 
     // Verify database update
     const updatedStats = await prisma.arkanaStats.findUnique({
@@ -186,7 +186,6 @@ describe('POST /api/arkana/shop/purchase', () => {
     });
 
     expect(updatedStats?.magicWeaves).toContain('weave_fire_bolt');
-    expect(updatedStats?.magicSchools).toContain('school_elemental');
   });
 
   it('should not re-add school if already owned', async () => {
@@ -518,5 +517,257 @@ describe('POST /api/arkana/shop/purchase', () => {
     expect(events[0].details).toHaveProperty('totalCost', 2);
     expect(events[0].details).toHaveProperty('xpBefore', 300);
     expect(events[0].details).toHaveProperty('xpAfter', 298);
+  });
+
+  it('should successfully purchase a magic school', async () => {
+    const { user, token } = await createTestUser('arkana');
+
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Magic User',
+        agentName: 'MagicAgent',
+        race: 'Human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        xp: 100,
+        cyberneticAugments: [],
+        magicSchools: [],
+        magicWeaves: [],
+        arkanaRole: 'player',
+        registrationCompleted: true
+      }
+    });
+
+    const sessionId = 'test-session-' + Date.now();
+    const request = createMockPostRequest('/api/arkana/shop/purchase', {
+      sl_uuid: user.slUuid,
+      universe: 'arkana',
+      token,
+      sessionId,
+      purchases: [
+        {
+          itemType: 'magic_school',
+          itemId: 'school_elemental',
+          xpCost: 3 // School costs 3 XP in test data
+        }
+      ]
+    });
+
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.updatedXp).toBe(97); // 100 - 3
+    expect(data.data.addedMagicSchools).toContain('school_elemental');
+    expect(data.data.addedMagicWeaves).toHaveLength(0);
+    expect(data.data.totalCost).toBe(3);
+
+    // Verify database update
+    const updatedStats = await prisma.arkanaStats.findUnique({
+      where: { userId: user.id }
+    });
+
+    expect(updatedStats?.xp).toBe(97);
+    expect(updatedStats?.magicSchools).toContain('school_elemental');
+  });
+
+  it('should purchase school and weave together', async () => {
+    const { user, token } = await createTestUser('arkana');
+
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Magic User',
+        agentName: 'MagicAgent',
+        race: 'Human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        xp: 100,
+        cyberneticAugments: [],
+        magicSchools: [],
+        magicWeaves: [],
+        arkanaRole: 'player',
+        registrationCompleted: true
+      }
+    });
+
+    const sessionId = 'test-session-' + Date.now();
+    const request = createMockPostRequest('/api/arkana/shop/purchase', {
+      sl_uuid: user.slUuid,
+      universe: 'arkana',
+      token,
+      sessionId,
+      purchases: [
+        {
+          itemType: 'magic_school',
+          itemId: 'school_elemental',
+          xpCost: 3 // School costs 3 XP
+        },
+        {
+          itemType: 'magic_weave',
+          itemId: 'weave_fire_bolt',
+          xpCost: 1 // Weave costs 1 XP
+        }
+      ]
+    });
+
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.updatedXp).toBe(96); // 100 - 4
+    expect(data.data.addedMagicSchools).toContain('school_elemental');
+    expect(data.data.addedMagicWeaves).toContain('weave_fire_bolt');
+    expect(data.data.totalCost).toBe(4);
+  });
+
+  it('should fail when buying weave without owning/purchasing school', async () => {
+    const { user, token } = await createTestUser('arkana');
+
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Magic User',
+        agentName: 'MagicAgent',
+        race: 'Human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        xp: 100,
+        cyberneticAugments: [],
+        magicSchools: [],
+        magicWeaves: [],
+        arkanaRole: 'player',
+        registrationCompleted: true
+      }
+    });
+
+    const sessionId = 'test-session-' + Date.now();
+    const request = createMockPostRequest('/api/arkana/shop/purchase', {
+      sl_uuid: user.slUuid,
+      universe: 'arkana',
+      token,
+      sessionId,
+      purchases: [
+        {
+          itemType: 'magic_weave',
+          itemId: 'weave_fire_bolt',
+          xpCost: 1
+        }
+      ]
+    });
+
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data);
+    expect(data.error).toContain('must purchase the required magic school');
+  });
+
+  it('should fail when purchasing already owned school', async () => {
+    const { user, token } = await createTestUser('arkana');
+
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Magic User',
+        agentName: 'MagicAgent',
+        race: 'Human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        xp: 100,
+        cyberneticAugments: [],
+        magicSchools: ['school_elemental'], // Already owns this
+        magicWeaves: [],
+        arkanaRole: 'player',
+        registrationCompleted: true
+      }
+    });
+
+    const sessionId = 'test-session-' + Date.now();
+    const request = createMockPostRequest('/api/arkana/shop/purchase', {
+      sl_uuid: user.slUuid,
+      universe: 'arkana',
+      token,
+      sessionId,
+      purchases: [
+        {
+          itemType: 'magic_school',
+          itemId: 'school_elemental',
+          xpCost: 3 // School costs 3 XP
+        }
+      ]
+    });
+
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data);
+    expect(data.error).toContain('already own this magic school');
+  });
+
+  it('should allow weave purchase when school is owned', async () => {
+    const { user, token } = await createTestUser('arkana');
+
+    await prisma.arkanaStats.create({
+      data: {
+        userId: user.id,
+        characterName: 'Magic User',
+        agentName: 'MagicAgent',
+        race: 'Human',
+        archetype: 'Arcanist',
+        physical: 2,
+        dexterity: 2,
+        mental: 4,
+        perception: 2,
+        hitPoints: 10,
+        xp: 100,
+        cyberneticAugments: [],
+        magicSchools: ['school_elemental'], // Already owns school
+        magicWeaves: [],
+        arkanaRole: 'player',
+        registrationCompleted: true
+      }
+    });
+
+    const sessionId = 'test-session-' + Date.now();
+    const request = createMockPostRequest('/api/arkana/shop/purchase', {
+      sl_uuid: user.slUuid,
+      universe: 'arkana',
+      token,
+      sessionId,
+      purchases: [
+        {
+          itemType: 'magic_weave',
+          itemId: 'weave_fire_bolt',
+          xpCost: 1
+        }
+      ]
+    });
+
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.updatedXp).toBe(99);
+    expect(data.data.addedMagicWeaves).toContain('weave_fire_bolt');
+    // School should NOT be added again
+    expect(data.data.addedMagicSchools).toHaveLength(0);
   });
 });

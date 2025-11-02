@@ -89,6 +89,9 @@ export async function POST(request: NextRequest) {
 
       // Validate each purchase
       const validatedPurchases = [];
+      // Track schools being purchased in this transaction
+      const schoolsBeingPurchased: string[] = [];
+
       for (const purchase of purchases) {
         const validation = validatePurchaseItem(
           purchase.itemType,
@@ -111,6 +114,18 @@ export async function POST(request: NextRequest) {
           if (arkanaStats.magicWeaves.includes(purchase.itemId)) {
             throw new Error(`You already own this magic weave`);
           }
+          // Validate that the required school is owned or being purchased
+          const requiredSchoolId = getSchoolIdForWeave(purchase.itemId);
+          if (requiredSchoolId &&
+              !arkanaStats.magicSchools.includes(requiredSchoolId) &&
+              !schoolsBeingPurchased.includes(requiredSchoolId)) {
+            throw new Error(`You must purchase the required magic school before buying this weave`);
+          }
+        } else if (purchase.itemType === 'magic_school') {
+          if (arkanaStats.magicSchools.includes(purchase.itemId)) {
+            throw new Error(`You already own this magic school`);
+          }
+          schoolsBeingPurchased.push(purchase.itemId);
         }
 
         validatedPurchases.push({
@@ -130,12 +145,8 @@ export async function POST(request: NextRequest) {
           newCybernetics.push(purchase.itemId);
         } else if (purchase.itemType === 'magic_weave') {
           newMagicWeaves.push(purchase.itemId);
-
-          // Check if we need to auto-add the school
-          const schoolId = getSchoolIdForWeave(purchase.itemId);
-          if (schoolId && !arkanaStats.magicSchools.includes(schoolId) && !newMagicSchools.includes(schoolId)) {
-            newMagicSchools.push(schoolId);
-          }
+        } else if (purchase.itemType === 'magic_school') {
+          newMagicSchools.push(purchase.itemId);
         }
       }
 
