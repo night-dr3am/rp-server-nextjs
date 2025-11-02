@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, calculateDamageReduction, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
@@ -419,17 +419,24 @@ export async function POST(request: NextRequest) {
         (affectedUser.arkanaStats.cybernetics as string[]) || [],
         (affectedUser.arkanaStats.magicWeaves as string[]) || []
       );
-      const userCombinedEffects = [...userActiveEffects, ...passiveEffectsToActiveFormat(userPassiveEffects)];
+      const userPassiveAsActive = passiveEffectsToActiveFormat(userPassiveEffects);
 
-      // Calculate damage reduction and apply damage
-      const damageReduction = calculateDamageReduction(userCombinedEffects);
-      const damageAfterReduction = Math.max(0, entry.damage - damageReduction);
+      // Apply damage and healing with damage reduction and bounds checking using utility
       const healthBefore = affectedUser.stats?.health || 0;
-      let healthAfter = healthBefore;
+      const damageHealResult = applyDamageAndHealing(
+        healthBefore,
+        affectedUser.arkanaStats.hitPoints,
+        entry.damage,
+        0,  // No healing in power-attack (healing is handled separately via self-effects)
+        userActiveEffects,
+        userPassiveAsActive
+      );
+      const healthAfter = damageHealResult.newHP;
+      const damageReduction = damageHealResult.damageReduction;
+      const damageAfterReduction = damageHealResult.damageDealt;
 
-      // Apply damage to health (only if user has stats and damage > 0)
+      // Update health in database if damage was dealt
       if (affectedUser.stats && damageAfterReduction > 0) {
-        healthAfter = Math.max(0, healthBefore - damageAfterReduction);
         await prisma.userStats.update({
           where: { userId: affectedUser.id },
           data: { health: healthAfter, lastUpdated: new Date() }

@@ -1180,6 +1180,83 @@ export function calculateDamageReduction(activeEffects: ActiveEffect[]): number 
 }
 
 /**
+ * Extract immediate damage and healing from effect results
+ * Used by combat endpoints to aggregate effects before applying them
+ * @param effectResults - Array of effect results to process
+ * @returns Object with total immediate damage and healing
+ */
+export function extractImmediateEffects(effectResults: EffectResult[]): {
+  immediateDamage: number;
+  immediateHealing: number;
+} {
+  let immediateDamage = 0;
+  let immediateHealing = 0;
+
+  for (const effectResult of effectResults) {
+    if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
+      immediateHealing += effectResult.heal;
+    }
+    if (effectResult.effectDef.category === 'damage' && effectResult.damage) {
+      immediateDamage += effectResult.damage;
+    }
+  }
+
+  return { immediateDamage, immediateHealing };
+}
+
+/**
+ * Apply damage and healing to current HP with damage reduction and bounds checking
+ * Healing is applied FIRST (capped at maxHP), then damage is applied (with reduction, minimum 0 HP)
+ * Central function used by all combat endpoints to ensure consistent damage/healing application
+ *
+ * @param currentHP - Current health points
+ * @param maxHP - Maximum health points (from arkanaStats.hitPoints)
+ * @param immediateDamage - Raw damage before reduction
+ * @param immediateHealing - Healing amount
+ * @param activeEffects - Active effects for damage reduction calculation
+ * @param passiveEffects - Passive effects from perks/cybernetics/magic (already in ActiveEffect format)
+ * @returns New HP and breakdown of damage/healing applied with damage reduction
+ */
+export function applyDamageAndHealing(
+  currentHP: number,
+  maxHP: number,
+  immediateDamage: number,
+  immediateHealing: number,
+  activeEffects: ActiveEffect[],
+  passiveEffects: ActiveEffect[]
+): {
+  newHP: number;
+  damageDealt: number;
+  healingApplied: number;
+  damageReduction: number;
+} {
+  const combinedEffects = [...activeEffects, ...passiveEffects];
+
+  // Calculate damage reduction from defense effects
+  const damageReduction = calculateDamageReduction(combinedEffects);
+  const reducedDamage = Math.max(0, immediateDamage - damageReduction);
+
+  // Apply healing first (capped at maxHP)
+  let newHP = currentHP;
+  if (immediateHealing > 0) {
+    newHP = Math.min(newHP + immediateHealing, maxHP);
+  }
+
+  // Then apply damage (cannot go below 0)
+  const actualDamageDealt = Math.min(reducedDamage, newHP); // Can't deal more damage than current HP
+  if (reducedDamage > 0) {
+    newHP = Math.max(0, newHP - reducedDamage);
+  }
+
+  return {
+    newHP,
+    damageDealt: actualDamageDealt,
+    healingApplied: immediateHealing,
+    damageReduction
+  };
+}
+
+/**
  * Clear all turn-based and scene-based effects
  * Keeps only permanent effects
  * @param activeEffects - Current active effects

@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
@@ -390,15 +390,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate immediate healing for caster from self-effects BEFORE turn processing
-    // We need to know this upfront to pass to processEffectsTurnAndApplyHealing
+    // Extract immediate healing and damage for caster from self-effects BEFORE turn processing
     const casterSelfEffects = appliedEffectsMap.get(caster.slUuid) || [];
-    let casterImmediateHealing = 0;
-    for (const effectResult of casterSelfEffects) {
-      if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
-        casterImmediateHealing += effectResult.heal;
-      }
-    }
+    const { immediateDamage: casterImmediateDamage, immediateHealing: casterImmediateHealing } = extractImmediateEffects(casterSelfEffects);
 
     // ALWAYS process caster's turn first (decrement all PRE-EXISTING effects) and apply all healing
     // This happens regardless of whether the caster receives new effects from this power
@@ -409,6 +403,27 @@ export async function POST(request: NextRequest) {
       casterImmediateHealing  // Apply immediate healing from self-effects
     );
     casterActiveEffects = casterTurnProcessed.activeEffects;
+
+    // Apply damage to caster if they have self-damage effects (must happen after healing)
+    // Now includes damage reduction from caster's own defensive effects
+    let casterFinalHP = casterTurnProcessed.newHP;
+    if (casterImmediateDamage > 0) {
+      const casterDamageResult = applyDamageAndHealing(
+        casterFinalHP,
+        caster.arkanaStats.hitPoints,
+        casterImmediateDamage,
+        0,  // No additional healing (already applied above)
+        casterActiveEffects,
+        casterPassiveAsActive
+      );
+      casterFinalHP = casterDamageResult.newHP;
+
+      // Update caster's health immediately if damage was applied
+      await prisma.userStats.update({
+        where: { userId: caster.id },
+        data: { health: casterFinalHP }
+      });
+    }
 
     // Track which users have been updated (to avoid duplicate processing)
     const updatedUsers = new Set<string>();
@@ -443,23 +458,34 @@ export async function POST(request: NextRequest) {
       // Recalculate liveStats
       const userLiveStats = recalculateLiveStats(affectedUser.arkanaStats, userActiveEffects);
 
-      // Apply immediate healing from heal effects (if any)
+      // Apply immediate healing and damage from effects
       let userNewHP = affectedUser.stats?.health || 0;
 
-      // If this is the caster, healing was already applied by processEffectsTurnAndApplyHealing
+      // If this is the caster, healing AND damage were already applied above
       if (userUuid === caster.slUuid) {
-        userNewHP = casterTurnProcessed.newHP;
+        userNewHP = casterFinalHP;
       } else {
-        // For non-casters, calculate and apply immediate healing
-        let immediateHealing = 0;
-        for (const effectResult of effectResults) {
-          if (effectResult.effectDef.category === 'heal' && effectResult.heal) {
-            immediateHealing += effectResult.heal;
-          }
-        }
-        if (immediateHealing > 0) {
-          userNewHP = Math.min(userNewHP + immediateHealing, affectedUser.arkanaStats.hitPoints);
-        }
+        // For non-casters, extract and apply immediate healing and damage with damage reduction
+        const { immediateDamage, immediateHealing } = extractImmediateEffects(effectResults);
+
+        // Get passive effects for this user to calculate damage reduction
+        const userPassiveEffectsWithSource = getPassiveEffectsWithSource(
+          (affectedUser.arkanaStats.perks as string[]) || [],
+          (affectedUser.arkanaStats.cybernetics as string[]) || [],
+          (affectedUser.arkanaStats.magicWeaves as string[]) || []
+        );
+        const userPassiveAsActive = passiveEffectsToActiveFormat(userPassiveEffectsWithSource);
+
+        // Apply damage and healing with damage reduction and bounds checking
+        const damageHealResult = applyDamageAndHealing(
+          userNewHP,
+          affectedUser.arkanaStats.hitPoints,
+          immediateDamage,
+          immediateHealing,
+          userActiveEffects,
+          userPassiveAsActive
+        );
+        userNewHP = damageHealResult.newHP;
       }
 
       // Update database - update ArkanaStats for effects/liveStats and UserStats for current health
