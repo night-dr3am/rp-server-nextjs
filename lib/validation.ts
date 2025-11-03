@@ -320,6 +320,7 @@ export const worldObjectUpsertSchema = Joi.object({
     showStates: Joi.string().required(),                  // Comma-delimited states
     skills: Joi.string().optional(),                      // Pipe-delimited OR skill requirements
     checks: Joi.string().optional(),                      // Check ID from worldObjectChecks.json
+    successScript: Joi.string().optional(),               // Success script ID from worldObjectSuccessScripts.json
     successState: Joi.string().required(),                // State on success
     notify: Joi.string().optional()                       // Notification mode ("private", "local", or empty)
   })).min(1).required(),

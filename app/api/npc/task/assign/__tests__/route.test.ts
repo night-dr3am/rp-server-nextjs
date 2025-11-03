@@ -430,8 +430,17 @@ describe('/api/npc/task/assign', () => {
 
 
     it('should allow task after cooldown period has passed', async () => {
-      // Create a task that is older than the interval
-      const oldTime = new Date(Date.now() - 400000); // 400 seconds ago (more than 300 second interval)
+      // Create a task that is older than the interval (300 seconds)
+      // Use current time minus 400 seconds, ensuring it stays within today
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const fourHundredSecondsAgo = new Date(Date.now() - 400000);
+
+      // If 400 seconds ago would be yesterday (we're in the first 7 minutes of the day),
+      // use 1 hour after midnight instead
+      const oldTime = fourHundredSecondsAgo.getTime() < todayStart.getTime()
+        ? new Date(todayStart.getTime() + 3600000) // 1 hour after midnight
+        : fourHundredSecondsAgo; // 400 seconds ago
       await prisma.nPCTask.create({
         data: {
           npcId: testNpc.id,
