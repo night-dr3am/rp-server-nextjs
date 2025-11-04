@@ -1,5 +1,21 @@
 [
   {
+    "id": "test_area_psychic_blast",
+    "name": "Test Psychic Blast",
+    "desc": "Test power for area-of-effect attacks without primary target requirement.",
+    "cost": 3,
+    "species": "human",
+    "arch": "psion",
+    "abilityType": ["attack"],
+    "tags": ["damage", "psychic", "area"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 10,
+    "effects": {
+      "attack": ["damage_psychic_3"]
+    }
+  },
+  {
     "id": "strigoi_life_cradle_of_hunger",
     "name": "Cradle of Hunger",
     "desc": "Touch can sap energy, leaving mortals weak as if struck by days of exhaustion.",

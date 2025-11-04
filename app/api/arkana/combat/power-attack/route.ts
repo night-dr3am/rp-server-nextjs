@@ -6,6 +6,7 @@ import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllC
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
+import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness, type UserWithStats } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
@@ -87,73 +88,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get attacker and target with their stats
-    const [attacker, target] = await Promise.all([
-      prisma.user.findFirst({
-        where: { slUuid: attacker_uuid, universe: 'arkana' },
-        include: { arkanaStats: true, stats: true }
-      }),
-      prisma.user.findFirst({
-        where: { slUuid: target_uuid, universe: 'arkana' },
-        include: { arkanaStats: true, stats: true }
-      })
-    ]);
+    // Get attacker with stats
+    const attackerRaw = await prisma.user.findFirst({
+      where: { slUuid: attacker_uuid, universe: 'arkana' },
+      include: { arkanaStats: true, stats: true }
+    });
 
-    // Validate both players exist
-    if (!attacker?.arkanaStats?.registrationCompleted) {
+    // Validate attacker
+    const attackerValidation = validateCombatReadiness(attackerRaw, 'attacker');
+    if (!attackerValidation.valid) {
       return NextResponse.json(
-        { success: false, error: 'Attacker not found or registration incomplete' },
+        { success: false, error: attackerValidation.error },
+        { status: attackerValidation.statusCode || 404 }
+      );
+    }
+
+    // Type assertion: attacker is now guaranteed non-null by validation
+    const attacker = attackerRaw as NonNullable<typeof attackerRaw>;
+
+    // Load target (may be null for area-of-effect powers)
+    const targetRaw = await loadCombatTarget(target_uuid, 'arkana');
+
+    // If target_uuid was PROVIDED but target NOT FOUND, return error
+    if (target_uuid && !targetRaw) {
+      return NextResponse.json(
+        { success: false, error: 'Target not found' },
         { status: 404 }
       );
     }
 
-    if (!target?.arkanaStats?.registrationCompleted) {
-      return NextResponse.json(
-        { success: false, error: 'Target not found or registration incomplete' },
-        { status: 404 }
-      );
+    // Validate target if provided
+    let target: NonNullable<typeof targetRaw> | null = null;
+    if (targetRaw) {
+      const targetValidation = validateCombatReadiness(targetRaw, 'target');
+      if (!targetValidation.valid) {
+        return NextResponse.json(
+          { success: false, error: targetValidation.error },
+          { status: targetValidation.statusCode || 400 }
+        );
+      }
+      // Type assertion: target is now guaranteed valid by validation
+      target = targetRaw as NonNullable<typeof targetRaw>;
     }
 
-    // Check if target is conscious
-    if (!target.stats || target.stats.health <= 0) {
+    // Load nearby users for multi-target/area attacks
+    const excludeUuids = [attacker.slUuid];
+    if (target) excludeUuids.push(target.slUuid);
+
+    const nearbyUsers = await loadNearbyPlayers(
+      value.nearby_uuids,
+      'arkana',
+      excludeUuids
+    );
+
+    // Build allPotentialTargets array for effect application
+    const allPotentialTargets = buildPotentialTargets(target, nearbyUsers);
+
+    // For area-of-effect powers without primary target, ensure we have at least nearby targets
+    if (!target && allPotentialTargets.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Target is unconscious' },
+        { success: false, error: 'No valid targets in area' },
         { status: 400 }
       );
-    }
-
-    // Check if target is in RP mode (status === 0 means IC/RP mode)
-    if (target.stats.status !== 0) {
-      return NextResponse.json(
-        { success: false, error: 'Target player is not in RP mode' },
-        { status: 400 }
-      );
-    }
-
-    // Build allPotentialTargets array for multi-target attacks
-    type UserWithStats = typeof attacker;
-    const allPotentialTargets: UserWithStats[] = [target];
-
-    // Load nearby users for multi-target attacks (same pattern as power-activate)
-    if (value.nearby_uuids && Array.isArray(value.nearby_uuids) && value.nearby_uuids.length > 0) {
-      const nearbyUsers = await prisma.user.findMany({
-        where: {
-          slUuid: { in: value.nearby_uuids },
-          universe: 'arkana'
-        },
-        include: { arkanaStats: true, stats: true }
-      });
-
-      // Filter to registered, conscious users in RP mode (exclude attacker)
-      const validNearby = nearbyUsers.filter(u =>
-        u?.arkanaStats?.registrationCompleted &&
-        u.stats?.status === 0 &&
-        u.stats.health > 0 &&  // Must be conscious for attacks
-        u.slUuid !== attacker.slUuid &&
-        u.slUuid !== target.slUuid  // Don't duplicate target
-      );
-
-      allPotentialTargets.push(...validNearby);
     }
 
     // Load arkana data (needed for passive effects from perks/cybernetics/magic)
@@ -165,31 +161,36 @@ export async function POST(request: NextRequest) {
     const allMagicSchools = getAllMagicSchools();
 
     // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
-    const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats.activeEffects);
-    const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+    const attackerActiveEffects = parseActiveEffects(attacker.arkanaStats!.activeEffects);
 
     // Get passive effects from perks/cybernetics/magic WITH source tracking
     const attackerPassiveEffectsWithSource = getPassiveEffectsWithSource(
-      (attacker.arkanaStats.perks as string[]) || [],
-      (attacker.arkanaStats.cybernetics as string[]) || [],
-      (attacker.arkanaStats.magicWeaves as string[]) || []
-    );
-    const targetPassiveEffectsWithSource = getPassiveEffectsWithSource(
-      (target.arkanaStats.perks as string[]) || [],
-      (target.arkanaStats.cybernetics as string[]) || [],
-      (target.arkanaStats.magicWeaves as string[]) || []
+      (attacker.arkanaStats!.perks as string[]) || [],
+      (attacker.arkanaStats!.cybernetics as string[]) || [],
+      (attacker.arkanaStats!.magicWeaves as string[]) || []
     );
 
     // Convert passive effects to ActiveEffect format (with source info) and combine with active effects
     const attackerPassiveAsActive = passiveEffectsToActiveFormat(attackerPassiveEffectsWithSource);
-    const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectsWithSource);
-
     const attackerCombinedEffects = [...attackerActiveEffects, ...attackerPassiveAsActive];
-    const targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
 
     // Recalculate liveStats with both active and passive effects
-    const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats, attackerCombinedEffects);
-    const targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
+    const attackerLiveStats = recalculateLiveStats(attacker.arkanaStats!, attackerCombinedEffects);
+
+    // Calculate target liveStats if target exists (for single-target or targeted area attacks)
+    let targetLiveStats: LiveStats = {};
+    let targetCombinedEffects: typeof attackerCombinedEffects = [];
+    if (target?.arkanaStats) {
+      const targetActiveEffects = parseActiveEffects(target.arkanaStats.activeEffects);
+      const targetPassiveEffectsWithSource = getPassiveEffectsWithSource(
+        (target.arkanaStats.perks as string[]) || [],
+        (target.arkanaStats.cybernetics as string[]) || [],
+        (target.arkanaStats.magicWeaves as string[]) || []
+      );
+      const targetPassiveAsActive = passiveEffectsToActiveFormat(targetPassiveEffectsWithSource);
+      targetCombinedEffects = [...targetActiveEffects, ...targetPassiveAsActive];
+      targetLiveStats = recalculateLiveStats(target.arkanaStats, targetCombinedEffects);
+    }
 
     // Find the ability (search all 5 ability types: common powers, archetype powers, perks, cybernetics, magic weaves)
     let power: CommonPower | ArchetypePower | Perk | Cybernetic | MagicSchool | undefined = undefined;
@@ -218,11 +219,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify ownership across all ability types and determine source type
-    const userCommonPowerIds = (attacker.arkanaStats.commonPowers as string[]) || [];
-    const userArchPowerIds = (attacker.arkanaStats.archetypePowers as string[]) || [];
-    const userPerkIds = (attacker.arkanaStats.perks as string[]) || [];
-    const userCyberneticIds = (attacker.arkanaStats.cybernetics as string[]) || [];
-    const userMagicWeaveIds = (attacker.arkanaStats.magicWeaves as string[]) || [];
+    const userCommonPowerIds = (attacker.arkanaStats!.commonPowers as string[]) || [];
+    const userArchPowerIds = (attacker.arkanaStats!.archetypePowers as string[]) || [];
+    const userPerkIds = (attacker.arkanaStats!.perks as string[]) || [];
+    const userCyberneticIds = (attacker.arkanaStats!.cybernetics as string[]) || [];
+    const userMagicWeaveIds = (attacker.arkanaStats!.magicWeaves as string[]) || [];
 
     let powerSourceType: 'power' | 'perk' | 'cybernetic' | 'magic' = 'power';
     let ownsPower = false;
@@ -262,24 +263,42 @@ export async function POST(request: NextRequest) {
     let attackSuccess = false;
     let rollDescription = '';
 
+    // Determine if this power has any check effects
+    const hasCheckEffects = attackEffects.some((e: string) => e.startsWith('check_'));
+
+    // Powers without check effects automatically succeed
+    if (!hasCheckEffects) {
+      attackSuccess = true;
+      rollDescription = 'Auto-success (no check required)';
+    }
+
     // First, execute check effects to determine success (using effective stats)
+    // Note: Checks require a target - area-without-target attacks should not have check effects
     for (const effectId of attackEffects) {
       if (effectId.startsWith('check_')) {
+        if (!target) {
+          // Area attack with check but no primary target - this is invalid
+          return NextResponse.json(
+            { success: false, error: 'Attack check requires a primary target' },
+            { status: 400 }
+          );
+        }
+
         const baseStatName = power.baseStat?.toLowerCase() || 'mental';
         let targetStatValue: number;
-        if (baseStatName === 'physical') targetStatValue = target.arkanaStats.physical;
-        else if (baseStatName === 'mental') targetStatValue = target.arkanaStats.mental;
-        else if (baseStatName === 'dexterity') targetStatValue = target.arkanaStats.dexterity;
-        else if (baseStatName === 'perception') targetStatValue = target.arkanaStats.perception;
-        else targetStatValue = target.arkanaStats.mental;
+        if (baseStatName === 'physical') targetStatValue = target.arkanaStats!.physical;
+        else if (baseStatName === 'mental') targetStatValue = target.arkanaStats!.mental;
+        else if (baseStatName === 'dexterity') targetStatValue = target.arkanaStats!.dexterity;
+        else if (baseStatName === 'perception') targetStatValue = target.arkanaStats!.perception;
+        else targetStatValue = target.arkanaStats!.mental;
 
-        const result = executeEffect(effectId, attacker.arkanaStats, target.arkanaStats, targetStatValue, attackerLiveStats, targetLiveStats);
+        const result = executeEffect(effectId, attacker.arkanaStats!, target.arkanaStats!, targetStatValue, attackerLiveStats, targetLiveStats);
         if (result) {
           attackSuccess = result.success;
           // Get detailed calculation breakdown for the message
           const baseStat = (power.baseStat?.toLowerCase() || 'mental') as 'physical' | 'dexterity' | 'mental' | 'perception';
           const attackerCalc = getDetailedStatCalculation(
-            attacker.arkanaStats,
+            attacker.arkanaStats!,
             attackerLiveStats,
             baseStat,
             attackerCombinedEffects
@@ -289,17 +308,43 @@ export async function POST(request: NextRequest) {
           // Use the defenseStat from result if available, otherwise default to baseStat
           const defenseStat = result.defenseStat || baseStat;
           const targetCalc = getDetailedDefenseCalculation(
-            target.arkanaStats,
+            target.arkanaStats!,
             targetLiveStats,
             defenseStat,
             targetCombinedEffects
           );
 
-          // Extract d20 roll and total from the old rollInfo format
+          // Extract d20 roll from rollInfo and recalculate using detailed calculations
           const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
           if (rollMatch) {
-            const [, d20, , total] = rollMatch;
-            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${total} vs TN: ${targetCalc.formattedString}`;
+            const [, d20Str, originalModStr, originalTotalStr, originalTNStr] = rollMatch;
+            const d20 = parseInt(d20Str);
+            const originalMod = parseInt(originalModStr);
+            const originalTotal = parseInt(originalTotalStr);
+            const originalTN = parseInt(originalTNStr);
+
+            // Recalculate total and TN using the SAME values we'll display in the message
+            const recalculatedTotal = d20 + attackerCalc.finalModifier;
+            const recalculatedTN = targetCalc.finalTN;
+            const recalculatedSuccess = recalculatedTotal >= recalculatedTN;
+
+            // Log warning if calculation mismatch detected (diagnostic for underlying bugs)
+            if (recalculatedSuccess !== attackSuccess ||
+                attackerCalc.finalModifier !== originalMod ||
+                recalculatedTN !== originalTN) {
+              console.warn(
+                `[ROLL MISMATCH - power-attack] Power: ${power.name}\n` +
+                `  Original: ${attackSuccess ? 'HIT' : 'MISS'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${originalTN})\n` +
+                `  Recalculated: ${recalculatedSuccess ? 'HIT' : 'MISS'} (d20:${d20} + mod:${attackerCalc.finalModifier} = ${recalculatedTotal} vs TN:${recalculatedTN})\n` +
+                `  Attacker effects: ${attackerCombinedEffects.length} effects\n` +
+                `  Target effects: ${targetCombinedEffects.length} effects`
+              );
+            }
+
+            // Use recalculated success to ensure message is always mathematically consistent
+            attackSuccess = recalculatedSuccess;
+
+            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${recalculatedTotal} vs TN: ${targetCalc.formattedString}`;
           } else {
             rollDescription = result.rollInfo || '';
           }
@@ -326,6 +371,7 @@ export async function POST(request: NextRequest) {
         })
       });
 
+      // Target must exist if we got here (check validated it above)
       return NextResponse.json({
         success: true,
         data: {
@@ -336,13 +382,13 @@ export async function POST(request: NextRequest) {
           totalDamage: 0,
           affected: [],
           target: {
-            uuid: target.slUuid,
-            name: encodeForLSL(target.arkanaStats.characterName),
-            healthBefore: target.stats.health,
-            healthAfter: target.stats.health,
-            isUnconscious: (target.stats.health <= 0) ? 'true' : 'false'
+            uuid: target!.slUuid,
+            name: encodeForLSL(target!.arkanaStats!.characterName),
+            healthBefore: target!.stats!.health,
+            healthAfter: target!.stats!.health,
+            isUnconscious: (target!.stats!.health <= 0) ? 'true' : 'false'
           },
-          message: encodeForLSL(`${attacker.arkanaStats.characterName} uses ${power.name} on ${target.arkanaStats.characterName} - MISS! ${rollDescription}`)
+          message: encodeForLSL(`${attacker.arkanaStats!.characterName} uses ${power.name} on ${target!.arkanaStats!.characterName} - MISS! ${rollDescription}`)
         }
       });
     }
@@ -366,7 +412,7 @@ export async function POST(request: NextRequest) {
 
         // Calculate or reuse liveStats for this target
         let currentTargetLiveStats: LiveStats = {};
-        if (applicableTarget.slUuid === target.slUuid) {
+        if (target && applicableTarget.slUuid === target.slUuid) {
           currentTargetLiveStats = targetLiveStats; // Reuse primary target's already-calculated stats
         } else if (applicableTarget.slUuid === attacker.slUuid) {
           currentTargetLiveStats = attackerLiveStats; // Reuse attacker's stats for self-effects
@@ -383,7 +429,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Execute effect on this target
-        const result = executeEffect(effectId, attacker.arkanaStats, applicableTarget.arkanaStats, undefined, attackerLiveStats, currentTargetLiveStats);
+        const result = executeEffect(effectId, attacker.arkanaStats!, applicableTarget.arkanaStats, undefined, attackerLiveStats, currentTargetLiveStats);
 
         if (result) {
           const key = applicableTarget.slUuid;
@@ -452,7 +498,7 @@ export async function POST(request: NextRequest) {
         let updatedActiveEffects = userActiveEffects;
 
         for (const effectResult of nonSelfEffects) {
-          updatedActiveEffects = applyActiveEffect(updatedActiveEffects, effectResult, attacker.arkanaStats.characterName, sourceInfo);
+          updatedActiveEffects = applyActiveEffect(updatedActiveEffects, effectResult, attacker.arkanaStats!.characterName, sourceInfo);
         }
 
         const updatedLiveStats = recalculateLiveStats(affectedUser.arkanaStats, updatedActiveEffects);
@@ -478,9 +524,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract legacy variables for backward compatibility with attacker processing below
-    const primaryTargetData = affectedTargets.find(t => t.user.slUuid === target.slUuid);
+    const primaryTargetData = target ? affectedTargets.find(t => t.user?.slUuid === target.slUuid) : null;
     const totalDamage = primaryTargetData?.damageDealt || 0;
-    const newTargetHealth = primaryTargetData?.healthAfter || target.stats.health;
+    const newTargetHealth = primaryTargetData?.healthAfter || (target?.stats?.health ?? 0);
 
     // Collect self-effects for attacker processing
     const appliedEffects: EffectResult[] = [];
@@ -528,24 +574,31 @@ export async function POST(request: NextRequest) {
     });
 
     // Build comprehensive message with effect details
-    const attackerName = attacker.arkanaStats.characterName;
-    const targetName = target.arkanaStats.characterName;
+    const attackerName = attacker.arkanaStats!.characterName;
+    const targetName = target?.arkanaStats?.characterName;
 
-    let message = `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription}`;
+    // Message format varies based on whether there's a primary target
+    let message: string;
+    if (target && targetName) {
+      message = `${attackerName} uses ${power.name} on ${targetName} - HIT! ${rollDescription}`;
 
-    // Always show damage for primary target (even if 0), include damage reduction if present
-    const primaryDamageReduction = primaryTargetData?.damageReduction || 0;
-    if (primaryDamageReduction > 0) {
-      message += ` - ${totalDamage} damage dealt (${primaryDamageReduction} blocked by defenses)`;
+      // Always show damage for primary target (even if 0), include damage reduction if present
+      const primaryDamageReduction = primaryTargetData?.damageReduction || 0;
+      if (primaryDamageReduction > 0) {
+        message += ` - ${totalDamage} damage dealt (${primaryDamageReduction} blocked by defenses)`;
+      } else {
+        message += ` - ${totalDamage} damage dealt`;
+      }
+
+      // Add effect messages for primary target
+      const primaryTargetEffects = primaryTargetData?.effectsForUser.filter(e => e.effectDef.target !== 'self') || [];
+      if (primaryTargetEffects.length > 0) {
+        const msgs = primaryTargetEffects.map(buildEffectMessage);
+        message += `. Target: ${msgs.join(', ')}`;
+      }
     } else {
-      message += ` - ${totalDamage} damage dealt`;
-    }
-
-    // Add effect messages for primary target
-    const primaryTargetEffects = primaryTargetData?.effectsForUser.filter(e => e.effectDef.target !== 'self') || [];
-    if (primaryTargetEffects.length > 0) {
-      const msgs = primaryTargetEffects.map(buildEffectMessage);
-      message += `. Target: ${msgs.join(', ')}`;
+      // Area attack without primary target
+      message = `${attackerName} uses ${power.name} affecting ${affectedTargets.length} ${affectedTargets.length === 1 ? 'target' : 'targets'}`;
     }
 
     // Add self-effects message
@@ -554,44 +607,61 @@ export async function POST(request: NextRequest) {
       message += `. Attacker: ${msgs.join(', ')}`;
     }
 
-    // Add multi-target summary if there are additional affected targets
-    const additionalTargets = affectedTargets.filter(t => t.user.slUuid !== target.slUuid && t.user.slUuid !== attacker.slUuid);
+    // Add multi-target summary if there are additional affected targets beyond primary
+    const additionalTargets = affectedTargets.filter(t =>
+      t.user?.slUuid !== target?.slUuid && t.user?.slUuid !== attacker.slUuid
+    );
     if (additionalTargets.length > 0) {
-      const names = additionalTargets.map(t => t.user.arkanaStats?.characterName || 'Unknown').join(', ');
+      const names = additionalTargets.map(t => t.user?.arkanaStats?.characterName || 'Unknown').join(', ');
       message += `. Also affects: ${names}`;
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        attackSuccess: 'true',
-        powerUsed: power.name,
-        powerBaseStat: power.baseStat || 'Mental',
-        rollInfo: rollDescription,
-        totalDamage,  // Primary target damage after reduction
-        affected: affectedTargets
-          .filter(t => t.user.slUuid !== attacker.slUuid)  // Exclude attacker from affected list
-          .map(t => ({
-            uuid: t.user.slUuid,
-            name: encodeForLSL(t.user.arkanaStats?.characterName || 'Unknown'),
-            damage: t.damageDealt,
-            healthBefore: t.healthBefore,
-            healthAfter: t.healthAfter,
-            isUnconscious: (t.healthAfter <= 0) ? 'true' : 'false',
-            effects: t.effectsForUser
-              .filter(e => e.effectDef.target !== 'self')
-              .map(buildEffectMessage)
-          })),
-        target: {
-          uuid: target.slUuid,
-          name: encodeForLSL(targetName),
-          healthBefore: target.stats.health,
-          healthAfter: newTargetHealth,
-          isUnconscious: (newTargetHealth <= 0) ? 'true' : 'false'
-        },
-        message: encodeForLSL(message)
-      }
-    });
+    // Build response data with optional target field
+    const affectedData = affectedTargets
+      .filter(t => t.user?.slUuid !== attacker.slUuid)  // Exclude attacker from affected list
+      .map(t => ({
+        uuid: t.user?.slUuid || '',
+        name: encodeForLSL(t.user?.arkanaStats?.characterName || 'Unknown'),
+        damage: t.damageDealt,
+        healthBefore: t.healthBefore,
+        healthAfter: t.healthAfter,
+        isUnconscious: (t.healthAfter <= 0) ? 'true' : 'false',
+        effects: t.effectsForUser
+          .filter(e => e.effectDef.target !== 'self')
+          .map(buildEffectMessage)
+      }));
+
+    const baseResponseData = {
+      attackSuccess: 'true' as const,
+      powerUsed: power.name,
+      powerBaseStat: power.baseStat || 'Mental',
+      rollInfo: rollDescription,
+      totalDamage,  // Primary target damage after reduction (0 if no primary target)
+      affected: affectedData,
+      message: encodeForLSL(message)
+    };
+
+    // Only include target field if there was a primary target
+    if (target) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          ...baseResponseData,
+          target: {
+            uuid: target.slUuid,
+            name: encodeForLSL(targetName || ''),
+            healthBefore: target.stats?.health || 0,
+            healthAfter: newTargetHealth,
+            isUnconscious: (newTargetHealth <= 0) ? 'true' : 'false'
+          }
+        }
+      });
+    } else {
+      return NextResponse.json({
+        success: true,
+        data: baseResponseData
+      });
+    }
 
   } catch (error: unknown) {
     console.error('Error processing power attack:', error);

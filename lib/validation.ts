@@ -703,7 +703,7 @@ export const arkanaPowerAttackSchema = Joi.object({
   attacker_uuid: uuidSchema,
   power_id: Joi.string().min(1).max(255).optional(),
   power_name: Joi.string().min(1).max(255).optional(),
-  target_uuid: uuidSchema,
+  target_uuid: Joi.string().uuid().allow('').optional(), // Optional for area-of-effect powers, allow empty string
   nearby_uuids: Joi.array().items(Joi.string().uuid()).optional().default([]),
   universe: Joi.string().valid('arkana').required(),
   timestamp: timestampSchema,
@@ -713,8 +713,8 @@ export const arkanaPowerAttackSchema = Joi.object({
   if (!value.power_id && !value.power_name) {
     return helpers.error('any.invalid', { message: 'Either power_id or power_name must be provided' });
   }
-  // Ensure attacker and target are different
-  if (value.attacker_uuid === value.target_uuid) {
+  // Ensure attacker and target are different (only if target is provided)
+  if (value.target_uuid && value.attacker_uuid === value.target_uuid) {
     return helpers.error('any.invalid', { message: 'Cannot attack yourself' });
   }
   return value;

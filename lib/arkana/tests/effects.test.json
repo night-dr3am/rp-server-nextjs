@@ -175,6 +175,17 @@
     "duration": "immediate"
   },
   {
+    "id": "damage_psychic_3",
+    "name": "Psychic Damage +3",
+    "desc": "Deals 3 + Mental modifier psychic damage (for area attacks)",
+    "category": "damage",
+    "type": "stat_based",
+    "damageType": "psychic",
+    "damageFormula": "3 + Mental",
+    "target": "area",
+    "duration": "immediate"
+  },
+  {
     "id": "debuff_physical_minus_2",
     "name": "Physical Debuff -2",
     "desc": "Drains stamina, reducing Physical stat by 2",

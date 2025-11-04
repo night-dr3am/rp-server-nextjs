@@ -303,7 +303,7 @@ describe('/api/arkana/combat/power-attack', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'Target player is not in RP mode');
+      expectError(data, 'Target is not in RP mode');
       expect(response.status).toBe(400);
     });
 
@@ -1536,6 +1536,608 @@ describe('/api/arkana/combat/power-attack', () => {
         const effects = updatedStats?.activeEffects as ActiveEffect[];
         expect(effects[0].turnsLeft).toBe(999);  // Should remain 999
       }
+    });
+  });
+
+  describe('Roll Calculation Consistency Tests', () => {
+    it('should show HIT when roll >= TN in message calculation', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Strong Attacker',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 7, // High mental (+10 modifier)
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis']
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Weak Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 1, // Low mental (-1 modifier, easier to hit)
+        perception: 3,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Parse the message to extract roll information
+      const decodedMessage = decodeURIComponent(data.data.message);
+      const rollMatch = decodedMessage.match(/Roll: d20\((\d+)\).*?=\s*(\d+)\s+vs TN:.*?=\s*(\d+)/);
+
+      if (rollMatch) {
+        const [, , total, tn] = rollMatch;
+        const rollTotal = parseInt(total);
+        const targetNumber = parseInt(tn);
+
+        // Verify message consistency
+        if (rollTotal >= targetNumber) {
+          expect(decodedMessage).toContain('HIT!');
+          expect(data.data.attackSuccess).toBe('true');
+        } else {
+          expect(decodedMessage).toContain('MISS!');
+          expect(data.data.attackSuccess).toBe('false');
+        }
+      }
+    });
+
+    it('should show MISS when roll < TN in message calculation', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Weak Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 1, // Very low mental (-1 modifier, likely to miss)
+        perception: 3,
+        hitPoints: 10,
+        commonPowers: ['strigoi_hypnosis']
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Strong Target',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 2,
+        dexterity: 2,
+        mental: 7, // High mental (+10 modifier, hard to hit)
+        perception: 3,
+        hitPoints: 15
+      });
+
+      // Try multiple times to ensure we get at least one miss
+      let foundMiss = false;
+      for (let i = 0; i < 20 && !foundMiss; i++) {
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        const requestData = {
+          attacker_uuid: attacker.slUuid,
+          power_id: 'strigoi_hypnosis',
+          target_uuid: target.slUuid,
+          nearby_uuids: [],
+          universe: 'arkana',
+          timestamp,
+          signature
+        };
+
+        const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+        const response = await POST(request);
+        const data = await parseJsonResponse(response);
+
+        expectSuccess(data);
+
+        if (data.data.attackSuccess === 'false') {
+          foundMiss = true;
+
+          // Parse message and verify consistency
+          const decodedMessage = decodeURIComponent(data.data.message);
+          const rollMatch = decodedMessage.match(/Roll: d20\((\d+)\).*?=\s*(\d+)\s+vs TN:.*?=\s*(\d+)/);
+
+          if (rollMatch) {
+            const [, , total, tn] = rollMatch;
+            const rollTotal = parseInt(total);
+            const targetNumber = parseInt(tn);
+
+            // CRITICAL: Roll total must be less than TN for a miss
+            expect(rollTotal).toBeLessThan(targetNumber);
+            expect(decodedMessage).toContain('MISS!');
+          }
+        }
+      }
+
+      // Should find at least one miss with these stats
+      expect(foundMiss).toBe(true);
+    });
+
+    it('should have mathematically consistent roll messages', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Test Attacker',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis']
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Test Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: target.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const decodedMessage = decodeURIComponent(data.data.message);
+
+      // Message should contain roll information
+      expect(decodedMessage).toMatch(/Roll: d20\(\d+\)/);
+      expect(decodedMessage).toMatch(/vs TN:/);
+      expect(decodedMessage).toMatch(/(HIT!|MISS!)/);
+
+      // Extract and validate calculation
+      const rollMatch = decodedMessage.match(/Roll: d20\((\d+)\).*?=\s*(\d+)\s+vs TN:.*?=\s*(\d+)/);
+      if (rollMatch) {
+        const [, d20, total, tn] = rollMatch;
+        const d20Value = parseInt(d20);
+        const rollTotal = parseInt(total);
+        const targetNumber = parseInt(tn);
+
+        // Verify d20 is valid (1-20)
+        expect(d20Value).toBeGreaterThanOrEqual(1);
+        expect(d20Value).toBeLessThanOrEqual(20);
+
+        // Verify success matches calculation
+        const shouldHit = rollTotal >= targetNumber;
+        if (shouldHit) {
+          expect(data.data.attackSuccess).toBe('true');
+          expect(decodedMessage).toContain('HIT!');
+        } else {
+          expect(data.data.attackSuccess).toBe('false');
+          expect(decodedMessage).toContain('MISS!');
+        }
+      }
+    });
+  });
+
+  describe('Area-of-Effect Attack Tests', () => {
+    it('should execute area attack WITHOUT primary target using test_area_psychic_blast', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Area Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_psychic_blast']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target 1',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const nearby2 = await createArkanaTestUser({
+        characterName: 'Nearby Target 2',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_psychic_blast',
+        // target_uuid: OMITTED (no primary target)
+        nearby_uuids: [nearby1.slUuid, nearby2.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.powerUsed).toBe('Test Psychic Blast');
+      expect(data.data.affected).toBeDefined();
+      expect(data.data.affected.length).toBe(2);
+
+      // Verify both targets were affected
+      const affectedUuids = data.data.affected.map((t: { uuid: string }) => t.uuid);
+      expect(affectedUuids).toContain(nearby1.slUuid);
+      expect(affectedUuids).toContain(nearby2.slUuid);
+
+      // Verify no primary target field in response
+      expect(data.data.target).toBeUndefined();
+    });
+
+    it('should return 400 when area attack has NO targets available', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Lonely Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_psychic_blast']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_psychic_blast',
+        // target_uuid: OMITTED
+        nearby_uuids: [], // Empty array - no targets
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'No valid targets in area');
+      expect(response.status).toBe(400);
+    });
+
+    it('should filter invalid nearby targets from area attack', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Selective Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_psychic_blast']
+      });
+
+      const validTarget = await createArkanaTestUser({
+        characterName: 'Valid Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const unconsciousTarget = await createArkanaTestUser({
+        characterName: 'Unconscious Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10,
+        health: 0 // Unconscious
+      });
+
+      const oocTarget = await createArkanaTestUser({
+        characterName: 'OOC Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      // Set OOC target to OOC mode
+      await prisma.userStats.update({
+        where: { userId: oocTarget.id },
+        data: { status: 1 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_psychic_blast',
+        // target_uuid: OMITTED
+        nearby_uuids: [validTarget.slUuid, unconsciousTarget.slUuid, oocTarget.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.affected.length).toBe(1); // Only valid target
+      expect(data.data.affected[0].uuid).toBe(validTarget.slUuid);
+    });
+
+    it('should hit multiple nearby targets with area power', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Multi Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_psychic_blast']
+      });
+
+      // Create 3 nearby targets
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby 1',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const nearby2 = await createArkanaTestUser({
+        characterName: 'Nearby 2',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const nearby3 = await createArkanaTestUser({
+        characterName: 'Nearby 3',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 10
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_psychic_blast',
+        // target_uuid: OMITTED
+        nearby_uuids: [nearby1.slUuid, nearby2.slUuid, nearby3.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.affected.length).toBe(3);
+
+      // Verify all targets took damage
+      for (const affected of data.data.affected) {
+        expect(affected.damage).toBeGreaterThan(0);
+        expect(affected.healthBefore).toBeGreaterThan(affected.healthAfter);
+      }
+    });
+  });
+
+  describe('Target Validation Tests', () => {
+    it('should return 404 when target UUID is provided but user not found', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: generateTestUUID(), // Valid UUID format but doesn't exist
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data, 'Target not found');
+      expect(response.status).toBe(404); // NOT 400
+    });
+
+    it('should return 404 for missing target, 400 for invalid state', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Attacker',
+        race: 'strigoi',
+        archetype: 'Life',
+        physical: 3,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        commonPowers: ['strigoi_hypnosis']
+      });
+
+      const existingTarget = await createArkanaTestUser({
+        characterName: 'Existing Target',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 3,
+        perception: 3,
+        hitPoints: 10,
+        health: 0 // Unconscious
+      });
+
+      // Test 1: Non-existent UUID returns 404
+      const timestamp1 = new Date().toISOString();
+      const signature1 = generateSignature(timestamp1, 'arkana');
+
+      const request1 = createMockPostRequest('/api/arkana/combat/power-attack', {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: generateTestUUID(),
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp1,
+        signature: signature1
+      });
+
+      const response1 = await POST(request1);
+      expect(response1.status).toBe(404);
+
+      // Test 2: Existing but unconscious target returns 400
+      const timestamp2 = new Date().toISOString();
+      const signature2 = generateSignature(timestamp2, 'arkana');
+
+      const request2 = createMockPostRequest('/api/arkana/combat/power-attack', {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'strigoi_hypnosis',
+        target_uuid: existingTarget.slUuid,
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: timestamp2,
+        signature: signature2
+      });
+
+      const response2 = await POST(request2);
+      expect(response2.status).toBe(400); // NOT 404
+    });
+  });
+
+  describe('Validation Schema Tests (Extended)', () => {
+    it('should accept request with NO target_uuid for area powers', () => {
+      const payload = {
+        attacker_uuid: generateTestUUID(),
+        power_id: 'test_area_psychic_blast',
+        // target_uuid: OMITTED
+        nearby_uuids: [generateTestUUID()],
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'a'.repeat(64)
+      };
+
+      const { error } = arkanaPowerAttackSchema.validate(payload);
+      expect(error).toBeUndefined();
+    });
+
+    it('should accept request with empty string target_uuid', () => {
+      const payload = {
+        attacker_uuid: generateTestUUID(),
+        power_id: 'some_power',
+        target_uuid: '', // Empty string
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'a'.repeat(64)
+      };
+
+      const { error } = arkanaPowerAttackSchema.validate(payload);
+      expect(error).toBeUndefined();
+    });
+
+    it('should reject request with invalid UUID format for target_uuid', () => {
+      const payload = {
+        attacker_uuid: generateTestUUID(),
+        power_id: 'some_power',
+        target_uuid: 'not-a-valid-uuid',
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp: new Date().toISOString(),
+        signature: 'a'.repeat(64)
+      };
+
+      const { error } = arkanaPowerAttackSchema.validate(payload);
+      expect(error).toBeDefined();
     });
   });
 });

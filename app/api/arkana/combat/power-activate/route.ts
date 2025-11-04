@@ -6,6 +6,7 @@ import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition 
 import { encodeForLSL } from '@/lib/stringUtils';
 import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
+import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
 
 // Build human-readable effect message
@@ -75,80 +76,66 @@ export async function POST(request: NextRequest) {
     }
 
     // Get caster with stats
-    const caster = await prisma.user.findFirst({
+    const casterRaw = await prisma.user.findFirst({
       where: { slUuid: caster_uuid, universe: 'arkana' },
       include: { arkanaStats: true, stats: true }
     });
 
-    // Validate caster exists
-    if (!caster?.arkanaStats?.registrationCompleted) {
+    // Validate caster
+    const casterValidation = validateCombatReadiness(casterRaw, 'caster');
+    if (!casterValidation.valid) {
       return NextResponse.json(
-        { success: false, error: 'Caster not found or registration incomplete' },
+        { success: false, error: casterValidation.error },
+        { status: casterValidation.statusCode || 404 }
+      );
+    }
+
+    // Type assertion: caster is now guaranteed non-null by validation
+    const caster = casterRaw as NonNullable<typeof casterRaw>;
+
+    // Load target (may be null for self/area powers)
+    const targetRaw = await loadCombatTarget(target_uuid, 'arkana');
+
+    // CRITICAL FIX: If target_uuid was PROVIDED but target NOT FOUND, return error
+    if (target_uuid && !targetRaw) {
+      return NextResponse.json(
+        { success: false, error: 'Target not found' },
         { status: 404 }
       );
     }
 
-    // Check if caster is in RP mode (status === 0 means IC/RP mode)
-    if (!caster.stats || caster.stats.status !== 0) {
-      return NextResponse.json(
-        { success: false, error: 'Caster is not in RP mode' },
-        { status: 400 }
-      );
-    }
-
-    // Get target if specified (for non-self powers)
-    type UserWithStats = Awaited<ReturnType<typeof prisma.user.findFirst<{
-      where: { slUuid: string; universe: string };
-      include: { arkanaStats: true; stats: true };
-    }>>>;
-
-    let target: UserWithStats = null;
-    const allPotentialTargets: UserWithStats[] = [];
-
-    if (target_uuid) {
-      target = await prisma.user.findFirst({
-        where: { slUuid: target_uuid, universe: 'arkana' },
-        include: { arkanaStats: true, stats: true }
-      });
-
-      if (!target?.arkanaStats?.registrationCompleted) {
+    // Validate target if provided (note: targets for abilities don't need consciousness check)
+    let target: NonNullable<typeof targetRaw> | null = null;
+    if (targetRaw) {
+      // For power-activate, we allow unconscious targets (e.g., healing/resurrection)
+      // So we only check registration and RP mode
+      if (!targetRaw.arkanaStats?.registrationCompleted) {
         return NextResponse.json(
           { success: false, error: 'Target not found or registration incomplete' },
           { status: 404 }
         );
       }
-
-      // Check if target is in RP mode (status === 0 means IC/RP mode)
-      if (!target.stats || target.stats.status !== 0) {
+      if (!targetRaw.stats || targetRaw.stats.status !== 0) {
         return NextResponse.json(
           { success: false, error: 'Target is not in RP mode' },
           { status: 400 }
         );
       }
-
-      allPotentialTargets.push(target);
+      target = targetRaw as NonNullable<typeof targetRaw>;
     }
 
     // Load nearby users for area effects
-    if (value.nearby_uuids && Array.isArray(value.nearby_uuids) && value.nearby_uuids.length > 0) {
-      const nearbyUsers = await prisma.user.findMany({
-        where: {
-          slUuid: { in: value.nearby_uuids },
-          universe: 'arkana'
-        },
-        include: { arkanaStats: true, stats: true }
-      });
+    const excludeUuids = [caster.slUuid];
+    if (target) excludeUuids.push(target.slUuid);
 
-      // Filter to only registered users in RP mode and conscious (health > 0)
-      const validNearby = nearbyUsers.filter(u =>
-        u?.arkanaStats?.registrationCompleted &&
-        u.stats?.status === 0 &&
-        (u.stats?.health || 0) > 0 && // Exclude unconscious users
-        u.slUuid !== caster.slUuid // Exclude caster from nearby list
-      );
+    const nearbyUsers = await loadNearbyPlayers(
+      value.nearby_uuids,
+      'arkana',
+      excludeUuids
+    );
 
-      allPotentialTargets.push(...validNearby);
-    }
+    // Build allPotentialTargets array
+    const allPotentialTargets = buildPotentialTargets(target, nearbyUsers);
 
     // Load arkana data (needed for passive effects from perks/cybernetics/magic)
     await loadAllData();
@@ -156,13 +143,13 @@ export async function POST(request: NextRequest) {
     const allArchPowers = getAllArchPowers();
 
     // Calculate liveStats with active effects AND passive effects from perks/cybernetics/magic
-    const casterActiveEffectsForLiveStats = parseActiveEffects(caster.arkanaStats.activeEffects);
+    const casterActiveEffectsForLiveStats = parseActiveEffects(caster.arkanaStats!.activeEffects);
 
     // Get passive effects from perks/cybernetics/magic for caster WITH source tracking
     const casterPassiveEffectsWithSource = getPassiveEffectsWithSource(
-      (caster.arkanaStats.perks as string[]) || [],
-      (caster.arkanaStats.cybernetics as string[]) || [],
-      (caster.arkanaStats.magicWeaves as string[]) || []
+      (caster.arkanaStats!.perks as string[]) || [],
+      (caster.arkanaStats!.cybernetics as string[]) || [],
+      (caster.arkanaStats!.magicWeaves as string[]) || []
     );
 
     // Convert passive effects to ActiveEffect format (with source info) and combine with active effects
@@ -170,7 +157,7 @@ export async function POST(request: NextRequest) {
     const casterCombinedEffects = [...casterActiveEffectsForLiveStats, ...casterPassiveAsActive];
 
     // Recalculate caster liveStats with both active and passive effects
-    const casterLiveStats = recalculateLiveStats(caster.arkanaStats, casterCombinedEffects);
+    const casterLiveStats = recalculateLiveStats(caster.arkanaStats!, casterCombinedEffects);
 
     // Calculate target liveStats if target exists
     let targetLiveStats: LiveStats = {};
@@ -235,11 +222,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify ownership based on ability type
-    const userPerks = (caster.arkanaStats.perks as string[]) || [];
-    const userCybernetics = (caster.arkanaStats.cybernetics as string[]) || [];
-    const userMagicWeaves = (caster.arkanaStats.magicWeaves as string[]) || [];
-    const userCommonPowerIds = (caster.arkanaStats.commonPowers as string[]) || [];
-    const userArchPowerIds = (caster.arkanaStats.archetypePowers as string[]) || [];
+    const userPerks = (caster.arkanaStats!.perks as string[]) || [];
+    const userCybernetics = (caster.arkanaStats!.cybernetics as string[]) || [];
+    const userMagicWeaves = (caster.arkanaStats!.magicWeaves as string[]) || [];
+    const userCommonPowerIds = (caster.arkanaStats!.commonPowers as string[]) || [];
+    const userArchPowerIds = (caster.arkanaStats!.archetypePowers as string[]) || [];
 
     const ownsAbility =
       ownsPerk(userPerks, ability.id) ||
@@ -282,14 +269,14 @@ export async function POST(request: NextRequest) {
           else targetStatValue = target.arkanaStats.mental;
         }
 
-        const result = executeEffect(effectId, caster.arkanaStats, target?.arkanaStats || caster.arkanaStats, targetStatValue, casterLiveStats, targetLiveStats);
+        const result = executeEffect(effectId, caster.arkanaStats!, target?.arkanaStats || caster.arkanaStats!, targetStatValue, casterLiveStats, targetLiveStats);
         if (result) {
           activationSuccess = result.success;
 
           // Get detailed calculation breakdown for the message
           const baseStat = baseStatName as 'physical' | 'dexterity' | 'mental' | 'perception';
           const casterCalc = getDetailedStatCalculation(
-            caster.arkanaStats,
+            caster.arkanaStats!,
             casterLiveStats,
             baseStat,
             casterCombinedEffects
@@ -299,17 +286,43 @@ export async function POST(request: NextRequest) {
           if (target && target.arkanaStats) {
             const defenseStat = result.defenseStat || baseStat;
             const targetCalc = getDetailedDefenseCalculation(
-              target.arkanaStats,
+              target.arkanaStats!,
               targetLiveStats,
               defenseStat,
               targetCombinedEffects
             );
 
-            // Extract d20 roll and total from the old rollInfo format
+            // Extract d20 roll from rollInfo and recalculate using detailed calculations
             const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
             if (rollMatch) {
-              const [, d20, , total] = rollMatch;
-              rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${total} vs TN: ${targetCalc.formattedString}`;
+              const [, d20Str, originalModStr, originalTotalStr, originalTNStr] = rollMatch;
+              const d20 = parseInt(d20Str);
+              const originalMod = parseInt(originalModStr);
+              const originalTotal = parseInt(originalTotalStr);
+              const originalTN = parseInt(originalTNStr);
+
+              // Recalculate total and TN using the SAME values we'll display in the message
+              const recalculatedTotal = d20 + casterCalc.finalModifier;
+              const recalculatedTN = targetCalc.finalTN;
+              const recalculatedSuccess = recalculatedTotal >= recalculatedTN;
+
+              // Log warning if calculation mismatch detected (diagnostic for underlying bugs)
+              if (recalculatedSuccess !== activationSuccess ||
+                  casterCalc.finalModifier !== originalMod ||
+                  recalculatedTN !== originalTN) {
+                console.warn(
+                  `[ROLL MISMATCH - power-activate] Ability: ${ability.name}\n` +
+                  `  Original: ${activationSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${originalTN})\n` +
+                  `  Recalculated: ${recalculatedSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${casterCalc.finalModifier} = ${recalculatedTotal} vs TN:${recalculatedTN})\n` +
+                  `  Caster effects: ${casterCombinedEffects.length} effects\n` +
+                  `  Target effects: ${targetCombinedEffects.length} effects`
+                );
+              }
+
+              // Use recalculated success to ensure message is always mathematically consistent
+              activationSuccess = recalculatedSuccess;
+
+              rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${recalculatedTotal} vs TN: ${targetCalc.formattedString}`;
             } else {
               rollDescription = result.rollInfo || '';
             }
@@ -325,7 +338,7 @@ export async function POST(request: NextRequest) {
     // If activation failed on check, still process turn and return failure
     if (!activationSuccess && activateEffects.some((e: string) => e.startsWith('check_'))) {
       // Process turn for caster (decrement all effects) and apply healing even on failure
-      const casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
+      const casterActiveEffects = parseActiveEffects(caster.arkanaStats!.activeEffects);
       const turnProcessed = await processEffectsTurnAndApplyHealing(
         caster as typeof caster & { arkanaStats: NonNullable<typeof caster.arkanaStats> },
         casterActiveEffects,
@@ -351,9 +364,9 @@ export async function POST(request: NextRequest) {
           affected: [],
           caster: {
             uuid: caster.slUuid,
-            name: encodeForLSL(caster.arkanaStats.characterName)
+            name: encodeForLSL(caster.arkanaStats!.characterName)
           },
-          message: encodeForLSL(`${caster.arkanaStats.characterName} attempts ${ability.name} - FAILED! ${rollDescription}`)
+          message: encodeForLSL(`${caster.arkanaStats!.characterName} attempts ${ability.name} - FAILED! ${rollDescription}`)
         }
       });
     }
@@ -378,7 +391,7 @@ export async function POST(request: NextRequest) {
         if (!applicableTarget || !applicableTarget.arkanaStats) continue;
 
         const targetLiveStats = (applicableTarget.arkanaStats.liveStats as LiveStats) || {};
-        const result = executeEffect(effectId, caster.arkanaStats, applicableTarget.arkanaStats, undefined, casterLiveStats, targetLiveStats);
+        const result = executeEffect(effectId, caster.arkanaStats!, applicableTarget.arkanaStats, undefined, casterLiveStats, targetLiveStats);
 
         if (result) {
           const userKey = applicableTarget.slUuid;
@@ -396,7 +409,7 @@ export async function POST(request: NextRequest) {
 
     // ALWAYS process caster's turn first (decrement all PRE-EXISTING effects) and apply all healing
     // This happens regardless of whether the caster receives new effects from this power
-    let casterActiveEffects = parseActiveEffects(caster.arkanaStats.activeEffects);
+    let casterActiveEffects = parseActiveEffects(caster.arkanaStats!.activeEffects);
     const casterTurnProcessed = await processEffectsTurnAndApplyHealing(
       caster as typeof caster & { arkanaStats: NonNullable<typeof caster.arkanaStats> },
       casterActiveEffects,
@@ -410,7 +423,7 @@ export async function POST(request: NextRequest) {
     if (casterImmediateDamage > 0) {
       const casterDamageResult = applyDamageAndHealing(
         casterFinalHP,
-        caster.arkanaStats.hitPoints,
+        caster.arkanaStats!.hitPoints,
         casterImmediateDamage,
         0,  // No additional healing (already applied above)
         casterActiveEffects,
@@ -452,7 +465,7 @@ export async function POST(request: NextRequest) {
 
       // Apply all new effects for this user (pass caster name for display)
       for (const effectResult of effectResults) {
-        userActiveEffects = applyActiveEffect(userActiveEffects, effectResult, caster.arkanaStats.characterName);
+        userActiveEffects = applyActiveEffect(userActiveEffects, effectResult, caster.arkanaStats!.characterName);
       }
 
       // Recalculate liveStats
@@ -528,7 +541,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build comprehensive message with effect details
-    const casterName = caster.arkanaStats.characterName;
+    const casterName = caster.arkanaStats!.characterName;
 
     let message = `${casterName} activates ${ability.name}`;
 
