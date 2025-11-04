@@ -1668,7 +1668,7 @@
     "type": "stat_based",
     "damageType": "force",
     "damageFormula": "4 + Mental",
-    "target": "enemy",
+    "target": "area",
     "duration": "immediate"
   },
   {

@@ -1955,7 +1955,7 @@
     "abilityType": ["attack"],
     "tags": ["damage", "energy"],
     "baseStat": "Mental",
-    "targetType": "area",
+    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_mental_vs_physical", "damage_energy_8"]
