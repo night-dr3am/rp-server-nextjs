@@ -2140,4 +2140,234 @@ describe('/api/arkana/combat/power-attack', () => {
       expect(error).toBeDefined();
     });
   });
+
+  describe('Fixed TN Check Tests (check_mental_vs_tn10)', () => {
+    it('should execute area attack with fixed TN check (check_mental_vs_tn10) - NO primary target - SUCCESS', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'TK Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,  // +6 modifier (tier 5-6)
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_tk_surge']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target 1',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const nearby2 = await createArkanaTestUser({
+        characterName: 'Nearby Target 2',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_tk_surge',
+        // NO target_uuid - area attack with fixed TN check
+        nearby_uuids: [nearby1.slUuid, nearby2.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Fixed TN check should work without primary target
+      expectSuccess(data);
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Test TK Surge');
+
+      // With Mental 5 (+6), should execute without error (check may pass or fail due to d20 roll)
+      // Key assertion: NO "Attack check requires a primary target" error
+      expect(data.data.message).not.toContain('Attack check requires');
+    });
+
+    it('should execute area attack with fixed TN check - low Mental - possible FAILURE', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Weak TK Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 1,  // -2 modifier (tier 0-1)
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['test_area_tk_surge']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_tk_surge',
+        // NO target_uuid - area attack with fixed TN check
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Should not error - fixed TN checks work without targets
+      // Key assertion: API call succeeds (doesn't return 400 error)
+      // The check itself may fail (expected with Mental 1), but the endpoint should work
+      if (!data.success) {
+        // If API failed, it should NOT be due to "Attack check requires a primary target"
+        expect(data.error).not.toContain('Attack check requires');
+      } else {
+        expectSuccess(data);
+        const decodedMessage = decodeURIComponent(data.data.message);
+        expect(decodedMessage).toContain('Test TK Surge');
+      }
+    });
+
+    it('should reject enemy_stat check without primary target', async () => {
+      // This test ensures enemy_stat checks still require targets
+      const attacker = await createArkanaTestUser({
+        characterName: 'Psion Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['gaki_death_soul_drain']  // Uses check_mental_vs_mental (enemy_stat)
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'gaki_death_soul_drain',
+        // NO target_uuid - should FAIL for enemy_stat check
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Should fail because enemy_stat checks require a primary target
+      expectError(data, 'Attack check requires a primary target');
+    });
+
+    // Test area attack with check FAILURE without primary target (regression test for HTTP 500)
+    it('should handle area attack check FAILURE with fixed TN check - NO primary target - NO HTTP 500', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Weak TK User',
+        race: 'human',
+        mental: 1,  // +0 modifier (tier 0-2) - likely to fail TN 10 check
+        archetypePowers: ['test_area_tk_surge']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target 1',
+        race: 'human',
+        physical: 3
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_tk_surge',
+        // NO target_uuid - area attack with fixed TN check
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Primary assertion: Should return HTTP 200, not HTTP 500 (regression test)
+      expect(response.status).toBe(200);
+      expectSuccess(data);
+
+      // Secondary assertions: Verify response format
+      expect(data.data.powerUsed).toBe('Test TK Surge');
+      expect(data.data.rollInfo).toBeTruthy();
+
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Weak TK User');
+      expect(decodedMessage).toContain('Test TK Surge');
+      expect(decodedMessage).toContain('vs TN:10');
+
+      // Check-specific assertions: If check failed (which is likely with Mental 1)
+      if (data.data.attackSuccess === 'false') {
+        expect(data.data.totalDamage).toBe(0);
+        expect(data.data.affected).toEqual([]);
+
+        // Should NOT have target object (since no primary target)
+        expect(data.data.target).toBeUndefined();
+
+        // Message should contain MISS
+        expect(decodedMessage).toContain('MISS');
+      } else {
+        // Check succeeded (less likely but possible with Mental 1)
+        // Just verify it completed without errors
+        expect(data.data.attackSuccess).toBe('true');
+      }
+    });
+  });
 });

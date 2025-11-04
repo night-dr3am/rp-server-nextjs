@@ -1844,7 +1844,7 @@
     "targetType": "area",
     "range": 30,
     "effects": {
-      "attack": ["check_mental_vs_physical", "damage_tk_crush_4"],
+      "attack": ["check_mental_vs_tn10", "damage_tk_crush_4"],
       "ability": ["check_mental_vs_tn10", "utility_telekinesis"]
     }
   },

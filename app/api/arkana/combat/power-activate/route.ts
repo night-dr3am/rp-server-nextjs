@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -255,84 +255,33 @@ export async function POST(request: NextRequest) {
     let activationSuccess = true;
     let rollDescription = '';
 
-    // First, execute check effects to determine success (using effective stats)
-    for (const effectId of activateEffects) {
-      if (effectId.startsWith('check_')) {
-        const baseStatName = ability.baseStat?.toLowerCase() || 'mental';
-        let targetStatValue: number = 2;
+    // Determine if this ability has any check effects
+    const hasCheckEffects = activateEffects.some((e: string) => e.startsWith('check_'));
 
-        if (target && target.arkanaStats) {
-          if (baseStatName === 'physical') targetStatValue = target.arkanaStats.physical;
-          else if (baseStatName === 'mental') targetStatValue = target.arkanaStats.mental;
-          else if (baseStatName === 'dexterity') targetStatValue = target.arkanaStats.dexterity;
-          else if (baseStatName === 'perception') targetStatValue = target.arkanaStats.perception;
-          else targetStatValue = target.arkanaStats.mental;
-        }
+    // Execute check effects using shared validation function (if any exist)
+    if (hasCheckEffects) {
+      const checkResult = validateAndExecuteCheck(
+        activateEffects,
+        ability,
+        caster as typeof caster & { arkanaStats: NonNullable<typeof caster.arkanaStats> },
+        casterLiveStats,
+        casterCombinedEffects,
+        target ? (target as typeof target & { arkanaStats: NonNullable<typeof target.arkanaStats> }) : null,
+        targetLiveStats,
+        targetCombinedEffects,
+        false  // requireTargetForChecks - power-activate allows checks without targets (fixed TN checks)
+      );
 
-        const result = executeEffect(effectId, caster.arkanaStats!, target?.arkanaStats || caster.arkanaStats!, targetStatValue, casterLiveStats, targetLiveStats);
-        if (result) {
-          activationSuccess = result.success;
-
-          // Get detailed calculation breakdown for the message
-          const baseStat = baseStatName as 'physical' | 'dexterity' | 'mental' | 'perception';
-          const casterCalc = getDetailedStatCalculation(
-            caster.arkanaStats!,
-            casterLiveStats,
-            baseStat,
-            casterCombinedEffects
-          );
-
-          // Get target's detailed defense calculation if target exists
-          if (target && target.arkanaStats) {
-            const defenseStat = result.defenseStat || baseStat;
-            const targetCalc = getDetailedDefenseCalculation(
-              target.arkanaStats!,
-              targetLiveStats,
-              defenseStat,
-              targetCombinedEffects
-            );
-
-            // Extract d20 roll from rollInfo and recalculate using detailed calculations
-            const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
-            if (rollMatch) {
-              const [, d20Str, originalModStr, originalTotalStr, originalTNStr] = rollMatch;
-              const d20 = parseInt(d20Str);
-              const originalMod = parseInt(originalModStr);
-              const originalTotal = parseInt(originalTotalStr);
-              const originalTN = parseInt(originalTNStr);
-
-              // Recalculate total and TN using the SAME values we'll display in the message
-              const recalculatedTotal = d20 + casterCalc.finalModifier;
-              const recalculatedTN = targetCalc.finalTN;
-              const recalculatedSuccess = recalculatedTotal >= recalculatedTN;
-
-              // Log warning if calculation mismatch detected (diagnostic for underlying bugs)
-              if (recalculatedSuccess !== activationSuccess ||
-                  casterCalc.finalModifier !== originalMod ||
-                  recalculatedTN !== originalTN) {
-                console.warn(
-                  `[ROLL MISMATCH - power-activate] Ability: ${ability.name}\n` +
-                  `  Original: ${activationSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${originalTN})\n` +
-                  `  Recalculated: ${recalculatedSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${casterCalc.finalModifier} = ${recalculatedTotal} vs TN:${recalculatedTN})\n` +
-                  `  Caster effects: ${casterCombinedEffects.length} effects\n` +
-                  `  Target effects: ${targetCombinedEffects.length} effects`
-                );
-              }
-
-              // Use recalculated success to ensure message is always mathematically consistent
-              activationSuccess = recalculatedSuccess;
-
-              rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${recalculatedTotal} vs TN: ${targetCalc.formattedString}`;
-            } else {
-              rollDescription = result.rollInfo || '';
-            }
-          } else {
-            // No target or fixed TN check
-            rollDescription = result.rollInfo || '';
-          }
-        }
-        break;
+      // Handle validation errors (shouldn't happen with requireTargetForChecks=false, but check anyway)
+      if (checkResult.error) {
+        return NextResponse.json(
+          { success: false, error: checkResult.error.message },
+          { status: checkResult.error.statusCode }
+        );
       }
+
+      activationSuccess = checkResult.success;
+      rollDescription = checkResult.rollDescription;
     }
 
     // If activation failed on check, still process turn and return failure
@@ -553,7 +502,12 @@ export async function POST(request: NextRequest) {
       message += ` on ${target.arkanaStats.characterName}`;
     }
 
-    message += ` - SUCCESS! ${rollDescription}`;
+    // Add roll description if check was performed
+    if (rollDescription) {
+      message += ` - SUCCESS! ${rollDescription}`;
+    } else {
+      message += ' - SUCCESS';
+    }
 
     // Add effect summary
     const effectSummary = affectedUsersData

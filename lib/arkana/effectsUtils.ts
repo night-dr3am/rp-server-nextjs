@@ -1282,6 +1282,164 @@ export function clearSceneEffects(
 }
 
 /**
+ * Validate and execute check effects with detailed roll calculation breakdown
+ * Handles both fixed TN checks (no target required) and enemy stat checks (target required)
+ * Used by power-attack and power-activate endpoints to ensure consistent check validation
+ *
+ * @param effectIds - Array of effect IDs to check (processes first check_ effect only)
+ * @param ability - The ability/power being used (contains baseStat and name)
+ * @param caster - User performing the check (with arkanaStats)
+ * @param casterLiveStats - Caster's effective stats with buffs/debuffs
+ * @param casterCombinedEffects - Caster's active + passive effects (for detailed breakdown)
+ * @param target - Optional target for the check (null for self/area abilities)
+ * @param targetLiveStats - Optional target's effective stats
+ * @param targetCombinedEffects - Optional target's active + passive effects
+ * @param requireTargetForChecks - If true, validates that enemy_stat checks have a target
+ * @returns CheckValidationResult with success, rollDescription, and optional error
+ */
+export function validateAndExecuteCheck(
+  effectIds: string[],
+  ability: { baseStat?: string; name: string },
+  caster: { arkanaStats: ArkanaStats },
+  casterLiveStats: LiveStats,
+  casterCombinedEffects: ActiveEffect[],
+  target: { arkanaStats: ArkanaStats } | null,
+  targetLiveStats: LiveStats,
+  targetCombinedEffects: ActiveEffect[],
+  requireTargetForChecks: boolean = false
+): {
+  success: boolean;
+  rollDescription: string;
+  error?: { message: string; statusCode: number };
+} {
+  // Find first check effect
+  for (const effectId of effectIds) {
+    if (effectId.startsWith('check_')) {
+      // Load effect definition to determine if target is truly required
+      const effectDef = getEffectDefinition(effectId);
+
+      if (!effectDef) {
+        return {
+          success: false,
+          rollDescription: '',
+          error: { message: `Effect definition not found: ${effectId}`, statusCode: 500 }
+        };
+      }
+
+      // Check if target is required based on effect's checkVs type
+      if (requireTargetForChecks && !target && effectDef.checkVs === 'enemy_stat') {
+        // Enemy stat checks require a target to read their stats
+        return {
+          success: false,
+          rollDescription: '',
+          error: { message: 'Attack check requires a primary target', statusCode: 400 }
+        };
+      }
+
+      // Extract base stat and map to target stat value
+      const baseStatName = ability.baseStat?.toLowerCase() || 'mental';
+      let targetStatValue: number = 2; // Default fallback for self/area abilities
+
+      if (target && target.arkanaStats) {
+        if (baseStatName === 'physical') targetStatValue = target.arkanaStats.physical;
+        else if (baseStatName === 'mental') targetStatValue = target.arkanaStats.mental;
+        else if (baseStatName === 'dexterity') targetStatValue = target.arkanaStats.dexterity;
+        else if (baseStatName === 'perception') targetStatValue = target.arkanaStats.perception;
+        else targetStatValue = target.arkanaStats.mental;
+      }
+
+      // Execute the check effect
+      const result = executeEffect(
+        effectId,
+        caster.arkanaStats,
+        target?.arkanaStats || caster.arkanaStats,
+        targetStatValue,
+        casterLiveStats,
+        targetLiveStats
+      );
+
+      if (!result) {
+        return {
+          success: false,
+          rollDescription: '',
+          error: { message: `Failed to execute check effect: ${effectId}`, statusCode: 500 }
+        };
+      }
+
+      // Get detailed calculation breakdown for the message
+      const baseStat = baseStatName as 'physical' | 'dexterity' | 'mental' | 'perception';
+      const casterCalc = getDetailedStatCalculation(
+        caster.arkanaStats,
+        casterLiveStats,
+        baseStat,
+        casterCombinedEffects
+      );
+
+      let rollDescription = '';
+
+      // Get target's detailed defense calculation if target exists
+      if (target && target.arkanaStats) {
+        const defenseStat = result.defenseStat || baseStat;
+        const targetCalc = getDetailedDefenseCalculation(
+          target.arkanaStats,
+          targetLiveStats,
+          defenseStat,
+          targetCombinedEffects
+        );
+
+        // Extract d20 roll from rollInfo and recalculate using detailed calculations
+        const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
+        if (rollMatch) {
+          const [, d20Str, originalModStr, originalTotalStr, originalTNStr] = rollMatch;
+          const d20 = parseInt(d20Str);
+          const originalMod = parseInt(originalModStr);
+          const originalTotal = parseInt(originalTotalStr);
+          const originalTN = parseInt(originalTNStr);
+
+          // Recalculate total and TN using the SAME values we'll display in the message
+          const recalculatedTotal = d20 + casterCalc.finalModifier;
+          const recalculatedTN = targetCalc.finalTN;
+          const recalculatedSuccess = recalculatedTotal >= recalculatedTN;
+
+          // Log warning if calculation mismatch detected (diagnostic for underlying bugs)
+          if (recalculatedSuccess !== result.success ||
+              casterCalc.finalModifier !== originalMod ||
+              recalculatedTN !== originalTN) {
+            console.warn(
+              `[ROLL MISMATCH - validateAndExecuteCheck] Ability: ${ability.name}\n` +
+              `  Original: ${result.success ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${originalTN})\n` +
+              `  Recalculated: ${recalculatedSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${casterCalc.finalModifier} = ${recalculatedTotal} vs TN:${recalculatedTN})\n` +
+              `  Caster effects: ${casterCombinedEffects.length} effects\n` +
+              `  Target effects: ${targetCombinedEffects.length} effects`
+            );
+          }
+
+          // Use recalculated success to ensure message is always mathematically consistent
+          const finalSuccess = recalculatedSuccess;
+          rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${recalculatedTotal} vs TN: ${targetCalc.formattedString}`;
+
+          return { success: finalSuccess, rollDescription };
+        } else {
+          rollDescription = result.rollInfo || '';
+        }
+      } else {
+        // No target or fixed TN check
+        rollDescription = result.rollInfo || '';
+      }
+
+      return { success: result.success, rollDescription };
+    }
+  }
+
+  // No check effect found - this shouldn't happen as caller should check hasCheckEffects
+  return {
+    success: false,
+    rollDescription: '',
+    error: { message: 'No check effect found', statusCode: 500 }
+  };
+}
+
+/**
  * Format power details for LSL display in dialogs
  * Creates human-readable power description with effects breakdown
  * @param power - The power/ability/perk/cybernetic/magic object

@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, getDetailedStatCalculation, getDetailedDefenseCalculation, determineApplicableTargets, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness, type UserWithStats } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -270,87 +270,30 @@ export async function POST(request: NextRequest) {
     if (!hasCheckEffects) {
       attackSuccess = true;
       rollDescription = 'Auto-success (no check required)';
-    }
+    } else {
+      // Execute check effects using shared validation function
+      const checkResult = validateAndExecuteCheck(
+        attackEffects,
+        power,
+        attacker as typeof attacker & { arkanaStats: NonNullable<typeof attacker.arkanaStats> },
+        attackerLiveStats,
+        attackerCombinedEffects,
+        target ? (target as typeof target & { arkanaStats: NonNullable<typeof target.arkanaStats> }) : null,
+        targetLiveStats,
+        targetCombinedEffects,
+        true  // requireTargetForChecks - validates that enemy_stat checks have a target
+      );
 
-    // First, execute check effects to determine success (using effective stats)
-    // Note: Checks require a target - area-without-target attacks should not have check effects
-    for (const effectId of attackEffects) {
-      if (effectId.startsWith('check_')) {
-        if (!target) {
-          // Area attack with check but no primary target - this is invalid
-          return NextResponse.json(
-            { success: false, error: 'Attack check requires a primary target' },
-            { status: 400 }
-          );
-        }
-
-        const baseStatName = power.baseStat?.toLowerCase() || 'mental';
-        let targetStatValue: number;
-        if (baseStatName === 'physical') targetStatValue = target.arkanaStats!.physical;
-        else if (baseStatName === 'mental') targetStatValue = target.arkanaStats!.mental;
-        else if (baseStatName === 'dexterity') targetStatValue = target.arkanaStats!.dexterity;
-        else if (baseStatName === 'perception') targetStatValue = target.arkanaStats!.perception;
-        else targetStatValue = target.arkanaStats!.mental;
-
-        const result = executeEffect(effectId, attacker.arkanaStats!, target.arkanaStats!, targetStatValue, attackerLiveStats, targetLiveStats);
-        if (result) {
-          attackSuccess = result.success;
-          // Get detailed calculation breakdown for the message
-          const baseStat = (power.baseStat?.toLowerCase() || 'mental') as 'physical' | 'dexterity' | 'mental' | 'perception';
-          const attackerCalc = getDetailedStatCalculation(
-            attacker.arkanaStats!,
-            attackerLiveStats,
-            baseStat,
-            attackerCombinedEffects
-          );
-
-          // Get target's detailed defense calculation
-          // Use the defenseStat from result if available, otherwise default to baseStat
-          const defenseStat = result.defenseStat || baseStat;
-          const targetCalc = getDetailedDefenseCalculation(
-            target.arkanaStats!,
-            targetLiveStats,
-            defenseStat,
-            targetCombinedEffects
-          );
-
-          // Extract d20 roll from rollInfo and recalculate using detailed calculations
-          const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
-          if (rollMatch) {
-            const [, d20Str, originalModStr, originalTotalStr, originalTNStr] = rollMatch;
-            const d20 = parseInt(d20Str);
-            const originalMod = parseInt(originalModStr);
-            const originalTotal = parseInt(originalTotalStr);
-            const originalTN = parseInt(originalTNStr);
-
-            // Recalculate total and TN using the SAME values we'll display in the message
-            const recalculatedTotal = d20 + attackerCalc.finalModifier;
-            const recalculatedTN = targetCalc.finalTN;
-            const recalculatedSuccess = recalculatedTotal >= recalculatedTN;
-
-            // Log warning if calculation mismatch detected (diagnostic for underlying bugs)
-            if (recalculatedSuccess !== attackSuccess ||
-                attackerCalc.finalModifier !== originalMod ||
-                recalculatedTN !== originalTN) {
-              console.warn(
-                `[ROLL MISMATCH - power-attack] Power: ${power.name}\n` +
-                `  Original: ${attackSuccess ? 'HIT' : 'MISS'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${originalTN})\n` +
-                `  Recalculated: ${recalculatedSuccess ? 'HIT' : 'MISS'} (d20:${d20} + mod:${attackerCalc.finalModifier} = ${recalculatedTotal} vs TN:${recalculatedTN})\n` +
-                `  Attacker effects: ${attackerCombinedEffects.length} effects\n` +
-                `  Target effects: ${targetCombinedEffects.length} effects`
-              );
-            }
-
-            // Use recalculated success to ensure message is always mathematically consistent
-            attackSuccess = recalculatedSuccess;
-
-            rollDescription = `Roll: d20(${d20}) + ${attackerCalc.formattedString} = ${recalculatedTotal} vs TN: ${targetCalc.formattedString}`;
-          } else {
-            rollDescription = result.rollInfo || '';
-          }
-        }
-        break;
+      // Handle validation errors (e.g., enemy_stat check without target)
+      if (checkResult.error) {
+        return NextResponse.json(
+          { success: false, error: checkResult.error.message },
+          { status: checkResult.error.statusCode }
+        );
       }
+
+      attackSuccess = checkResult.success;
+      rollDescription = checkResult.rollDescription;
     }
 
     // If attack failed on check, process turn and return miss
@@ -371,25 +314,51 @@ export async function POST(request: NextRequest) {
         })
       });
 
-      // Target must exist if we got here (check validated it above)
+      // For fixed TN checks, target may be null (area attacks)
+      const attackerName = attacker.arkanaStats!.characterName;
+      const missMessage = target
+        ? `${attackerName} uses ${power.name} on ${target.arkanaStats!.characterName} - MISS! ${rollDescription}`
+        : `${attackerName} uses ${power.name} - MISS! ${rollDescription}`;
+
+      const responseData: {
+        attackSuccess: string;
+        powerUsed: string;
+        powerBaseStat: string;
+        rollInfo: string;
+        totalDamage: number;
+        affected: never[];
+        message: string;
+        target?: {
+          uuid: string;
+          name: string;
+          healthBefore: number;
+          healthAfter: number;
+          isUnconscious: string;
+        };
+      } = {
+        attackSuccess: 'false',
+        powerUsed: power.name,
+        powerBaseStat: power.baseStat || 'Mental',
+        rollInfo: rollDescription,
+        totalDamage: 0,
+        affected: [],
+        message: encodeForLSL(missMessage)
+      };
+
+      // Only include target info if target exists
+      if (target) {
+        responseData.target = {
+          uuid: target.slUuid,
+          name: encodeForLSL(target.arkanaStats!.characterName),
+          healthBefore: target.stats!.health,
+          healthAfter: target.stats!.health,
+          isUnconscious: (target.stats!.health <= 0) ? 'true' : 'false'
+        };
+      }
+
       return NextResponse.json({
         success: true,
-        data: {
-          attackSuccess: 'false',
-          powerUsed: power.name,
-          powerBaseStat: power.baseStat || 'Mental',
-          rollInfo: rollDescription,
-          totalDamage: 0,
-          affected: [],
-          target: {
-            uuid: target!.slUuid,
-            name: encodeForLSL(target!.arkanaStats!.characterName),
-            healthBefore: target!.stats!.health,
-            healthAfter: target!.stats!.health,
-            isUnconscious: (target!.stats!.health <= 0) ? 'true' : 'false'
-          },
-          message: encodeForLSL(`${attacker.arkanaStats!.characterName} uses ${power.name} on ${target!.arkanaStats!.characterName} - MISS! ${rollDescription}`)
-        }
+        data: responseData
       });
     }
 
@@ -599,6 +568,11 @@ export async function POST(request: NextRequest) {
     } else {
       // Area attack without primary target
       message = `${attackerName} uses ${power.name} affecting ${affectedTargets.length} ${affectedTargets.length === 1 ? 'target' : 'targets'}`;
+
+      // Add roll description if check was performed
+      if (rollDescription) {
+        message += ` - ${rollDescription}`;
+      }
     }
 
     // Add self-effects message

@@ -16,6 +16,22 @@
     }
   },
   {
+    "id": "test_area_tk_surge",
+    "name": "Test TK Surge",
+    "desc": "Test power for area attacks WITH fixed TN check (check_mental_vs_tn10).",
+    "cost": 4,
+    "species": "human",
+    "arch": "psion",
+    "abilityType": ["attack"],
+    "tags": ["damage", "force", "area"],
+    "baseStat": "Mental",
+    "targetType": "area",
+    "range": 30,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "damage_tk_crush_4"]
+    }
+  },
+  {
     "id": "strigoi_life_cradle_of_hunger",
     "name": "Cradle of Hunger",
     "desc": "Touch can sap energy, leaving mortals weak as if struck by days of exhaustion.",

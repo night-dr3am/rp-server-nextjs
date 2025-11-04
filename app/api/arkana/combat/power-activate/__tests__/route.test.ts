@@ -6055,4 +6055,201 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(error).toBeDefined();
     });
   });
+
+  describe('Fixed TN Check Tests (check_mental_vs_tn10)', () => {
+    it('should execute ability with fixed TN check (check_mental_vs_tn10) - NO target - SUCCESS', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Memory Weaver',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,  // +6 modifier (tier 5-6)
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['veilborn_echoes_memory_weave']  // Uses check_mental_vs_tn10 in ability effects
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veilborn_echoes_memory_weave',
+        // NO target_uuid - fixed TN check works without target
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Fixed TN check should work without target
+      expectSuccess(data);
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Memory Weave');
+
+      // With Mental 5 (+6), most rolls should pass TN 10
+      // Check that roll was executed
+      expect(decodedMessage).toMatch(/Roll:/);
+    });
+
+    it('should execute ability with fixed TN check - low Mental - possible FAILURE', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Weak Weaver',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 1,  // -2 modifier (tier 0-1)
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['veilborn_echoes_memory_weave']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veilborn_echoes_memory_weave',
+        // NO target_uuid - fixed TN check works without target
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Should not error - fixed TN checks work without targets
+      expectSuccess(data);
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Memory Weave');
+
+      // With Mental 1 (-2), rolling TN 10 requires d20 roll of 12+
+      // Check message format (may indicate success or failure depending on roll)
+      expect(decodedMessage).toMatch(/Roll:/);
+    });
+
+    it('should execute ability with fixed TN check - WITH optional target - SUCCESS', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Memory Weaver',
+        race: 'veilborn',
+        archetype: 'Echoes',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 3,
+        hitPoints: 15,
+        archetypePowers: ['veilborn_echoes_memory_weave']
+      });
+
+      const target = await createArkanaTestUser({
+        characterName: 'Memory Subject',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'veilborn_echoes_memory_weave',
+        target_uuid: target.slUuid,  // Optional target provided
+        nearby_uuids: [],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Should work with optional target too
+      expectSuccess(data);
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Memory Weave');
+      expect(decodedMessage).toMatch(/Roll:/);
+    });
+
+    it('should execute area ability with fixed TN check (check_mental_vs_tn10) - NO target - roll in message', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Area Effect Caster',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,  // +6 modifier (tier 5-6)
+        perception: 2,
+        hitPoints: 15,
+        archetypePowers: ['test_area_tk_surge']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target 1',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const nearby2 = await createArkanaTestUser({
+        characterName: 'Nearby Target 2',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'test_area_tk_surge',
+        // NO target_uuid - area ability with fixed TN check
+        nearby_uuids: [nearby1.slUuid, nearby2.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      // Should succeed - area abilities with fixed TN checks don't need targets
+      expectSuccess(data);
+
+      // Key assertion: rollDescription should appear in success message
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toContain('Test TK Surge');
+      expect(decodedMessage).toContain('SUCCESS');
+      expect(decodedMessage).toMatch(/Roll:/);
+      expect(decodedMessage).toContain('vs TN:10');
+    });
+  });
 });
