@@ -1423,8 +1423,45 @@ export function validateAndExecuteCheck(
           rollDescription = result.rollInfo || '';
         }
       } else {
-        // No target or fixed TN check
-        rollDescription = result.rollInfo || '';
+        // No target or fixed TN check - use detailed formatting for caster side
+        const rollMatch = (result.rollInfo || '').match(/Roll: (\d+)\+(-?\d+)=(-?\d+) vs TN:(\d+)/);
+        if (rollMatch) {
+          const [, d20Str, modStr, totalStr, tnStr] = rollMatch;
+          const d20 = parseInt(d20Str);
+          const originalMod = parseInt(modStr);
+          const originalTotal = parseInt(totalStr);
+          const tn = parseInt(tnStr);
+
+          // Get detailed caster calculation
+          const casterCalc = getDetailedStatCalculation(
+            caster.arkanaStats,
+            casterLiveStats,
+            baseStat,
+            casterCombinedEffects
+          );
+
+          // Recalculate with detailed display
+          const recalculatedTotal = d20 + casterCalc.finalModifier;
+          const recalculatedSuccess = recalculatedTotal >= tn;
+
+          // Log warning if calculation mismatch detected
+          if (recalculatedSuccess !== result.success || casterCalc.finalModifier !== originalMod) {
+            console.warn(
+              `[ROLL MISMATCH - fixed TN check] Ability: ${ability.name}\n` +
+              `  Original: ${result.success ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${originalMod} = ${originalTotal} vs TN:${tn})\n` +
+              `  Recalculated: ${recalculatedSuccess ? 'SUCCESS' : 'FAILED'} (d20:${d20} + mod:${casterCalc.finalModifier} = ${recalculatedTotal} vs TN:${tn})\n` +
+              `  Caster effects: ${casterCombinedEffects.length} effects`
+            );
+          }
+
+          // Use recalculated success to ensure message is always mathematically consistent
+          const finalSuccess = recalculatedSuccess;
+          rollDescription = `Roll: d20(${d20}) + ${casterCalc.formattedString} = ${recalculatedTotal} vs TN:${tn}`;
+
+          return { success: finalSuccess, rollDescription };
+        } else {
+          rollDescription = result.rollInfo || '';
+        }
       }
 
       return { success: result.success, rollDescription };
@@ -1626,4 +1663,65 @@ export function formatPowerDetailsForLSL(
 
   // URL-encode for LSL transmission
   return encodeURIComponent(message.trim());
+}
+
+/**
+ * Build human-readable effect message for combat output
+ * Handles damage, stat modifiers, control, healing, defense, special, and utility effects
+ * Used by both power-attack and power-activate endpoints for consistent effect messaging
+ * @param result - Effect result containing effect definition and applied values
+ * @returns Formatted effect message string
+ */
+export function buildEffectMessage(result: EffectResult): string {
+  const def = result.effectDef;
+
+  if (def.category === 'damage' && result.damage) {
+    return `${result.damage} ${def.damageType} damage`;
+  }
+
+  if (def.category === 'stat_modifier') {
+    const sign = (def.modifier || 0) >= 0 ? '+' : '';
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    return `${sign}${def.modifier} ${def.stat}${duration}`;
+  }
+
+  if (def.category === 'control') {
+    return `${def.controlType || 'control'} effect`;
+  }
+
+  if (def.category === 'heal' && result.heal) {
+    return `Heals ${result.heal} HP`;
+  }
+
+  if (def.category === 'utility') {
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    return `${def.name}${duration}`;
+  }
+
+  if (def.category === 'defense') {
+    let duration = '';
+    if (def.duration?.startsWith('turns:')) {
+      const turns = def.duration.split(':')[1];
+      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
+    } else if (def.duration === 'scene') {
+      duration = ' (scene)';
+    }
+    const reduction = def.damageReduction || 0;
+    return `Damage Reduction -${reduction}${duration}`;
+  }
+
+  // Fallback: use effect name
+  return def.name;
 }

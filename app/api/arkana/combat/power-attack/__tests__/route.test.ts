@@ -2369,5 +2369,60 @@ describe('/api/arkana/combat/power-attack', () => {
         expect(data.data.attackSuccess).toBe('true');
       }
     });
+
+    it('should show DETAILED roll format for area attack with fixed TN check', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Detailed Format Test',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,  // +6 modifier (tier 5-6)
+        perception: 2,
+        hitPoints: 15,
+        archetypePowers: ['test_area_tk_surge']
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_tk_surge',
+        // NO target_uuid - area attack with fixed TN check
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Key assertion: rollInfo should have DETAILED format with d20() notation
+      expect(data.data.rollInfo).toMatch(/d20\(\d+\)/);  // Must have d20(X) format
+      expect(data.data.rollInfo).toMatch(/Mental\[\d+\]\([\+\-]\d+\)/);  // Must have Mental[base](±mod) format
+      expect(data.data.rollInfo).toContain('vs TN:');  // Must show TN
+
+      // Verify message also contains detailed format
+      const decodedMessage = decodeURIComponent(data.data.message);
+      expect(decodedMessage).toMatch(/d20\(\d+\)/);
+      expect(decodedMessage).toMatch(/Mental\[\d+\]\([\+\-]\d+\)/);
+    });
   });
 });

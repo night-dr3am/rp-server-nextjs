@@ -4,65 +4,10 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing, buildEffectMessage } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness, type UserWithStats } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
-
-// Build human-readable effect message
-function buildEffectMessage(result: EffectResult): string {
-  const def = result.effectDef;
-
-  if (def.category === 'damage' && result.damage) {
-    return `${result.damage} ${def.damageType} damage`;
-  }
-
-  if (def.category === 'stat_modifier') {
-    const sign = (def.modifier || 0) >= 0 ? '+' : '';
-    let duration = '';
-    if (def.duration?.startsWith('turns:')) {
-      const turns = def.duration.split(':')[1];
-      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
-    } else if (def.duration === 'scene') {
-      duration = ' (scene)';
-    }
-    return `${sign}${def.modifier} ${def.stat}${duration}`;
-  }
-
-  if (def.category === 'control') {
-    return `${def.controlType || 'control'} effect`;
-  }
-
-  if (def.category === 'heal' && result.heal) {
-    return `Heals ${result.heal} HP`;
-  }
-
-  if (def.category === 'utility') {
-    let duration = '';
-    if (def.duration?.startsWith('turns:')) {
-      const turns = def.duration.split(':')[1];
-      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
-    } else if (def.duration === 'scene') {
-      duration = ' (scene)';
-    }
-    return `${def.name}${duration}`;
-  }
-
-  if (def.category === 'defense') {
-    let duration = '';
-    if (def.duration?.startsWith('turns:')) {
-      const turns = def.duration.split(':')[1];
-      duration = ` (${turns} ${turns === '1' ? 'turn' : 'turns'})`;
-    } else if (def.duration === 'scene') {
-      duration = ' (scene)';
-    }
-    const reduction = def.damageReduction || 0;
-    return `Damage Reduction -${reduction}${duration}`;
-  }
-
-  // Fallback: use effect name
-  return def.name;
-}
 
 export async function POST(request: NextRequest) {
   try {
