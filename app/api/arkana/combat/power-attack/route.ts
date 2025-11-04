@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing, buildEffectMessage } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness, type UserWithStats } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -531,8 +531,13 @@ export async function POST(request: NextRequest) {
       t.user?.slUuid !== target?.slUuid && t.user?.slUuid !== attacker.slUuid
     );
     if (additionalTargets.length > 0) {
-      const names = additionalTargets.map(t => t.user?.arkanaStats?.characterName || 'Unknown').join(', ');
-      message += `. Also affects: ${names}`;
+      const summaries = additionalTargets.map(t =>
+        buildTargetEffectSummary(
+          t.user?.arkanaStats?.characterName || 'Unknown',
+          t.effectsForUser
+        )
+      );
+      message += `. Also affects: ${summaries.join(', ')}`;
     }
 
     // Build response data with optional target field

@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing, buildEffectMessage } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -352,7 +352,7 @@ export async function POST(request: NextRequest) {
     const affectedUsersData: Array<{
       uuid: string;
       name: string;
-      effects: string[];
+      effectResults: EffectResult[];
     }> = [];
 
     // Apply new effects to all affected users (including caster if they receive effects)
@@ -431,7 +431,7 @@ export async function POST(request: NextRequest) {
       affectedUsersData.push({
         uuid: userUuid,
         name: affectedUser.arkanaStats.characterName,
-        effects: effectResults.map(buildEffectMessage)
+        effectResults: effectResults
       });
     }
 
@@ -467,12 +467,11 @@ export async function POST(request: NextRequest) {
       message += ' - SUCCESS';
     }
 
-    // Add effect summary
-    const effectSummary = affectedUsersData
-      .map(u => `${u.name}: ${u.effects.join(', ')}`)
-      .join('; ');
-    if (effectSummary) {
-      message += `. Effects: ${effectSummary}`;
+    // Add effect summary using shared utility
+    const effectSummaries = affectedUsersData
+      .map(u => buildTargetEffectSummary(u.name, u.effectResults));
+    if (effectSummaries.length > 0) {
+      message += `. Effects: ${effectSummaries.join('; ')}`;
     }
 
     return NextResponse.json({
@@ -485,7 +484,7 @@ export async function POST(request: NextRequest) {
         affected: affectedUsersData.map(u => ({
           uuid: u.uuid,
           name: encodeForLSL(u.name),
-          effects: u.effects
+          effects: u.effectResults.map(buildEffectMessage)
         })),
         caster: {
           uuid: caster.slUuid,

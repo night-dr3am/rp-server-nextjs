@@ -6243,10 +6243,11 @@ describe('/api/arkana/combat/power-activate', () => {
       // Should succeed - area abilities with fixed TN checks don't need targets
       expectSuccess(data);
 
-      // Key assertion: rollDescription should appear in success message
+      // Key assertion: rollDescription should appear in message (success or failure)
       const decodedMessage = decodeURIComponent(data.data.message);
       expect(decodedMessage).toContain('Test TK Surge');
-      expect(decodedMessage).toContain('SUCCESS');
+      // Check can succeed or fail depending on d20 roll
+      expect(decodedMessage).toMatch(/SUCCESS|FAILED/);
       expect(decodedMessage).toMatch(/Roll:/);
       expect(decodedMessage).toContain('vs TN:10');
     });

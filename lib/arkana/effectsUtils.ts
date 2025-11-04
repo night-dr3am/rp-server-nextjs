@@ -1725,3 +1725,35 @@ export function buildEffectMessage(result: EffectResult): string {
   // Fallback: use effect name
   return def.name;
 }
+
+/**
+ * Builds a concise effect summary for a target in area attacks
+ * Formats as: "TargetName (effect1, effect2, ...)"
+ * Used by power-attack "Also affects:" messages for consistent effect display
+ *
+ * @param targetName - Character name of the affected target
+ * @param effectResults - Array of effect results applied to this target
+ * @returns Formatted string with target name and effects in parentheses
+ *
+ * @example
+ * buildTargetEffectSummary('Night Corvus', [damageEffect])
+ * // Returns: "Night Corvus (4 force damage)"
+ *
+ * buildTargetEffectSummary('Night Corvus', [damageEffect, buffEffect])
+ * // Returns: "Night Corvus (4 force damage, +2 Mental (3 turns))"
+ */
+export function buildTargetEffectSummary(
+  targetName: string,
+  effectResults: EffectResult[]
+): string {
+  // Filter out self-effects (should apply to caster, not targets)
+  const targetEffects = effectResults.filter(e => e.effectDef.target !== 'self');
+
+  if (targetEffects.length === 0) {
+    return targetName;  // No effects to show
+  }
+
+  // Use existing buildEffectMessage() for consistency
+  const effectMessages = targetEffects.map(buildEffectMessage);
+  return `${targetName} (${effectMessages.join(', ')})`;
+}

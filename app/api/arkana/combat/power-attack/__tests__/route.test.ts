@@ -2424,5 +2424,60 @@ describe('/api/arkana/combat/power-attack', () => {
       expect(decodedMessage).toMatch(/d20\(\d+\)/);
       expect(decodedMessage).toMatch(/Mental\[\d+\]\([\+\-]\d+\)/);
     });
+
+    it('should show effect details in "Also affects" for area attacks', async () => {
+      const attacker = await createArkanaTestUser({
+        characterName: 'Area Attacker',
+        race: 'human',
+        archetype: 'Psion',
+        physical: 2,
+        dexterity: 2,
+        mental: 5,
+        perception: 2,
+        hitPoints: 15,
+        archetypePowers: ['test_area_psychic_blast']  // Deals psychic damage, no check
+      });
+
+      const nearby1 = await createArkanaTestUser({
+        characterName: 'Nearby Target',
+        race: 'human',
+        archetype: 'Warrior',
+        physical: 3,
+        dexterity: 2,
+        mental: 2,
+        perception: 2,
+        hitPoints: 20
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        attacker_uuid: attacker.slUuid,
+        power_id: 'test_area_psychic_blast',
+        // NO target_uuid - area attack
+        nearby_uuids: [nearby1.slUuid],
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-attack', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const decodedMessage = decodeURIComponent(data.data.message);
+
+      // Should contain "Also affects:" with target name
+      expect(decodedMessage).toContain('Also affects: Nearby Target');
+
+      // Should contain effect details in parentheses
+      expect(decodedMessage).toMatch(/Also affects: Nearby Target \([^)]+\)/);
+
+      // Should show damage (test_area_psychic_blast deals psychic damage)
+      expect(decodedMessage).toMatch(/\d+ psychic damage/);
+    });
   });
 });
