@@ -1136,11 +1136,44 @@ export default function ArkanaCharacterCreation() {
     // Helper function to toggle magic schools
     const toggleMagicSchool = (id: string) => {
       const newMagicSchools = new Set(characterModel.magicSchools);
+
       if (newMagicSchools.has(id)) {
+        // Unchecking school - cascade deselect its weaves
         newMagicSchools.delete(id);
+
+        // Find the school's section to get all its weaves
+        const schoolSection = Object.entries(availableMagicSchools).find(
+          ([, schools]) => schools[0].id === id
+        );
+
+        if (schoolSection) {
+          const [, schools] = schoolSection;
+          const weaves = schools.slice(1); // All weaves in this school
+
+          setCharacterModel(prev => {
+            const newMagicWeaves = new Set(prev.magicWeaves);
+
+            // Remove each weave EXCEPT free weaves
+            weaves.forEach(weave => {
+              if (weave.id !== prev.freeMagicWeave &&
+                  weave.id !== prev.synthralFreeWeave) {
+                newMagicWeaves.delete(weave.id);
+              }
+            });
+
+            return {
+              ...prev,
+              magicSchools: newMagicSchools,
+              magicWeaves: newMagicWeaves
+            };
+          });
+          return; // Exit early since we handled state update above
+        }
       } else {
+        // Checking school - just add it
         newMagicSchools.add(id);
       }
+
       setCharacterModel(prev => ({ ...prev, magicSchools: newMagicSchools }));
     };
 
