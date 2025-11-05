@@ -224,6 +224,82 @@ export function applyActiveEffect(
 }
 
 /**
+ * Calculate total Health stat bonus from active effects
+ * Used to determine maxHP change when effects are added/removed
+ *
+ * Only counts stat_value modifiers for Health stat (not roll_bonus)
+ * @param activeEffects - Array of active effects on the character
+ * @returns Total Health stat bonus (can be negative for debuffs)
+ */
+export function calculateHealthBonus(activeEffects: ActiveEffect[]): number {
+  let healthBonus = 0;
+
+  for (const effect of activeEffects) {
+    const effectDef = getEffectDefinition(effect.effectId);
+    if (effectDef &&
+        effectDef.category === 'stat_modifier' &&
+        effectDef.stat === 'Health' &&
+        effectDef.modifierType === 'stat_value') {
+      healthBonus += (effectDef.modifier || 0);
+    }
+  }
+
+  return healthBonus;
+}
+
+/**
+ * Apply Health bonus changes to maxHP and current HP
+ * Implements Option A behavior: immediate HP boost when Health stat increases
+ *
+ * @param oldActiveEffects - Active effects BEFORE new effects were applied (for old bonus calculation)
+ * @param newLiveStats - Recalculated liveStats AFTER new effects were applied
+ * @param currentHP - Current HP value before adjustment
+ * @param baseMaxHP - Base maxHP before Health bonus adjustment
+ * @returns Object with newMaxHP, newHP, and healthBonusChange
+ */
+export function applyHealthBonusChanges(
+  oldActiveEffects: ActiveEffect[],
+  newLiveStats: LiveStats,
+  currentHP: number,
+  baseMaxHP: number
+): {
+  newMaxHP: number;
+  newHP: number;
+  healthBonusChange: number;
+} {
+  // Calculate old Health bonus from effects before changes
+  const oldHealthBonus = calculateHealthBonus(oldActiveEffects);
+
+  // Calculate new Health bonus from updated liveStats
+  const newHealthBonus = typeof newLiveStats.Health === 'number' ? newLiveStats.Health : 0;
+
+  // Calculate the change in Health bonus
+  const healthBonusChange = newHealthBonus - oldHealthBonus;
+
+  // Apply delta to maxHP
+  const newMaxHP = baseMaxHP + healthBonusChange;
+
+  // Apply Option A behavior: immediate HP adjustment based on Health bonus change
+  let newHP = currentHP;
+
+  if (healthBonusChange > 0) {
+    // Health increased (buff applied): Grant immediate HP boost equal to the increase
+    // Cap at new maxHP to prevent overhealing
+    newHP = Math.min(currentHP + healthBonusChange, newMaxHP);
+  } else if (healthBonusChange < 0) {
+    // Health decreased (debuff applied or buff expired): Cap current HP at new lower maxHP
+    newHP = Math.min(currentHP, newMaxHP);
+  }
+  // If healthBonusChange === 0, HP remains unchanged
+
+  return {
+    newMaxHP,
+    newHP,
+    healthBonusChange
+  };
+}
+
+/**
  * Recalculate live stats from base stats and active effects
  * Removes stats that match their reset values in liveStatsConfig
  */
@@ -383,6 +459,7 @@ export async function processEffectsTurnAndApplyHealing(
   healingApplied: number;
   healEffectNames: string[];
   newHP: number;
+  temporaryMaxHP: number;
 }> {
   const { prisma } = await import('@/lib/prisma');
 
@@ -392,10 +469,16 @@ export async function processEffectsTurnAndApplyHealing(
   // Calculate total healing (turn-based + immediate)
   const totalHealing = turnResult.healingApplied + immediateHealing;
 
-  // Apply healing to health (capped at maxHP from arkanaStats.maxHP)
+  // Calculate temporary maxHP from Health stat bonuses in liveStats
+  const baseMaxHP = user.arkanaStats.maxHP;
+  const healthStatBonus = typeof turnResult.liveStats.Health === 'number'
+    ? turnResult.liveStats.Health
+    : 0;
+  const temporaryMaxHP = baseMaxHP + healthStatBonus;
+
+  // Apply healing to health (capped at temporary maxHP)
   const currentHP = user.stats?.health || 0;
-  const maxHP = user.arkanaStats.maxHP;
-  const newHP = Math.min(currentHP + totalHealing, maxHP);
+  const newHP = Math.min(currentHP + totalHealing, temporaryMaxHP);
 
   // Update UserStats.health if user has stats (regardless of healing amount)
   // This ensures the database always reflects the current state
@@ -411,7 +494,8 @@ export async function processEffectsTurnAndApplyHealing(
     liveStats: turnResult.liveStats,
     healingApplied: totalHealing,
     healEffectNames: turnResult.healEffectNames,
-    newHP
+    newHP,
+    temporaryMaxHP
   };
 }
 
@@ -1215,6 +1299,7 @@ export function extractImmediateEffects(effectResults: EffectResult[]): {
  * @param immediateHealing - Healing amount
  * @param activeEffects - Active effects for damage reduction calculation
  * @param passiveEffects - Passive effects from perks/cybernetics/magic (already in ActiveEffect format)
+ * @param temporaryMaxHP - Optional temporary maxHP (from Health stat bonuses), overrides maxHP if provided
  * @returns New HP and breakdown of damage/healing applied with damage reduction
  */
 export function applyDamageAndHealing(
@@ -1223,7 +1308,8 @@ export function applyDamageAndHealing(
   immediateDamage: number,
   immediateHealing: number,
   activeEffects: ActiveEffect[],
-  passiveEffects: ActiveEffect[]
+  passiveEffects: ActiveEffect[],
+  temporaryMaxHP?: number
 ): {
   newHP: number;
   damageDealt: number;
@@ -1236,10 +1322,13 @@ export function applyDamageAndHealing(
   const damageReduction = calculateDamageReduction(combinedEffects);
   const reducedDamage = Math.max(0, immediateDamage - damageReduction);
 
-  // Apply healing first (capped at maxHP)
+  // Use temporary maxHP if provided (from Health stat bonuses), otherwise use base maxHP
+  const effectiveMaxHP = temporaryMaxHP ?? maxHP;
+
+  // Apply healing first (capped at effective maxHP)
   let newHP = currentHP;
   if (immediateHealing > 0) {
-    newHP = Math.min(newHP + immediateHealing, maxHP);
+    newHP = Math.min(newHP + immediateHealing, effectiveMaxHP);
   }
 
   // Then apply damage (cannot go below 0)
@@ -1688,6 +1777,13 @@ export function buildEffectMessage(result: EffectResult): string {
     } else if (def.duration === 'scene') {
       duration = ' (scene)';
     }
+
+    // For Health stat_value modifiers, explicitly mention maxHP impact
+    if (def.stat === 'Health' && def.modifierType === 'stat_value') {
+      const maxHPNote = ` (maxHP ${sign}${def.modifier}`;
+      return `${sign}${def.modifier} ${def.stat}${maxHPNote}${duration ? ', ' + duration.trim() : ''})`;
+    }
+
     return `${sign}${def.modifier} ${def.stat}${duration}`;
   }
 

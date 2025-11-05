@@ -2148,6 +2148,18 @@
     "duration": "scene"
   },
   {
+    "id": "buff_health_10",
+    "name": "Health Bonus +10",
+    "desc": "Grants +10 bonus to Health",
+    "category": "stat_modifier",
+    "type": "stat_buff",
+    "stat": "Health",
+    "modifier": 10,
+    "modifierType": "stat_value",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
     "id": "buff_mental_2",
     "name": "Mental Bonus +2",
     "desc": "Grants +2 bonus to Mental rolls",

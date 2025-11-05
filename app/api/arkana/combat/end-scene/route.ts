@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaEndSceneSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, clearSceneEffects, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, clearSceneEffects, buildArkanaStatsUpdate, applyHealthBonusChanges } from '@/lib/arkana/effectsUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,12 +64,28 @@ export async function POST(request: NextRequest) {
     const originalCount = activeEffects.length;
     const sceneCleared = clearSceneEffects(activeEffects, player.arkanaStats);
 
-    // Update database with new activeEffects and liveStats
+    // Handle Health stat modifiers using shared utility function
+    // This applies delta-based maxHP changes and caps HP if Health bonuses decreased
+    const { newMaxHP, newHP } = applyHealthBonusChanges(
+      activeEffects,  // Old effects before scene clearing
+      sceneCleared.liveStats,  // New liveStats after scene clearing
+      player.stats?.health || 0,  // Current HP
+      player.arkanaStats.maxHP  // Base maxHP
+    );
+
+    // Update UserStats with new HP (handles both increases and decreases)
+    await prisma.userStats.update({
+      where: { userId: player.id },
+      data: { health: newHP }
+    });
+
+    // Update database with new activeEffects, liveStats, and maxHP
     await prisma.arkanaStats.update({
       where: { userId: player.id },
       data: buildArkanaStatsUpdate({
         activeEffects: sceneCleared.activeEffects,
-        liveStats: sceneCleared.liveStats
+        liveStats: sceneCleared.liveStats,
+        maxHP: newMaxHP
       })
     });
 

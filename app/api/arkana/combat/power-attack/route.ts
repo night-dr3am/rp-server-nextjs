@@ -4,7 +4,7 @@ import { arkanaPowerAttackSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getAllPerks, getAllCybernetics, getAllMagicSchools, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary, applyHealthBonusChanges } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness, type UserWithStats } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -409,6 +409,10 @@ export async function POST(request: NextRequest) {
       );
 
       if (nonSelfEffects.length > 0) {
+        // Store old active effects (BEFORE applying new effects) for Health bonus calculation
+        // IMPORTANT: Create a COPY to prevent mutation
+        const oldActiveEffects = [...userActiveEffects];
+
         let updatedActiveEffects = userActiveEffects;
 
         for (const effectResult of nonSelfEffects) {
@@ -417,13 +421,31 @@ export async function POST(request: NextRequest) {
 
         const updatedLiveStats = recalculateLiveStats(affectedUser.arkanaStats, updatedActiveEffects);
 
+        // Handle Health stat modifiers (temporary maxHP increase) using shared utility
+        const healthBonusResult = applyHealthBonusChanges(
+          oldActiveEffects,
+          updatedLiveStats,
+          healthAfter,  // Current HP after damage was applied
+          affectedUser.arkanaStats.maxHP
+        );
+
+        // Update arkanaStats with new maxHP and effects/liveStats
         await prisma.arkanaStats.update({
           where: { userId: affectedUser.id },
           data: buildArkanaStatsUpdate({
             activeEffects: updatedActiveEffects,
-            liveStats: updatedLiveStats
+            liveStats: updatedLiveStats,
+            maxHP: healthBonusResult.newMaxHP
           })
         });
+
+        // Update current HP if Health bonus changed it (Option A behavior)
+        if (healthBonusResult.newHP !== healthAfter && affectedUser.stats) {
+          await prisma.userStats.update({
+            where: { userId: affectedUser.id },
+            data: { health: healthBonusResult.newHP, lastUpdated: new Date() }
+          });
+        }
       }
 
       // Track this affected target for response
@@ -461,6 +483,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Store old active effects for Health bonus calculation (BEFORE turn processing and new effects)
+    // IMPORTANT: Create a COPY to prevent mutation
+    const oldAttackerActiveEffects = [...attackerActiveEffects];
+
     // Process turn for attacker FIRST (decrement all PRE-EXISTING effects by 1 turn) and apply healing
     const turnProcessed = await processEffectsTurnAndApplyHealing(
       attacker as typeof attacker & { arkanaStats: NonNullable<typeof attacker.arkanaStats> },
@@ -468,6 +494,7 @@ export async function POST(request: NextRequest) {
       immediateHealing
     );
     let processedAttackerActiveEffects = turnProcessed.activeEffects;
+    const attackerNewHP = turnProcessed.newHP;
 
     // THEN apply new self-effects from this attack (these should start with full duration)
     if (selfEffects.length > 0) {
@@ -479,13 +506,30 @@ export async function POST(request: NextRequest) {
     // Recalculate liveStats with both decremented old effects AND new self-effects
     const finalLiveStats = recalculateLiveStats(attacker.arkanaStats!, processedAttackerActiveEffects);
 
+    // Handle Health stat modifiers (temporary maxHP increase) for attacker
+    const attackerHealthBonusResult = applyHealthBonusChanges(
+      oldAttackerActiveEffects,
+      finalLiveStats,
+      attackerNewHP,
+      attacker.arkanaStats!.maxHP
+    );
+
     await prisma.arkanaStats.update({
       where: { userId: attacker.id },
       data: buildArkanaStatsUpdate({
         activeEffects: processedAttackerActiveEffects,
-        liveStats: finalLiveStats
+        liveStats: finalLiveStats,
+        maxHP: attackerHealthBonusResult.newMaxHP
       })
     });
+
+    // Update attacker's current HP if Health bonus changed it (Option A behavior)
+    if (attackerHealthBonusResult.newHP !== attackerNewHP && attacker.stats) {
+      await prisma.userStats.update({
+        where: { userId: attacker.id },
+        data: { health: attackerHealthBonusResult.newHP, lastUpdated: new Date() }
+      });
+    }
 
     // Build comprehensive message with effect details
     const attackerName = attacker.arkanaStats!.characterName;

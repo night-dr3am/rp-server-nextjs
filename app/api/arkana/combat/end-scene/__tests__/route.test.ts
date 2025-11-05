@@ -342,5 +342,141 @@ describe('POST /api/arkana/combat/end-scene', () => {
     expectError(data);
     expect(response.status).toBe(401);
   });
+
+  // Health Modifier Tests (stat_value affects maxHP)
+  describe('Health Modifier Effects (maxHP Changes on Scene End)', () => {
+    it('should decrease maxHP when scene-long Health stat_value effect clears', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply scene-long Health +10 effect
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_10', name: 'Constitution Enhancement +10', duration: 'scene', turnsLeft: 999, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 23 });
+
+      // Manually update maxHP to 25 (15 base + 10 from Health effect)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 25 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        player_uuid: user.slUuid,
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/end-scene', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemoved).toBe(1);
+      expect(data.data.effectsRemaining).toBe(0);
+
+      // Verify maxHP decreased back to 15 (scene effect cleared)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify current HP was capped at 15 (was 23, but new maxHP is 15)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(15);
+
+      // Verify liveStats.Health is cleared
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBeUndefined();
+    });
+
+    it('should cap health when maxHP decreases due to scene Health effect clearing', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply scene-long Health +10 effect, current HP at new maxHP
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_10', name: 'Constitution Enhancement +10', duration: 'scene', turnsLeft: 999, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 25 });
+
+      // Manually update maxHP to 25 (15 base + 10 from Health effect)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 25 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        player_uuid: user.slUuid,
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/end-scene', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemoved).toBe(1);
+
+      // Verify maxHP decreased back to 15 (scene effect cleared)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify current HP was capped at 15 (was 25, but new maxHP is 15)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(15);
+    });
+
+    it('should clear multiple Health effects with mixed durations', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply scene-long Health +10 and turn-based Health +5
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_10', name: 'Constitution Enhancement +10', duration: 'scene', turnsLeft: 999, appliedAt: new Date().toISOString() },
+        { effectId: 'buff_health_stat_5', name: 'Fortitude Boost +5', duration: 'turns:2', turnsLeft: 2, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 28 });
+
+      // Manually update maxHP to 30 (15 base + 10 + 5 from Health effects)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 30 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const params = {
+        player_uuid: user.slUuid,
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/end-scene', params);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemoved).toBe(2); // Both effects cleared
+
+      // Verify maxHP decreased back to 15 (all scene/turn effects cleared)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify current HP was capped at 15 (was 28, but new maxHP is 15)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(15);
+
+      // Verify liveStats.Health is cleared
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBeUndefined();
+    });
+  });
 });
 

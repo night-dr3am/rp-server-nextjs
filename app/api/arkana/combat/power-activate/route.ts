@@ -4,7 +4,7 @@ import { arkanaPowerActivateSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { loadAllData, getAllCommonPowers, getAllArchPowers, getEffectDefinition } from '@/lib/arkana/dataLoader';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary } from '@/lib/arkana/effectsUtils';
+import { executeEffect, applyActiveEffect, recalculateLiveStats, buildArkanaStatsUpdate, parseActiveEffects, processEffectsTurnAndApplyHealing, validateAndExecuteCheck, determineApplicableTargets, extractImmediateEffects, applyDamageAndHealing, buildEffectMessage, buildTargetEffectSummary, applyHealthBonusChanges } from '@/lib/arkana/effectsUtils';
 import { getPassiveEffectsWithSource, passiveEffectsToActiveFormat, loadPerk, loadCybernetic, loadMagicWeave, ownsPerk, ownsCybernetic, ownsMagicWeave } from '@/lib/arkana/abilityUtils';
 import { loadCombatTarget, loadNearbyPlayers, buildPotentialTargets, validateCombatReadiness } from '@/lib/arkana/combatUtils';
 import type { CommonPower, ArchetypePower, Perk, Cybernetic, MagicSchool, EffectResult, LiveStats } from '@/lib/arkana/types';
@@ -362,11 +362,16 @@ export async function POST(request: NextRequest) {
 
       let userActiveEffects: typeof casterActiveEffects;
 
+      // Store old active effects (BEFORE applying new effects) for Health bonus calculation
+      // IMPORTANT: Create a COPY to prevent mutation when we apply new effects to userActiveEffects
+      const oldActiveEffects = [...parseActiveEffects(affectedUser.arkanaStats.activeEffects)];
+
       // If this is the caster, use the already-processed effects
       if (userUuid === caster.slUuid) {
         userActiveEffects = casterActiveEffects;
       } else {
-        // For other users, just parse their current effects (no turn processing)
+        // For other users, parse their current effects (no turn processing)
+        // Use the original parsed effects (not oldActiveEffects copy) as the base for new effects
         userActiveEffects = parseActiveEffects(affectedUser.arkanaStats.activeEffects);
       }
 
@@ -408,12 +413,24 @@ export async function POST(request: NextRequest) {
         userNewHP = damageHealResult.newHP;
       }
 
-      // Update database - update ArkanaStats for effects/liveStats and UserStats for current health
+      // Handle Health stat modifiers (temporary maxHP increase) using shared utility
+      const healthBonusResult = applyHealthBonusChanges(
+        oldActiveEffects,
+        userLiveStats,
+        userNewHP,
+        affectedUser.arkanaStats.maxHP
+      );
+
+      const userNewMaxHP = healthBonusResult.newMaxHP;
+      userNewHP = healthBonusResult.newHP;
+
+      // Update database - update ArkanaStats for effects/liveStats/maxHP and UserStats for current health
       await prisma.arkanaStats.update({
         where: { userId: affectedUser.id },
         data: buildArkanaStatsUpdate({
           activeEffects: userActiveEffects,
-          liveStats: userLiveStats
+          liveStats: userLiveStats,
+          maxHP: userNewMaxHP
         })
       });
 

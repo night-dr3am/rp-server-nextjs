@@ -597,6 +597,16 @@
     "duration": "immediate"
   },
   {
+    "id": "heal_immediate_8",
+    "name": "Test Immediate Heal +8",
+    "desc": "Instantly heals 8 HP",
+    "category": "heal",
+    "type": "direct",
+    "healFormula": "8",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
     "id": "check_mental_vs_tn12",
     "name": "Mental Check vs TN 12",
     "desc": "Roll 1d20 + Mental modifier vs TN 12",
@@ -981,6 +991,66 @@
     "modifier": -1,
     "modifierType": "roll_bonus",
     "target": "all_enemies_and_self",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_health_stat_5",
+    "name": "Fortitude Boost +5 (Self)",
+    "desc": "Test: Increases Health (maxHP) by 5 (self-targeting)",
+    "category": "stat_modifier",
+    "type": "stat_buff",
+    "stat": "Health",
+    "modifier": 5,
+    "modifierType": "stat_value",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_health_stat_5_ally",
+    "name": "Fortitude Boost +5 (Ally)",
+    "desc": "Test: Increases Health (maxHP) by 5 (ally-targeting)",
+    "category": "stat_modifier",
+    "type": "stat_buff",
+    "stat": "Health",
+    "modifier": 5,
+    "modifierType": "stat_value",
+    "target": "ally",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_health_stat_10",
+    "name": "Constitution Enhancement +10",
+    "desc": "Test: Increases Health (maxHP) by 10 (self-targeting)",
+    "category": "stat_modifier",
+    "type": "stat_buff",
+    "stat": "Health",
+    "modifier": 10,
+    "modifierType": "stat_value",
+    "target": "self",
+    "duration": "scene"
+  },
+  {
+    "id": "debuff_health_stat_minus_5",
+    "name": "Withering Curse -5",
+    "desc": "Test: Decreases Health (maxHP) by 5 (enemy-targeting)",
+    "category": "stat_modifier",
+    "type": "stat_debuff",
+    "stat": "Health",
+    "modifier": -5,
+    "modifierType": "stat_value",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "buff_health_roll_2",
+    "name": "Health Roll Bonus +2",
+    "desc": "Test: roll_bonus type (should NOT affect maxHP)",
+    "category": "stat_modifier",
+    "type": "roll_bonus",
+    "stat": "Health",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
     "duration": "turns:2"
   }
 ]

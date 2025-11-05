@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { arkanaEndTurnSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
-import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate } from '@/lib/arkana/effectsUtils';
+import { parseActiveEffects, processEffectsTurnAndApplyHealing, buildArkanaStatsUpdate, applyHealthBonusChanges } from '@/lib/arkana/effectsUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
     // Parse activeEffects, process turn, and apply healing in one operation
     const activeEffects = parseActiveEffects(player.arkanaStats.activeEffects);
     const currentHP = player.stats?.health || 0;
-    const maxHP = player.arkanaStats.physical * 5;
 
     const turnProcessed = await processEffectsTurnAndApplyHealing(
       player as typeof player & { arkanaStats: NonNullable<typeof player.arkanaStats> },
@@ -70,12 +69,37 @@ export async function POST(request: NextRequest) {
       0  // No immediate healing in end-turn
     );
 
-    // Update database with new activeEffects and liveStats
+    // Handle Health stat modifiers using shared utility function
+    // This applies delta-based maxHP changes and caps HP if Health bonuses changed
+    const { newMaxHP, newHP, healthBonusChange } = applyHealthBonusChanges(
+      activeEffects,  // Old effects before turn processing
+      turnProcessed.liveStats,  // New liveStats after turn processing
+      turnProcessed.newHP,  // Current HP (already includes HoT healing)
+      player.arkanaStats.maxHP  // Base maxHP
+    );
+
+    const finalHP = newHP;
+    let healingMessage = '';
+    if (healthBonusChange < 0 && finalHP < currentHP) {
+      healingMessage = ` HP capped at ${newMaxHP} due to effect expiration.`;
+    }
+
+    // Update UserStats with final HP (accounts for both HoT and Health bonus changes)
+    // Note: processEffectsTurnAndApplyHealing() already updated health, but without Health bonus adjustments
+    if (finalHP !== turnProcessed.newHP) {
+      await prisma.userStats.update({
+        where: { userId: player.id },
+        data: { health: finalHP }
+      });
+    }
+
+    // Update database with new activeEffects, liveStats, and maxHP
     await prisma.arkanaStats.update({
       where: { userId: player.id },
       data: buildArkanaStatsUpdate({
         activeEffects: turnProcessed.activeEffects,
-        liveStats: turnProcessed.liveStats
+        liveStats: turnProcessed.liveStats,
+        maxHP: newMaxHP
       })
     });
 
@@ -86,8 +110,13 @@ export async function POST(request: NextRequest) {
     let message = `Turn ended. ${effectsRemaining} active effects remaining.`;
 
     if (turnProcessed.healingApplied > 0) {
-      const actualHealing = turnProcessed.newHP - currentHP;
+      const actualHealing = finalHP - currentHP;
       message += ` Healed ${actualHealing} HP from: ${turnProcessed.healEffectNames.join(', ')}.`;
+    }
+
+    // Add health capping message if it was capped
+    if (healingMessage) {
+      message += healingMessage;
     }
 
     return NextResponse.json({
@@ -96,8 +125,8 @@ export async function POST(request: NextRequest) {
         playerName: encodeForLSL(playerName),
         effectsRemaining,
         healingApplied: turnProcessed.healingApplied,
-        currentHP: turnProcessed.newHP,
-        maxHP: maxHP,
+        currentHP: finalHP,
+        maxHP: newMaxHP,
         message: encodeForLSL(message)
       }
     });

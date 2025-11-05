@@ -267,7 +267,7 @@
     "species": "spliced",
     "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_physical_2"]
+      "passive": ["buff_physical_2", "buff_health_10"]
     }
   },
   {

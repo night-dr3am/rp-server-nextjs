@@ -436,5 +436,95 @@
     "effects": {
       "ability": ["debuff_test_area_enemies_physical"]
     }
+  },
+  {
+    "id": "power_buff_health_stat_5_test",
+    "name": "Test Fortitude Boost +5",
+    "desc": "Test power: Increases Health (maxHP) by 5 for 3 turns",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["buff", "health"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["buff_health_stat_5"]
+    }
+  },
+  {
+    "id": "power_buff_health_stat_10_test",
+    "name": "Test Constitution Enhancement +10",
+    "desc": "Test power: Increases Health (maxHP) by 10 for the scene",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["buff", "health"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["buff_health_stat_10"]
+    }
+  },
+  {
+    "id": "power_buff_health_roll_2_test",
+    "name": "Test Health Roll Bonus +2",
+    "desc": "Test power: roll_bonus type (should NOT affect maxHP)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["buff", "health"],
+    "baseStat": "Physical",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["buff_health_roll_2"]
+    }
+  },
+  {
+    "id": "power_debuff_health_minus_5_test",
+    "name": "Test Withering Curse -5",
+    "desc": "Test power: Decreases Health (maxHP) by 5 for 2 turns",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["attack"],
+    "tags": ["debuff", "health"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "attack": ["check_mental_vs_tn10", "debuff_health_stat_minus_5"]
+    }
+  },
+  {
+    "id": "power_heal_and_buff_health_test",
+    "name": "Test Heal and Fortitude",
+    "desc": "Test power: Heals 8 HP and increases Health (maxHP) by 5",
+    "cost": 3,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["heal", "buff", "health"],
+    "baseStat": "Mental",
+    "targetType": "self",
+    "range": 0,
+    "effects": {
+      "ability": ["heal_immediate_8", "buff_health_stat_5"]
+    }
+  },
+  {
+    "id": "power_buff_ally_health_test",
+    "name": "Test Ally Fortitude Boost",
+    "desc": "Test power: Increases ally's Health (maxHP) by 5",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["buff", "health", "support"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["buff_health_stat_5_ally"]
+    }
   }
 ]

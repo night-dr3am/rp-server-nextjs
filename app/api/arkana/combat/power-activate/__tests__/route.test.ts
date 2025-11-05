@@ -6308,4 +6308,446 @@ describe('/api/arkana/combat/power-activate', () => {
       expect(decodedMessage).toContain('vs TN:');
     });
   });
+
+  describe('Health stat modifiers - temporary maxHP', () => {
+    it('should increase maxHP when Health stat_value effect is applied to self', async () => {
+      // Create caster with base stats: Physical 3 = maxHP 15
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 10,
+        commonPowers: ['power_buff_health_stat_5_test']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_buff_health_stat_5_test',
+        power_name: 'Test Health Buff +5',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify updated stats in database
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP should increase from 15 to 20 (+5)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(20);
+
+      // Current HP should increase by 5 (immediate boost): 10 → 15
+      expect(updatedUser?.stats?.health).toBe(15);
+
+      // Verify active effect was added
+      const activeEffects = updatedUser?.arkanaStats?.activeEffects as ActiveEffect[];
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].effectId).toBe('buff_health_stat_5');
+
+      // Verify liveStats contains Health modifier
+      const liveStats = updatedUser?.arkanaStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBe(5);
+    });
+
+    it('should grant immediate HP boost equal to Health modifier (Option A)', async () => {
+      // Create caster at half health
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 8, // Half health
+        commonPowers: ['power_buff_health_stat_10_test']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_buff_health_stat_10_test',
+        power_name: 'Test Health Buff +10',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP: 15 → 25 (+10)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(25);
+
+      // HP gets immediate +10 boost: 8 → 18
+      expect(updatedUser?.stats?.health).toBe(18);
+    });
+
+    it('should stack multiple Health stat_value effects', async () => {
+      // Create caster with one existing Health effect
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 20, // Already has +5 from first effect
+        health: 15,
+        commonPowers: ['power_buff_health_stat_5_test', 'power_buff_health_stat_10_test'],
+        activeEffects: [
+          {
+            effectId: 'buff_health_stat_5',
+            name: 'Fortitude Boost +5',
+            duration: 'turns:3',
+            turnsLeft: 3,
+            appliedAt: new Date().toISOString()
+          }
+        ]
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_buff_health_stat_10_test',
+        power_name: 'Test Health Buff +10',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP: 20 → 30 (base 15 + first effect 5 + second effect 10)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(30);
+
+      // HP gets immediate +10 boost from new effect: 15 → 25
+      expect(updatedUser?.stats?.health).toBe(25);
+
+      // Verify both effects active
+      const activeEffects = updatedUser?.arkanaStats?.activeEffects as ActiveEffect[];
+      expect(activeEffects).toHaveLength(2);
+
+      // Verify liveStats shows total +15
+      const liveStats = updatedUser?.arkanaStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBe(15);
+    });
+
+    it('should NOT increase maxHP for Health roll_bonus modifiers', async () => {
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 15,
+        commonPowers: ['power_buff_health_roll_2_test']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_buff_health_roll_2_test',
+        power_name: 'Test Health Roll Bonus',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP should NOT change (still 15)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(15);
+
+      // Health should NOT change (still 15)
+      expect(updatedUser?.stats?.health).toBe(15);
+
+      // Verify liveStats has Health_rollbonus, NOT Health
+      const liveStats = updatedUser?.arkanaStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBeUndefined();
+      expect(liveStats.Health_rollbonus).toBe(2);
+    });
+
+    it('should decrease maxHP for Health stat debuffs and cap health immediately', async () => {
+      // Create target at full health
+      const target = await createArkanaTestUser({
+        characterName: 'Target',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 15 // Full health
+      });
+
+      // Create caster with debuff power
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 15,
+        commonPowers: ['power_debuff_health_minus_5_test']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        target_uuid: target.slUuid,
+        power_id: 'power_debuff_health_minus_5_test',
+        power_name: 'Test Health Debuff -5',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedTarget = await prisma.user.findUnique({
+        where: { id: target.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP: 15 → 10 (-5)
+      expect(updatedTarget?.arkanaStats?.maxHP).toBe(10);
+
+      // Health capped at new maxHP: 15 → 10
+      expect(updatedTarget?.stats?.health).toBe(10);
+
+      // Verify debuff effect added
+      const activeEffects = updatedTarget?.arkanaStats?.activeEffects as ActiveEffect[];
+      expect(activeEffects).toHaveLength(1);
+      expect(activeEffects[0].effectId).toBe('debuff_health_stat_minus_5');
+
+      // Verify liveStats shows negative modifier
+      const liveStats = updatedTarget?.arkanaStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBe(-5);
+    });
+
+    it('should apply immediate boost + regular healing correctly', async () => {
+      // Create caster with combined healing + Health buff power
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 10,
+        commonPowers: ['power_heal_and_buff_health_test'] // Heal +5, Health +5
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_heal_and_buff_health_test',
+        power_name: 'Test Heal + Health Buff',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP: 15 → 20 (+5)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(20);
+
+      // HP: Start at 10
+      // + Immediate healing +5 = 15 (capped at old maxHP 15)
+      // + Health effect immediate boost +5 = 20 (new maxHP is 20)
+      // Final: 20/20
+      expect(updatedUser?.stats?.health).toBe(20);
+    });
+
+    it('should not boost HP beyond new maxHP cap', async () => {
+      // Create caster near max health
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 13, // Near max
+        commonPowers: ['power_buff_health_stat_5_test']
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        power_id: 'power_buff_health_stat_5_test',
+        power_name: 'Test Health Buff +5',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      const updatedUser = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // maxHP: 15 → 20 (+5)
+      expect(updatedUser?.arkanaStats?.maxHP).toBe(20);
+
+      // HP: 13 + 5 = 18, capped at 20 → 18
+      expect(updatedUser?.stats?.health).toBe(18);
+    });
+
+    it('should apply Health effect to target and update their maxHP', async () => {
+      // Create ally target
+      const target = await createArkanaTestUser({
+        characterName: 'Ally',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 12
+      });
+
+      // Create caster with target Health buff
+      const caster = await createArkanaTestUser({
+        characterName: 'Caster',
+        race: 'human',
+        archetype: 'Arcanist',
+        physical: 3,
+        dexterity: 3,
+        mental: 3,
+        perception: 3,
+        maxHP: 15,
+        health: 15,
+        commonPowers: ['power_buff_ally_health_test'] // Targets ally
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const requestData = {
+        caster_uuid: caster.slUuid,
+        target_uuid: target.slUuid,
+        power_id: 'power_buff_ally_health_test',
+        power_name: 'Test Ally Health Buff',
+        universe: 'arkana',
+        timestamp,
+        signature
+      };
+
+      const request = createMockPostRequest('/api/arkana/combat/power-activate', requestData);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Check target received buff
+      const updatedTarget = await prisma.user.findUnique({
+        where: { id: target.id },
+        include: { arkanaStats: true, stats: true }
+      });
+
+      // Target maxHP: 15 → 20 (+5)
+      expect(updatedTarget?.arkanaStats?.maxHP).toBe(20);
+
+      // Target HP: 12 + 5 = 17
+      expect(updatedTarget?.stats?.health).toBe(17);
+
+      // Caster should be unchanged
+      const updatedCaster = await prisma.user.findUnique({
+        where: { id: caster.id },
+        include: { arkanaStats: true, stats: true }
+      });
+      expect(updatedCaster?.arkanaStats?.maxHP).toBe(15);
+      expect(updatedCaster?.stats?.health).toBe(15);
+    });
+  });
 });

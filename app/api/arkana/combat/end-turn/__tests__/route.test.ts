@@ -803,4 +803,188 @@ describe('POST /api/arkana/combat/end-turn', () => {
     const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
     expect(updatedUserStats?.health).toBe(12);
   });
+
+  // Health Modifier Tests (stat_value affects maxHP)
+  describe('Health Modifier Effects (maxHP Changes)', () => {
+    it('should maintain elevated maxHP while Health stat_value effect is active', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply Health +5 effect for 3 turns
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_5', name: 'Fortitude Boost +5', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 20 });
+
+      // Manually update maxHP to 20 (15 base + 5 from Health effect)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 20 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemaining).toBe(1);
+
+      // Verify maxHP is still 20 (effect still active with turnsLeft: 2)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(20);
+
+      const effects = updatedStats?.activeEffects as ActiveEffect[];
+      expect(effects[0].turnsLeft).toBe(2);
+
+      // Verify liveStats.Health is still 5
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBe(5);
+    });
+
+    it('should decrease maxHP when Health stat_value effect expires', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply Health +5 effect for 1 turn (will expire this turn)
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_5', name: 'Fortitude Boost +5', duration: 'turns:1', turnsLeft: 1, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 18 });
+
+      // Manually update maxHP to 20 (15 base + 5 from Health effect)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 20 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemaining).toBe(0);
+
+      // Verify maxHP decreased back to 15 (effect expired)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify current HP was capped at 15 (was 18, but new maxHP is 15)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(15);
+
+      // Verify liveStats.Health is now 0 (no Health effects)
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBeUndefined();
+    });
+
+    it('should cap health when maxHP decreases due to Health effect expiration', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply Health +10 effect for 1 turn (will expire this turn)
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_10', name: 'Constitution Enhancement +10', duration: 'turns:1', turnsLeft: 1, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 25 });
+
+      // Manually update maxHP to 25 (15 base + 10 from Health effect)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 25 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemaining).toBe(0);
+      expect(decodeURIComponent(data.data.message)).toContain('HP capped at 15 due to effect expiration');
+
+      // Verify maxHP decreased back to 15 (effect expired)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify current HP was capped at 15 (was 25, but new maxHP is 15)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(15);
+    });
+
+    it('should stack multiple Health stat_value effects and handle partial expiration', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply two Health effects: +5 (expires this turn) and +10 (lasts 3 turns)
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_stat_5', name: 'Fortitude Boost +5', duration: 'turns:1', turnsLeft: 1, appliedAt: new Date().toISOString() },
+        { effectId: 'buff_health_stat_10', name: 'Constitution Enhancement +10', duration: 'turns:3', turnsLeft: 3, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user } = await createArkanaTestUser({ physical: 3, activeEffects, health: 28 });
+
+      // Manually update maxHP to 30 (15 base + 5 + 10 from Health effects)
+      await prisma.arkanaStats.update({
+        where: { userId: user.id },
+        data: { maxHP: 30 }
+      });
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemaining).toBe(1);
+
+      // Verify maxHP decreased to 25 (15 base + 10 from remaining effect)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(25);
+
+      // Verify current HP was capped at 25 (was 28, but new maxHP is 25)
+      const updatedUserStats = await prisma.userStats.findUnique({ where: { userId: user.id } });
+      expect(updatedUserStats?.health).toBe(25);
+
+      // Verify liveStats.Health is now 10 (only remaining effect)
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBe(10);
+    });
+
+    it('should NOT affect maxHP for Health roll_bonus modifiers', async () => {
+      // Start with physical: 3 (base maxHP = 15)
+      // Apply Health roll_bonus effect (should NOT affect maxHP)
+      const activeEffects: ActiveEffect[] = [
+        { effectId: 'buff_health_roll_2', name: 'Health Roll Bonus +2', duration: 'turns:2', turnsLeft: 2, appliedAt: new Date().toISOString() }
+      ];
+
+      const { user, arkanaStats } = await createArkanaTestUser({ physical: 3, activeEffects, health: 15 });
+
+      // maxHP should remain at 15 (3 × 5, no Health stat_value effects)
+      expect(arkanaStats.maxHP).toBe(15);
+
+      const timestamp = new Date().toISOString();
+      const signature = generateSignature(timestamp, 'arkana');
+
+      const request = createMockPostRequest('/api/arkana/combat/end-turn', { player_uuid: user.slUuid, universe: 'arkana', timestamp, signature });
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.effectsRemaining).toBe(1);
+
+      // Verify maxHP is still 15 (roll_bonus should NOT affect maxHP)
+      const updatedStats = await prisma.arkanaStats.findUnique({ where: { userId: user.id } });
+      expect(updatedStats?.maxHP).toBe(15);
+
+      // Verify liveStats.Health_rollbonus is 2 (not liveStats.Health)
+      const liveStats = updatedStats?.liveStats as LiveStats;
+      expect(liveStats.Health).toBeUndefined();
+      expect(liveStats.Health_rollbonus).toBe(2);
+    });
+  });
 });
