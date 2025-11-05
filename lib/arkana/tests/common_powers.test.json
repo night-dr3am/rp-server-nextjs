@@ -498,6 +498,21 @@
     }
   },
   {
+    "id": "power_debuff_health_ability_test",
+    "name": "Test Health Debuff -5 (Ability)",
+    "desc": "Test power: Decreases Health (maxHP) by 5 (deterministic, no random check)",
+    "cost": 2,
+    "species": "human",
+    "abilityType": ["ability"],
+    "tags": ["debuff", "health"],
+    "baseStat": "Mental",
+    "targetType": "single",
+    "range": 10,
+    "effects": {
+      "ability": ["debuff_health_stat_minus_5"]
+    }
+  },
+  {
     "id": "power_heal_and_buff_health_test",
     "name": "Test Heal and Fortitude",
     "desc": "Test power: Heals 8 HP and increases Health (maxHP) by 5",

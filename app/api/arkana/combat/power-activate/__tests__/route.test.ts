@@ -6546,7 +6546,7 @@ describe('/api/arkana/combat/power-activate', () => {
         perception: 3,
         maxHP: 15,
         health: 15,
-        commonPowers: ['power_debuff_health_minus_5_test']
+        commonPowers: ['power_debuff_health_ability_test']
       });
 
       const timestamp = new Date().toISOString();
@@ -6555,8 +6555,8 @@ describe('/api/arkana/combat/power-activate', () => {
       const requestData = {
         caster_uuid: caster.slUuid,
         target_uuid: target.slUuid,
-        power_id: 'power_debuff_health_minus_5_test',
-        power_name: 'Test Health Debuff -5',
+        power_id: 'power_debuff_health_ability_test',
+        power_name: 'Test Health Debuff -5 (Ability)',
         universe: 'arkana',
         timestamp,
         signature
