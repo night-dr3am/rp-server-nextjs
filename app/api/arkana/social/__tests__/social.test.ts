@@ -62,7 +62,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -78,7 +78,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           registrationCompleted: true
         }
       });
@@ -190,7 +190,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -234,7 +234,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -250,7 +250,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           registrationCompleted: true
         }
       });
@@ -304,7 +304,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -349,7 +349,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -424,7 +424,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -478,7 +478,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -530,7 +530,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -601,7 +601,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -617,7 +617,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           registrationCompleted: true
         }
       });
@@ -687,7 +687,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -703,7 +703,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           registrationCompleted: true
         }
       });
@@ -719,7 +719,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 4,
           perception: 3,
-          hitPoints: 12,
+          maxHP: 12,
           registrationCompleted: true
         }
       });
@@ -759,7 +759,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -775,7 +775,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           registrationCompleted: true
         }
       });
@@ -791,7 +791,7 @@ describe('/api/arkana/social', () => {
           dexterity: 3,
           mental: 4,
           perception: 3,
-          hitPoints: 12,
+          maxHP: 12,
           registrationCompleted: true
         }
       });
@@ -827,7 +827,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -847,7 +847,7 @@ describe('/api/arkana/social', () => {
             dexterity: 2,
             mental: 4,
             perception: 3,
-            hitPoints: 15,
+            maxHP: 15,
             registrationCompleted: true
           }
         });
@@ -891,7 +891,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: true
         }
       });
@@ -907,7 +907,7 @@ describe('/api/arkana/social', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: false // Incomplete registration
         }
       });

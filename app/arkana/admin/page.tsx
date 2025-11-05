@@ -76,7 +76,7 @@ interface EditDataForm {
   dexterity: number;
   mental: number;
   perception: number;
-  hitPoints: number;
+  maxHP: number;
   health: number;
   status: number;
   skills: CharacterSkill[];
@@ -110,7 +110,8 @@ interface ArkanaStatsData {
   dexterity: number;
   mental: number;
   perception: number;
-  hitPoints: number;
+  maxHP: number;
+  hitPoints?: number; // Backward compatibility - API may return this
   skills: unknown;
   skillsAllocatedPoints?: number;
   skillsSpentPoints?: number;
@@ -407,9 +408,9 @@ function AdminDashboardContent() {
           dexterity: result.data.arkanaStats.dexterity,
           mental: result.data.arkanaStats.mental,
           perception: result.data.arkanaStats.perception,
-          hitPoints: result.data.arkanaStats.hitPoints,
+          maxHP: result.data.arkanaStats.maxHP || result.data.arkanaStats.hitPoints || 5, // Backward compatibility
           // Current health
-          health: result.data.stats?.health || result.data.arkanaStats.hitPoints,
+          health: result.data.stats?.health || result.data.arkanaStats.maxHP || result.data.arkanaStats.hitPoints || 5,
           status: result.data.stats?.status || 0,
           // Skills
           skills: (result.data.arkanaStats.skills as CharacterSkill[]) || [],
@@ -1419,11 +1420,11 @@ function AdminDashboardContent() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-cyan-300 mb-1">Current Health</label>
-                    <input type="number" min="0" max={editData.hitPoints} value={editData.health} onChange={(e) => setEditData({...editData, health: parseInt(e.target.value)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
+                    <input type="number" min="0" max={editData.maxHP} value={editData.health} onChange={(e) => setEditData({...editData, health: parseInt(e.target.value)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-cyan-300 mb-1">Max Health (HP)</label>
-                    <input type="number" min="1" max="100" value={editData.hitPoints} onChange={(e) => setEditData({...editData, hitPoints: parseInt(e.target.value)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
+                    <input type="number" min="1" max="100" value={editData.maxHP} onChange={(e) => setEditData({...editData, maxHP: parseInt(e.target.value)})} className="w-full px-3 py-2 bg-gray-900 border border-cyan-500 rounded text-cyan-100" />
                   </div>
                 </div>
                 <div className="mt-4">

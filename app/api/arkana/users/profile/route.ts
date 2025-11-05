@@ -189,7 +189,8 @@ export async function POST(request: NextRequest) {
           dexterity: result.arkanaStats.dexterity,
           mental: result.arkanaStats.mental,
           perception: result.arkanaStats.perception,
-          hitPoints: result.arkanaStats.hitPoints,
+          maxHP: result.arkanaStats.maxHP,
+          hitPoints: result.arkanaStats.maxHP, // DEPRECATED: Use maxHP (kept for backward compatibility)
           credits: result.arkanaStats.credits,
           chips: result.arkanaStats.chips,
           xp: result.arkanaStats.xp,

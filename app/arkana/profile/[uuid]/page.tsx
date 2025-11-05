@@ -64,7 +64,7 @@ interface ArkanaStats {
   dexterity: number;
   mental: number;
   perception: number;
-  hitPoints: number; // Maximum health
+  maxHP: number; // Maximum health
   skills: unknown;
   skillsAllocatedPoints?: number;
   skillsSpentPoints?: number;
@@ -685,7 +685,7 @@ export default function ArkanaProfilePage() {
   }
 
   const { user, stats, arkanaStats, inventory, events } = profileData;
-  const healthPercentage = stats ? (stats.health / arkanaStats.hitPoints) * 100 : 0;
+  const healthPercentage = stats ? (stats.health / arkanaStats.maxHP) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-black text-cyan-100">
@@ -793,7 +793,7 @@ export default function ArkanaProfilePage() {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-cyan-300 font-medium">Health</span>
-                    <span className="text-cyan-100">{stats.health} / {arkanaStats.hitPoints} HP</span>
+                    <span className="text-cyan-100">{stats.health} / {arkanaStats.maxHP} HP</span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div

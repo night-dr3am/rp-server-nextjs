@@ -148,9 +148,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     // Validate health values if provided
-    if (value.health !== undefined || value.hitPoints !== undefined) {
+    // Support both maxHP (new) and hitPoints (deprecated) for backward compatibility
+    if (value.health !== undefined || value.maxHP !== undefined || value.hitPoints !== undefined) {
       const currentHealth = value.health !== undefined ? value.health : (existingUser.stats?.health || 0);
-      const maxHealth = value.hitPoints !== undefined ? value.hitPoints : existingUser.arkanaStats.hitPoints;
+      const maxHealth = value.maxHP !== undefined ? value.maxHP : (value.hitPoints !== undefined ? value.hitPoints : existingUser.arkanaStats.maxHP);
 
       const healthValidation = validateHealthValues(currentHealth, maxHealth);
       if (!healthValidation.valid) {
@@ -195,7 +196,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const arkanaFields = [
       'characterName', 'agentName', 'aliasCallsign', 'faction', 'conceptRole', 'job', 'background',
       'race', 'subrace', 'archetype',
-      'physical', 'dexterity', 'mental', 'perception', 'hitPoints',
+      'physical', 'dexterity', 'mental', 'perception', 'maxHP', 'hitPoints', // hitPoints deprecated, use maxHP
       'inherentPowers', 'weaknesses',
       'commonPowers', 'archetypePowers', 'perks',
       'magicSchools', 'magicWeaves',
@@ -209,6 +210,12 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       if (value[field] !== undefined) {
         arkanaStatsUpdate[field] = value[field];
       }
+    }
+
+    // Map deprecated hitPoints to maxHP for backward compatibility
+    if (value.hitPoints !== undefined && value.maxHP === undefined) {
+      arkanaStatsUpdate.maxHP = value.hitPoints;
+      delete arkanaStatsUpdate.hitPoints; // Remove the deprecated field
     }
 
     // Add converted flaws if provided
@@ -252,7 +259,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           updatedUserStats = await tx.userStats.create({
             data: {
               userId: userId,
-              health: value.health !== undefined ? value.health : updatedArkanaStats.hitPoints,
+              health: value.health !== undefined ? value.health : updatedArkanaStats.maxHP,
               status: value.status !== undefined ? value.status : 0,
               hunger: 100,
               thirst: 100,

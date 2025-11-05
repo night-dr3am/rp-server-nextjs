@@ -392,9 +392,9 @@ export async function processEffectsTurnAndApplyHealing(
   // Calculate total healing (turn-based + immediate)
   const totalHealing = turnResult.healingApplied + immediateHealing;
 
-  // Apply healing to health (capped at maxHP from arkanaStats.hitPoints)
+  // Apply healing to health (capped at maxHP from arkanaStats.maxHP)
   const currentHP = user.stats?.health || 0;
-  const maxHP = user.arkanaStats.hitPoints;
+  const maxHP = user.arkanaStats.maxHP;
   const newHP = Math.min(currentHP + totalHealing, maxHP);
 
   // Update UserStats.health if user has stats (regardless of healing amount)
@@ -519,13 +519,13 @@ export function determineApplicableTargets<T extends {
 }
 
 /**
- * Build Prisma update data for arkanaStats with activeEffects, liveStats, and optional hitPoints
+ * Build Prisma update data for arkanaStats with activeEffects, liveStats, and optional maxHP
  * Uses Record<string, unknown> to avoid type casting issues with JSON fields
  */
 export function buildArkanaStatsUpdate(updates: {
   activeEffects?: ActiveEffect[];
   liveStats?: LiveStats;
-  hitPoints?: number;
+  maxHP?: number;
 }): Record<string, unknown> {
   const data: Record<string, unknown> = {};
 
@@ -535,9 +535,9 @@ export function buildArkanaStatsUpdate(updates: {
   if (updates.liveStats !== undefined) {
     data.liveStats = updates.liveStats;
   }
-  // Only include hitPoints if it's a valid number
-  if (typeof updates.hitPoints === 'number' && !isNaN(updates.hitPoints)) {
-    data.hitPoints = updates.hitPoints;
+  // Only include maxHP if it's a valid number
+  if (typeof updates.maxHP === 'number' && !isNaN(updates.maxHP)) {
+    data.maxHP = updates.maxHP;
   }
 
   return data;
@@ -1210,7 +1210,7 @@ export function extractImmediateEffects(effectResults: EffectResult[]): {
  * Central function used by all combat endpoints to ensure consistent damage/healing application
  *
  * @param currentHP - Current health points
- * @param maxHP - Maximum health points (from arkanaStats.hitPoints)
+ * @param maxHP - Maximum health points (from arkanaStats.maxHP)
  * @param immediateDamage - Raw damage before reduction
  * @param immediateHealing - Healing amount
  * @param activeEffects - Active effects for damage reduction calculation

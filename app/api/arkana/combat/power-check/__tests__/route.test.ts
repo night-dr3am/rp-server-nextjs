@@ -39,7 +39,7 @@ describe('/api/arkana/combat/power-check', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     commonPowers?: string[];
     archetypePowers?: string[];
     activeEffects?: ActiveEffect[];
@@ -90,7 +90,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         commonPowers: arkanaStatsData.commonPowers || [],
         archetypePowers: arkanaStatsData.archetypePowers || [],
         activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
@@ -112,7 +112,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 5, // High mental = +2 modifier
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -153,7 +153,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 3,
         mental: 1, // Low mental = -2 modifier
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const timestamp = new Date().toISOString();
@@ -188,7 +188,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 4,
         mental: 3, // Average mental = 0 modifier
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -253,7 +253,7 @@ describe('/api/arkana/combat/power-check', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: false // Not completed!
         }
       });
@@ -285,7 +285,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const powerCheckData = {
@@ -314,7 +314,7 @@ describe('/api/arkana/combat/power-check', () => {
           dexterity: 3,
           mental: 1,
           perception: 2,
-          hitPoints: 25
+          maxHP: 25
         }),
         createArkanaTestUser({
           characterName: 'Player 2',
@@ -324,7 +324,7 @@ describe('/api/arkana/combat/power-check', () => {
           dexterity: 2,
           mental: 5,
           perception: 4,
-          hitPoints: 10
+          maxHP: 10
         }),
         createArkanaTestUser({
           characterName: 'Player 3',
@@ -334,7 +334,7 @@ describe('/api/arkana/combat/power-check', () => {
           dexterity: 4,
           mental: 3,
           perception: 3,
-          hitPoints: 15
+          maxHP: 15
         })
       ]);
 
@@ -367,7 +367,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -409,7 +409,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 2, // 0 modifier base
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_stat_1',
@@ -458,7 +458,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_mental_minus_1',
@@ -499,7 +499,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 1, // -2 modifier base
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_stat_1',
@@ -547,7 +547,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 5, // +6 modifier base
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -595,7 +595,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 2, // 0 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_roll_2',
@@ -644,7 +644,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_mental_roll_minus_2',
@@ -691,7 +691,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 2, // 0 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_stat_1',
@@ -749,7 +749,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 5, // +6 modifier (high success chance)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -794,7 +794,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 1, // -2 modifier (high failure chance against TN 12)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -839,7 +839,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -887,7 +887,7 @@ describe('/api/arkana/combat/power-check', () => {
         dexterity: 2,
         mental: 4,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',

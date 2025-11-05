@@ -39,7 +39,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     commonPowers?: string[];
     archetypePowers?: string[];
     activeEffects?: ActiveEffect[];
@@ -90,7 +90,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         commonPowers: arkanaStatsData.commonPowers || [],
         archetypePowers: arkanaStatsData.archetypePowers || [],
         activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
@@ -111,7 +111,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 1,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const timestamp = new Date().toISOString();
@@ -154,7 +154,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 4, // Dexterity 4 → +4 modifier
         mental: 3,
         perception: 4,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -190,7 +190,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 5, // Mental 5 → +6 modifier
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -226,7 +226,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 4,
         mental: 2,
         perception: 5, // Perception 5 → +6 modifier
-        hitPoints: 18
+        maxHP: 18
       });
 
       const timestamp = new Date().toISOString();
@@ -262,7 +262,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 1,
         mental: 1,
         perception: 1,
-        hitPoints: 8
+        maxHP: 8
       });
 
       const timestamp = new Date().toISOString();
@@ -296,7 +296,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -330,7 +330,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -362,7 +362,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -428,7 +428,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: false
         }
       });
@@ -462,7 +462,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       // Set player status to 1 (OOC mode, not in RP)
@@ -500,7 +500,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const statCheckData = {
@@ -529,7 +529,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -571,7 +571,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_1',
@@ -622,7 +622,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_mental_minus_1',
@@ -676,7 +676,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           activeEffects: [
             {
               effectId: config.effectId,
@@ -719,7 +719,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_2',
@@ -768,7 +768,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_roll_2',
@@ -819,7 +819,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_mental_roll_minus_2',
@@ -868,7 +868,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2, // 0 modifier base (tier)
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_dexterity_stat_1',
@@ -926,7 +926,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 3,
         mental: 2,
         perception: 3, // +2 modifier base (tier)
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_perception_roll_1',
@@ -977,7 +977,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -1024,7 +1024,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -1071,7 +1071,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -1121,7 +1121,7 @@ describe('/api/arkana/combat/feat-stat-check', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',

@@ -40,7 +40,7 @@ describe('/api/arkana/combat/power-activate', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     health?: number; // Optional current HP (defaults to hitPoints if not specified)
     commonPowers?: string[];
     archetypePowers?: string[];
@@ -51,8 +51,8 @@ describe('/api/arkana/combat/power-activate', () => {
     const { user } = await createTestUser('arkana');
 
     // Create user stats with specified status (default 0 = RP mode)
-    // Use provided health value, or default to hitPoints (current HP = max HP at creation)
-    const healthValue = arkanaStatsData.health !== undefined ? arkanaStatsData.health : arkanaStatsData.hitPoints;
+    // Use provided health value, or default to maxHP (current HP = max HP at creation)
+    const healthValue = arkanaStatsData.health !== undefined ? arkanaStatsData.health : arkanaStatsData.maxHP;
     await prisma.userStats.create({
       data: {
         userId: user.id,
@@ -93,7 +93,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.maxHP,
         commonPowers: arkanaStatsData.commonPowers || [],
         archetypePowers: arkanaStatsData.archetypePowers || [],
         activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
@@ -115,7 +115,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4, // +1 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_manipulation'], // Has ability effects
         archetypePowers: []
       });
@@ -128,7 +128,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -166,7 +166,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_emotion_theft'], // Has self-buff component
         archetypePowers: []
       });
@@ -201,7 +201,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [], // No powers
         archetypePowers: []
       });
@@ -214,7 +214,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -249,7 +249,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         status: 1 // OOC mode
@@ -263,7 +263,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -298,7 +298,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -311,7 +311,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         status: 1 // OOC mode
@@ -347,7 +347,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -381,7 +381,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -416,7 +416,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -476,7 +476,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -530,7 +530,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -585,7 +585,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -657,7 +657,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -718,7 +718,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 5, // +6 modifier, high chance of check success (d20+6 vs TN:10)
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'], // Self-buff ability
         archetypePowers: []
       });
@@ -764,7 +764,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -805,7 +805,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -836,7 +836,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -876,7 +876,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -907,7 +907,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [] // No effects, so Stealth should be 0 and removed
@@ -931,7 +931,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -983,7 +983,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2, // 0 modifier (stat 2 = 0 mod)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_dreamwalking'], // Has ability: check_mental_vs_mental
         archetypePowers: []
       });
@@ -996,7 +996,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2, // 0 modifier, TN should be 10+0=10
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1032,7 +1032,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 1, // -2 modifier (stat 1 = modifier -2)
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'], // Uses check_dexterity_vs_tn10
         archetypePowers: []
       });
@@ -1068,7 +1068,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 5, // +6 modifier, high chance of check success (d20+6 vs TN:10)
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'], // Has buff_dexterity_3
         archetypePowers: []
       });
@@ -1120,7 +1120,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_manipulation'], // Has ability_chi_balance_restore
         archetypePowers: []
       });
@@ -1133,7 +1133,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1169,7 +1169,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_yin_shroud'], // Has buff_stealth_4 (scene), uses check_physical_vs_tn10
         archetypePowers: []
       });
@@ -1218,7 +1218,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_dreamwalking'], // Has control_dreamwalk ability
         archetypePowers: []
       });
@@ -1231,7 +1231,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1269,7 +1269,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 5, // +6 modifier, high chance of check success (d20+6 vs TN:10)
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'],
         archetypePowers: [],
         activeEffects: [
@@ -1327,7 +1327,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -1366,7 +1366,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -1409,7 +1409,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5, // +7 modifier, ensures check success (d20+7 vs TN:10)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set current health
         commonPowers: ['veil_pulse_bloom'], // Area power: buff_mental_2_area, targetType: "area"
         archetypePowers: []
@@ -1423,7 +1423,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set current health
         commonPowers: [],
         archetypePowers: []
@@ -1437,7 +1437,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set current health
         commonPowers: [],
         archetypePowers: []
@@ -1520,7 +1520,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5, // +7 modifier, ensures check success
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_pulse_bloom'],
         archetypePowers: []
       });
@@ -1560,7 +1560,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set current health
         commonPowers: ['veil_pulse_bloom'],
         archetypePowers: []
@@ -1574,7 +1574,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set health for test
         commonPowers: [],
         archetypePowers: [],
@@ -1589,7 +1589,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10, // Explicitly set current health
         commonPowers: [],
         archetypePowers: [],
@@ -1655,7 +1655,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 5, // +6 modifier, high chance of check success (d20+6 vs TN:10)
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'], // Self-targeted, uses check_dexterity_vs_tn10
         archetypePowers: []
       });
@@ -1706,7 +1706,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_pulse_bloom'],
         archetypePowers: []
       });
@@ -1752,7 +1752,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_manipulation'], // Single target power
         archetypePowers: []
       });
@@ -1765,7 +1765,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1778,7 +1778,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1821,7 +1821,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: [],
         activeEffects: [
@@ -1844,7 +1844,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -1886,7 +1886,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: [],
         activeEffects: [
@@ -1909,7 +1909,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2042,7 +2042,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -2055,7 +2055,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2098,7 +2098,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2151,7 +2151,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -2202,7 +2202,7 @@ describe('/api/arkana/combat/power-activate', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 10,
+          maxHP: 10,
           commonPowers: ['veil_entropy_pulse'],
           archetypePowers: []
         }
@@ -2236,7 +2236,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [], // Empty
@@ -2272,7 +2272,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -2285,7 +2285,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2327,7 +2327,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -2340,7 +2340,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2382,7 +2382,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -2437,7 +2437,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 5, // +6 modifier, ensures check success (d20+6 vs TN:10)
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['gaki_chi_step'], // Self buff (dexterity +3), uses check_dexterity_vs_tn10
         archetypePowers: []
       });
@@ -2450,7 +2450,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2557,7 +2557,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_utility_sensor_sweep'],
         archetypePowers: []
       });
@@ -2570,7 +2570,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2583,7 +2583,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2705,7 +2705,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_utility_mind_link'],
         archetypePowers: []
       });
@@ -2718,7 +2718,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2763,7 +2763,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_utility_mind_link'],
         archetypePowers: []
       });
@@ -2776,7 +2776,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_utility_sensor_sweep'],
         archetypePowers: []
       });
@@ -2789,7 +2789,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -2970,7 +2970,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_special_shadow_walk'],
         archetypePowers: []
       });
@@ -3086,7 +3086,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_special_group_mist'],
         archetypePowers: []
       });
@@ -3099,7 +3099,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -3112,7 +3112,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -3257,7 +3257,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         commonPowers: ['test_defense_harden_skin'],
         archetypePowers: []
       });
@@ -3304,7 +3304,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 30,
+        maxHP: 30,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -3352,7 +3352,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['spliced_tail_slap'],  // Does 3 + Physical damage
         archetypePowers: []
       });
@@ -3365,7 +3365,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -3423,7 +3423,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['spliced_tail_slap'],
         archetypePowers: []
       });
@@ -3436,7 +3436,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 25,
+        maxHP: 25,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -3511,7 +3511,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -3560,7 +3560,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: [],
         activeEffects: [
@@ -3608,7 +3608,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: [],
         archetypePowers: []
       });
@@ -3621,7 +3621,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 25,
+        maxHP: 25,
         commonPowers: [],
         archetypePowers: [],
         activeEffects: [
@@ -3731,7 +3731,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 55,  // MAX HP
+        maxHP: 55,  // MAX HP
         health: 50,  // CURRENT HP
         commonPowers: ['gaki_chi_manipulation'],
         archetypePowers: []
@@ -3775,7 +3775,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 50,
+        maxHP: 50,
         commonPowers: [],
         archetypePowers: []
       });
@@ -3823,7 +3823,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 55,  // MAX HP
+        maxHP: 55,  // MAX HP
         health: 50,  // CURRENT HP
         commonPowers: [],
         archetypePowers: [],
@@ -3872,7 +3872,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 100,  // NOTE: hitPoints in ArkanaStats is now MAX HP, not current HP
+        maxHP: 100,  // NOTE: hitPoints in ArkanaStats is now MAX HP, not current HP
         commonPowers: [],
         archetypePowers: []
       });
@@ -3923,7 +3923,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_rally_cry']
       });
 
@@ -3936,7 +3936,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
       const ally1Stats = await prisma.arkanaStats.findUnique({ where: { userId: ally1.id } });
 
@@ -3948,7 +3948,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
       const ally2Stats = await prisma.arkanaStats.findUnique({ where: { userId: ally2.id } });
 
@@ -3961,7 +3961,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nonAlly2 = await createArkanaTestUser({
@@ -3972,7 +3972,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Update caster's groups to include only ally1 and ally2
@@ -4045,7 +4045,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_rally_cry']
       });
 
@@ -4057,7 +4057,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
 
       // Set empty Allies array
@@ -4115,7 +4115,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_special_group_mist'] // Uses target: "area"
       });
 
@@ -4127,7 +4127,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
       const nearby1Stats = await prisma.arkanaStats.findUnique({ where: { userId: nearby1.id } });
 
@@ -4139,7 +4139,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
 
       // Set groups.Allies to ONLY nearby1 (not nearby2)
@@ -4193,7 +4193,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_healing_wave']
       });
 
@@ -4205,7 +4205,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12,
+        maxHP: 12,
         health: 8
       });
       const consciousStats = await prisma.arkanaStats.findUnique({ where: { userId: allyConscious.id } });
@@ -4218,7 +4218,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12,
+        maxHP: 12,
         health: 0 // Unconscious!
       });
       const unconsciousStats = await prisma.arkanaStats.findUnique({ where: { userId: allyUnconscious.id } });
@@ -4275,7 +4275,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_rally_cry']
       });
 
@@ -4287,7 +4287,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12,
+        maxHP: 12,
         status: 0 // IC
       });
       const icStats = await prisma.arkanaStats.findUnique({ where: { userId: allyIC.id } });
@@ -4300,7 +4300,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12,
+        maxHP: 12,
         status: 1 // OOC!
       });
       const oocStats = await prisma.arkanaStats.findUnique({ where: { userId: allyOOC.id } });
@@ -4357,7 +4357,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_rally_cry']
       });
 
@@ -4369,7 +4369,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
       const nearbyStats = await prisma.arkanaStats.findUnique({ where: { userId: nearbyAlly.id } });
 
@@ -4381,7 +4381,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 12
+        maxHP: 12
       });
       const farStats = await prisma.arkanaStats.findUnique({ where: { userId: farAlly.id } });
 
@@ -4440,7 +4440,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_area_exclude_caster']
       });
 
@@ -4452,7 +4452,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4499,7 +4499,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_all_allies_exclude_caster']
       });
 
@@ -4511,7 +4511,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4570,7 +4570,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_area_and_self']
       });
 
@@ -4582,7 +4582,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4628,7 +4628,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_all_allies_and_self']
       });
 
@@ -4640,7 +4640,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4698,7 +4698,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_all_enemies_and_self']
       });
 
@@ -4710,7 +4710,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4768,7 +4768,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_area_and_self']
       });
 
@@ -4811,7 +4811,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['test_all_enemies_no_self']
       });
 
@@ -4823,7 +4823,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: []
       });
 
@@ -4886,7 +4886,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,  // +2 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
@@ -4899,7 +4899,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [{
           effectId: 'defense_test_reduction_3',
@@ -4956,7 +4956,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,  // Modifier 0 (2-3 range), so 2 + 0 = 2 damage
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
@@ -4969,7 +4969,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [{
           effectId: 'defense_test_reduction_3',  // Changed to -3 reduction (same as working test)
@@ -5024,7 +5024,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,  // +0 modifier, so 2 + 0 = 2 damage
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
@@ -5037,7 +5037,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [
           {
@@ -5107,7 +5107,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [{
           effectId: 'defense_test_reduction_3',
@@ -5157,7 +5157,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,  // +2 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
@@ -5171,7 +5171,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [{
           effectId: 'defense_test_reduction_5_scene',
@@ -5194,7 +5194,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: []
       });
@@ -5261,7 +5261,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 5,  // Damaged
         activeEffects: [{
           effectId: 'defense_test_reduction_5_scene',
@@ -5307,7 +5307,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,  // +2 modifier, so 2 + 2 = 4 damage before reduction
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
@@ -5320,7 +5320,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 2,  // Very low HP
         activeEffects: [{
           effectId: 'defense_test_reduction_2',
@@ -5389,7 +5389,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         commonPowers: ['veil_emotion_theft']  // Deals damage + debuff
       });
@@ -5402,7 +5402,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 10,
         activeEffects: [{
           effectId: 'defense_test_reduction_3',
@@ -5466,7 +5466,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 7, // High mental (+10 modifier)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_dreamwalking']
       });
 
@@ -5478,7 +5478,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 1, // Low mental (-1 modifier, easier to affect)
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -5529,7 +5529,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 1, // Very low mental (-1 modifier, likely to fail)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['strigoi_dreamwalking']
       });
 
@@ -5541,7 +5541,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 7, // High mental (+10 modifier, hard to affect)
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       // Try multiple times to ensure we get at least one failure
@@ -5598,7 +5598,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_dreamwalking']
       });
 
@@ -5610,7 +5610,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -5674,7 +5674,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_area_and_self']
       });
 
@@ -5686,7 +5686,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -5697,7 +5697,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -5736,7 +5736,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_area_and_self']
       });
 
@@ -5771,7 +5771,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_area_and_self']
       });
 
@@ -5783,7 +5783,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const unconsciousTarget = await createArkanaTestUser({
@@ -5794,7 +5794,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         health: 0 // Unconscious
       });
 
@@ -5806,7 +5806,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         status: 1 // OOC mode
       });
 
@@ -5846,7 +5846,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_area_and_self']
       });
 
@@ -5859,7 +5859,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -5870,7 +5870,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby3 = await createArkanaTestUser({
@@ -5881,7 +5881,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -5922,7 +5922,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_dreamwalking']
       });
 
@@ -5956,7 +5956,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_dreamwalking']
       });
 
@@ -5968,7 +5968,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         status: 1 // OOC mode
       });
 
@@ -6065,7 +6065,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,  // +6 modifier (tier 5-6)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['veilborn_echoes_memory_weave']  // Uses check_mental_vs_tn10 in ability effects
       });
 
@@ -6106,7 +6106,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 1,  // -2 modifier (tier 0-1)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['veilborn_echoes_memory_weave']
       });
 
@@ -6147,7 +6147,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['veilborn_echoes_memory_weave']
       });
 
@@ -6159,7 +6159,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -6196,7 +6196,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,  // +6 modifier (tier 5-6)
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_tk_surge']
       });
 
@@ -6208,7 +6208,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -6219,7 +6219,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -6261,7 +6261,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 5,  // +6 modifier (tier 5-6)
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_tk_surge']
       });
 
@@ -6273,7 +6273,7 @@ describe('/api/arkana/combat/power-activate', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();

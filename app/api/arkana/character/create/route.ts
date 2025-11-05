@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate derived stats
-    const hitPoints = characterData.physical * 5;
+    const maxHP = characterData.physical * 5;
     const statPointsSpent = (characterData.physical - 1) + (characterData.dexterity - 1) +
                            (characterData.mental - 1) + (characterData.perception - 1);
 
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       dexterity: characterData.dexterity,
       mental: characterData.mental,
       perception: characterData.perception,
-      hitPoints: hitPoints,
+      maxHP: maxHP,
       statPointsPool: 10 - statPointsSpent,
       statPointsSpent: statPointsSpent,
       inherentPowers: characterData.inherentPowers || [],
@@ -154,16 +154,16 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Update or create UserStats to set health to match hitPoints (character starts at full health)
+      // Update or create UserStats to set health to match maxHP (character starts at full health)
       await tx.userStats.upsert({
         where: { userId: user.id },
         update: {
-          health: hitPoints,
+          health: maxHP,
           lastUpdated: new Date()
         },
         create: {
           userId: user.id,
-          health: hitPoints,
+          health: maxHP,
           hunger: 100,
           thirst: 100,
           status: 0,
@@ -201,7 +201,8 @@ export async function POST(request: NextRequest) {
           dexterity: result.dexterity,
           mental: result.mental,
           perception: result.perception,
-          hitPoints: result.hitPoints,
+          maxHP: result.maxHP,
+          hitPoints: result.maxHP, // DEPRECATED: Use maxHP (kept for backward compatibility)
           credits: result.credits,
           chips: result.chips,
           xp: result.xp,

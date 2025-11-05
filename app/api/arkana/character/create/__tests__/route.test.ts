@@ -52,7 +52,7 @@ describe('/api/arkana/character/create', () => {
       expect(data.data.arkanaStats.characterName).toBe('Test Character');
       expect(data.data.arkanaStats.race).toBe('human');
       expect(data.data.arkanaStats.archetype).toBe('Arcanist');
-      expect(data.data.arkanaStats.hitPoints).toBe(10); // physical * 5
+      expect(data.data.arkanaStats.maxHP).toBe(10); // physical * 5
       expect(data.data.user.uuid).toBe(user.slUuid);
     });
 
@@ -87,7 +87,7 @@ describe('/api/arkana/character/create', () => {
       expect(data.data.arkanaStats.characterName).toBe('Test Character');
       expect(data.data.arkanaStats.race).toBe('human');
       expect(data.data.arkanaStats.archetype).toBe('Synthral');
-      expect(data.data.arkanaStats.hitPoints).toBe(10); // physical * 5
+      expect(data.data.arkanaStats.maxHP).toBe(10); // physical * 5
     });
 
     it('should return 401 for invalid token', async () => {

@@ -149,7 +149,8 @@ export async function GET(request: NextRequest) {
           dexterity: user.arkanaStats.dexterity,
           mental: user.arkanaStats.mental,
           perception: user.arkanaStats.perception,
-          hitPoints: user.arkanaStats.hitPoints, // Maximum health
+          maxHP: user.arkanaStats.maxHP, // Maximum health
+          hitPoints: user.arkanaStats.maxHP, // DEPRECATED: Use maxHP (kept for backward compatibility)
           inherentPowers: user.arkanaStats.inherentPowers,
           weaknesses: user.arkanaStats.weaknesses,
           flaws: user.arkanaStats.flaws,

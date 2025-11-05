@@ -34,7 +34,7 @@ describe('/api/arkana/combat/power-info', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     commonPowers?: string[];
     archetypePowers?: string[];
   }) {
@@ -72,7 +72,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -113,7 +113,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -147,7 +147,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: [], // No powers
         archetypePowers: []
       });
@@ -180,7 +180,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -233,7 +233,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -281,7 +281,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -325,7 +325,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 3,
         mental: 6,
         perception: 4,
-        hitPoints: 14,
+        maxHP: 14,
         commonPowers: ['veil_emotion_theft'],
         archetypePowers: []
       });
@@ -367,7 +367,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['test_defense_harden_skin', 'test_utility_sensor_sweep'],
         archetypePowers: []
       });
@@ -519,7 +519,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 12,
+        maxHP: 12,
         commonPowers: ['gaki_chi_manipulation'],
         archetypePowers: []
       });
@@ -561,7 +561,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 12,
+        maxHP: 12,
         commonPowers: ['gaki_chi_manipulation'],
         archetypePowers: []
       });
@@ -603,7 +603,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 12,
+        maxHP: 12,
         commonPowers: ['gaki_chi_manipulation'],
         archetypePowers: []
       });
@@ -667,7 +667,7 @@ describe('/api/arkana/combat/power-info', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_wall_walking'],
         archetypePowers: []
       });

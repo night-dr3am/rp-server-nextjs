@@ -891,7 +891,8 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
   dexterity: Joi.number().integer().min(1).max(10).optional(),
   mental: Joi.number().integer().min(1).max(10).optional(),
   perception: Joi.number().integer().min(1).max(10).optional(),
-  hitPoints: Joi.number().integer().min(1).max(100).optional(),
+  maxHP: Joi.number().integer().min(1).max(100).optional(),
+  hitPoints: Joi.number().integer().min(1).max(100).optional(), // DEPRECATED: Use maxHP (kept for backward compatibility)
 
   // Current health from userStats
   health: Joi.number().integer().min(0).max(100).optional(),
@@ -932,10 +933,11 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
   // Admin role
   arkanaRole: Joi.string().valid('player', 'admin').optional()
 }).custom((value, helpers) => {
-  // Validate health doesn't exceed hitPoints if both are provided
-  if (value.health !== undefined && value.hitPoints !== undefined) {
-    if (value.health > value.hitPoints) {
-      return helpers.message({ custom: 'Current health cannot exceed maximum health (hitPoints)' });
+  // Validate health doesn't exceed maxHP/hitPoints if both are provided
+  const maxHealth = value.maxHP !== undefined ? value.maxHP : value.hitPoints;
+  if (value.health !== undefined && maxHealth !== undefined) {
+    if (value.health > maxHealth) {
+      return helpers.message({ custom: 'Current health cannot exceed maximum health (maxHP)' });
     }
   }
   return value;

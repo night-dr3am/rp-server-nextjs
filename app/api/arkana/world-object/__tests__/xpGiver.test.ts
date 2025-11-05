@@ -33,7 +33,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     xp?: number;
     status?: number;
   }) {
@@ -63,7 +63,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         xp: arkanaStatsData.xp || 0,
         skills: [],
         activeEffects: [],
@@ -130,7 +130,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0
     });
 
@@ -173,7 +173,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0
     });
 
@@ -222,7 +222,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0
     });
 
@@ -234,7 +234,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 4,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0
     });
 
@@ -279,7 +279,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0
     });
 
@@ -307,7 +307,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 0,
       status: 1 // NOT in RP mode
     });
@@ -332,7 +332,7 @@ describe('/api/arkana/world-object/perform-action - XP Giver (event_gate + succe
       dexterity: 2,
       mental: 3,
       perception: 2,
-      hitPoints: 10,
+      maxHP: 10,
       xp: 50 // Already has some XP
     });
 

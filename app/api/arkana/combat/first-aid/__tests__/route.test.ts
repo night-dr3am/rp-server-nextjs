@@ -35,7 +35,7 @@ describe('/api/arkana/combat/first-aid', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
   }, health?: number) {
     const { user } = await createTestUser('arkana');
 
@@ -74,7 +74,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Create target with low health
@@ -86,7 +86,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 5); // Only 5 HP
 
       const timestamp = new Date().toISOString();
@@ -124,7 +124,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 3,
         perception: 4,
-        hitPoints: 15
+        maxHP: 15
       }, 8); // Low health
 
       const timestamp = new Date().toISOString();
@@ -162,7 +162,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -173,7 +173,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 10);
 
       // Create a recent first aid event (within cooldown)
@@ -218,7 +218,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -229,7 +229,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 10);
 
       // Create an old first aid event (outside cooldown - 31 minutes ago)
@@ -273,7 +273,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -284,7 +284,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 25); // Already at max HP
 
       const timestamp = new Date().toISOString();
@@ -319,7 +319,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -350,7 +350,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -394,7 +394,7 @@ describe('/api/arkana/combat/first-aid', () => {
           dexterity: 2,
           mental: 3,
           perception: 5,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: false // Not completed!
         }
       });
@@ -407,7 +407,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const timestamp = new Date().toISOString();
@@ -438,7 +438,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const { user: target } = await createTestUser('arkana');
@@ -462,7 +462,7 @@ describe('/api/arkana/combat/first-aid', () => {
           dexterity: 3,
           mental: 2,
           perception: 2,
-          hitPoints: 25,
+          maxHP: 25,
           registrationCompleted: false // Not completed!
         }
       });
@@ -495,7 +495,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -506,7 +506,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 10);
 
       // Set target status to 1 (OOC mode, not in RP)
@@ -543,7 +543,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -554,7 +554,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const firstAidData = {
@@ -582,7 +582,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -593,7 +593,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 10);
 
       const timestamp = new Date().toISOString();
@@ -626,7 +626,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 2,
         mental: 3,
         perception: 5,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -637,7 +637,7 @@ describe('/api/arkana/combat/first-aid', () => {
         dexterity: 3,
         mental: 2,
         perception: 2,
-        hitPoints: 25
+        maxHP: 25
       }, 10);
 
       const timestamp = new Date().toISOString();

@@ -39,7 +39,7 @@ describe('GET /api/arkana/profile/data', () => {
         dexterity: 4,
         mental: 2,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         credits: 100,
         chips: 50,
         xp: 0,
@@ -90,7 +90,7 @@ describe('GET /api/arkana/profile/data', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin', // Admin role
         registrationCompleted: true
       }
@@ -130,7 +130,7 @@ describe('GET /api/arkana/profile/data', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         registrationCompleted: true
       }
     });
@@ -185,7 +185,7 @@ describe('GET /api/arkana/profile/data', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         registrationCompleted: true
       }
     });

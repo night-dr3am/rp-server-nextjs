@@ -41,7 +41,7 @@ describe('/api/arkana/combat/user-powers', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     commonPowers?: string[];
     archetypePowers?: string[];
   }) {
@@ -82,7 +82,7 @@ describe('/api/arkana/combat/user-powers', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis', 'strigoi_wall_walking', 'strigoi_shapeshifting'],
         archetypePowers: []
       });
@@ -123,7 +123,7 @@ describe('/api/arkana/combat/user-powers', () => {
         dexterity: 2,
         mental: 3,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         commonPowers: [],
         archetypePowers: ['strigoi_life_cradle_of_hunger', 'strigoi_life_blood_seed']
       });
@@ -163,7 +163,7 @@ describe('/api/arkana/combat/user-powers', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['strigoi_wall_walking'], // passive power
         archetypePowers: []
       });
@@ -229,7 +229,7 @@ describe('/api/arkana/combat/user-powers', () => {
           dexterity: 2,
           mental: 4,
           perception: 3,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: false // Not completed!
         }
       });
@@ -261,7 +261,7 @@ describe('/api/arkana/combat/user-powers', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const requestData = {
@@ -289,7 +289,7 @@ describe('/api/arkana/combat/user-powers', () => {
         dexterity: 3,
         mental: 4,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: [
           'strigoi_hypnosis', // attack
           'strigoi_wall_walking', // passive

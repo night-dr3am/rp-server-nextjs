@@ -36,7 +36,7 @@ describe('/api/arkana/world-object/perform-action', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     skills?: Array<{ skill_id: string; skill_name: string; level: number }>;
     activeEffects?: ActiveEffect[];
     liveStats?: LiveStats;
@@ -85,7 +85,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         skills: (arkanaStatsData.skills || []) as unknown as typeof prisma.$Prisma.JsonNull,
         activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
         liveStats: (calculatedLiveStats || {}) as unknown as typeof prisma.$Prisma.JsonNull
@@ -121,7 +121,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Create world object with simple action (no checks or skills)
@@ -184,7 +184,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -241,7 +241,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_hack', skill_name: 'Hacking', level: 2 }
         ]
@@ -284,7 +284,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [] // No skills
       });
 
@@ -331,7 +331,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_hack', skill_name: 'Hacking', level: 1 } // Level 1
         ]
@@ -376,7 +376,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_engineering', skill_name: 'Engineering', level: 2 }
           // No hacking skill
@@ -420,7 +420,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_hack', skill_name: 'Hacking', level: 3 }
           // No engineering skill
@@ -464,7 +464,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_stealth', skill_name: 'Stealth', level: 3 }
         ]
@@ -512,7 +512,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 5, // +2 modifier (high stat)
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -570,7 +570,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 2, // Base mental is low
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_mental_1_turn',
@@ -626,7 +626,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 5, // High mental for better success chance
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -680,7 +680,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -723,7 +723,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nonOwner = await createArkanaTestUser({
@@ -734,7 +734,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -781,7 +781,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 4, // +1 modifier
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [
           { skill_id: 'skill_hack', skill_name: 'Hacking', level: 2 }
         ]
@@ -835,7 +835,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 5, // High mental, but no skill
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [] // No skills
       });
 
@@ -884,7 +884,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const requestData = createPerformActionRequest(player.slUuid, 'NONEXISTENT', 'Open');
@@ -942,7 +942,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -986,7 +986,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         status: 1 // NOT in RP mode (status !== 0)
       });
 
@@ -1048,7 +1048,7 @@ describe('/api/arkana/world-object/perform-action', () => {
           dexterity: 3,
           mental: 3,
           perception: 2,
-          hitPoints: 10
+          maxHP: 10
         }
       });
 
@@ -1092,7 +1092,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -1162,7 +1162,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -1209,7 +1209,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       await prisma.worldObject.create({
@@ -1249,7 +1249,7 @@ describe('/api/arkana/world-object/perform-action', () => {
         dexterity: 3,
         mental: 3,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         skills: [] // No skills - will fail
       });
 

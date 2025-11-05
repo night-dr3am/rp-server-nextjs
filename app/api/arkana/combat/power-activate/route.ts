@@ -330,7 +330,7 @@ export async function POST(request: NextRequest) {
     if (casterImmediateDamage > 0) {
       const casterDamageResult = applyDamageAndHealing(
         casterFinalHP,
-        caster.arkanaStats!.hitPoints,
+        caster.arkanaStats!.maxHP,
         casterImmediateDamage,
         0,  // No additional healing (already applied above)
         casterActiveEffects,
@@ -399,7 +399,7 @@ export async function POST(request: NextRequest) {
         // Apply damage and healing with damage reduction and bounds checking
         const damageHealResult = applyDamageAndHealing(
           userNewHP,
-          affectedUser.arkanaStats.hitPoints,
+          affectedUser.arkanaStats.maxHP,
           immediateDamage,
           immediateHealing,
           userActiveEffects,

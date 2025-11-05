@@ -36,7 +36,7 @@ describe('/api/arkana/combat/power-attack', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     health?: number;  // Optional current HP (defaults to hitPoints value)
     activeEffects?: ActiveEffect[];  // Optional active effects for testing turn processing
     liveStats?: LiveStats;  // Optional manual liveStats (auto-calculated if activeEffects provided)
@@ -108,7 +108,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -121,7 +121,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -160,7 +160,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -173,7 +173,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -208,7 +208,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -221,7 +221,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -262,7 +262,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -275,7 +275,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -316,7 +316,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis'],
         archetypePowers: []
       });
@@ -415,7 +415,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,  // +0 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_emotion_theft'],
         archetypePowers: []
       });
@@ -428,7 +428,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,  // +0 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -476,7 +476,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_entropy_pulse'],
         archetypePowers: []
       });
@@ -489,7 +489,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -533,7 +533,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: [],
         archetypePowers: [],
         cybernetics: ['cyb_razorjack_interface'] // Cybernetic with attack effects
@@ -547,7 +547,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -585,7 +585,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         magicWeaves: ['enchant_sleep'] // Magic weave with attack effects
@@ -599,7 +599,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -637,7 +637,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 12,
+        maxHP: 12,
         commonPowers: [],
         archetypePowers: [],
         perks: ['spliced_bioelectric_resonance'] // Perk with attack effects
@@ -651,7 +651,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -689,7 +689,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 4,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: [],
         magicWeaves: [] // Doesn't own enchant_sleep
@@ -703,7 +703,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: [],
         archetypePowers: []
       });
@@ -745,7 +745,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2, // 0 modifier base (tier)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_emotion_theft'],
         activeEffects: [
           {
@@ -767,7 +767,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2, // 0 modifier (defense)
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -809,7 +809,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         magicWeaves: ['enchant_sleep'],
         activeEffects: [
           {
@@ -831,7 +831,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -874,7 +874,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 4, // +4 modifier (strong offense)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['veil_emotion_theft']
       });
 
@@ -886,7 +886,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3, // +2 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_mental_roll_minus_1',
@@ -938,7 +938,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2, // 0 modifier base (tier)
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         magicWeaves: ['enchant_sleep'],
         activeEffects: [
           {
@@ -968,7 +968,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1013,7 +1013,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,  // +1 modifier
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 5,  // Start at low HP to see healing
         magicWeaves: ['necromancy_drain']  // Magic school powers are commonPowers
       });
@@ -1026,7 +1026,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,  // +0 modifier
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1083,7 +1083,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 1,  // -1 modifier - higher chance to miss
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 5,
         magicWeaves: ['necromancy_drain']
       });
@@ -1096,7 +1096,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,  // High mental for better defense
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Run multiple attacks to ensure we test both hit and miss scenarios
@@ -1150,7 +1150,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 8,  // Start at 8 HP, heal_drain_6 gives 6 HP, should cap at 10
         magicWeaves: ['necromancy_drain']
       });
@@ -1163,7 +1163,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1213,7 +1213,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 20,
+        maxHP: 20,
         health: 10,  // Start at 10 HP
         activeEffects,  // Has HoT effect
         magicWeaves: ['necromancy_drain']
@@ -1227,7 +1227,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1285,7 +1285,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 1,  // Low mental to increase miss chance
         perception: 3,
-        hitPoints: 20,
+        maxHP: 20,
         health: 10,
         activeEffects,
         magicWeaves: ['necromancy_drain']
@@ -1299,7 +1299,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,  // High mental for defense
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Try multiple times to get a miss
@@ -1365,7 +1365,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 5,
         magicWeaves: ['necromancy_drain']
       });
@@ -1378,7 +1378,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1422,7 +1422,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 1,  // Very low HP
         magicWeaves: ['necromancy_drain']
       });
@@ -1435,7 +1435,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1485,7 +1485,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 20,
+        maxHP: 20,
         health: 10,
         activeEffects,  // Scene-based heal (1 HP per turn, never decrements)
         magicWeaves: ['necromancy_drain']
@@ -1499,7 +1499,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1549,7 +1549,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 7, // High mental (+10 modifier)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis']
       });
 
@@ -1561,7 +1561,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 1, // Low mental (-1 modifier, easier to hit)
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1612,7 +1612,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 1, // Very low mental (-1 modifier, likely to miss)
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         commonPowers: ['strigoi_hypnosis']
       });
 
@@ -1624,7 +1624,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 7, // High mental (+10 modifier, hard to hit)
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       // Try multiple times to ensure we get at least one miss
@@ -1681,7 +1681,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis']
       });
 
@@ -1693,7 +1693,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1757,7 +1757,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_psychic_blast']
       });
 
@@ -1769,7 +1769,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -1780,7 +1780,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1823,7 +1823,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_psychic_blast']
       });
 
@@ -1857,7 +1857,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_psychic_blast']
       });
 
@@ -1869,7 +1869,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const unconsciousTarget = await createArkanaTestUser({
@@ -1880,7 +1880,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         health: 0 // Unconscious
       });
 
@@ -1892,7 +1892,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Set OOC target to OOC mode
@@ -1932,7 +1932,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_psychic_blast']
       });
 
@@ -1945,7 +1945,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -1956,7 +1956,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const nearby3 = await createArkanaTestUser({
@@ -1967,7 +1967,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -2008,7 +2008,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis']
       });
 
@@ -2042,7 +2042,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         commonPowers: ['strigoi_hypnosis']
       });
 
@@ -2054,7 +2054,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 3,
         perception: 3,
-        hitPoints: 10,
+        maxHP: 10,
         health: 0 // Unconscious
       });
 
@@ -2151,7 +2151,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,  // +6 modifier (tier 5-6)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_tk_surge']
       });
 
@@ -2163,7 +2163,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const nearby2 = await createArkanaTestUser({
@@ -2174,7 +2174,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -2214,7 +2214,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 1,  // -2 modifier (tier 0-1)
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_tk_surge']
       });
 
@@ -2226,7 +2226,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -2270,7 +2270,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['gaki_death_soul_drain']  // Uses check_mental_vs_mental (enemy_stat)
       });
 
@@ -2282,7 +2282,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -2379,7 +2379,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,  // +6 modifier (tier 5-6)
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_tk_surge']
       });
 
@@ -2391,7 +2391,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -2434,7 +2434,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 2,
-        hitPoints: 15,
+        maxHP: 15,
         archetypePowers: ['test_area_psychic_blast']  // Deals psychic damage, no check
       });
 
@@ -2446,7 +2446,7 @@ describe('/api/arkana/combat/power-attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();

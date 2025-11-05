@@ -56,7 +56,7 @@ describe('POST /api/arkana/users/payment', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15,
+            maxHP: 15,
             credits: 10,
             chips: 8
           }
@@ -89,7 +89,7 @@ describe('POST /api/arkana/users/payment', () => {
             dexterity: 4,
             mental: 3,
             perception: 3,
-            hitPoints: 12,
+            maxHP: 12,
             credits: 5,
             chips: 12
           }

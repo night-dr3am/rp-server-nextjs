@@ -385,7 +385,7 @@ export async function POST(request: NextRequest) {
       const healthBefore = affectedUser.stats?.health || 0;
       const damageHealResult = applyDamageAndHealing(
         healthBefore,
-        affectedUser.arkanaStats.hitPoints,
+        affectedUser.arkanaStats.maxHP,
         entry.damage,
         0,  // No healing in power-attack (healing is handled separately via self-effects)
         userActiveEffects,

@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     // Get current target health
     const currentHealth = target.stats?.health || 0;
     const healthBefore = currentHealth;
-    const healthAfter = Math.min(currentHealth + healingAmount, target.arkanaStats.hitPoints);
+    const healthAfter = Math.min(currentHealth + healingAmount, target.arkanaStats.maxHP);
 
     // Update target health
     await prisma.userStats.update({

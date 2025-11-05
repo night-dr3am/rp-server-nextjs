@@ -202,7 +202,7 @@ model ArkanaStats {
   dexterity              Int       @default(1)
   mental                 Int       @default(1)
   perception             Int       @default(1)
-  hitPoints              Int       @default(5) @map("hit_points")
+  maxHP                  Int       @default(5) @map("max_hp")
   statPointsPool         Int       @default(10) @map("stat_points_pool")
   statPointsSpent        Int       @default(0) @map("stat_points_spent")
 

@@ -37,7 +37,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -57,7 +57,7 @@ describe('GET /api/arkana/admin/users', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           credits: 100 * i,
           registrationCompleted: true
         }
@@ -105,7 +105,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -124,7 +124,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         registrationCompleted: true
       }
     });
@@ -154,7 +154,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -172,7 +172,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         registrationCompleted: true
       }
     });
@@ -202,7 +202,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -220,7 +220,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         registrationCompleted: true
       }
     });
@@ -250,7 +250,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -270,7 +270,7 @@ describe('GET /api/arkana/admin/users', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -302,7 +302,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         arkanaRole: 'player', // Not admin
         registrationCompleted: true
       }
@@ -332,7 +332,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -350,7 +350,7 @@ describe('GET /api/arkana/admin/users', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 20,
+        maxHP: 20,
         registrationCompleted: true
       }
     });

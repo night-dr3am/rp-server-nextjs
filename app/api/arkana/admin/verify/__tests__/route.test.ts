@@ -38,7 +38,7 @@ describe('POST /api/arkana/admin/verify', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -72,7 +72,7 @@ describe('POST /api/arkana/admin/verify', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'player', // Not admin
         registrationCompleted: true
       }

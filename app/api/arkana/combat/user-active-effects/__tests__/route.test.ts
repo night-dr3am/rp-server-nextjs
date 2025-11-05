@@ -38,7 +38,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     activeEffects?: ActiveEffect[];
   }) {
     const { user } = await createTestUser('arkana');
@@ -67,7 +67,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         activeEffects: arkanaStatsData.activeEffects || [],
         liveStats: {}
       }
@@ -105,7 +105,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         activeEffects
       });
 
@@ -149,7 +149,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         activeEffects
       });
 
@@ -191,7 +191,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         activeEffects
       });
 
@@ -222,7 +222,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         activeEffects: []
       });
 
@@ -290,7 +290,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15
+          maxHP: 15
         }
       });
 
@@ -321,7 +321,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -362,7 +362,7 @@ describe('/api/arkana/combat/user-active-effects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         activeEffects
       });
 

@@ -37,7 +37,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -98,7 +98,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -164,7 +164,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -229,7 +229,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -281,7 +281,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         arkanaRole: 'player', // Not admin
         registrationCompleted: true
       }
@@ -311,7 +311,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -378,7 +378,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -438,7 +438,7 @@ describe('GET /api/arkana/admin/world-objects', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }

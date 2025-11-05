@@ -39,7 +39,7 @@ describe('/api/arkana/combat/attack', () => {
     dexterity: number;
     mental: number;
     perception: number;
-    hitPoints: number;
+    maxHP: number;
     commonPowers?: string[];
     archetypePowers?: string[];
     activeEffects?: ActiveEffect[];
@@ -90,7 +90,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        hitPoints: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.hitPoints,
         commonPowers: arkanaStatsData.commonPowers || [],
         archetypePowers: arkanaStatsData.archetypePowers || [],
         activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
@@ -125,7 +125,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_1',
@@ -146,7 +146,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2, // 0 modifier (defense)
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -187,7 +187,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_physical_minus_2',
@@ -208,7 +208,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -241,7 +241,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_1',
@@ -269,7 +269,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -302,7 +302,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_1',
@@ -330,7 +330,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -363,7 +363,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_2',
@@ -384,7 +384,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2, // 0 modifier base (defense stat for physical attacks)
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_dexterity_minus_1',
@@ -436,7 +436,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_roll_2',
@@ -457,7 +457,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2, // 0 modifier (defense)
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -498,7 +498,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_physical_roll_minus_2',
@@ -519,7 +519,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -558,7 +558,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -569,7 +569,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3, // +2 modifier base (tier)
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'debuff_dexterity_roll_minus_1',
@@ -616,7 +616,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_stat_1',
@@ -645,7 +645,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -685,7 +685,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3, // +2 modifier base (tier)
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_dexterity_3',
@@ -706,7 +706,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 0, // Very low defense (guarantees hit)
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -748,7 +748,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -768,7 +768,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -808,7 +808,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -842,7 +842,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -884,7 +884,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         activeEffects: [
           {
             effectId: 'buff_physical_1',
@@ -904,7 +904,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -946,7 +946,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const target = await createArkanaTestUser({
@@ -957,7 +957,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 1,
         perception: 2,
-        hitPoints: 20
+        maxHP: 20
       });
 
       const timestamp = new Date().toISOString();
@@ -990,7 +990,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const timestamp = new Date().toISOString();
@@ -1022,7 +1022,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const target = await createArkanaTestUser({
@@ -1033,7 +1033,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Set target health to 0 (unconscious)
@@ -1071,7 +1071,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 25
+        maxHP: 25
       });
 
       const target = await createArkanaTestUser({
@@ -1082,7 +1082,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       // Set target status to 1 (OOC mode, not in RP)
@@ -1120,7 +1120,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1165,7 +1165,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           registrationCompleted: false // Not completed!
         }
       });
@@ -1178,7 +1178,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1210,7 +1210,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const target = await createArkanaTestUser({
@@ -1221,7 +1221,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const attackData = {
@@ -1250,7 +1250,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15
+        maxHP: 15
       });
 
       const target = await createArkanaTestUser({
@@ -1261,7 +1261,7 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: 2,
         mental: 5,
         perception: 3,
-        hitPoints: 10
+        maxHP: 10
       });
 
       const timestamp = new Date().toISOString();
@@ -1371,7 +1371,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1382,7 +1382,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0, // Very low defense, guarantees hit
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1419,7 +1419,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1430,7 +1430,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1465,7 +1465,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1476,7 +1476,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1511,7 +1511,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 15
+          maxHP: 15
         });
 
         const target = await createArkanaTestUser({
@@ -1522,7 +1522,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1558,7 +1558,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 20
+          maxHP: 20
         });
 
         const target = await createArkanaTestUser({
@@ -1569,7 +1569,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1604,7 +1604,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 25
+          maxHP: 25
         });
 
         const target = await createArkanaTestUser({
@@ -1615,7 +1615,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1652,7 +1652,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0, // Modifier: -3 → Damage: 1 + (-3) = -2 → clamped to 1
           mental: 2,
           perception: 2,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1663,7 +1663,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0, // Very low defense
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1698,7 +1698,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 2, // Modifier: 0 → Damage: 1 + 0 = 1
           mental: 2,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1709,7 +1709,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1744,7 +1744,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 3, // Modifier: +2 → Damage: 1 + 2 = 3
           mental: 2,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1755,7 +1755,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1790,7 +1790,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 4, // Modifier: +4 → Damage: 1 + 4 = 5
           mental: 2,
           perception: 4,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1801,7 +1801,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();
@@ -1836,7 +1836,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 5, // Modifier: +6 → Damage: 1 + 6 = 7
           mental: 2,
           perception: 5,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const target = await createArkanaTestUser({
@@ -1847,7 +1847,7 @@ describe('/api/arkana/combat/attack', () => {
           dexterity: 0,
           mental: 5,
           perception: 3,
-          hitPoints: 10
+          maxHP: 10
         });
 
         const timestamp = new Date().toISOString();

@@ -37,7 +37,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -102,7 +102,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -138,7 +138,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 2,
         mental: 2,
         perception: 2,
-        hitPoints: 10,
+        maxHP: 10,
         arkanaRole: 'player', // Not admin
         registrationCompleted: true
       }
@@ -192,7 +192,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -228,7 +228,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -292,7 +292,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }
@@ -346,7 +346,7 @@ describe('POST /api/arkana/admin/world-object/update-state', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 15,
+        maxHP: 15,
         arkanaRole: 'admin',
         registrationCompleted: true
       }

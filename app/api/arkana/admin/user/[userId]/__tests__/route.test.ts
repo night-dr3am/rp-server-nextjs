@@ -38,7 +38,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -56,7 +56,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 2,
           perception: 3,
-          hitPoints: 20,
+          maxHP: 20,
           credits: 500,
           chips: 100,
           xp: 50,
@@ -87,7 +87,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
       expectSuccess(data);
       expect(data.data.user.id).toBe(targetUser.id);
       expect(data.data.arkanaStats.characterName).toBe('Target User');
-      expect(data.data.arkanaStats.hitPoints).toBe(20);
+      expect(data.data.arkanaStats.maxHP).toBe(20);
       expect(data.data.stats.health).toBe(15);
       expect(data.data.arkanaStats.credits).toBe(500);
     });
@@ -105,7 +105,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           arkanaRole: 'player',
           registrationCompleted: true
         }
@@ -123,7 +123,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -153,7 +153,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -187,7 +187,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -205,7 +205,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           credits: 100,
           registrationCompleted: true
         }
@@ -223,7 +223,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
         token: adminToken,
         characterName: 'Updated Name',
         physical: 5,
-        hitPoints: 25,
+        maxHP: 25,
         health: 20,
         credits: 1000,
         chips: 500,
@@ -243,7 +243,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
       expectSuccess(data);
       expect(data.data.arkanaStats.characterName).toBe('Updated Name');
       expect(data.data.arkanaStats.physical).toBe(5);
-      expect(data.data.arkanaStats.hitPoints).toBe(25);
+      expect(data.data.arkanaStats.maxHP).toBe(25);
       expect(data.data.arkanaStats.credits).toBe(1000);
       expect(data.data.arkanaStats.chips).toBe(500);
       expect(data.data.arkanaStats.arkanaRole).toBe('admin');
@@ -263,7 +263,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -281,7 +281,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -297,7 +297,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
       const updateData = {
         token: adminToken,
         health: 50, // Greater than hitPoints (10)
-        hitPoints: 10
+        maxHP: 10
       };
 
       const request = createMockPutRequest(
@@ -326,7 +326,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -344,7 +344,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -359,7 +359,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
 
       const updateData = {
         token: adminToken,
-        hitPoints: 50, // Increase max health
+        maxHP: 50, // Increase max health
         health: 50 // Set current health to new max
       };
 
@@ -373,7 +373,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.arkanaStats.hitPoints).toBe(50);
+      expect(data.data.arkanaStats.maxHP).toBe(50);
       expect(data.data.stats.health).toBe(50);
     });
 
@@ -390,7 +390,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -408,7 +408,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           commonPowers: [],
           registrationCompleted: true
         }
@@ -453,7 +453,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           arkanaRole: 'player',
           registrationCompleted: true
         }
@@ -471,7 +471,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -507,7 +507,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -525,7 +525,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           registrationCompleted: true
         }
       });
@@ -565,7 +565,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -584,7 +584,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           flaws: [
             { name: 'Glass Jaw', cost: 2 },
             { name: 'Technophobe', cost: 2 }
@@ -653,7 +653,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 3,
           mental: 3,
           perception: 3,
-          hitPoints: 15,
+          maxHP: 15,
           arkanaRole: 'admin',
           registrationCompleted: true
         }
@@ -671,7 +671,7 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
           dexterity: 2,
           mental: 2,
           perception: 2,
-          hitPoints: 10,
+          maxHP: 10,
           flaws: [
             { name: 'Glass Jaw', cost: 2 }
           ],

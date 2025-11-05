@@ -54,7 +54,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15,
+            maxHP: 15,
             statPointsPool: 2,
             statPointsSpent: 8,
             inherentPowers: ['Magic Sense'],
@@ -127,7 +127,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15
+            maxHP: 15
           }
         }
       }
@@ -180,7 +180,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15
+            maxHP: 15
           }
         }
       }
@@ -234,7 +234,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15
+            maxHP: 15
           }
         }
       }
@@ -285,7 +285,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15
+            maxHP: 15
           }
         }
       }
@@ -420,7 +420,7 @@ describe('POST /api/arkana/users/profile', () => {
             dexterity: 3,
             mental: 4,
             perception: 2,
-            hitPoints: 15
+            maxHP: 15
           }
         }
       }

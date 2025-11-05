@@ -11,7 +11,7 @@ async function createArkanaTestUser(arkanaStatsData: {
   dexterity?: number;
   mental?: number;
   perception?: number;
-  hitPoints?: number;
+  maxHP?: number;  // Fallback for setting current health (backward compatibility with old hitPoints param)
   activeEffects?: ActiveEffect[];
   liveStats?: LiveStats;
   status?: number;
@@ -34,11 +34,11 @@ async function createArkanaTestUser(arkanaStatsData: {
   }
 
   // Create userStats (global createTestUser doesn't create it for arkana universe)
-  // Use hitPoints parameter for backward compat (if health not specified, use hitPoints for current HP)
-  // Otherwise default to physical * 5
+  // Always calculate true maxHP from physical * 5 (stored in arkanaStats)
+  // maxHP parameter is used as fallback for current health (backward compatibility)
   const physical = arkanaStatsData.physical || 3;
-  const maxHP = physical * 5;
-  const currentHP = arkanaStatsData.health ?? arkanaStatsData.hitPoints ?? maxHP;
+  const trueMaxHP = physical * 5;
+  const currentHP = arkanaStatsData.health ?? arkanaStatsData.maxHP ?? trueMaxHP;
 
   await prisma.userStats.create({
     data: {
@@ -64,7 +64,7 @@ async function createArkanaTestUser(arkanaStatsData: {
       dexterity: arkanaStatsData.dexterity || 3,
       mental: arkanaStatsData.mental || 3,
       perception: arkanaStatsData.perception || 3,
-      hitPoints: maxHP,  // Always calculate from physical (hitPoints is MAX HP)
+      maxHP: trueMaxHP,  // Always calculate from physical * 5
       statPointsPool: 0,
       statPointsSpent: 6,
       flaws: ['flaw_addiction'],
@@ -251,7 +251,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
         dexterity: 3,
         mental: 3,
         perception: 3,
-        hitPoints: 100,
+        maxHP: 100,
         statPointsPool: 0,
         statPointsSpent: 6,
         credits: 0,
@@ -565,7 +565,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to support HP: 50 (maxHP = 100)
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 50 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 50 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -599,7 +599,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to support HP: 80 (maxHP = 100)
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 80 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 80 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -632,7 +632,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to get maxHP = 100
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 95 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 95 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -664,7 +664,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to support HP: 70 (maxHP = 100)
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 70 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 70 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -698,7 +698,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to support HP: 60 (maxHP = 100)
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 60 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 60 });
 
     // First turn
     let timestamp = new Date().toISOString();
@@ -736,7 +736,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to support HP: 50 (maxHP = 100)
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 50 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 50 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -763,7 +763,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
     ];
 
     // Set physical: 20 to get maxHP = 100
-    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, hitPoints: 100 });
+    const { user } = await createArkanaTestUser({ physical: 20, activeEffects, maxHP: 100 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
@@ -786,7 +786,7 @@ describe('POST /api/arkana/combat/end-turn', () => {
       { effectId: 'heal_test_over_time_2', name: 'Test Heal Over Time +2', duration: 'turns:2', turnsLeft: 2, appliedAt: new Date().toISOString() }
     ];
 
-    const { user } = await createArkanaTestUser({ activeEffects, hitPoints: 10 });
+    const { user } = await createArkanaTestUser({ activeEffects, maxHP: 10 });
 
     const timestamp = new Date().toISOString();
     const signature = generateSignature(timestamp, 'arkana');
