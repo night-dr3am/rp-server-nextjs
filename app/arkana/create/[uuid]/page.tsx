@@ -2,22 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+// Import types from types.ts (Prisma-free)
+import type {
+  RaceName,
+  CharacterModel,
+  Flaw,
+  CommonPower,
+  Perk,
+  ArchetypePower,
+  Cybernetic,
+  MagicSchool,
+  Skill
+} from '@/lib/arkana/types';
+// Import constants and functions from types.ts (Prisma-free)
 import {
   RACES,
   STAT_NAMES,
   STAT_DESCRIPTIONS,
-  calculateStatModifier,
+  calculateStatModifier
+} from '@/lib/arkana/types';
+// Import client-safe utilities (parameterized functions)
+import {
   CYBERNETIC_SLOT_COST,
-  type RaceName,
-  type CharacterModel,
-  type Flaw,
-  type CommonPower,
-  type Perk,
-  type ArchetypePower,
-  type Cybernetic,
-  type MagicSchool,
-  type Skill,
-  loadAllData,
   flawsForRace,
   perksForRace,
   commonPowersForRace,
@@ -32,9 +38,8 @@ import {
   getSchoolWeaves,
   getSchoolIdsForArcanist,
   getSchoolName,
-  getWeaveName,
-  getAllSkills
-} from '@/lib/arkanaData';
+  getWeaveName
+} from '@/lib/arkana/clientUtils';
 
 export default function ArkanaCharacterCreation() {
   const params = useParams();
@@ -43,6 +48,8 @@ export default function ArkanaCharacterCreation() {
   const uuid = params?.uuid as string; // Reserved for future validation
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
+  // Generate session ID for token binding
+  const [sessionId] = useState(() => crypto.randomUUID());
 
   // Character creation constants
   const MAX_FLAWS = 4;
@@ -94,7 +101,16 @@ export default function ArkanaCharacterCreation() {
     synthralFreeWeave: ''
   });
 
-  // Data caches
+  // Raw data from API (used for filtering)
+  const [allFlaws, setAllFlaws] = useState<Flaw[]>([]);
+  const [allPerks, setAllPerks] = useState<Perk[]>([]);
+  const [allCommonPowers, setAllCommonPowers] = useState<CommonPower[]>([]);
+  const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
+  const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
+  const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+
+  // Filtered data caches (updated when race/archetype changes)
   const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
   const [availableCommonPowers, setAvailableCommonPowers] = useState<CommonPower[]>([]);
@@ -116,30 +132,38 @@ export default function ArkanaCharacterCreation() {
   // Load data and validate token on mount
   useEffect(() => {
     const initializeApp = async () => {
-      if (!token || universe !== 'arkana') {
+      if (!token || !uuid || universe !== 'arkana') {
         setError('Invalid or missing token');
         setLoading(false);
         return;
       }
 
       try {
-        // Load arkana data first
-        await loadAllData();
-        setAvailableSkills(getAllSkills());
+        // Load arkana metadata from API
+        const metadataResponse = await fetch(
+          `/api/arkana/metadata?token=${token}&sl_uuid=${uuid}&universe=${universe}&sessionId=${sessionId}`
+        );
+        const metadataResult = await metadataResponse.json();
+
+        if (!metadataResult.success) {
+          setError(metadataResult.error || 'Failed to load game data');
+          setLoading(false);
+          return;
+        }
+
+        // Store all raw data from API
+        setAllFlaws(metadataResult.data.flaws || []);
+        setAllPerks(metadataResult.data.perks || []);
+        setAllCommonPowers(metadataResult.data.commonPowers || []);
+        setAllArchPowers(metadataResult.data.archetypePowers || []);
+        setAllCybernetics(metadataResult.data.cybernetics || []);
+        setAllMagicSchools(metadataResult.data.magicSchools || []);
+        setAllSkills(metadataResult.data.skills || []);
+        setAvailableSkills(metadataResult.data.skills || []);
         setDataLoaded(true);
 
-        // Then validate token
-        const encodedToken = encodeURIComponent(token);
-        const response = await fetch(`/api/profile/validate?token=${encodedToken}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (response.ok) {
-          setIsValidToken(true);
-        } else {
-          setError('Invalid or expired token');
-        }
+        // Token is already validated by metadata endpoint, so we're good
+        setIsValidToken(true);
       } catch (error) {
         console.error('Failed to initialize app:', error);
         setError('Failed to load character creation data');
@@ -149,28 +173,28 @@ export default function ArkanaCharacterCreation() {
     };
 
     initializeApp();
-  }, [token, universe]);
+  }, [token, uuid, universe, sessionId]);
 
   // Update available options when race/archetype changes
   useEffect(() => {
     if (!dataLoaded || !characterModel.race) return;
 
     const updateAvailableOptions = () => {
-      setAvailableFlaws(flawsForRace(characterModel.race, characterModel.arch));
-      setAvailablePerks(perksForRace(characterModel.race, characterModel.arch));
-      setAvailableCommonPowers(commonPowersForRace(characterModel.race));
-      setAvailableArchPowers(archPowersForRaceArch(characterModel.race, characterModel.arch));
-      setAvailableCybernetics(cyberneticsAll());
+      setAvailableFlaws(flawsForRace(characterModel.race, characterModel.arch, allFlaws));
+      setAvailablePerks(perksForRace(characterModel.race, characterModel.arch, allPerks));
+      setAvailableCommonPowers(commonPowersForRace(characterModel.race, allCommonPowers));
+      setAvailableArchPowers(archPowersForRaceArch(characterModel.race, characterModel.arch, allArchPowers));
+      setAvailableCybernetics(cyberneticsAll(allCybernetics));
 
       if (canUseMagic(characterModel.race, characterModel.arch)) {
-        setAvailableMagicSchools(magicSchoolsAllGrouped(characterModel.race, characterModel.arch));
+        setAvailableMagicSchools(magicSchoolsAllGrouped(characterModel.race, characterModel.arch, allMagicSchools));
       } else {
         setAvailableMagicSchools({});
       }
     };
 
     updateAvailableOptions();
-  }, [dataLoaded, characterModel.race, characterModel.arch]);
+  }, [dataLoaded, characterModel.race, characterModel.arch, allFlaws, allPerks, allCommonPowers, allArchPowers, allCybernetics, allMagicSchools]);
 
   // Helper functions for updating character model
   const updateIdentity = (field: keyof typeof characterModel.identity, value: string) => {
@@ -277,8 +301,8 @@ export default function ArkanaCharacterCreation() {
   };
 
   // Power Point calculation functions (separate from stat points)
-  const getPowerPointsTotal = () => powerPointsTotal(characterModel);
-  const getPowerPointsSpent = () => powerPointsSpentTotal(characterModel);
+  const getPowerPointsTotal = () => powerPointsTotal(characterModel, allFlaws);
+  const getPowerPointsSpent = () => powerPointsSpentTotal(characterModel, allCommonPowers, allArchPowers, allPerks, allCybernetics, allMagicSchools);
   const getPowerPointsRemaining = () => getPowerPointsTotal() - getPowerPointsSpent();
 
   // Cybernetic slots cost calculation (using imported constant)
@@ -345,9 +369,9 @@ export default function ArkanaCharacterCreation() {
       if (weave) magicSchoolsSummary.push(weave.name);
     });
 
-    const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
-    const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
-    const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave) : '';
+    const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool, allMagicSchools) : '';
+    const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave, allMagicSchools) : '';
+    const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave, allMagicSchools) : '';
 
     let message =
       `**Arkana Character Submission**\n` +
@@ -451,9 +475,9 @@ export default function ArkanaCharacterCreation() {
         if (weave) magicSchoolsSummary.push(weave.name);
       });
 
-      const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
-      const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
-      const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave) : '';
+      const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool, allMagicSchools) : '';
+      const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave, allMagicSchools) : '';
+      const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave, allMagicSchools) : '';
 
       // Create full summary text (without truncation for Google submission)
       const summaryText =
@@ -1217,7 +1241,7 @@ export default function ArkanaCharacterCreation() {
       setCharacterModel(prev => {
         const newMagicSchools = new Set(prev.magicSchools);
         const newMagicWeaves = new Set(prev.magicWeaves);
-        const techSchoolId = getTechnomancySchoolId();
+        const techSchoolId = getTechnomancySchoolId(allMagicSchools);
 
         // Remove previous free weave if it exists
         if (prev.synthralFreeWeave && newMagicWeaves.has(prev.synthralFreeWeave)) {
@@ -1303,10 +1327,10 @@ export default function ArkanaCharacterCreation() {
     const isArcanist = characterModel.race.toLowerCase() === 'human' && characterModel.arch.toLowerCase() === 'arcanist';
 
     // Get data for free picks
-    const techSchoolId = getTechnomancySchoolId();
-    const techWeaves = dataLoaded ? getSchoolWeaves(techSchoolId) : [];
-    const arcanistSchoolIds = dataLoaded ? getSchoolIdsForArcanist(characterModel.race, characterModel.arch) : [];
-    const arcanistSchoolWeaves = characterModel.freeMagicSchool ? getSchoolWeaves(characterModel.freeMagicSchool) : [];
+    const techSchoolId = getTechnomancySchoolId(allMagicSchools);
+    const techWeaves = dataLoaded ? getSchoolWeaves(techSchoolId, allMagicSchools) : [];
+    const arcanistSchoolIds = dataLoaded ? getSchoolIdsForArcanist(characterModel.race, characterModel.arch, allMagicSchools) : [];
+    const arcanistSchoolWeaves = characterModel.freeMagicSchool ? getSchoolWeaves(characterModel.freeMagicSchool, allMagicSchools) : [];
 
     return (
       <div className="space-y-6">
@@ -1393,7 +1417,7 @@ export default function ArkanaCharacterCreation() {
                   </select>
                   {characterModel.synthralFreeWeave && (
                     <p className="text-blue-200 text-sm">
-                      Free weave selected: <strong>{getWeaveName(characterModel.synthralFreeWeave)}</strong>
+                      Free weave selected: <strong>{getWeaveName(characterModel.synthralFreeWeave, allMagicSchools)}</strong>
                     </p>
                   )}
                 </div>
@@ -1418,7 +1442,7 @@ export default function ArkanaCharacterCreation() {
                     <option value="">— select a school —</option>
                     {arcanistSchoolIds.map(schoolId => (
                       <option key={schoolId} value={schoolId}>
-                        {getSchoolName(schoolId)}
+                        {getSchoolName(schoolId, allMagicSchools)}
                       </option>
                     ))}
                   </select>
@@ -1445,8 +1469,8 @@ export default function ArkanaCharacterCreation() {
 
                   {characterModel.freeMagicSchool && characterModel.freeMagicWeave && (
                     <p className="text-blue-200 text-sm">
-                      Free school: <strong>{getSchoolName(characterModel.freeMagicSchool)}</strong>,
-                      Free weave: <strong>{getWeaveName(characterModel.freeMagicWeave)}</strong>
+                      Free school: <strong>{getSchoolName(characterModel.freeMagicSchool, allMagicSchools)}</strong>,
+                      Free weave: <strong>{getWeaveName(characterModel.freeMagicWeave, allMagicSchools)}</strong>
                     </p>
                   )}
                 </div>
@@ -1815,9 +1839,9 @@ export default function ArkanaCharacterCreation() {
     const cyberSlotPts = calculateCyberSlotsCost(characterModel.cyberSlots);
     const powersPts = spentPowerPoints - cyberSlotPts;
 
-    const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool) : '';
-    const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave) : '';
-    const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave) : '';
+    const freeMagicSchoolName = characterModel.freeMagicSchool ? getSchoolName(characterModel.freeMagicSchool, allMagicSchools) : '';
+    const freeMagicWeaveName = characterModel.freeMagicWeave ? getWeaveName(characterModel.freeMagicWeave, allMagicSchools) : '';
+    const synthralFreeWeaveName = characterModel.synthralFreeWeave ? getWeaveName(characterModel.synthralFreeWeave, allMagicSchools) : '';
 
     // Generate copyable character summary
     const generateCharacterSummary = () => {

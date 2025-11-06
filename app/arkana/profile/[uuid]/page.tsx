@@ -2,22 +2,15 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import {
-  loadAllData,
-  getAllCommonPowers,
-  getAllPerks,
-  getAllArchPowers,
-  getAllCybernetics,
-  getAllSkills,
-  getSchoolName,
-  getWeaveName,
-  type CommonPower,
-  type Perk,
-  type ArchetypePower,
-  type Cybernetic,
-  type Skill,
-  type CharacterSkill
-} from '@/lib/arkanaData';
+import type {
+  CommonPower,
+  Perk,
+  ArchetypePower,
+  Cybernetic,
+  Skill,
+  CharacterSkill,
+  MagicSchool
+} from '@/lib/arkana/types';
 import {
   type ShopCybernetic,
   type ShopMagicSchool,
@@ -147,6 +140,7 @@ export default function ArkanaProfilePage() {
   const [perksData, setPerksData] = useState<Perk[]>([]);
   const [archPowersData, setArchPowersData] = useState<ArchetypePower[]>([]);
   const [cyberneticsData, setCyberneticsData] = useState<Cybernetic[]>([]);
+  const [magicSchoolsData, setMagicSchoolsData] = useState<MagicSchool[]>([]);
 
   // Tab navigation state
   const [activeTab, setActiveTab] = useState<'dashboard' | 'social' | 'shop'>('dashboard');
@@ -212,24 +206,39 @@ export default function ArkanaProfilePage() {
     fetchProfileData();
   }, [uuid, universe, token, eventsPage, eventsLimit, fetchProfileData]);
 
-  // Load arkana data on mount
+  // Load arkana metadata from API on mount
   useEffect(() => {
-    const loadData = async () => {
+    const loadMetadata = async () => {
+      if (!token || !uuid || !universe) return;
+
       try {
-        await loadAllData();
-        setSkillsData(getAllSkills());
-        setCommonPowersData(getAllCommonPowers());
-        setPerksData(getAllPerks());
-        setArchPowersData(getAllArchPowers());
-        setCyberneticsData(getAllCybernetics());
+        const response = await fetch(
+          `/api/arkana/metadata?token=${token}&sl_uuid=${uuid}&universe=${universe}&sessionId=${sessionId}`
+        );
+        const result = await response.json();
+
+        if (!result.success) {
+          console.error('Failed to load arkana metadata:', result.error);
+          setError(result.error);
+          return;
+        }
+
+        // Set all metadata from API response
+        setSkillsData(result.data.skills);
+        setCommonPowersData(result.data.commonPowers);
+        setPerksData(result.data.perks);
+        setArchPowersData(result.data.archetypePowers);
+        setCyberneticsData(result.data.cybernetics);
+        setMagicSchoolsData(result.data.magicSchools);
         setDataLoaded(true);
       } catch (err) {
-        console.error('Failed to load arkana data:', err);
+        console.error('Failed to load arkana metadata:', err);
+        setError('Failed to load game data');
       }
     };
 
-    loadData();
-  }, []);
+    loadMetadata();
+  }, [token, uuid, universe, sessionId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -263,6 +272,18 @@ export default function ArkanaProfilePage() {
     if (!dataLoaded) return id;
     const cyber = cyberneticsData.find(c => c.id === id);
     return cyber ? cyber.name : id;
+  };
+
+  const getSchoolName = (id: string): string => {
+    if (!dataLoaded || !magicSchoolsData) return id;
+    const school = magicSchoolsData.find(s => s.id === id && s.id.startsWith('school_'));
+    return school ? school.name : id;
+  };
+
+  const getWeaveName = (id: string): string => {
+    if (!dataLoaded || !magicSchoolsData) return id;
+    const weave = magicSchoolsData.find(w => w.id === id && !w.id.startsWith('school_'));
+    return weave ? weave.name : id;
   };
 
   // Generic function to get power name (for inherent powers and weaknesses)

@@ -2,16 +2,19 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+// Import types from types.ts (Prisma-free)
+import type {
+  Flaw,
+  CommonPower,
+  Perk,
+  ArchetypePower,
+  Cybernetic,
+  MagicSchool,
+  Skill,
+  CharacterSkill
+} from '@/lib/arkana/types';
+// Import client-safe utilities (parameterized functions)
 import {
-  type Flaw,
-  type CommonPower,
-  type Perk,
-  type ArchetypePower,
-  type Cybernetic,
-  type MagicSchool,
-  type Skill,
-  type CharacterSkill,
-  loadAllData,
   flawsForRace,
   perksForRace,
   commonPowersForRace,
@@ -19,10 +22,9 @@ import {
   cyberneticsAll,
   canUseMagic,
   magicSchoolsAllGrouped,
-  groupCyberneticsBySection,
-  getAllFlaws,
-  getAllSkills
-} from '@/lib/arkanaData';
+  groupCyberneticsBySection
+} from '@/lib/arkana/clientUtils';
+import ArkanaDataTab from './components/ArkanaDataTab';
 
 interface User {
   id: string;
@@ -163,7 +165,7 @@ function AdminDashboardContent() {
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'objects'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'objects' | 'data'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -181,6 +183,17 @@ function AdminDashboardContent() {
 
   // Arkana data state
   const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Raw data from API (used for filtering and lookups)
+  const [allFlaws, setAllFlaws] = useState<Flaw[]>([]);
+  const [allPerks, setAllPerks] = useState<Perk[]>([]);
+  const [allCommonPowers, setAllCommonPowers] = useState<CommonPower[]>([]);
+  const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
+  const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
+  const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+
+  // Filtered data caches (updated when race/archetype changes)
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
   const [availablePerks, setAvailablePerks] = useState<Perk[]>([]);
@@ -232,12 +245,36 @@ function AdminDashboardContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Load arkana data on mount
+  // Load arkana data from admin API on mount
   useEffect(() => {
     const loadData = async () => {
+      if (!token) return;
+
       try {
-        await loadAllData();
-        setAvailableSkills(getAllSkills());
+        const response = await fetch('/api/arkana/admin/metadata', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          setError(result.error || 'Failed to load game data');
+          return;
+        }
+
+        // Store all raw data from API
+        setAllFlaws(result.data.flaws || []);
+        setAllPerks(result.data.perks || []);
+        setAllCommonPowers(result.data.commonPowers || []);
+        setAllArchPowers(result.data.archetypePowers || []);
+        setAllCybernetics(result.data.cybernetics || []);
+        setAllMagicSchools(result.data.magicSchools || []);
+        setAllSkills(result.data.skills || []);
+        setAvailableSkills(result.data.skills || []);
         setDataLoaded(true);
       } catch (err) {
         console.error('Failed to load arkana data:', err);
@@ -246,6 +283,7 @@ function AdminDashboardContent() {
     };
 
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Re-convert flaws when data loads (handles race condition)
@@ -264,7 +302,7 @@ function AdminDashboardContent() {
     // Convert flaws from JSON to IDs
     const flawIds = new Set<string>();
     if (Array.isArray(flawsJson)) {
-      const allFlawsList = getAllFlaws();
+      const allFlawsList = allFlaws;
       if (process.env.NODE_ENV === 'development') {
         console.log('[CLIENT EFFECT] All flaws available:', allFlawsList.length);
       }
@@ -302,18 +340,18 @@ function AdminDashboardContent() {
     }));
 
     // Update available options for this race/archetype
-    setAvailableFlaws(flawsForRace(race, archetype));
-    setAvailablePerks(perksForRace(race, archetype));
-    setAvailableCommonPowers(commonPowersForRace(race));
-    setAvailableArchPowers(archPowersForRaceArch(race, archetype));
-    setAvailableCybernetics(cyberneticsAll());
+    setAvailableFlaws(flawsForRace(race, archetype, allFlaws));
+    setAvailablePerks(perksForRace(race, archetype, allPerks));
+    setAvailableCommonPowers(commonPowersForRace(race, allCommonPowers));
+    setAvailableArchPowers(archPowersForRaceArch(race, archetype, allArchPowers));
+    setAvailableCybernetics(cyberneticsAll(allCybernetics));
 
     if (canUseMagic(race, archetype)) {
-      const magicSchools = magicSchoolsAllGrouped(race, archetype);
+      const magicSchools = magicSchoolsAllGrouped(race, archetype, allMagicSchools);
       setAvailableMagicSchools(magicSchools);
       setExpandedSections(new Set(Object.keys(magicSchools)));
     }
-  }, [dataLoaded, selectedUser]);
+  }, [dataLoaded, selectedUser, allFlaws, allPerks, allCommonPowers, allArchPowers, allCybernetics, allMagicSchools]);
 
   const fetchUsers = async (page = 1, search = '') => {
     try {
@@ -358,7 +396,7 @@ function AdminDashboardContent() {
         if (dataLoaded && flawsJson && Array.isArray(flawsJson)) {
           // flawsJson is [{id?: "...", name: "...", cost: ...}, ...]
           // We need to convert it to IDs, preferring the ID field if available
-          const allFlawsList = getAllFlaws();
+          const allFlawsList = allFlaws;
           if (process.env.NODE_ENV === 'development') {
             console.log('[CLIENT LOAD] All flaws available:', allFlawsList.length);
           }
@@ -437,14 +475,14 @@ function AdminDashboardContent() {
 
         // Filter available options based on race/archetype
         if (dataLoaded && race) {
-          setAvailableFlaws(flawsForRace(race, archetype));
-          setAvailablePerks(perksForRace(race, archetype));
-          setAvailableCommonPowers(commonPowersForRace(race));
-          setAvailableArchPowers(archPowersForRaceArch(race, archetype));
-          setAvailableCybernetics(cyberneticsAll());
+          setAvailableFlaws(flawsForRace(race, archetype, allFlaws));
+          setAvailablePerks(perksForRace(race, archetype, allPerks));
+          setAvailableCommonPowers(commonPowersForRace(race, allCommonPowers));
+          setAvailableArchPowers(archPowersForRaceArch(race, archetype, allArchPowers));
+          setAvailableCybernetics(cyberneticsAll(allCybernetics));
 
           if (canUseMagic(race, archetype)) {
-            const magicSchools = magicSchoolsAllGrouped(race, archetype);
+            const magicSchools = magicSchoolsAllGrouped(race, archetype, allMagicSchools);
             setAvailableMagicSchools(magicSchools);
             // Auto-expand all magic school sections
             setExpandedSections(new Set(Object.keys(magicSchools)));
@@ -1141,6 +1179,16 @@ function AdminDashboardContent() {
               >
                 🌍 Objects Management
               </button>
+              <button
+                onClick={() => setActiveTab('data')}
+                className={`flex-1 px-6 py-3 rounded font-medium transition-colors ${
+                  activeTab === 'data'
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-gray-800 text-cyan-300 hover:bg-gray-700'
+                }`}
+              >
+                📊 Data Management
+              </button>
             </div>
 
             {activeTab === 'users' ? (
@@ -1246,7 +1294,7 @@ function AdminDashboardContent() {
               )}
             </div>
           </>
-            ) : (
+            ) : activeTab === 'objects' ? (
               <>
                 {/* Objects Management Tab */}
                 {/* Search Bar */}
@@ -1348,6 +1396,11 @@ function AdminDashboardContent() {
                     </div>
                   )}
                 </div>
+              </>
+            ) : (
+              <>
+                {/* Data Management Tab */}
+                <ArkanaDataTab token={token || ''} />
               </>
             )}
           </>

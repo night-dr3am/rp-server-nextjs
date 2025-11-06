@@ -11,6 +11,16 @@ import {
   Skill,
   WorldObjectSuccessScript
 } from './types';
+import {
+  loadFlaws,
+  loadCommonPowers,
+  loadPerks,
+  loadArchetypePowers,
+  loadCybernetics,
+  loadAllMagic,
+  loadSkills,
+  loadEffects
+} from './unifiedDataLoader';
 
 // Constants
 export const CYBERNETIC_SLOT_COST = 1; // Cost per cybernetic slot in power points
@@ -39,15 +49,17 @@ export async function loadAllData(): Promise<void> {
     const basePath = testMode ? './tests/' : './';
     const fileSuffix = testMode ? '.test.json' : '';
 
+    // Load arkana data from unified loader (DB-first with JSON fallback)
+    // WorldObject files still use direct imports (not yet migrated to DB)
     const [flawsData, commonData, perksData, archData, cyberData, magicData, effectsData, skillsData, worldObjectChecksData, worldObjectSuccessScriptsData] = await Promise.all([
-      import(`${basePath}flaws${testMode ? '' : '3'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}common_powers${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}perks${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}archetype_powers${testMode ? '' : '4'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}cybernetics${testMode ? '' : '2'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`).then(m => m.default),
-      import(`${basePath}effects${fileSuffix}`).then(m => m.default),
-      import(`${basePath}skills${fileSuffix}`).then(m => m.default),
+      loadFlaws(),
+      loadCommonPowers(),
+      loadPerks(),
+      loadArchetypePowers(),
+      loadCybernetics(),
+      loadAllMagic(), // Combines schools + weaves
+      loadEffects(),
+      loadSkills(),
       import(`${basePath}worldObjectChecks${fileSuffix}`).then(m => m.default),
       import(`${basePath}worldObjectSuccessScripts${fileSuffix}`).then(m => m.default)
     ]);
@@ -61,8 +73,7 @@ export async function loadAllData(): Promise<void> {
     skills = skillsData;
 
     // Load effects into map for fast lookup
-    // Cast the JSON data to EffectDefinition array
-    effectsMap = new Map((effectsData as EffectDefinition[]).map(e => [e.id, e]));
+    effectsMap = new Map(effectsData.map(e => [e.id, e]));
 
     // Load worldObjectChecks into map for fast lookup
     worldObjectChecksMap = new Map((worldObjectChecksData as EffectDefinition[]).map(e => [e.id, e]));

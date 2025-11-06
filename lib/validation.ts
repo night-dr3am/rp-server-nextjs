@@ -845,6 +845,13 @@ export const arkanaProfileDataSchema = Joi.object({
   limit: Joi.number().integer().min(5).max(100).optional().default(20)
 });
 
+export const arkanaMetadataSchema = Joi.object({
+  token: Joi.string().required(),
+  sl_uuid: uuidSchema,
+  universe: Joi.string().valid('arkana').required(),
+  sessionId: Joi.string().uuid().optional()
+});
+
 export const arkanaAdminVerifySchema = Joi.object({
   token: Joi.string().required()
 });
@@ -941,6 +948,58 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
     }
   }
   return value;
+});
+
+// Arkana Data Management - Admin endpoints for dynamic content system
+const arkanaDataTypes = ['flaw', 'commonPower', 'archetypePower', 'perk', 'magicSchool', 'magicWave', 'cybernetic', 'skill', 'effect'];
+
+export const arkanaAdminDataListSchema = Joi.object({
+  token: Joi.string().required(),
+  type: Joi.string().valid(...arkanaDataTypes).optional(),
+  search: Joi.string().max(255).optional().allow(''),
+  page: Joi.string().pattern(/^\d+$/).optional().default('1'),
+  limit: Joi.string().pattern(/^\d+$/).optional().default('50'),
+  sortBy: Joi.string().valid('id', 'type', 'createdAt', 'updatedAt').optional().default('id'),
+  sortOrder: Joi.string().valid('asc', 'desc').optional().default('asc')
+});
+
+export const arkanaAdminDataGetSchema = Joi.object({
+  token: Joi.string().required(),
+  id: Joi.string().required()
+});
+
+export const arkanaAdminDataCreateSchema = Joi.object({
+  token: Joi.string().required(),
+  id: Joi.string().min(1).max(255).required(),
+  type: Joi.string().valid(...arkanaDataTypes).required(),
+  jsonData: Joi.object().required() // Validated separately per type in endpoint
+});
+
+export const arkanaAdminDataUpdateSchema = Joi.object({
+  token: Joi.string().required(),
+  id: Joi.string().min(1).max(255).required(),
+  jsonData: Joi.object().required()
+});
+
+export const arkanaAdminDataDeleteSchema = Joi.object({
+  token: Joi.string().required(),
+  id: Joi.string().required()
+});
+
+export const arkanaAdminDataBulkSaveSchema = Joi.object({
+  token: Joi.string().required(),
+  data: Joi.array().items(
+    Joi.object({
+      id: Joi.string().min(1).max(255).required(),
+      type: Joi.string().valid(...arkanaDataTypes).required(),
+      jsonData: Joi.object().required()
+    })
+  ).min(1).required()
+});
+
+export const arkanaAdminDataExportSchema = Joi.object({
+  token: Joi.string().required(),
+  type: Joi.string().valid(...arkanaDataTypes).required()
 });
 
 // Arkana social groups validation schemas

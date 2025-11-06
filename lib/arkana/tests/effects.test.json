@@ -99,15 +99,6 @@
     "duration": "immediate"
   },
   {
-    "id": "check_mental_vs_tn10",
-    "name": "Mental Check vs TN 10",
-    "desc": "Roll 1d20 + Mental modifier vs TN 10",
-    "category": "check",
-    "checkStat": "Mental",
-    "checkVs": "fixed",
-    "checkTN": 10
-  },
-  {
     "id": "debuff_mental_minus_1",
     "name": "Mental Debuff -1",
     "desc": "Reduces target's Mental stat by 1 (emotion theft)",
