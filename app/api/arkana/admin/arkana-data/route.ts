@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         const itemData = item as Record<string, unknown>;
         return {
           ...itemData,
-          type: value.type,
+          arkanaDataType: value.type,
           // Add unique composite key for React rendering (type:id)
           _uniqueId: `${value.type}:${itemData.id}`
         };
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
           const itemData = item as Record<string, unknown>;
           return {
             ...itemData,
-            type: type,
+            arkanaDataType: type,
             // Add unique composite key for React rendering (type:id)
             _uniqueId: `${type}:${itemData.id}`
           };
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `ID "${value.id}" already exists with type "${existing.type}". IDs must be globally unique.`
+          error: `ID "${value.id}" already exists with type "${existing.arkanaDataType}". IDs must be globally unique.`
         },
         { status: 409 }
       );
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
     const newItem = await prisma.arkanaData.create({
       data: {
         id: value.id,
-        type: value.type,
+        arkanaDataType: value.type,
         jsonData: value.jsonData
       }
     });
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
         message: 'Arkana data item created successfully',
         item: {
           id: newItem.id,
-          type: newItem.type,
+          arkanaDataType: newItem.arkanaDataType,
           ...(newItem.jsonData as Record<string, unknown>),
           _dbMeta: {
             createdAt: newItem.createdAt,

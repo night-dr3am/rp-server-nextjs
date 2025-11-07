@@ -80,8 +80,8 @@ describe('Arkana Data Export Endpoint', () => {
     it('should export data as JSON file for admin', async () => {
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'export_flaw_1', type: 'flaw', jsonData: { name: 'Export Flaw 1', cost: 1 } },
-          { id: 'export_flaw_2', type: 'flaw', jsonData: { name: 'Export Flaw 2', cost: 2 } }
+          { id: 'export_flaw_1', arkanaDataType: 'flaw', jsonData: { name: 'Export Flaw 1', cost: 1 } },
+          { id: 'export_flaw_2', arkanaDataType: 'flaw', jsonData: { name: 'Export Flaw 2', cost: 2 } }
         ]
       });
 
@@ -131,8 +131,8 @@ describe('Arkana Data Export Endpoint', () => {
     it('should export magic schools and weaves to same file', async () => {
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'school_test', type: 'magicSchool', jsonData: { name: 'Test School' } },
-          { id: 'test_weave', type: 'magicWave', jsonData: { name: 'Test Weave' } }
+          { id: 'school_test', arkanaDataType: 'magicSchool', jsonData: { name: 'Test School' } },
+          { id: 'test_weave', arkanaDataType: 'magicWave', jsonData: { name: 'Test Weave' } }
         ]
       });
 
@@ -157,7 +157,7 @@ describe('Arkana Data Export Endpoint', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'format_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Format Test', cost: 1 }
         }
       });
@@ -181,7 +181,7 @@ describe('Arkana Data Export Endpoint', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'stats_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Stats Test', cost: 1, desc: 'Test flaw for stats' }
         }
       });
@@ -205,7 +205,7 @@ describe('Arkana Data Export Endpoint', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'invalid_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {} // Empty data
         }
       });
@@ -255,8 +255,8 @@ describe('Arkana Data Export Endpoint', () => {
     it('should return export stats for admin', async () => {
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'stats_flaw_1', type: 'flaw', jsonData: { name: 'Flaw 1', cost: 1 } },
-          { id: 'stats_flaw_2', type: 'flaw', jsonData: { name: 'Flaw 2', cost: 2 } }
+          { id: 'stats_flaw_1', arkanaDataType: 'flaw', jsonData: { name: 'Flaw 1', cost: 1 } },
+          { id: 'stats_flaw_2', arkanaDataType: 'flaw', jsonData: { name: 'Flaw 2', cost: 2 } }
         ]
       });
 
@@ -280,7 +280,7 @@ describe('Arkana Data Export Endpoint', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'invalid_data',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {} // Empty/invalid
         }
       });

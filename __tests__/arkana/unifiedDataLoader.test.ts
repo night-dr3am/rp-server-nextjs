@@ -114,7 +114,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'test_flaw_1',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: 'Test Flaw',
             desc: 'A test flaw',
@@ -137,7 +137,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'test_power_1',
-          type: 'commonPower',
+          arkanaDataType: 'commonPower',
           jsonData: {
             name: 'Test Power',
             desc: 'A test power',
@@ -159,9 +159,9 @@ describe('Unified Data Loader', () => {
     test('should load multiple items of same type from database', async () => {
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'perk_1', type: 'perk', jsonData: { name: 'Perk 1', cost: 1 } },
-          { id: 'perk_2', type: 'perk', jsonData: { name: 'Perk 2', cost: 2 } },
-          { id: 'perk_3', type: 'perk', jsonData: { name: 'Perk 3', cost: 3 } }
+          { id: 'perk_1', arkanaDataType: 'perk', jsonData: { name: 'Perk 1', cost: 1 } },
+          { id: 'perk_2', arkanaDataType: 'perk', jsonData: { name: 'Perk 2', cost: 2 } },
+          { id: 'perk_3', arkanaDataType: 'perk', jsonData: { name: 'Perk 3', cost: 3 } }
         ]
       });
 
@@ -197,7 +197,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'cache_test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Cache Test', cost: 1 }
         }
       });
@@ -233,8 +233,8 @@ describe('Unified Data Loader', () => {
       // Insert test data for multiple types
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'cache_flaw_all', type: 'flaw', jsonData: { name: 'Test Flaw', cost: 1 } },
-          { id: 'cache_perk_all', type: 'perk', jsonData: { name: 'Test Perk', cost: 2 } }
+          { id: 'cache_flaw_all', arkanaDataType: 'flaw', jsonData: { name: 'Test Flaw', cost: 1 } },
+          { id: 'cache_perk_all', arkanaDataType: 'perk', jsonData: { name: 'Test Perk', cost: 2 } }
         ]
       });
 
@@ -269,7 +269,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'unique_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Unique Flaw', cost: 5 }
         }
       });
@@ -293,7 +293,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'any_item',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Any Item' }
         }
       });
@@ -307,7 +307,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'db_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'DB Flaw' }
         }
       });
@@ -381,7 +381,7 @@ describe('Unified Data Loader', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'db_structure_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: sampleFlaw.name,
             desc: sampleFlaw.desc,

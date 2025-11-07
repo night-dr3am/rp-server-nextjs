@@ -101,8 +101,8 @@ describe('POST /api/arkana/admin/arkana-data/bulk-save', () => {
     // Create initial items
     await prisma.arkanaData.createMany({
       data: [
-        { id: 'existing_1', type: 'flaw', jsonData: { name: 'Original 1' } },
-        { id: 'existing_2', type: 'perk', jsonData: { name: 'Original 2' } }
+        { id: 'existing_1', arkanaDataType: 'flaw', jsonData: { name: 'Original 1' } },
+        { id: 'existing_2', arkanaDataType: 'perk', jsonData: { name: 'Original 2' } }
       ]
     });
 
@@ -128,7 +128,7 @@ describe('POST /api/arkana/admin/arkana-data/bulk-save', () => {
 
   it('should handle mixed create and update', async () => {
     await prisma.arkanaData.create({
-      data: { id: 'existing', type: 'flaw', jsonData: { name: 'Original' } }
+      data: { id: 'existing', arkanaDataType: 'flaw', jsonData: { name: 'Original' } }
     });
 
     const request = createMockPostRequest('/api/arkana/admin/arkana-data/bulk-save', {

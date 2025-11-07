@@ -39,7 +39,7 @@ function isTestMode(): boolean {
 async function hasDataInDatabase(type: ArkanaDataType): Promise<boolean> {
   try {
     const count = await prisma.arkanaData.count({
-      where: { type }
+      where: { arkanaDataType: type }
     });
     return count > 0;
   } catch (error) {
@@ -54,7 +54,7 @@ async function hasDataInDatabase(type: ArkanaDataType): Promise<boolean> {
 async function loadFromDatabase<T>(type: ArkanaDataType): Promise<T[]> {
   try {
     const records = await prisma.arkanaData.findMany({
-      where: { type },
+      where: { arkanaDataType: type },
       orderBy: { id: 'asc' }
     });
 

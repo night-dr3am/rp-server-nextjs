@@ -42,6 +42,8 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
   const [selectedItem, setSelectedItem] = useState<Record<string, unknown> | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isDatabaseEmpty, setIsDatabaseEmpty] = useState<boolean>(false);
+  const [checkingDatabase, setCheckingDatabase] = useState<boolean>(true);
 
   // Load data source information
   useEffect(() => {
@@ -77,6 +79,37 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
     loadDataSourceInfo();
   }, [token]);
 
+  // Check if database is empty (for migration button visibility)
+  useEffect(() => {
+    const checkDatabaseStatus = async () => {
+      try {
+        setCheckingDatabase(true);
+
+        // Use data-source-info endpoint to check if database has any data
+        const response = await fetch('/api/arkana/admin/data-source-info', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            // Check if ALL types are from JSON (database completely empty)
+            const allFromJson = result.data.every((item: DataSourceInfo) => item.source === 'json');
+            setIsDatabaseEmpty(allFromJson);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking database status:', err);
+      } finally {
+        setCheckingDatabase(false);
+      }
+    };
+
+    checkDatabaseStatus();
+  }, [token, refreshKey]); // Re-check when data refreshes
+
   // Get count for a specific type
   const getTypeCount = (type: ArkanaDataType): number => {
     const info = dataSourceInfo.find(item => item.type === type);
@@ -90,19 +123,138 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
     return info.source === 'database' ? '🗄️ Database' : '📄 JSON Files';
   };
 
-  // Handle save all to database
+  // Handle JSON-to-Database migration (one-time operation)
   const handleSaveAllToDatabase = async () => {
-    if (!confirm('Save all JSON data to database? This will overwrite existing database entries.')) {
-      return;
-    }
+    // Confirmation dialog
+    const confirmed = confirm(
+      'Import all JSON data to database?\n\n' +
+      'This will create database entries for all static JSON data.\n' +
+      'After this, all edits will be automatically saved to the database.\n\n' +
+      'This is a one-time migration operation. Continue?'
+    );
+
+    if (!confirmed) return;
 
     try {
       setLoading(true);
-      // TODO: Implement bulk save endpoint
-      alert('Save to database functionality coming soon!');
+      setError(null);
+
+      // All Arkana data types
+      const types: ArkanaDataType[] = [
+        'flaw', 'commonPower', 'archetypePower', 'perk',
+        'magicSchool', 'magicWave', 'cybernetic', 'skill', 'effect'
+      ];
+
+      const bulkData: Array<{ id: string; type: string; jsonData: Record<string, unknown> }> = [];
+
+      console.log('Starting JSON to database migration...');
+
+      // Fetch data from JSON files (via unified loader fallback)
+      for (const type of types) {
+        console.log(`Fetching ${type} data...`);
+
+        const response = await fetch(
+          `/api/arkana/admin/arkana-data?type=${type}&limit=10000&token=${token}`,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${type} data: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.data.items && result.data.items.length > 0) {
+          console.log(`Found ${result.data.items.length} ${type} items`);
+
+          // Transform items for bulk save (remove metadata fields only)
+          for (const item of result.data.items) {
+            // Extract only metadata fields, keep everything else including data's 'type' field
+            // IMPORTANT: Extract 'arkanaDataType', NOT 'type' - Skills/Effects have their own 'type' field!
+            const { id, createdAt, updatedAt, _uniqueId, _dbMeta, arkanaDataType, ...jsonData } = item;
+
+            bulkData.push({
+              id: String(id),
+              type: type, // Use loop variable for arkanaDataType category (always correct)
+              jsonData: jsonData as Record<string, unknown> // Preserves all data fields including type
+            });
+          }
+        } else {
+          console.log(`No ${type} items found`);
+        }
+      }
+
+      console.log(`Prepared ${bulkData.length} total items for bulk import`);
+
+      if (bulkData.length === 0) {
+        alert('No data found to import. JSON files may be empty.');
+        return;
+      }
+
+      // Call bulk-save endpoint
+      const saveResponse = await fetch('/api/arkana/admin/arkana-data/bulk-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          token: token,
+          data: bulkData
+        })
+      });
+
+      if (!saveResponse.ok) {
+        // Try to extract detailed error message from response
+        const errorData = await saveResponse.json().catch(() => ({
+          error: 'Failed to parse error response'
+        }));
+
+        console.error('Bulk save error details:', {
+          status: saveResponse.status,
+          statusText: saveResponse.statusText,
+          errorData
+        });
+
+        const errorMessage = errorData.error ||
+                           errorData.message ||
+                           errorData.details ||
+                           `Bulk save failed with status ${saveResponse.status}`;
+
+        throw new Error(errorMessage);
+      }
+
+      const saveResult = await saveResponse.json();
+
+      if (saveResult.success) {
+        const { created, updated, failed } = saveResult.data;
+
+        console.log('Migration completed:', { created, updated, failed });
+
+        alert(
+          `✅ JSON to Database Migration Completed!\n\n` +
+          `Created: ${created} new database entries\n` +
+          `Updated: ${updated} existing entries\n` +
+          `Failed: ${failed} entries\n\n` +
+          `All data is now in the database.\n` +
+          `Future edits will be automatically saved.`
+        );
+
+        // Refresh UI to show database data and hide migration button
+        setRefreshKey(prev => prev + 1);
+        setIsDatabaseEmpty(false);
+      } else {
+        throw new Error(saveResult.error || 'Bulk save returned failure status');
+      }
     } catch (err) {
-      console.error('Error saving to database:', err);
-      alert('Failed to save to database');
+      console.error('Migration error:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Migration failed: ${errorMsg}`);
+      alert(
+        `❌ Migration Failed\n\n` +
+        `Error: ${errorMsg}\n\n` +
+        `Please check the console for details and try again.`
+      );
     } finally {
       setLoading(false);
     }
@@ -184,13 +336,31 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 px-4 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300"
           />
-          <button
-            onClick={handleSaveAllToDatabase}
-            disabled={loading}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-medium disabled:opacity-50 whitespace-nowrap"
-          >
-            💾 Save All to Database
-          </button>
+
+          {/* One-time JSON-to-Database migration button (only shown when database is empty) */}
+          {isDatabaseEmpty && !checkingDatabase && (
+            <button
+              onClick={handleSaveAllToDatabase}
+              disabled={loading}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded font-medium transition-colors whitespace-nowrap"
+              title="Import all JSON data into database (one-time operation)"
+            >
+              {loading ? 'Migrating...' : '💾 Save all JSON static data to the database'}
+            </button>
+          )}
+
+          {checkingDatabase && (
+            <span className="text-sm text-gray-400 px-4 py-2">
+              Checking database status...
+            </span>
+          )}
+
+          {!isDatabaseEmpty && !checkingDatabase && (
+            <span className="text-sm text-green-400 px-4 py-2 bg-green-900/20 rounded border border-green-500/30">
+              ✓ Data in database - items auto-saved on edit
+            </span>
+          )}
+
           <button
             onClick={handleExportToJSON}
             disabled={loading}

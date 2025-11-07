@@ -959,7 +959,7 @@ export const arkanaAdminDataListSchema = Joi.object({
   search: Joi.string().max(255).optional().allow(''),
   page: Joi.string().pattern(/^\d+$/).optional().default('1'),
   limit: Joi.string().pattern(/^\d+$/).optional().default('50'),
-  sortBy: Joi.string().valid('id', 'type', 'createdAt', 'updatedAt').optional().default('id'),
+  sortBy: Joi.string().valid('id', 'arkanaDataType', 'createdAt', 'updatedAt').optional().default('id'),
   sortOrder: Joi.string().valid('asc', 'desc').optional().default('asc')
 });
 

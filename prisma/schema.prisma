@@ -180,13 +180,13 @@ model WorldObject {
 
 // Arkana Data Management - Dynamic content system
 model ArkanaData {
-  id        String   @id                         // Globally unique ID (e.g., "vamp_emotional_resonance")
-  type      String                               // Type: "flaw", "commonPower", "archetypePower", "perk", "magicSchool", "magicWave", "cybernetic", "skill", "effect"
-  jsonData  Json     @map("json_data")          // Complete object without id field
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id              String   @id                         // Globally unique ID (e.g., "vamp_emotional_resonance")
+  arkanaDataType  String   @map("arkana_data_type")   // Type: "flaw", "commonPower", "archetypePower", "perk", "magicSchool", "magicWave", "cybernetic", "skill", "effect"
+  jsonData        Json     @map("json_data")          // Complete object without id field
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
-  @@index([type])
+  @@index([arkanaDataType])
   @@map("arkana_data")
 }
 

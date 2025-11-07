@@ -32,7 +32,7 @@ describe('Arkana Data Admin API', () => {
       const item = await prisma.arkanaData.create({
         data: {
           id: 'test_flaw_001',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: 'Test Flaw',
             desc: 'A test flaw for testing',
@@ -43,7 +43,7 @@ describe('Arkana Data Admin API', () => {
       });
 
       expect(item.id).toBe('test_flaw_001');
-      expect(item.type).toBe('flaw');
+      expect(item.arkanaDataType).toBe('flaw');
       expect((item.jsonData as any).name).toBe('Test Flaw');
     });
 
@@ -51,7 +51,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'duplicate_id',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'First' }
         }
       });
@@ -60,7 +60,7 @@ describe('Arkana Data Admin API', () => {
         prisma.arkanaData.create({
           data: {
             id: 'duplicate_id',
-            type: 'perk',
+            arkanaDataType: 'perk',
             jsonData: { name: 'Second' }
           }
         })
@@ -71,7 +71,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'update_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Original' }
         }
       });
@@ -90,7 +90,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'delete_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'To Delete' }
         }
       });
@@ -109,27 +109,27 @@ describe('Arkana Data Admin API', () => {
     test('should filter by type', async () => {
       await prisma.arkanaData.createMany({
         data: [
-          { id: 'flaw_1', type: 'flaw', jsonData: { name: 'Flaw 1' } },
-          { id: 'flaw_2', type: 'flaw', jsonData: { name: 'Flaw 2' } },
-          { id: 'perk_1', type: 'perk', jsonData: { name: 'Perk 1' } }
+          { id: 'flaw_1', arkanaDataType: 'flaw', jsonData: { name: 'Flaw 1' } },
+          { id: 'flaw_2', arkanaDataType: 'flaw', jsonData: { name: 'Flaw 2' } },
+          { id: 'perk_1', arkanaDataType: 'perk', jsonData: { name: 'Perk 1' } }
         ]
       });
 
       const flaws = await prisma.arkanaData.findMany({
-        where: { type: 'flaw' }
+        where: { arkanaDataType: 'flaw' }
       });
 
       expect(flaws).toHaveLength(2);
-      expect(flaws.every(f => f.type === 'flaw')).toBe(true);
+      expect(flaws.every(f => f.arkanaDataType === 'flaw')).toBe(true);
     });
   });
 
   describe('Bulk Save Operations', () => {
     test('should create multiple items in transaction', async () => {
       const items = [
-        { id: 'bulk_1', type: 'flaw', jsonData: { name: 'Bulk 1' } },
-        { id: 'bulk_2', type: 'perk', jsonData: { name: 'Bulk 2' } },
-        { id: 'bulk_3', type: 'skill', jsonData: { name: 'Bulk 3' } }
+        { id: 'bulk_1', arkanaDataType: 'flaw', jsonData: { name: 'Bulk 1' } },
+        { id: 'bulk_2', arkanaDataType: 'perk', jsonData: { name: 'Bulk 2' } },
+        { id: 'bulk_3', arkanaDataType: 'skill', jsonData: { name: 'Bulk 3' } }
       ];
 
       await prisma.$transaction(async (tx) => {
@@ -147,7 +147,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'upsert_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Original', cost: 1 }
         }
       });
@@ -160,7 +160,7 @@ describe('Arkana Data Admin API', () => {
         },
         create: {
           id: 'upsert_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Created', cost: 3 }
         }
       });
@@ -175,8 +175,8 @@ describe('Arkana Data Admin API', () => {
 
     test('should rollback on transaction error', async () => {
       const items = [
-        { id: 'trans_1', type: 'flaw', jsonData: { name: 'Trans 1' } },
-        { id: 'trans_2', type: 'perk', jsonData: { name: 'Trans 2' } }
+        { id: 'trans_1', arkanaDataType: 'flaw', jsonData: { name: 'Trans 1' } },
+        { id: 'trans_2', arkanaDataType: 'perk', jsonData: { name: 'Trans 2' } }
       ];
 
       try {
@@ -214,12 +214,12 @@ describe('Arkana Data Admin API', () => {
         data: [
           {
             id: 'export_flaw_1',
-            type: 'flaw',
+            arkanaDataType: 'flaw',
             jsonData: { name: 'Export Flaw 1', cost: 2 }
           },
           {
             id: 'export_flaw_2',
-            type: 'flaw',
+            arkanaDataType: 'flaw',
             jsonData: { name: 'Export Flaw 2', cost: 3 }
           }
         ]
@@ -246,12 +246,12 @@ describe('Arkana Data Admin API', () => {
         data: [
           {
             id: 'school_test_magic',
-            type: 'magicSchool',
+            arkanaDataType: 'magicSchool',
             jsonData: { name: 'Test School' }
           },
           {
             id: 'test_magic_weave',
-            type: 'magicWave',
+            arkanaDataType: 'magicWave',
             jsonData: { name: 'Test Weave' }
           }
         ]
@@ -271,7 +271,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'format_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Format Test', cost: 1 }
         }
       });
@@ -304,7 +304,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'minimal_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: 'Minimal Flaw'
             // cost and desc are optional in jsonData
@@ -338,7 +338,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'complex_power',
-          type: 'commonPower',
+          arkanaDataType: 'commonPower',
           jsonData: complexData
         }
       });
@@ -360,7 +360,7 @@ describe('Arkana Data Admin API', () => {
       // Insert many items
       const items = Array.from({ length: 100 }, (_, i) => ({
         id: `perf_flaw_${i}`,
-        type: 'flaw',
+        arkanaDataType: 'flaw',
         jsonData: { name: `Flaw ${i}`, cost: i % 5 }
       }));
 
@@ -368,7 +368,7 @@ describe('Arkana Data Admin API', () => {
 
       const start = Date.now();
       const flaws = await prisma.arkanaData.findMany({
-        where: { type: 'flaw' }
+        where: { arkanaDataType: 'flaw' }
       });
       const duration = Date.now() - start;
 
@@ -389,7 +389,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'large_power',
-          type: 'commonPower',
+          arkanaDataType: 'commonPower',
           jsonData: largeData
         }
       });
@@ -409,7 +409,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'cache_inv_1',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Cache Test' }
         }
       });
@@ -425,7 +425,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'cache_inv_2',
-          type: 'perk',
+          arkanaDataType: 'perk',
           jsonData: { name: 'Original' }
         }
       });
@@ -449,7 +449,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: longId,
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Long ID Test' }
         }
       });
@@ -471,7 +471,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'special_chars',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: specialData
         }
       });
@@ -488,7 +488,7 @@ describe('Arkana Data Admin API', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'empty_json',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {}
         }
       });

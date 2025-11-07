@@ -56,13 +56,23 @@ export async function POST(request: NextRequest) {
             where: { id: item.id }
           });
 
+          // IMPORTANT: Ensure jsonData includes ALL original fields from the source object
+          // Some data types (like Skills) have a "type" property that is different from
+          // the category type (arkanaDataType). We need to preserve these data properties.
+          // If jsonData is missing fields that should be there, this will cause runtime errors.
+          const completeJsonData = {
+            ...item.jsonData,
+            // Note: If the client constructed jsonData correctly, it should already include
+            // all necessary fields. This is just stored as-is from the request.
+          };
+
           if (existing) {
             // Update existing item
             await tx.arkanaData.update({
               where: { id: item.id },
               data: {
-                type: item.type, // Allow type change in bulk operations
-                jsonData: item.jsonData
+                arkanaDataType: item.type, // Allow type change in bulk operations
+                jsonData: completeJsonData
               }
             });
             updated.push(item.id);
@@ -71,8 +81,8 @@ export async function POST(request: NextRequest) {
             await tx.arkanaData.create({
               data: {
                 id: item.id,
-                type: item.type,
-                jsonData: item.jsonData
+                arkanaDataType: item.type,
+                jsonData: completeJsonData
               }
             });
             created.push(item.id);

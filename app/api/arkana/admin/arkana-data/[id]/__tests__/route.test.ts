@@ -81,7 +81,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'get_test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: 'Get Test Flaw',
             desc: 'Test description',
@@ -101,7 +101,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       expectSuccess(data);
       expect(data.data.id).toBe('get_test_flaw');
       expect(data.data.name).toBe('Get Test Flaw');
-      expect(data.data.type).toBe('flaw');
+      expect(data.data.arkanaDataType).toBe('flaw');
     });
 
     it('should return 404 for non-existent ID', async () => {
@@ -121,7 +121,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Test' }
         }
       });
@@ -144,7 +144,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'update_test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: {
             name: 'Original Name',
             desc: 'Original Description',
@@ -195,7 +195,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Test' }
         }
       });
@@ -217,7 +217,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'cache_update_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Original', cost: 1 }
         }
       });
@@ -243,7 +243,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'delete_test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'To Delete' }
         }
       });
@@ -283,7 +283,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'test_flaw',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'Test' }
         }
       });
@@ -304,7 +304,7 @@ describe('Arkana Data Admin API - Single Item', () => {
       await prisma.arkanaData.create({
         data: {
           id: 'cache_delete_test',
-          type: 'flaw',
+          arkanaDataType: 'flaw',
           jsonData: { name: 'To Delete' }
         }
       });

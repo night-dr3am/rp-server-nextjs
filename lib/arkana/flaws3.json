@@ -325,21 +325,21 @@
     "tags": ["race:strigoi"]
   },
     {
-    "id": "v_feed_addiction",
+    "id": "v_feed_addiction_gaki",
     "name": "Feeding Addiction",
     "desc": "Feeding thrills you beyond reason. Limits control.",
     "cost": 2,
     "tags": ["race:gaki"]
   },
   {
-    "id": "v_blood_madness",
+    "id": "v_blood_madness_gaki",
     "name": "Blood Madness",
     "desc": "Starvation drives you toward frenzy.",
     "cost": 4,
     "tags": ["race:gaki"]
   },
   {
-    "id": "v_shameful_hunger",
+    "id": "v_shameful_hunger_gaki",
     "name": "Shameful Hunger",
     "desc": "Recoil at feeding on living. May abstain.",
     "cost": 2,

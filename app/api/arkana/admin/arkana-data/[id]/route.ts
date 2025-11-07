@@ -63,7 +63,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       success: true,
       data: {
         id: item.id,
-        type: item.type,
+        arkanaDataType: item.arkanaDataType,
         ...(item.jsonData as Record<string, unknown>),
         _dbMeta: {
           createdAt: item.createdAt,
@@ -129,7 +129,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     });
 
     // 5. Invalidate cache for this type
-    invalidateCache(updated.type as ArkanaDataType);
+    invalidateCache(updated.arkanaDataType as ArkanaDataType);
 
     return NextResponse.json({
       success: true,
@@ -137,7 +137,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         message: 'Arkana data item updated successfully',
         item: {
           id: updated.id,
-          type: updated.type,
+          arkanaDataType: updated.arkanaDataType,
           ...(updated.jsonData as Record<string, unknown>),
           _dbMeta: {
             createdAt: updated.createdAt,
@@ -202,14 +202,14 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     });
 
     // 5. Invalidate cache for this type
-    invalidateCache(existing.type as ArkanaDataType);
+    invalidateCache(existing.arkanaDataType as ArkanaDataType);
 
     return NextResponse.json({
       success: true,
       data: {
         message: 'Arkana data item deleted successfully',
         deletedId: value.id,
-        deletedType: existing.type
+        deletedType: existing.arkanaDataType
       }
     });
   } catch (error: unknown) {
