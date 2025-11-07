@@ -9,6 +9,7 @@ interface ArkanaDataItem {
   type: ArkanaDataType;
   name?: string;
   cost?: number;
+  orderNumber?: number | null;
   tags?: string[];
   species?: string[];
   arch?: string[];
@@ -26,7 +27,7 @@ interface ArkanaDataGridProps {
   onRefresh?: () => void;
 }
 
-type SortField = 'id' | 'name' | 'cost' | 'updatedAt';
+type SortField = 'id' | 'name' | 'cost' | 'orderNumber' | 'updatedAt';
 type SortOrder = 'asc' | 'desc';
 
 export default function ArkanaDataGrid({
@@ -156,7 +157,7 @@ export default function ArkanaDataGrid({
       setLoading(true);
 
       // Remove id, createdAt, updatedAt from item data
-      const { id, type, createdAt, updatedAt, ...jsonData } = item;
+      const { id: _id, type: _type, createdAt: _createdAt, updatedAt: _updatedAt, ...jsonData } = item;
 
       const response = await fetch('/api/arkana/admin/arkana-data', {
         method: 'POST',
@@ -262,6 +263,13 @@ export default function ArkanaDataGrid({
           <thead>
             <tr className="bg-gray-800 border-b-2 border-cyan-500">
               <th
+                onClick={() => handleSort('orderNumber')}
+                className="px-4 py-3 text-left text-cyan-300 font-medium cursor-pointer hover:bg-gray-700"
+                title="Sort by order number (for exports)"
+              >
+                # {getSortIndicator('orderNumber')}
+              </th>
+              <th
                 onClick={() => handleSort('id')}
                 className="px-4 py-3 text-left text-cyan-300 font-medium cursor-pointer hover:bg-gray-700"
               >
@@ -296,14 +304,14 @@ export default function ArkanaDataGrid({
           <tbody>
             {loading && items.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-2"></div>
                   Loading...
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                   No items found. {searchTerm && `Try a different search term.`}
                 </td>
               </tr>
@@ -313,6 +321,9 @@ export default function ArkanaDataGrid({
                   key={item._uniqueId || `${item.type}:${item.id}` || item.id}
                   className="border-b border-gray-700 hover:bg-gray-800 transition-colors"
                 >
+                  <td className="px-4 py-3 text-gray-400 text-sm">
+                    {item.orderNumber !== undefined && item.orderNumber !== null ? item.orderNumber : '-'}
+                  </td>
                   <td className="px-4 py-3 text-cyan-100 font-mono text-sm">
                     {item.id}
                   </td>

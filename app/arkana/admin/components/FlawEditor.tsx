@@ -8,6 +8,7 @@ interface Flaw {
   name: string;
   desc: string;
   cost: number;
+  orderNumber?: number | null;
   tags?: string[];
 }
 
@@ -24,6 +25,7 @@ export default function FlawEditor({ token, flaw, onSave, onCancel }: FlawEditor
     name: '',
     desc: '',
     cost: 0,
+    orderNumber: null,
     tags: []
   });
   const [newTag, setNewTag] = useState('');
@@ -39,6 +41,7 @@ export default function FlawEditor({ token, flaw, onSave, onCancel }: FlawEditor
         name: flaw.name || '',
         desc: flaw.desc || '',
         cost: flaw.cost || 0,
+        orderNumber: flaw.orderNumber ?? null,
         tags: flaw.tags || []
       });
     }
@@ -87,17 +90,19 @@ export default function FlawEditor({ token, flaw, onSave, onCancel }: FlawEditor
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id, ...jsonData } = formData;
+      const { id: _id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {
             token,
             id: formData.id,
             type: 'flaw',
+            orderNumber,
             jsonData
           }
         : {
             token,
+            orderNumber,
             jsonData
           };
 
@@ -241,6 +246,23 @@ export default function FlawEditor({ token, flaw, onSave, onCancel }: FlawEditor
             )}
             <p className="text-gray-400 text-xs mt-1">
               Negative values give points back to the player. Positive values cost points.
+            </p>
+          </div>
+
+          {/* Order Number Field */}
+          <div>
+            <label className="block text-sm font-medium text-cyan-300 mb-2">
+              Order Number
+            </label>
+            <input
+              type="number"
+              value={formData.orderNumber ?? ''}
+              onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value ? parseInt(e.target.value) : null })}
+              className="w-full px-4 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300"
+              placeholder="e.g., 10"
+            />
+            <p className="text-gray-400 text-xs mt-1">
+              Optional sort order for JSON exports. Lower numbers appear first. Leave empty to sort at end.
             </p>
           </div>
 

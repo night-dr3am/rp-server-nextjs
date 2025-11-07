@@ -44,8 +44,7 @@ import {
 export default function ArkanaCharacterCreation() {
   const params = useParams();
   const searchParams = useSearchParams();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const uuid = params?.uuid as string; // Reserved for future validation
+  const uuid = params?.uuid as string;
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
   // Generate session ID for token binding
@@ -108,7 +107,7 @@ export default function ArkanaCharacterCreation() {
   const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
   const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
   const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
-  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [_allSkills, setAllSkills] = useState<Skill[]>([]);
 
   // Filtered data caches (updated when race/archetype changes)
   const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
@@ -173,6 +172,7 @@ export default function ArkanaCharacterCreation() {
     };
 
     initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, uuid, universe, sessionId]);
 
   // Update available options when race/archetype changes

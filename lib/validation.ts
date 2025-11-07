@@ -959,7 +959,7 @@ export const arkanaAdminDataListSchema = Joi.object({
   search: Joi.string().max(255).optional().allow(''),
   page: Joi.string().pattern(/^\d+$/).optional().default('1'),
   limit: Joi.string().pattern(/^\d+$/).optional().default('50'),
-  sortBy: Joi.string().valid('id', 'arkanaDataType', 'createdAt', 'updatedAt').optional().default('id'),
+  sortBy: Joi.string().valid('id', 'arkanaDataType', 'orderNumber', 'createdAt', 'updatedAt').optional().default('id'),
   sortOrder: Joi.string().valid('asc', 'desc').optional().default('asc')
 });
 
@@ -972,12 +972,14 @@ export const arkanaAdminDataCreateSchema = Joi.object({
   token: Joi.string().required(),
   id: Joi.string().min(1).max(255).required(),
   type: Joi.string().valid(...arkanaDataTypes).required(),
+  orderNumber: Joi.number().integer().min(0).optional().allow(null),
   jsonData: Joi.object().required() // Validated separately per type in endpoint
 });
 
 export const arkanaAdminDataUpdateSchema = Joi.object({
   token: Joi.string().required(),
   id: Joi.string().min(1).max(255).required(),
+  orderNumber: Joi.number().integer().min(0).optional().allow(null),
   jsonData: Joi.object().required()
 });
 
@@ -992,6 +994,7 @@ export const arkanaAdminDataBulkSaveSchema = Joi.object({
     Joi.object({
       id: Joi.string().min(1).max(255).required(),
       type: Joi.string().valid(...arkanaDataTypes).required(),
+      orderNumber: Joi.number().integer().min(0).optional().allow(null),
       jsonData: Joi.object().required()
     })
   ).min(1).required()
@@ -999,6 +1002,11 @@ export const arkanaAdminDataBulkSaveSchema = Joi.object({
 
 export const arkanaAdminDataExportSchema = Joi.object({
   token: Joi.string().required(),
+  type: Joi.string().valid(...arkanaDataTypes).required()
+});
+
+// Export schema for body-only validation (token extracted from Authorization header)
+export const arkanaAdminDataExportBodySchema = Joi.object({
   type: Joi.string().valid(...arkanaDataTypes).required()
 });
 

@@ -58,15 +58,31 @@ async function loadFromDatabase<T>(type: ArkanaDataType): Promise<T[]> {
       orderBy: { id: 'asc' }
     });
 
-    // Reconstruct objects with id field (id is separated in database)
-    return records.map(record => ({
+    // Reconstruct objects with id and orderNumber fields
+    // Auto-assign orderNumber based on array index if missing (NULL)
+    return records.map((record, index) => ({
       id: record.id,
+      orderNumber: record.orderNumber !== null ? record.orderNumber : index,
       ...(record.jsonData as Record<string, unknown>)
     })) as T[];
   } catch (error) {
     console.error(`Error loading from database for type ${type}:`, error);
     throw error;
   }
+}
+
+/**
+ * Auto-assign orderNumber to items that don't have it
+ * Uses array index as orderNumber (0, 1, 2, 3...)
+ */
+function assignOrderNumbers<T>(items: T[]): T[] {
+  return items.map((item, index) => {
+    const itemWithOrder = item as T & { orderNumber?: number | null };
+    return {
+      ...item,
+      orderNumber: (itemWithOrder.orderNumber !== undefined && itemWithOrder.orderNumber !== null) ? itemWithOrder.orderNumber : index
+    };
+  });
 }
 
 /**
@@ -99,11 +115,11 @@ async function loadFromJSON<T>(type: ArkanaDataType): Promise<T[]> {
         fileModule = await import(`${basePath}magic_schools${testMode ? '' : '8'}${fileSuffix}`);
         // Filter by ID pattern: schools start with "school_", weaves don't
         const allMagic = fileModule.default as MagicSchool[];
-        if (type === 'magicSchool') {
-          return allMagic.filter(item => item.id.startsWith('school_')) as T[];
-        } else {
-          return allMagic.filter(item => !item.id.startsWith('school_')) as T[];
-        }
+        const filtered = type === 'magicSchool'
+          ? allMagic.filter(item => item.id.startsWith('school_'))
+          : allMagic.filter(item => !item.id.startsWith('school_'));
+        // Auto-assign orderNumbers and return
+        return assignOrderNumbers(filtered) as T[];
       case 'cybernetic':
         fileModule = await import(`${basePath}cybernetics${testMode ? '' : '2'}${fileSuffix}`);
         break;
@@ -117,7 +133,9 @@ async function loadFromJSON<T>(type: ArkanaDataType): Promise<T[]> {
         throw new Error(`Unknown data type: ${type}`);
     }
 
-    return fileModule.default as T[];
+    // Auto-assign orderNumbers to loaded data
+    const data = fileModule.default as Record<string, unknown>[];
+    return assignOrderNumbers(data) as T[];
   } catch (error) {
     console.error(`Error loading from JSON for type ${type}:`, error);
     throw error;

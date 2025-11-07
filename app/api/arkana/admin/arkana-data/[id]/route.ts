@@ -64,8 +64,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
       data: {
         id: item.id,
         arkanaDataType: item.arkanaDataType,
+        orderNumber: item.orderNumber,
         ...(item.jsonData as Record<string, unknown>),
         _dbMeta: {
+          orderNumber: item.orderNumber,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt
         }
@@ -120,11 +122,12 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // 4. Update item (only jsonData can be updated, not id or type)
+    // 4. Update item (jsonData and orderNumber can be updated, not id or type)
     const updated = await prisma.arkanaData.update({
       where: { id: value.id },
       data: {
-        jsonData: value.jsonData
+        jsonData: value.jsonData,
+        ...(value.orderNumber !== undefined && { orderNumber: value.orderNumber })
       }
     });
 
@@ -138,8 +141,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         item: {
           id: updated.id,
           arkanaDataType: updated.arkanaDataType,
+          orderNumber: updated.orderNumber,
           ...(updated.jsonData as Record<string, unknown>),
           _dbMeta: {
+            orderNumber: updated.orderNumber,
             createdAt: updated.createdAt,
             updatedAt: updated.updatedAt
           }

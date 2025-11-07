@@ -9,6 +9,7 @@ interface Skill {
   desc: string;
   type: 'combat' | 'situational' | 'social' | 'crafting' | 'knowledge';
   maxLevel: number;
+  orderNumber?: number | null;
   mechanic?: string;
 }
 
@@ -34,6 +35,7 @@ export default function SkillEditor({ token, skill, onSave, onCancel }: SkillEdi
     desc: '',
     type: 'combat',
     maxLevel: 3,
+    orderNumber: null,
     mechanic: ''
   });
   const [saving, setSaving] = useState(false);
@@ -49,6 +51,7 @@ export default function SkillEditor({ token, skill, onSave, onCancel }: SkillEdi
         desc: skill.desc || '',
         type: skill.type || 'combat',
         maxLevel: skill.maxLevel || 3,
+        orderNumber: skill.orderNumber ?? null,
         mechanic: skill.mechanic || ''
       });
     }
@@ -101,17 +104,19 @@ export default function SkillEditor({ token, skill, onSave, onCancel }: SkillEdi
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id, ...jsonData } = formData;
+      const { id: _id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {
             token,
             id: formData.id,
             type: 'skill',
+            orderNumber,
             jsonData
           }
         : {
             token,
+            orderNumber,
             jsonData
           };
 
@@ -255,6 +260,23 @@ export default function SkillEditor({ token, skill, onSave, onCancel }: SkillEdi
             )}
             <p className="text-gray-400 text-xs mt-1">
               Maximum level players can achieve in this skill (1-5).
+            </p>
+          </div>
+
+          {/* Order Number Field */}
+          <div>
+            <label className="block text-sm font-medium text-cyan-300 mb-2">
+              Order Number
+            </label>
+            <input
+              type="number"
+              value={formData.orderNumber ?? ''}
+              onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value ? parseInt(e.target.value) : null })}
+              className="w-full px-4 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300"
+              placeholder="e.g., 10"
+            />
+            <p className="text-gray-400 text-xs mt-1">
+              Optional sort order for JSON exports. Lower numbers appear first. Leave empty to sort at end.
             </p>
           </div>
 

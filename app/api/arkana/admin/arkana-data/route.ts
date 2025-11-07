@@ -200,16 +200,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Create new item
+    // 4. Auto-assign orderNumber if not provided
+    let orderNumber = value.orderNumber;
+    if (orderNumber === null || orderNumber === undefined) {
+      // Find max orderNumber for this type
+      const maxRecord = await prisma.arkanaData.findFirst({
+        where: { arkanaDataType: value.type },
+        orderBy: { orderNumber: 'desc' },
+        select: { orderNumber: true }
+      });
+      orderNumber = (maxRecord?.orderNumber ?? -1) + 1;
+    }
+
+    // 5. Create new item
     const newItem = await prisma.arkanaData.create({
       data: {
         id: value.id,
         arkanaDataType: value.type,
+        orderNumber: orderNumber,
         jsonData: value.jsonData
       }
     });
 
-    // 5. Invalidate cache for this type
+    // 6. Invalidate cache for this type
     invalidateCache(value.type as ArkanaDataType);
 
     return NextResponse.json({
@@ -219,8 +232,10 @@ export async function POST(request: NextRequest) {
         item: {
           id: newItem.id,
           arkanaDataType: newItem.arkanaDataType,
+          orderNumber: newItem.orderNumber,
           ...(newItem.jsonData as Record<string, unknown>),
           _dbMeta: {
+            orderNumber: newItem.orderNumber,
             createdAt: newItem.createdAt,
             updatedAt: newItem.updatedAt
           }

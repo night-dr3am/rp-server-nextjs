@@ -182,11 +182,12 @@ model WorldObject {
 model ArkanaData {
   id              String   @id                         // Globally unique ID (e.g., "vamp_emotional_resonance")
   arkanaDataType  String   @map("arkana_data_type")   // Type: "flaw", "commonPower", "archetypePower", "perk", "magicSchool", "magicWave", "cybernetic", "skill", "effect"
+  orderNumber     Int?     @map("order_number")       // Custom sort order for exports (nullable, NULL values sorted last)
   jsonData        Json     @map("json_data")          // Complete object without id field
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  @@index([arkanaDataType])
+  @@index([arkanaDataType, orderNumber])             // Composite index for efficient sorted queries
   @@map("arkana_data")
 }
 

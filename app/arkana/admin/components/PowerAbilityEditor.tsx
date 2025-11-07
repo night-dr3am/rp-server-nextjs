@@ -11,6 +11,7 @@ interface Power {
   name: string;
   desc: string;
   cost: number;
+  orderNumber?: number | null;
   abilityType?: string[];
   species?: string | string[];
   arch?: string | string[];
@@ -56,6 +57,7 @@ export default function PowerAbilityEditor({ token, dataType, power, onSave, onC
     name: '',
     desc: '',
     cost: 0,
+    orderNumber: null,
     abilityType: [],
     species: [],
     arch: [],
@@ -129,17 +131,19 @@ export default function PowerAbilityEditor({ token, dataType, power, onSave, onC
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id, ...jsonData } = formData;
+      const { id: _id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {
             token,
             id: formData.id,
             type: dataType,
+            orderNumber,
             jsonData
           }
         : {
             token,
+            orderNumber,
             jsonData
           };
 
@@ -369,6 +373,23 @@ export default function PowerAbilityEditor({ token, dataType, power, onSave, onC
                     onChange={(e) => setFormData({ ...formData, cost: parseInt(e.target.value) || 0 })}
                     className="w-full px-3 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300 text-sm"
                   />
+                </div>
+
+                {/* Order Number */}
+                <div>
+                  <label className="block text-sm font-medium text-cyan-300 mb-2">
+                    Order Number
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.orderNumber ?? ''}
+                    onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value ? parseInt(e.target.value) : null })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300 text-sm"
+                    placeholder="e.g., 10"
+                  />
+                  <p className="text-gray-400 text-xs mt-1">
+                    Optional sort order for JSON exports. Lower numbers appear first.
+                  </p>
                 </div>
 
                 {/* Ability Types */}

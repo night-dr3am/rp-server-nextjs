@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
       const updated: string[] = [];
       const errors: Array<{ id: string; error: string }> = [];
 
+      // Track max orderNumber for each type to handle auto-assignment in bulk
+      const maxOrderNumbers: Map<string, number> = new Map();
+
       for (const item of value.data) {
         try {
           // Check if item exists
@@ -66,12 +69,32 @@ export async function POST(request: NextRequest) {
             // all necessary fields. This is just stored as-is from the request.
           };
 
+          // Auto-assign orderNumber if not provided
+          let orderNumber = item.orderNumber;
+          if (orderNumber === null || orderNumber === undefined) {
+            // Get or initialize max for this type
+            if (!maxOrderNumbers.has(item.type)) {
+              const maxRecord = await tx.arkanaData.findFirst({
+                where: { arkanaDataType: item.type },
+                orderBy: { orderNumber: 'desc' },
+                select: { orderNumber: true }
+              });
+              maxOrderNumbers.set(item.type, maxRecord?.orderNumber ?? -1);
+            }
+
+            // Assign next available number and update tracked max
+            const currentMax = maxOrderNumbers.get(item.type) ?? -1;
+            orderNumber = currentMax + 1;
+            maxOrderNumbers.set(item.type, orderNumber);
+          }
+
           if (existing) {
             // Update existing item
             await tx.arkanaData.update({
               where: { id: item.id },
               data: {
                 arkanaDataType: item.type, // Allow type change in bulk operations
+                orderNumber: orderNumber,
                 jsonData: completeJsonData
               }
             });
@@ -82,6 +105,7 @@ export async function POST(request: NextRequest) {
               data: {
                 id: item.id,
                 arkanaDataType: item.type,
+                orderNumber: orderNumber,
                 jsonData: completeJsonData
               }
             });

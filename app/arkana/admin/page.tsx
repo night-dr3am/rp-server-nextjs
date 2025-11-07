@@ -191,7 +191,7 @@ function AdminDashboardContent() {
   const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
   const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
   const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
-  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [_allSkills, setAllSkills] = useState<Skill[]>([]);
 
   // Filtered data caches (updated when race/archetype changes)
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);

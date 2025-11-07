@@ -2,7 +2,7 @@
 // POST: Export data type to production JSON format
 
 import { NextRequest, NextResponse } from 'next/server';
-import { arkanaAdminDataExportSchema } from '@/lib/validation';
+import { arkanaAdminDataExportBodySchema } from '@/lib/validation';
 import { validateAdminToken } from '@/lib/arkana/adminUtils';
 import {
   exportToJSON,
@@ -13,10 +13,21 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
+    // Extract token from Authorization header (consistent with other admin endpoints)
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization token required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
-    // 1. Validate input
-    const { error, value } = arkanaAdminDataExportSchema.validate(body);
+    // 1. Validate input (body only, token from header)
+    const { error, value } = arkanaAdminDataExportBodySchema.validate(body);
     if (error) {
       return NextResponse.json(
         { success: false, error: error.details[0].message },
@@ -25,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Validate admin token
-    const adminValidation = await validateAdminToken(value.token);
+    const adminValidation = await validateAdminToken(token);
     if (!adminValidation.valid) {
       return NextResponse.json(
         { success: false, error: adminValidation.error || 'Access denied' },
@@ -92,9 +103,8 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get('token');
     const type = searchParams.get('type') as string | null;
 
-    // 1. Validate input
-    const { error, value } = arkanaAdminDataExportSchema.validate({
-      token,
+    // 1. Validate input (GET endpoint uses full schema with token in query params)
+    const { error, value } = arkanaAdminDataExportBodySchema.validate({
       type
     });
 
@@ -105,8 +115,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Validate admin token
-    const adminValidation = await validateAdminToken(value.token);
+    // 2. Validate admin token (extracted from query params)
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization token required' },
+        { status: 401 }
+      );
+    }
+
+    const adminValidation = await validateAdminToken(token);
     if (!adminValidation.valid) {
       return NextResponse.json(
         { success: false, error: adminValidation.error || 'Access denied' },

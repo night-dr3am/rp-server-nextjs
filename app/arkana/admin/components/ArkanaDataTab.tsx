@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { ArkanaDataType } from '@/lib/arkana/unifiedDataLoader';
+import { getProductionFilename } from '@/lib/arkana/exportUtils';
 import ArkanaDataGrid from './ArkanaDataGrid';
 import FlawEditor from './FlawEditor';
 import SkillEditor from './SkillEditor';
@@ -171,7 +172,7 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
           for (const item of result.data.items) {
             // Extract only metadata fields, keep everything else including data's 'type' field
             // IMPORTANT: Extract 'arkanaDataType', NOT 'type' - Skills/Effects have their own 'type' field!
-            const { id, createdAt, updatedAt, _uniqueId, _dbMeta, arkanaDataType, ...jsonData } = item;
+            const { id, createdAt: _createdAt, updatedAt: _updatedAt, _uniqueId, _dbMeta, arkanaDataType: _arkanaDataType, ...jsonData } = item;
 
             bulkData.push({
               id: String(id),
@@ -277,12 +278,12 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
         throw new Error('Export failed');
       }
 
-      // Trigger download
+      // Trigger download with production filename
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${activeDataType}_export.json`;
+      a.download = getProductionFilename(activeDataType);  // Use production naming
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

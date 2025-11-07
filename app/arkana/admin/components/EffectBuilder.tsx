@@ -8,6 +8,7 @@ interface Effect {
   name: string;
   desc: string;
   category: 'check' | 'damage' | 'stat_modifier' | 'control' | 'defense' | 'heal' | 'utility' | 'resource' | 'special';
+  orderNumber?: number | null;
   type?: string;
   target?: string;
   duration?: string;
@@ -65,6 +66,7 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
     name: '',
     desc: '',
     category: 'check',
+    orderNumber: null,
     target: 'enemy',
     duration: 'immediate',
     tags: []
@@ -145,17 +147,19 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id, ...jsonData } = formData;
+      const { id: _id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {
             token,
             id: formData.id,
             type: 'effect',
+            orderNumber,
             jsonData
           }
         : {
             token,
+            orderNumber,
             jsonData
           };
 
@@ -284,6 +288,23 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
                 {validationErrors.desc && (
                   <p className="text-red-400 text-sm mt-1">{validationErrors.desc}</p>
                 )}
+              </div>
+
+              {/* Order Number Field */}
+              <div>
+                <label className="block text-sm font-medium text-cyan-300 mb-2">
+                  Order Number
+                </label>
+                <input
+                  type="number"
+                  value={formData.orderNumber ?? ''}
+                  onChange={(e) => setFormData({ ...formData, orderNumber: e.target.value ? parseInt(e.target.value) : null })}
+                  className="w-full px-4 py-2 bg-gray-800 border border-cyan-500 text-cyan-100 rounded focus:outline-none focus:border-cyan-300"
+                  placeholder="e.g., 10"
+                />
+                <p className="text-gray-400 text-xs mt-1">
+                  Optional sort order for JSON exports. Lower numbers appear first. Leave empty to sort at end.
+                </p>
               </div>
 
               {/* Category Selector */}
