@@ -1,460 +1,551 @@
 [
   {
     "id": "strigoi_hypnosis",
-    "name": "Hypnosis",
-    "desc": "Implant suggestions and triggers. (MEN)",
+    "orderNumber": 0,
     "cost": 2,
-    "species": "strigoi",
-    "abilityType": ["attack"],
+    "desc": "Implant suggestions and triggers. (MEN)",
+    "name": "Hypnosis",
     "tags": ["control", "mental", "charm"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 2,
     "effects": {
       "attack": ["check_mental_vs_mental", "control_suggestion"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "strigoi_shapeshifting",
-    "name": "Shapeshifting",
-    "desc": "Mist forms, wolf-like attributes, or bat-like wings. (PHYS)",
+    "orderNumber": 1,
     "cost": 2,
-    "species": "strigoi",
-    "abilityType": ["ability"],
+    "desc": "Mist forms, wolf-like attributes, or bat-like wings. (PHYS)",
+    "name": "Shapeshifting",
     "tags": ["transform", "utility", "movement"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "transform_mist_wolf_bat"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "strigoi_wall_walking",
-    "name": "Wall-Walking",
-    "desc": "Scale sheer surfaces like a spider.",
+    "orderNumber": 2,
     "cost": 1,
-    "species": "strigoi",
-    "abilityType": ["passive"],
+    "desc": "Scale sheer surfaces like a spider.",
+    "name": "Wall-Walking",
     "tags": ["utility", "movement"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
-      "passive": ["movement_wall_climbing"]
-    }
+      "passive": [
+        "movement_wall_climbing"
+      ]
+    },
+    "species": "strigoi",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "strigoi_dreamwalking",
-    "name": "Dreamwalking",
-    "desc": "Invade and shape dreams, feed subtly. (MEN)",
+    "orderNumber": 3,
     "cost": 3,
-    "species": "strigoi",
-    "abilityType": ["attack", "ability"],
+    "desc": "Invade and shape dreams, feed subtly. (MEN)",
+    "name": "Dreamwalking",
     "tags": ["control", "mental", "damage"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_mental_vs_mental", "damage_mental_2"],
       "ability": ["check_mental_vs_mental", "control_dreamwalk"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": ["attack", "ability"]
   },
   {
     "id": "strigoi_voice_of_command",
-    "name": "Voice of Command",
-    "desc": "Direct orders instantly obeyed by thralls/weaker minds. (MEN)",
+    "orderNumber": 4,
     "cost": 3,
-    "species": "strigoi",
-    "abilityType": ["attack"],
+    "desc": "Direct orders instantly obeyed by thralls/weaker minds. (MEN)",
+    "name": "Voice of Command",
     "tags": ["control", "mental", "domination"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 10,
     "effects": {
       "attack": ["check_mental_vs_mental", "control_command"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "strigoi_shadowform",
-    "name": "Shadowform",
-    "desc": "Become a living shadow, slip through cracks/hide. (PHYS)",
+    "orderNumber": 5,
     "cost": 4,
-    "species": "strigoi",
-    "abilityType": ["ability"],
+    "desc": "Become a living shadow, slip through cracks/hide. (PHYS)",
+    "name": "Shadowform",
     "tags": ["transform", "stealth", "utility"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "transform_shadowform", "buff_stealth_3"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "strigoi_true_polymorph",
-    "name": "True Polymorph",
-    "desc": "Full animal transformation (wolf or bat). (PHYS)",
+    "orderNumber": 6,
     "cost": 4,
-    "species": "strigoi",
-    "abilityType": ["ability"],
+    "desc": "Full animal transformation (wolf or bat). (PHYS)",
+    "name": "True Polymorph",
     "tags": ["transform", "utility"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "transform_animal_wolf_bat"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "strigoi_domination",
-    "name": "Domination",
-    "desc": "Full mental control over mortals; rivals may resist. (MEN)",
+    "orderNumber": 7,
     "cost": 5,
-    "species": "strigoi",
-    "abilityType": ["attack"],
+    "desc": "Full mental control over mortals; rivals may resist. (MEN)",
+    "name": "Domination",
     "tags": ["control", "mental", "domination"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 5,
     "effects": {
       "attack": ["check_mental_vs_mental", "control_domination_full"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "strigoi_mist_form",
-    "name": "Mist Form (Full)",
-    "desc": "Dissolve into fog, immune to physical harm for a short time. (PHYS)",
+    "orderNumber": 8,
     "cost": 5,
-    "species": "strigoi",
-    "abilityType": ["ability"],
+    "desc": "Dissolve into fog, immune to physical harm for a short time. (PHYS)",
+    "name": "Mist Form (Full)",
     "tags": ["transform", "defense", "stealth", "utility"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "transform_mist_full", "defense_immunity_physical", "buff_stealth_5"]
-    }
+    },
+    "species": "strigoi",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
-
   {
     "id": "gaki_chi_manipulation",
-    "name": "Chi Manipulation",
-    "desc": "Store, transfer, or balance yin/yang chi between beings. (MEN)",
+    "orderNumber": 9,
     "cost": 2,
-    "species": "gaki",
-    "abilityType": ["attack", "ability"],
+    "desc": "Store, transfer, or balance yin/yang chi between beings. (MEN)",
+    "name": "Chi Manipulation",
     "tags": ["debuff", "heal", "mental", "utility"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 5,
     "effects": {
       "attack": ["check_mental_vs_mental", "debuff_mental_minus_1"],
-      "ability": ["ability_chi_balance_restore"]
-    }
+      "ability": [
+        "ability_chi_balance_restore"
+      ]
+    },
+    "species": "gaki",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": ["attack", "ability"]
   },
   {
     "id": "gaki_dreamwalking",
-    "name": "Dreamwalking",
-    "desc": "Invade dreams, subtly feed, induce nightmares/ecstasy. (MEN)",
+    "orderNumber": 10,
     "cost": 3,
-    "species": "gaki",
-    "abilityType": ["attack", "ability"],
+    "desc": "Invade dreams, subtly feed, induce nightmares/ecstasy. (MEN)",
+    "name": "Dreamwalking",
     "tags": ["control", "mental", "damage"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_mental_vs_mental", "damage_mental_2"],
       "ability": ["check_mental_vs_mental", "control_dreamwalk"]
-    }
+    },
+    "species": "gaki",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": ["attack", "ability"]
   },
   {
     "id": "gaki_chi_step",
-    "name": "Chi Step",
-    "desc": "Short bursts of superhuman speed and agility. (DEX)",
+    "orderNumber": 11,
     "cost": 3,
-    "species": "gaki",
-    "abilityType": ["ability"],
+    "desc": "Short bursts of superhuman speed and agility. (DEX)",
+    "name": "Chi Step",
     "tags": ["buff", "utility", "movement"],
-    "baseStat": "Dexterity",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_dexterity_vs_tn10", "buff_dexterity_3"]
-    }
+    },
+    "species": "gaki",
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "gaki_yin_shroud",
-    "name": "Yin Shroud",
-    "desc": "Cloak themselves in shadow and silence.",
+    "orderNumber": 12,
     "cost": 3,
-    "species": "gaki",
-    "abilityType": ["ability"],
+    "desc": "Cloak themselves in shadow and silence.",
+    "name": "Yin Shroud",
     "tags": ["stealth", "utility"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "buff_stealth_4"]
-    }
+    },
+    "species": "gaki",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "gaki_yang_flame",
-    "name": "Yang Flame",
-    "desc": "Radiate heat, vitality, or raw force outward in an aura.",
+    "orderNumber": 13,
     "cost": 4,
-    "species": "gaki",
-    "abilityType": ["ability"],
+    "desc": "Radiate heat, vitality, or raw force outward in an aura.",
+    "name": "Yang Flame",
     "tags": ["damage", "heal", "fire", "utility"],
-    "baseStat": "Mental",
-    "targetType": "area",
     "range": 10,
     "effects": {
       "ability": ["aura_yang_flame_damage", "aura_yang_flame_vitality"]
-    }
+    },
+    "species": "gaki",
+    "baseStat": "Mental",
+    "targetType": "area",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "gaki_spectral_grip",
-    "name": "Spectral Grip",
-    "desc": "Manifest yin chi as chains or claws of shadow; restrain or damage foes. (PHYS)",
+    "orderNumber": 14,
     "cost": 3,
-    "species": "gaki",
-    "abilityType": ["attack", "ability"],
+    "desc": "Manifest yin chi as chains or claws of shadow; restrain or damage foes. (PHYS)",
+    "name": "Spectral Grip",
     "tags": ["damage", "control", "physical"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_3"],
       "ability": ["check_physical_vs_physical", "control_restrain"]
-    }
+    },
+    "species": "gaki",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": ["attack", "ability"]
   },
-
   {
     "id": "spliced_climbing",
-    "name": "Climbing",
-    "desc": "Climb walls and ceilings.",
+    "orderNumber": 15,
     "cost": 1,
-    "species": "spliced",
-    "abilityType": ["passive"],
+    "desc": "Climb walls and ceilings.",
+    "name": "Climbing",
     "tags": ["utility", "movement"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
-      "passive": ["movement_wall_climbing"]
-    }
+      "passive": [
+        "movement_wall_climbing"
+      ]
+    },
+    "species": "spliced",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "spliced_tail_slap",
-    "name": "Tail Slap",
-    "desc": "Powerful tail attack; Physical roll to hit.",
+    "orderNumber": 16,
     "cost": 2,
-    "species": "spliced",
-    "abilityType": ["attack"],
+    "desc": "Powerful tail attack; Physical roll to hit.",
+    "name": "Tail Slap",
     "tags": ["damage", "physical"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 5,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_4"]
-    }
+    },
+    "species": "spliced",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "spliced_pheromone_cloud",
-    "name": "Pheromone Cloud",
-    "desc": "Arouses/lowers thinking of targets within 5 ft; -1 Mental.",
+    "orderNumber": 17,
     "cost": 3,
-    "species": "spliced",
-    "abilityType": ["attack"],
+    "desc": "Arouses/lowers thinking of targets within 5 ft; -1 Mental.",
+    "name": "Pheromone Cloud",
     "tags": ["debuff", "mental"],
-    "baseStat": "Mental",
-    "targetType": "area",
     "range": 5,
     "effects": {
-      "attack": ["debuff_mental_minus_1_area"]
-    }
+      "attack": [
+        "debuff_mental_minus_1_area"
+      ]
+    },
+    "species": "spliced",
+    "baseStat": "Mental",
+    "targetType": "area",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "spliced_burrow",
-    "name": "Burrow",
-    "desc": "Travel underground in outdoor/city terrain; cannot penetrate ships' hulls.",
+    "orderNumber": 18,
     "cost": 1,
-    "species": "spliced",
-    "abilityType": ["ability"],
+    "desc": "Travel underground in outdoor/city terrain; cannot penetrate ships' hulls.",
+    "name": "Burrow",
     "tags": ["utility", "movement"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "movement_burrow"]
-    }
+    },
+    "species": "spliced",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "spliced_quill_cloud",
-    "name": "Quill Cloud",
-    "desc": "Covered in dangerous spines/quills; attackers take 1 damage; can fire spines.",
+    "orderNumber": 19,
     "cost": 1,
-    "species": "spliced",
-    "abilityType": ["attack", "passive"],
+    "desc": "Covered in dangerous spines/quills; attackers take 1 damage; can fire spines.",
+    "name": "Quill Cloud",
     "tags": ["damage", "defense", "physical"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_2_ranged"],
-      "onDefense": ["passive_reflect_damage_1"]
-    }
+      "onDefense": [
+        "passive_reflect_damage_1"
+      ]
+    },
+    "species": "spliced",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": ["attack", "passive"]
   },
-
   {
     "id": "veil_biofusion",
-    "name": "Biofusion",
-    "desc": "Temporarily merge with living systems; heal, communicate, redirect energy; situational utility/healing.",
+    "orderNumber": 20,
     "cost": 4,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Temporarily merge with living systems; heal, communicate, redirect energy; situational utility/healing.",
+    "name": "Biofusion",
     "tags": ["heal", "utility"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "heal_biofusion_4"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_circuit_whisper",
-    "name": "Circuit Whisper",
-    "desc": "Speak directly to Ark's infrastructure; coax machinery/AI into harmony/repair.",
+    "orderNumber": 21,
     "cost": 3,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Speak directly to Ark's infrastructure; coax machinery/AI into harmony/repair.",
+    "name": "Circuit Whisper",
     "tags": ["utility", "social"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 5,
     "effects": {
       "ability": ["check_mental_vs_tn10", "utility_machine_repair"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_pulse_bloom",
-    "name": "Pulse Bloom",
-    "desc": "Emit radiant pulse affecting flora/nearby minds; accelerate growth, restore morale/clarity.",
+    "orderNumber": 22,
     "cost": 3,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Emit radiant pulse affecting flora/nearby minds; accelerate growth, restore morale/clarity.",
+    "name": "Pulse Bloom",
     "tags": ["buff", "utility", "mental"],
-    "baseStat": "Mental",
-    "targetType": "area",
     "range": 10,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_mental_2_area"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "area",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_echo_memory",
-    "name": "Echo Memory",
-    "desc": "Access residual emotional imprints; replay/interpret past events in biodomes/spaces.",
+    "orderNumber": 23,
     "cost": 2,
-    "species": "veilborn",
-    "abilityType": ["ability"],
-    "tags": ["utility"],
-    "baseStat": "Perception",
-    "targetType": "self",
+    "desc": "Access residual emotional imprints; replay/interpret past events in biodomes/spaces.",
+    "name": "Echo Memory",
+    "tags": [
+      "utility"
+    ],
     "range": 0,
     "effects": {
       "ability": ["check_perception_vs_tn10", "utility_echo_memory"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Perception",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_sanctuary_field",
-    "name": "Sanctuary Field",
-    "desc": "Generate protective aura; stabilizes temp, oxygen, humidity in 10ft radius.",
+    "orderNumber": 24,
     "cost": 4,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Generate protective aura; stabilizes temp, oxygen, humidity in 10ft radius.",
+    "name": "Sanctuary Field",
     "tags": ["defense", "utility"],
-    "baseStat": "Mental",
-    "targetType": "area",
     "range": 10,
     "effects": {
       "ability": ["check_mental_vs_tn10", "aura_sanctuary_field"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "area",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_shadow_archive",
-    "name": "Shadow Archive",
-    "desc": "Absorb/store memories/data fragments; retrieve later for leverage/insight.",
+    "orderNumber": 25,
     "cost": 3,
-    "species": "veilborn",
-    "abilityType": ["ability"],
-    "tags": ["utility"],
-    "baseStat": "Mental",
-    "targetType": "single",
+    "desc": "Absorb/store memories/data fragments; retrieve later for leverage/insight.",
+    "name": "Shadow Archive",
+    "tags": [
+      "utility"
+    ],
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "utility_memory_archive"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_glimmerstep",
-    "name": "Glimmerstep",
-    "desc": "Move silently/invisibly; faint shimmer only; stealth mobility.",
+    "orderNumber": 26,
     "cost": 4,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Move silently/invisibly; faint shimmer only; stealth mobility.",
+    "name": "Glimmerstep",
     "tags": ["stealth", "utility", "movement"],
-    "baseStat": "Dexterity",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_dexterity_vs_tn10", "buff_stealth_6"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_emotion_theft",
-    "name": "Emotion Theft",
-    "desc": "Siphon dominant emotion; target suffers -1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
+    "orderNumber": 27,
     "cost": 3,
-    "species": "veilborn",
-    "abilityType": ["attack"],
+    "desc": "Siphon dominant emotion; target suffers -1 Mental or relevant roll; user gains situational bonus (+1 Mental) for 1 turn.",
+    "name": "Emotion Theft",
     "tags": ["debuff", "buff", "mental"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 10,
     "effects": {
       "attack": ["check_mental_vs_mental", "debuff_mental_minus_1", "buff_mental_1_turn"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "veil_mask_of_echoes",
-    "name": "Mask of Echoes",
-    "desc": "Mimic voice, appearance, or aura; copy another's likeness for 1–3 turns.",
+    "orderNumber": 28,
     "cost": 3,
-    "species": "veilborn",
-    "abilityType": ["ability"],
+    "desc": "Mimic voice, appearance, or aura; copy another's likeness for 1–3 turns.",
+    "name": "Mask of Echoes",
     "tags": ["transform", "utility", "social"],
-    "baseStat": "Mental",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "transform_mimic"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "veil_entropy_pulse",
-    "name": "Entropy Pulse",
-    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (-1 TN or effect for 1 turn).",
+    "orderNumber": 29,
     "cost": 2,
-    "species": "veilborn",
-    "abilityType": ["attack"],
+    "desc": "Destabilize tech or magic; minor malfunctions, frayed illusions, weakened constructs (-1 TN or effect for 1 turn).",
+    "name": "Entropy Pulse",
     "tags": ["debuff", "mental"],
-    "baseStat": "Mental",
-    "targetType": "single",
     "range": 20,
     "effects": {
       "attack": ["check_mental_vs_mental", "debuff_entropy_disruption"]
-    }
+    },
+    "species": "veilborn",
+    "baseStat": "Mental",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   }
 ]

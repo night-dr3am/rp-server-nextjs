@@ -1,615 +1,771 @@
 [
   {
     "id": "cyb_spectra_vision",
-    "name": "Spectra-Vision",
-    "desc": "Multi-spectrum sight (infrared, UV, etc.), wide utility.",
+    "orderNumber": 0,
     "cost": 3,
+    "desc": "Multi-spectrum sight (infrared, UV, etc.), wide utility.",
+    "name": "Spectra-Vision",
     "type": "sensory",
-    "section": "Sensory Mods",
-    "abilityType": ["passive"],
     "effects": {
       "passive": ["utility_multispectrum_vision", "buff_perception_1"]
-    }
+    },
+    "section": "Sensory Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_echo_sense",
-    "name": "EchoSense",
-    "desc": "Sonar/pulse mapping; excellent for navigation.",
+    "orderNumber": 1,
     "cost": 3,
+    "desc": "Sonar/pulse mapping; excellent for navigation.",
+    "name": "EchoSense",
     "type": "sensory",
-    "section": "Sensory Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["utility_echolocation"]
-    }
+      "passive": [
+        "utility_echolocation"
+      ]
+    },
+    "section": "Sensory Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_ghostlight_optics",
-    "name": "Ghostlight Optics",
-    "desc": "Low-light / thermal hybrid, strong for night/combat.",
+    "orderNumber": 2,
     "cost": 2,
+    "desc": "Low-light / thermal hybrid, strong for night/combat.",
+    "name": "Ghostlight Optics",
     "type": "sensory",
-    "section": "Sensory Mods",
-    "abilityType": ["passive"],
     "effects": {
       "passive": ["buff_perception_1_lowlight", "utility_heat_vision"]
-    }
+    },
+    "section": "Sensory Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_clarity_node",
-    "name": "Clarity Node",
-    "desc": "Anti-glare / image stabilizer; niche defensive utility.",
+    "orderNumber": 3,
     "cost": 1,
+    "desc": "Anti-glare / image stabilizer; niche defensive utility.",
+    "name": "Clarity Node",
     "type": "sensory",
-    "section": "Sensory Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_perception_1"]
-    }
+      "passive": [
+        "buff_perception_1"
+      ]
+    },
+    "section": "Sensory Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_street_eye_mkiv",
-    "name": "Street-Eye Mk IV",
-    "desc": "Basic starter sensory mod, cheap but common.",
+    "orderNumber": 4,
     "cost": 1,
+    "desc": "Basic starter sensory mod, cheap but common.",
+    "name": "Street-Eye Mk IV",
     "type": "sensory",
-    "section": "Sensory Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_perception_1"]
-    }
+      "passive": [
+        "buff_perception_1"
+      ]
+    },
+    "section": "Sensory Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_razorjack_interface",
-    "name": "Razorjack Interface",
-    "desc": "Deployable blades or claws; solid melee weapon upgrade.",
+    "orderNumber": 5,
     "cost": 3,
+    "desc": "Deployable blades or claws; solid melee weapon upgrade.",
+    "name": "Razorjack Interface",
     "type": "combat",
-    "section": "Combat/Utility Mods",
-    "abilityType": ["attack"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 0,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_3"]
-    }
+    },
+    "section": "Combat/Utility Mods",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "cyb_impact_coil",
-    "name": "Impact Coil",
-    "desc": "Shockwave-enhanced strikes; strong AoE knockback.",
+    "orderNumber": 6,
     "cost": 4,
+    "desc": "Shockwave-enhanced strikes; strong AoE knockback.",
+    "name": "Impact Coil",
     "type": "combat",
-    "section": "Combat/Utility Mods",
-    "abilityType": ["attack"],
-    "baseStat": "Physical",
-    "targetType": "area",
     "range": 5,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_force_3", "control_push"]
-    }
+    },
+    "section": "Combat/Utility Mods",
+    "baseStat": "Physical",
+    "targetType": "area",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "cyb_grav_lock_anchors",
-    "name": "Grav-Lock Anchors",
-    "desc": "Adhesion to walls/ceilings; great infiltration/mobility.",
+    "orderNumber": 7,
     "cost": 3,
+    "desc": "Adhesion to walls/ceilings; great infiltration/mobility.",
+    "name": "Grav-Lock Anchors",
     "type": "combat",
-    "section": "Combat/Utility Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["movement_wall_climbing"]
-    }
+      "passive": [
+        "movement_wall_climbing"
+      ]
+    },
+    "section": "Combat/Utility Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_pulse_injector",
-    "name": "Pulse Injector",
-    "desc": "Short-burst speed enhancer; versatile for Dex rolls/escapes.",
+    "orderNumber": 8,
     "cost": 3,
+    "desc": "Short-burst speed enhancer; versatile for Dex rolls/escapes.",
+    "name": "Pulse Injector",
     "type": "combat",
-    "section": "Combat/Utility Mods",
-    "abilityType": ["ability"],
-    "baseStat": "Dexterity",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_dexterity_vs_tn10", "buff_dexterity_3"]
-    }
+    },
+    "section": "Combat/Utility Mods",
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "cyb_wraith_grip",
-    "name": "Wraith Grip",
-    "desc": "Silent, vibration-dampened hands; strong stealth, lower combat.",
+    "orderNumber": 9,
     "cost": 2,
+    "desc": "Silent, vibration-dampened hands; strong stealth, lower combat.",
+    "name": "Wraith Grip",
     "type": "combat",
-    "section": "Combat/Utility Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_stealth_3_sound"]
-    }
+      "passive": [
+        "buff_stealth_3_sound"
+      ]
+    },
+    "section": "Combat/Utility Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_shadeskin",
-    "name": "ShadeSkin",
-    "desc": "Optical camouflage layer; high-end stealth, nearly invisible.",
+    "orderNumber": 10,
     "cost": 4,
+    "desc": "Optical camouflage layer; high-end stealth, nearly invisible.",
+    "name": "ShadeSkin",
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Dexterity",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_dexterity_vs_tn10", "buff_stealth_6"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Dexterity",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "cyb_veil_circuit",
-    "name": "Veil Circuit",
-    "desc": "Sound suppression dampeners; highly useful for stealth.",
+    "orderNumber": 11,
     "cost": 3,
+    "desc": "Sound suppression dampeners; highly useful for stealth.",
+    "name": "Veil Circuit",
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_stealth_3_sound"]
-    }
+      "passive": [
+        "buff_stealth_3_sound"
+      ]
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_ghoststep_relay",
-    "name": "Ghoststep Relay",
-    "desc": "Noise-cancelled footfalls; useful but narrower than Veil Circuit.",
+    "orderNumber": 12,
     "cost": 2,
+    "desc": "Noise-cancelled footfalls; useful but narrower than Veil Circuit.",
+    "name": "Ghoststep Relay",
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_stealth_2"]
-    }
+      "passive": [
+        "buff_stealth_2"
+      ]
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_null_sigil",
-    "name": "Null Sigil",
-    "desc": "Electronic signature masking; counters detection tech.",
+    "orderNumber": 13,
     "cost": 3,
+    "desc": "Electronic signature masking; counters detection tech.",
+    "name": "Null Sigil",
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["utility_electronic_masking"]
-    }
+      "passive": [
+        "utility_electronic_masking"
+      ]
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_cold_veins",
-    "name": "Cold Veins",
-    "desc": "Thermal suppression mod; valuable for surveillance-heavy zones.",
+    "orderNumber": 14,
     "cost": 2,
+    "desc": "Thermal suppression mod; valuable for surveillance-heavy zones.",
+    "name": "Cold Veins",
     "type": "stealth",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_stealth_2"]
-    }
+      "passive": [
+        "buff_stealth_2"
+      ]
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_titan_frame",
-    "name": "Titan Frame",
-    "desc": "Reinforced bone plating; strong defense/durability.",
+    "orderNumber": 15,
     "cost": 4,
+    "desc": "Reinforced bone plating; strong defense/durability.",
+    "name": "Titan Frame",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["defense_damage_reduction_2"]
-    }
+      "passive": [
+        "defense_damage_reduction_2"
+      ]
+    },
+    "section": "Augmented Strength/Durability",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_servocore_overdrive",
-    "name": "ServoCore Overdrive",
-    "desc": "Strength amplifier; huge melee upgrade.",
+    "orderNumber": 16,
     "cost": 4,
+    "desc": "Strength amplifier; huge melee upgrade.",
+    "name": "ServoCore Overdrive",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["ability"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "buff_physical_4_strength"]
-    }
+    },
+    "section": "Augmented Strength/Durability",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "cyb_ironlung_node",
-    "name": "Ironlung Node",
-    "desc": "Respiratory boost / toxic filter; environmental survival.",
+    "orderNumber": 17,
     "cost": 2,
+    "desc": "Respiratory boost / toxic filter; environmental survival.",
+    "name": "Ironlung Node",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["defense_environmental"]
-    }
+      "passive": [
+        "defense_environmental"
+      ]
+    },
+    "section": "Augmented Strength/Durability",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_shock_spine",
-    "name": "Shock-Spine",
-    "desc": "Electrical discharge defense; strong deterrent/reactive damage.",
+    "orderNumber": 18,
     "cost": 3,
+    "desc": "Electrical discharge defense; strong deterrent/reactive damage.",
+    "name": "Shock-Spine",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["passive_reflect_damage_2_electric"]
-    }
+      "passive": [
+        "passive_reflect_damage_2_electric"
+      ]
+    },
+    "section": "Augmented Strength/Durability",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_grinder_arm",
-    "name": "Grinder Arm",
-    "desc": "Industrial-grade crushing tool; brutal melee, bulky.",
+    "orderNumber": 19,
     "cost": 4,
+    "desc": "Industrial-grade crushing tool; brutal melee, bulky.",
+    "name": "Grinder Arm",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["attack"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 0,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_4"]
-    }
+    },
+    "section": "Augmented Strength/Durability",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "cyb_carapace_full",
-    "name": "Carapace (full)",
-    "desc": "Full-body reinforcement; reduces damage by -3 points.",
+    "orderNumber": 20,
     "cost": 5,
+    "desc": "Full-body reinforcement; reduces damage by -3 points.",
+    "name": "Carapace (full)",
     "type": "durability",
-    "section": "Augmented Strength/Durability",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["defense_damage_reduction_3"]
-    }
+      "passive": [
+        "defense_damage_reduction_3"
+      ]
+    },
+    "section": "Augmented Strength/Durability",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_meatjackers",
-    "name": "Meatjackers",
-    "desc": "Combat prosthetic arms; common street-tier melee enhancement.",
+    "orderNumber": 21,
     "cost": 2,
+    "desc": "Combat prosthetic arms; common street-tier melee enhancement.",
+    "name": "Meatjackers",
     "type": "street",
-    "section": "Street-Level Popular Mods",
-    "abilityType": ["attack"],
-    "baseStat": "Physical",
-    "targetType": "single",
     "range": 0,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_2"]
-    }
+    },
+    "section": "Street-Level Popular Mods",
+    "baseStat": "Physical",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "cyb_glowsticks",
-    "name": "Glowsticks",
-    "desc": "Cheap neon-lit limbs; cosmetic/intimidation, minimal combat use.",
+    "orderNumber": 22,
     "cost": 1,
+    "desc": "Cheap neon-lit limbs; cosmetic/intimidation, minimal combat use.",
+    "name": "Glowsticks",
     "type": "street",
-    "section": "Street-Level Popular Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_social_intimidation"]
-    }
+      "passive": [
+        "buff_social_intimidation"
+      ]
+    },
+    "section": "Street-Level Popular Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "cyb_bonecrackers",
-    "name": "Bonecrackers",
-    "desc": "Overclocked hand mods; short-term melee buff, unstable.",
+    "orderNumber": 23,
     "cost": 2,
+    "desc": "Overclocked hand mods; short-term melee buff, unstable.",
+    "name": "Bonecrackers",
     "type": "street",
-    "section": "Street-Level Popular Mods",
-    "abilityType": ["ability"],
-    "baseStat": "Physical",
-    "targetType": "self",
     "range": 0,
     "effects": {
       "ability": ["check_physical_vs_tn10", "buff_physical_2"]
-    }
+    },
+    "section": "Street-Level Popular Mods",
+    "baseStat": "Physical",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "cyb_spiderjoints",
-    "name": "Spiderjoints",
-    "desc": "Multi-angle bending prosthetics; useful for odd escapes/infiltration.",
+    "orderNumber": 24,
     "cost": 2,
+    "desc": "Multi-angle bending prosthetics; useful for odd escapes/infiltration.",
+    "name": "Spiderjoints",
     "type": "street",
-    "section": "Street-Level Popular Mods",
-    "abilityType": ["passive"],
     "effects": {
-      "passive": ["buff_dexterity_2"]
-    }
+      "passive": [
+        "buff_dexterity_2"
+      ]
+    },
+    "section": "Street-Level Popular Mods",
+    "abilityType": [
+      "passive"
+    ]
   },
   {
     "id": "hack_silkveil",
-    "name": "Silkveil",
-    "desc": "Ghostly cloaking routine for system monitors. Reliable, broad use stealth.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 25,
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Ghostly cloaking routine for system monitors. Reliable, broad use stealth.",
+    "name": "Silkveil",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_shadowstep",
-    "name": "Shadowstep",
-    "desc": "Short-burst stealth injector; quick escape/bypass tool.",
-    "cost": 1,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 26,
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 1,
+    "desc": "Short-burst stealth injector; quick escape/bypass tool.",
+    "name": "Shadowstep",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_nightloom",
-    "name": "Nightloom",
-    "desc": "Weaves background noise into a silent corridor for your trace.",
-    "cost": 1,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 27,
     "mk": "I",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 1,
+    "desc": "Weaves background noise into a silent corridor for your trace.",
+    "name": "Nightloom",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_mutepatch",
-    "name": "MutePatch",
-    "desc": "Temporary logging blind; leaves little more than a whisper.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 28,
     "mk": "II",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Temporary logging blind; leaves little more than a whisper.",
+    "name": "MutePatch",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_glasscloak",
-    "name": "Glasscloak",
-    "desc": "Reflection-layer that distorts how the system sees you.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 29,
     "mk": "II",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 3,
+    "desc": "Reflection-layer that distorts how the system sees you.",
+    "name": "Glasscloak",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_hushkit",
-    "name": "Hushkit",
-    "desc": "Suppresses alerting chirps and heartbeat tracers.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 30,
     "mk": "III",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Suppresses alerting chirps and heartbeat tracers.",
+    "name": "Hushkit",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_fogline",
-    "name": "Fogline",
-    "desc": "Generates transient decoys to confuse time-based scans.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "stealth",
+    "orderNumber": 31,
     "mk": "III",
-    "section": "Stealth/Infiltration - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 3,
+    "desc": "Generates transient decoys to confuse time-based scans.",
+    "name": "Fogline",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Stealth/Infiltration - Hacking",
+    "baseStat": "Mental",
+    "category": "stealth",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_wardhalo",
-    "name": "WardHalo",
-    "desc": "Defensive shell that repels basic scanning heuristics.",
-    "cost": 1,
-    "type": "hacking",
-    "category": "defense",
+    "orderNumber": 32,
     "mk": "I",
-    "section": "Defensive/Countermeasures - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 1,
+    "desc": "Defensive shell that repels basic scanning heuristics.",
+    "name": "WardHalo",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
-    }
+    },
+    "section": "Defensive/Countermeasures - Hacking",
+    "baseStat": "Mental",
+    "category": "defense",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_glassguard",
-    "name": "GlassGuard",
-    "desc": "Brittle shield that breaks to protect a deeper secret.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "defense",
+    "orderNumber": 33,
     "mk": "II",
-    "section": "Defensive/Countermeasures - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Brittle shield that breaks to protect a deeper secret.",
+    "name": "GlassGuard",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
-    }
+    },
+    "section": "Defensive/Countermeasures - Hacking",
+    "baseStat": "Mental",
+    "category": "defense",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_mistscreen",
-    "name": "MistScreen",
-    "desc": "Routes attention away from true assets with fog.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "defense",
+    "orderNumber": 34,
     "mk": "II",
-    "section": "Defensive/Countermeasures - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Routes attention away from true assets with fog.",
+    "name": "MistScreen",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
-    }
+    },
+    "section": "Defensive/Countermeasures - Hacking",
+    "baseStat": "Mental",
+    "category": "defense",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_pulsefence",
-    "name": "PulseFence",
-    "desc": "Short-lived perimeter push that confuses automated hunters.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "defense",
+    "orderNumber": 35,
     "mk": "III",
-    "section": "Defensive/Countermeasures - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 3,
+    "desc": "Short-lived perimeter push that confuses automated hunters.",
+    "name": "PulseFence",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "defense_mental_resistance"]
-    }
+    },
+    "section": "Defensive/Countermeasures - Hacking",
+    "baseStat": "Mental",
+    "category": "defense",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_brickwave",
-    "name": "Brickwave",
-    "desc": "Creates a blunt shock to overwhelm simple defenses.",
-    "cost": 1,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 36,
     "mk": "I",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["attack"],
-    "baseStat": "Mental",
-    "targetType": "single",
+    "cost": 1,
+    "desc": "Creates a blunt shock to overwhelm simple defenses.",
+    "name": "Brickwave",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "attack": ["check_mental_vs_tn10", "damage_breach"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "hack_glassrend",
-    "name": "GlassRend",
-    "desc": "Shatters brittle protocols with surgical force.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 37,
     "mk": "I",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["attack"],
-    "baseStat": "Mental",
-    "targetType": "single",
+    "cost": 2,
+    "desc": "Shatters brittle protocols with surgical force.",
+    "name": "GlassRend",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "attack": ["check_mental_vs_tn10", "damage_breach"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "hack_thunderclasp",
-    "name": "Thunderclasp",
-    "desc": "High-impact entry that forces doors open; strong, aggressive breach.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 38,
     "mk": "II",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["attack"],
-    "baseStat": "Mental",
-    "targetType": "single",
+    "cost": 3,
+    "desc": "High-impact entry that forces doors open; strong, aggressive breach.",
+    "name": "Thunderclasp",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "attack": ["check_mental_vs_tn12", "damage_breach"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   },
   {
     "id": "hack_clockmender",
-    "name": "Clockmender",
-    "desc": "Falsifies timestamps for short, plausible windows.",
-    "cost": 2,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 39,
     "mk": "II",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 2,
+    "desc": "Falsifies timestamps for short, plausible windows.",
+    "name": "Clockmender",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_signalsmith",
-    "name": "SignalSmith",
-    "desc": "Sculpts traffic patterns into believable flows; hides activity.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 40,
     "mk": "III",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["ability"],
-    "baseStat": "Mental",
-    "targetType": "self",
+    "cost": 3,
+    "desc": "Sculpts traffic patterns into believable flows; hides activity.",
+    "name": "SignalSmith",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "buff_stealth_hacking"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "self",
+    "abilityType": [
+      "ability"
+    ]
   },
   {
     "id": "hack_wreckline",
-    "name": "Wreckline",
-    "desc": "Loud, chaotic breaching routine that creates exploitable openings.",
-    "cost": 3,
-    "type": "hacking",
-    "category": "breach",
+    "orderNumber": 41,
     "mk": "III",
-    "section": "Breaching/Intrusion Protocols - Hacking",
-    "abilityType": ["attack"],
-    "baseStat": "Mental",
-    "targetType": "single",
+    "cost": 3,
+    "desc": "Loud, chaotic breaching routine that creates exploitable openings.",
+    "name": "Wreckline",
+    "type": "hacking",
     "range": 0,
     "effects": {
       "attack": ["check_mental_vs_tn12", "damage_breach"]
-    }
+    },
+    "section": "Breaching/Intrusion Protocols - Hacking",
+    "baseStat": "Mental",
+    "category": "breach",
+    "targetType": "single",
+    "abilityType": [
+      "attack"
+    ]
   }
 ]
