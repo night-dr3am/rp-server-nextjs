@@ -268,10 +268,9 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
       const response = await fetch('/api/arkana/admin/arkana-data/export', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ type: activeDataType })
+        body: JSON.stringify({ token, type: activeDataType })
       });
 
       if (!response.ok) {
