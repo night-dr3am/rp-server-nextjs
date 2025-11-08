@@ -154,7 +154,8 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id: _id, orderNumber, ...jsonData } = formData;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {

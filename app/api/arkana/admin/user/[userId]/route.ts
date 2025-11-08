@@ -298,3 +298,91 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  try {
+    const params = await context.params;
+    const userId = params.userId;
+    const { searchParams } = new URL(request.url);
+    const token = searchParams.get('token');
+
+    // Validate token
+    const { error } = arkanaAdminVerifySchema.validate({ token });
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.details[0].message },
+        { status: 400 }
+      );
+    }
+
+    // Validate admin token
+    const adminValidation = await validateAdminToken(token!);
+    if (!adminValidation.valid) {
+      return NextResponse.json(
+        { success: false, error: adminValidation.error || 'Access denied' },
+        { status: 403 }
+      );
+    }
+
+    // Fetch user to verify existence and get character name for response
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        arkanaStats: true,
+        stats: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!user.arkanaStats) {
+      return NextResponse.json(
+        { success: false, error: 'Arkana character not found for this user' },
+        { status: 404 }
+      );
+    }
+
+    const characterName = user.arkanaStats.characterName;
+
+    // Delete character data in transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete arkanaStats (character data)
+      await tx.arkanaStats.delete({
+        where: { userId: userId }
+      });
+
+      // Delete userStats if exists (cleanup Gor universe stats)
+      if (user.stats) {
+        await tx.userStats.delete({
+          where: { userId: userId }
+        });
+      }
+
+      // Update user's last active
+      await tx.user.update({
+        where: { id: userId },
+        data: { lastActive: new Date() }
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        message: `Character "${characterName}" deleted successfully`,
+        userId: userId
+      }
+    });
+
+  } catch (error: unknown) {
+    console.error('Error deleting character:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

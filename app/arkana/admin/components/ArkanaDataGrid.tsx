@@ -157,7 +157,8 @@ export default function ArkanaDataGrid({
       setLoading(true);
 
       // Remove id, createdAt, updatedAt from item data
-      const { id: _id, type: _type, createdAt: _createdAt, updatedAt: _updatedAt, ...jsonData } = item;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, type, createdAt, updatedAt, ...jsonData } = item;
 
       const response = await fetch('/api/arkana/admin/arkana-data', {
         method: 'POST',

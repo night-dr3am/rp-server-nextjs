@@ -104,7 +104,8 @@ export default function SkillEditor({ token, skill, onSave, onCancel }: SkillEdi
 
       const method = isNew ? 'POST' : 'PUT';
 
-      const { id: _id, orderNumber, ...jsonData } = formData;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, orderNumber, ...jsonData } = formData;
 
       const body = isNew
         ? {

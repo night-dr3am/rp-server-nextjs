@@ -2,7 +2,7 @@
 // POST: Export data type to production JSON format
 
 import { NextRequest, NextResponse } from 'next/server';
-import { arkanaAdminDataExportBodySchema } from '@/lib/validation';
+import { arkanaAdminDataExportBodySchema, arkanaAdminDataExportTypeSchema } from '@/lib/validation';
 import { validateAdminToken } from '@/lib/arkana/adminUtils';
 import {
   exportToJSON,
@@ -13,20 +13,9 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract token from Authorization header (consistent with other admin endpoints)
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: 'Authorization token required' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
 
-    // 1. Validate input (body only, token from header)
+    // 1. Validate input (includes token in body, consistent with other admin POST endpoints)
     const { error, value } = arkanaAdminDataExportBodySchema.validate(body);
     if (error) {
       return NextResponse.json(
@@ -35,8 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Validate admin token
-    const adminValidation = await validateAdminToken(token);
+    // 2. Validate admin token (from body)
+    const adminValidation = await validateAdminToken(value.token);
     if (!adminValidation.valid) {
       return NextResponse.json(
         { success: false, error: adminValidation.error || 'Access denied' },
@@ -103,8 +92,8 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get('token');
     const type = searchParams.get('type') as string | null;
 
-    // 1. Validate input (GET endpoint uses full schema with token in query params)
-    const { error, value } = arkanaAdminDataExportBodySchema.validate({
+    // 1. Validate type parameter (token comes from query params separately)
+    const { error, value } = arkanaAdminDataExportTypeSchema.validate({
       type
     });
 

@@ -107,7 +107,8 @@ export default function ArkanaCharacterCreation() {
   const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
   const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
   const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
-  const [_allSkills, setAllSkills] = useState<Skill[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
 
   // Filtered data caches (updated when race/archetype changes)
   const [availableFlaws, setAvailableFlaws] = useState<Flaw[]>([]);
@@ -172,7 +173,6 @@ export default function ArkanaCharacterCreation() {
     };
 
     initializeApp();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, uuid, universe, sessionId]);
 
   // Update available options when race/archetype changes

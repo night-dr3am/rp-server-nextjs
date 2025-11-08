@@ -1005,8 +1005,14 @@ export const arkanaAdminDataExportSchema = Joi.object({
   type: Joi.string().valid(...arkanaDataTypes).required()
 });
 
-// Export schema for body-only validation (token extracted from Authorization header)
+// Export schema for POST requests (token in body like other admin POST endpoints)
 export const arkanaAdminDataExportBodySchema = Joi.object({
+  token: Joi.string().required(),
+  type: Joi.string().valid(...arkanaDataTypes).required()
+});
+
+// Export schema for GET requests (type only, token from query params)
+export const arkanaAdminDataExportTypeSchema = Joi.object({
   type: Joi.string().valid(...arkanaDataTypes).required()
 });
 

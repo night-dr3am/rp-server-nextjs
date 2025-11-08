@@ -191,7 +191,8 @@ function AdminDashboardContent() {
   const [allArchPowers, setAllArchPowers] = useState<ArchetypePower[]>([]);
   const [allCybernetics, setAllCybernetics] = useState<Cybernetic[]>([]);
   const [allMagicSchools, setAllMagicSchools] = useState<MagicSchool[]>([]);
-  const [_allSkills, setAllSkills] = useState<Skill[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
 
   // Filtered data caches (updated when race/archetype changes)
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
@@ -540,6 +541,47 @@ function AdminDashboardContent() {
       }
     } catch {
       alert('Failed to update user');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteCharacter = async () => {
+    if (!selectedUser) return;
+
+    const characterName = editData.characterName || selectedUser.user.username;
+
+    // Confirmation dialog with clear warning
+    if (!confirm(
+      `Delete character "${characterName}"?\n\n` +
+      `This action cannot be undone and will permanently remove all Arkana character data.\n\n` +
+      `The user account will remain intact, but the character will be completely deleted.`
+    )) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch(
+        `/api/arkana/admin/user/${selectedUser.user.id}?token=${token}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(result.data.message || 'Character deleted successfully!');
+        setSelectedUser(null);
+        await fetchUsers(currentPage, searchTerm);
+      } else {
+        alert(`Failed to delete character: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting character:', error);
+      alert('Failed to delete character due to network error');
     } finally {
       setSaving(false);
     }
@@ -1408,7 +1450,16 @@ function AdminDashboardContent() {
           // User Editor
           <div className="bg-gray-900 border border-cyan-500 rounded-lg shadow-lg shadow-cyan-500/20 p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-cyan-400">Edit Character: {editData.characterName || ''}</h2>
+              <div className="flex flex-col gap-2">
+                <h2 className="text-2xl font-bold text-cyan-400">Edit Character: {editData.characterName || ''}</h2>
+                <button
+                  onClick={handleDeleteCharacter}
+                  disabled={saving}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  🗑️ Delete Character
+                </button>
+              </div>
               <button
                 onClick={() => setSelectedUser(null)}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded"
