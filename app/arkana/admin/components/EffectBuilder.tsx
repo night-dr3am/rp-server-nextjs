@@ -29,6 +29,9 @@ interface Effect {
   // Control fields
   controlType?: string;
   resistType?: string;
+  // Heal fields
+  healType?: string;
+  healFormula?: string;
   // Utility fields
   utilityType?: string;
 }
@@ -124,6 +127,10 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
 
     if (formData.category === 'control') {
       if (!formData.controlType) errors.controlType = 'Control type is required';
+    }
+
+    if (formData.category === 'heal') {
+      if (!formData.healFormula) errors.healFormula = 'Heal formula is required';
     }
 
     setValidationErrors(errors);
@@ -631,7 +638,52 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
                 </div>
               )}
 
-              {(formData.category === 'defense' || formData.category === 'heal' || formData.category === 'utility' || formData.category === 'resource' || formData.category === 'special') && (
+              {formData.category === 'heal' && (
+                <div className="space-y-4 p-4 bg-gray-800 rounded border border-cyan-600">
+                  <h3 className="text-cyan-400 font-bold">Heal Configuration</h3>
+
+                  <div>
+                    <label className="block text-sm font-medium text-cyan-300 mb-2">
+                      Heal Formula <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.healFormula || ''}
+                      onChange={(e) => setFormData({ ...formData, healFormula: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-900 border border-cyan-500 text-cyan-100 rounded"
+                      placeholder="e.g., 3 or 6 + Mental"
+                    />
+                    {validationErrors.healFormula && (
+                      <p className="text-red-400 text-sm mt-1">{validationErrors.healFormula}</p>
+                    )}
+                    <p className="text-gray-400 text-xs mt-1">
+                      Format: &quot;number + StatName&quot; (e.g., &quot;6 + Mental&quot;) or just a number (e.g., &quot;3&quot;)
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-cyan-300 mb-2">
+                      Heal Type <span className="text-gray-500">(Optional)</span>
+                    </label>
+                    <select
+                      value={formData.healType || ''}
+                      onChange={(e) => setFormData({ ...formData, healType: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-900 border border-cyan-500 text-cyan-100 rounded"
+                    >
+                      <option value="">Select type...</option>
+                      <option value="direct">Direct Healing</option>
+                      <option value="regeneration">Regeneration (over time)</option>
+                      <option value="stat_based">Stat-Based Healing</option>
+                      <option value="area">Area Healing</option>
+                    </select>
+                    <p className="text-gray-400 text-xs mt-1">
+                      Optional: Categorize the type of healing effect
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {(formData.category === 'defense' || formData.category === 'utility' || formData.category === 'resource' || formData.category === 'special') && (
                 <div className="space-y-4 p-4 bg-gray-800 rounded border border-cyan-600">
                   <h3 className="text-cyan-400 font-bold">{formData.category.charAt(0).toUpperCase() + formData.category.slice(1)} Configuration</h3>
 
