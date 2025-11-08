@@ -367,20 +367,22 @@
   {
     "id": "veil_biofusion",
     "orderNumber": 20,
-    "cost": 4,
+    "cost": 3,
     "desc": "Temporarily merge with living systems; heal, communicate, redirect energy; situational utility/healing.",
     "name": "Biofusion",
     "tags": ["heal", "utility"],
     "range": 0,
     "effects": {
-      "ability": ["check_mental_vs_tn10", "heal_biofusion_4"]
+      "ability": ["check_mental_vs_tn12", "heal_biofusion_3"]
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_biofusion",
     "targetType": "single",
     "abilityType": [
       "ability"
-    ]
+    ],
+    "arkanaDataType": "commonPower"
   },
   {
     "id": "veil_circuit_whisper",

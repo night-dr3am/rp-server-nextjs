@@ -356,16 +356,31 @@
     "checkStat": "Mental"
   },
   {
+    "id": "heal_biofusion_3",
+    "orderNumber": 31,
+    "desc": "Heals 3 HP + Mental by merging with living systems",
+    "name": "Biofusion Healing",
+    "target": "ally",
+    "category": "heal",
+    "duration": "immediate",
+    "healType": "direct",
+    "_uniqueId": "effect:heal_biofusion_3",
+    "healFormula": "3 + Mental",
+    "arkanaDataType": "effect"
+  },
+  {
     "id": "heal_biofusion_4",
     "orderNumber": 31,
-    "desc": "Heals 4 HP by merging with living systems",
+    "desc": "Heals 4 HP + Mental by merging with living systems",
     "name": "Biofusion Healing",
     "type": "direct",
     "target": "ally",
     "category": "heal",
     "duration": "immediate",
     "healType": "direct",
-    "healFormula": "4"
+    "_uniqueId": "effect:heal_biofusion_4",
+    "healFormula": "4 + Mental",
+    "arkanaDataType": "effect"
   },
   {
     "id": "utility_machine_repair",
