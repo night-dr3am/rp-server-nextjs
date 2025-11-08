@@ -109,8 +109,7 @@ export default function FlawEditor({ token, flaw, onSave, onCancel }: FlawEditor
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });

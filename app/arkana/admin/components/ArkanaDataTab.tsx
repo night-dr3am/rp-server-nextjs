@@ -196,8 +196,7 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
       const saveResponse = await fetch('/api/arkana/admin/arkana-data/bulk-save', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           token: token,

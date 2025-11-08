@@ -5,8 +5,11 @@ import { useState, useEffect } from 'react';
 interface Effect {
   id: string;
   name: string;
-  desc: string;
+  desc?: string;  // Optional to handle missing data from database
   category: string;
+  orderNumber?: number;  // Added by auto-assignment
+  arkanaDataType?: string;  // Added by API
+  _uniqueId?: string;  // Added by API
 }
 
 interface EffectBrowserProps {
@@ -32,22 +35,24 @@ export default function EffectBrowser({ token, selectedEffects, onSelect, onClos
     const loadEffects = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/arkana/admin/arkana-data?type=effect&limit=1000', {
+        const response = await fetch(`/api/arkana/admin/arkana-data?type=effect&limit=1000&token=${token}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           }
         });
 
         if (!response.ok) {
-          throw new Error('Failed to load effects');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
         }
 
         const result = await response.json();
         if (result.success) {
           setEffects(result.data.items || []);
           setFilteredEffects(result.data.items || []);
+        } else {
+          throw new Error(result.error || 'Failed to load effects');
         }
       } catch (err) {
         console.error('Error loading effects:', err);
@@ -72,7 +77,7 @@ export default function EffectBrowser({ token, selectedEffects, onSelect, onClos
       filtered = filtered.filter(e =>
         e.id.toLowerCase().includes(term) ||
         e.name.toLowerCase().includes(term) ||
-        e.desc.toLowerCase().includes(term)
+        (e.desc && e.desc.toLowerCase().includes(term))  // Safe null check
       );
     }
 
@@ -181,7 +186,7 @@ export default function EffectBrowser({ token, selectedEffects, onSelect, onClos
                       </div>
                       <code className="text-xs text-gray-400 font-mono">{effect.id}</code>
                     </div>
-                    <p className="text-gray-400 text-sm mt-1">{effect.desc}</p>
+                    <p className="text-gray-400 text-sm mt-1">{effect.desc || 'No description'}</p>
                   </div>
                 </label>
               ))}

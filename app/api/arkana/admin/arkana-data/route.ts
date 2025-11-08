@@ -64,6 +64,19 @@ export async function GET(request: NextRequest) {
       // Format items consistently (unified loader returns raw objects)
       allData = typeData.map(item => {
         const itemData = item as Record<string, unknown>;
+
+        // Validate and provide defaults for effects to prevent client-side errors
+        if (value.type === 'effect') {
+          return {
+            ...itemData,
+            desc: itemData.desc || 'No description',
+            name: itemData.name || itemData.id || 'Unnamed Effect',
+            category: itemData.category || 'utility',
+            arkanaDataType: value.type,
+            _uniqueId: `${value.type}:${itemData.id}`
+          };
+        }
+
         return {
           ...itemData,
           arkanaDataType: value.type,
@@ -80,6 +93,19 @@ export async function GET(request: NextRequest) {
         const typeData = await loadArkanaData(type);
         allData.push(...typeData.map(item => {
           const itemData = item as Record<string, unknown>;
+
+          // Validate and provide defaults for effects to prevent client-side errors
+          if (type === 'effect') {
+            return {
+              ...itemData,
+              desc: itemData.desc || 'No description',
+              name: itemData.name || itemData.id || 'Unnamed Effect',
+              category: itemData.category || 'utility',
+              arkanaDataType: type,
+              _uniqueId: `${type}:${itemData.id}`
+            };
+          }
+
           return {
             ...itemData,
             arkanaDataType: type,

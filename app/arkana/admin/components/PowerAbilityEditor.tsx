@@ -150,8 +150,7 @@ export default function PowerAbilityEditor({ token, dataType, power, onSave, onC
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });

@@ -166,8 +166,7 @@ export default function EffectBuilder({ token, effect, onSave, onCancel }: Effec
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
