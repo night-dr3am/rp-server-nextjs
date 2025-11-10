@@ -695,7 +695,7 @@ export default function GoreanCharacterCreation() {
                     : isComplete
                     ? GoreanColors.forestGreen
                     : GoreanColors.stone,
-                  color: 'white',
+                  color: isComplete ? 'white' : GoreanColors.charcoal,
                   opacity: isComplete || isActive ? 1 : 0.6
                 }}
               >

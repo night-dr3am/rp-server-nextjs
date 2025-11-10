@@ -109,7 +109,7 @@ export function SpeciesSelector({ selectedSpecies, onSelectSpecies, className = 
               }`}
               style={{
                 backgroundColor: isActive ? GoreanColors.bronze : GoreanColors.stone,
-                color: 'white',
+                color: GoreanColors.charcoal,
                 transform: isActive ? 'scale(1.05)' : 'scale(1)'
               }}
             >

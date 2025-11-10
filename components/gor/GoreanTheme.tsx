@@ -78,12 +78,32 @@ export function GoreanButton({
 }: GoreanButtonProps) {
   const baseClasses = 'font-semibold rounded-md transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed';
 
-  const variantClasses = {
-    primary: 'bg-gradient-to-b from-bronze to-bronzeDark text-white hover:from-bronzeDark hover:to-bronze',
-    secondary: 'bg-gradient-to-b from-stone to-charcoal text-white hover:from-charcoal hover:to-stone',
-    danger: 'bg-gradient-to-b from-bloodRed to-red-900 text-white hover:from-red-900 hover:to-bloodRed',
-    success: 'bg-gradient-to-b from-forestGreen to-green-900 text-white hover:from-green-900 hover:to-forestGreen',
-    disabled: 'bg-gray-400 text-gray-600 cursor-not-allowed'
+  // Text color classes
+  const variantTextClasses = {
+    primary: 'text-charcoal',
+    secondary: 'text-white',
+    danger: 'text-white',
+    success: 'text-white',
+    disabled: 'text-gray-600'
+  };
+
+  // Background styles using explicit hex values
+  const variantStyles = {
+    primary: {
+      backgroundImage: `linear-gradient(to bottom, ${GoreanColors.bronze}, ${GoreanColors.bronzeDark})`
+    },
+    secondary: {
+      backgroundImage: `linear-gradient(to bottom, ${GoreanColors.charcoal}, ${GoreanColors.leatherDark})`
+    },
+    danger: {
+      backgroundImage: `linear-gradient(to bottom, ${GoreanColors.bloodRed}, #8B0000)`
+    },
+    success: {
+      backgroundImage: `linear-gradient(to bottom, ${GoreanColors.forestGreen}, #006400)`
+    },
+    disabled: {
+      backgroundColor: '#9CA3AF'
+    }
   };
 
   const sizeClasses = {
@@ -99,8 +119,11 @@ export function GoreanButton({
       type={type}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`${baseClasses} ${variantClasses[finalVariant]} ${sizeClasses[size]} ${className}`}
-      style={{ fontFamily: GoreanFonts.body }}
+      className={`${baseClasses} ${variantTextClasses[finalVariant]} ${sizeClasses[size]} ${className}`}
+      style={{
+        fontFamily: GoreanFonts.body,
+        ...variantStyles[finalVariant]
+      }}
     >
       {children}
     </button>
