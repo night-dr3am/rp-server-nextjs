@@ -120,7 +120,7 @@ describe('POST /api/gor/character/create', () => {
     expect(data.data.goreanStats.culture).toBe('southern_cities');
     expect(data.data.goreanStats.strength).toBe(4);
     expect(data.data.goreanStats.charisma).toBe(3);
-    expect(data.data.goreanStats.healthMax).toBe(20); // Strength * 5
+    expect(data.data.goreanStats.healthMax).toBe(101); // 50 (human base) + 40 (str 4*10) + 9 (warrior 10%) + 2 (tarn riding lvl 2)
     expect(data.data.goreanStats.skills).toHaveLength(2);
     expect(data.data.goreanStats.registrationCompleted).toBe(true);
     expect(data.data.user.uuid).toBe(user.slUuid);
@@ -131,7 +131,7 @@ describe('POST /api/gor/character/create', () => {
     });
     expect(goreanStats).toBeTruthy();
     expect(goreanStats?.characterName).toBe('Tarl of Ko-ro-ba');
-    expect(goreanStats?.healthMax).toBe(20);
+    expect(goreanStats?.healthMax).toBe(101);
 
     // Verify token was deleted (one-time use)
     const deletedToken = await prisma.profileToken.findFirst({
@@ -141,12 +141,13 @@ describe('POST /api/gor/character/create', () => {
   });
 
   it('should calculate healthMax correctly from strength', async () => {
+    // Human warrior with Tarn Riding level 2: 50 base + (str*10) + 10% warrior bonus + 2 skill HP
     const testCases = [
-      { strength: 1, expectedHealth: 5 },
-      { strength: 2, expectedHealth: 10 },
-      { strength: 3, expectedHealth: 15 },
-      { strength: 4, expectedHealth: 20 },
-      { strength: 5, expectedHealth: 25 }
+      { strength: 1, expectedHealth: 68 },  // 50 + 10 + 6 (10%) + 2 = 68
+      { strength: 2, expectedHealth: 79 },  // 50 + 20 + 7 (10%) + 2 = 79
+      { strength: 3, expectedHealth: 90 },  // 50 + 30 + 8 (10%) + 2 = 90
+      { strength: 4, expectedHealth: 101 }, // 50 + 40 + 9 (10%) + 2 = 101
+      { strength: 5, expectedHealth: 112 }  // 50 + 50 + 10 (10%) + 2 = 112
     ];
 
     for (const testCase of testCases) {
@@ -394,7 +395,7 @@ describe('POST /api/gor/character/create', () => {
     });
 
     expect(userStats).toBeTruthy();
-    expect(userStats?.health).toBe(20); // healthMax from character
+    expect(userStats?.health).toBe(101); // healthMax from character (50 + 40 + 9 + 2)
     expect(userStats?.hunger).toBe(100);
     expect(userStats?.thirst).toBe(100);
     expect(userStats?.goldCoin).toBe(0); // New character defaults
@@ -535,7 +536,7 @@ describe('POST /api/gor/character/create', () => {
     // Update with lower strength
     const characterData = createGoreanCharacterPayload({
       token,
-      strength: 3, // New healthMax = 15
+      strength: 3, // New healthMax = 90 (50 + 30 + 8 warrior bonus + 2 tarn riding)
       agility: 3,
       intellect: 3,
       perception: 3,
@@ -547,7 +548,7 @@ describe('POST /api/gor/character/create', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.goreanStats.healthMax).toBe(15); // New max
-    expect(data.data.goreanStats.healthCurrent).toBe(15); // Clamped from 25 to new max
+    expect(data.data.goreanStats.healthMax).toBe(90); // New max (50 + 30 + 8 + 2)
+    expect(data.data.goreanStats.healthCurrent).toBe(25); // Preserved from old character (updating doesn't heal)
   });
 });

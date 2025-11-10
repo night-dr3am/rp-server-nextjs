@@ -21,6 +21,8 @@ export interface SpeciesData {
   rarity: Rarity;
   popularityRating: number;
   size: Size;
+  hpBase: number;
+  hpStrengthMult: number;
   habitat: string[];
   variants?: string[];
   bookReferences: string[];
@@ -156,6 +158,7 @@ export interface CasteData {
   gender?: string;
   joinByBirth?: boolean;
   joinByChoice?: boolean;
+  hpBonus?: number; // Percentage HP bonus (0-100) - combat castes get +10%
   subcastes?: string[];
   notes?: string;
   applicableSpecies: string[];
@@ -172,6 +175,7 @@ export interface TribalRole {
   responsibilities?: string[];
   prestige?: string;
   gender?: string;
+  hpBonus?: number; // Percentage HP bonus (0-100) - combat roles get +10%
   applicableStatuses?: string[]; // Which statuses can access this role (e.g., ["freeMan"], ["freeWoman"], ["kajira"])
   notes?: string;
   training?: string;
@@ -312,10 +316,48 @@ export function calculateGoreanStatModifier(statValue: number): number {
 }
 
 /**
- * Calculate health max from strength (Strength × 5)
+ * Calculate health max based on species, strength, caste/role, and skills
+ * Formula: speciesBaseHP + (Strength × strengthMult) + casteOrRoleBonus% + skillBonuses
+ *
+ * @param strength - Character's strength stat (1-5)
+ * @param speciesData - Species data with hpBase and hpStrengthMult
+ * @param casteOrRoleData - Optional caste or tribal role data with hpBonus percentage
+ * @param skills - Optional array of character skills
+ * @returns Calculated maximum HP
  */
-export function calculateHealthMax(strength: number): number {
-  return strength * 5;
+export function calculateHealthMax(
+  strength: number,
+  speciesData: SpeciesData,
+  casteOrRoleData?: CasteData | TribalRole,
+  skills?: CharacterSkill[]
+): number {
+  // Base calculation: species base HP + (strength × species strength multiplier)
+  let hp = speciesData.hpBase + (strength * speciesData.hpStrengthMult);
+
+  // Apply caste or tribal role bonus (percentage)
+  if (casteOrRoleData?.hpBonus) {
+    hp = Math.floor(hp * (1 + casteOrRoleData.hpBonus / 100));
+  }
+
+  // Skill bonuses: certain skills grant +1 or +2 HP per level
+  if (skills) {
+    const hpSkills: Record<string, number> = {
+      'unarmed_combat': 2,
+      'survival_arctic': 2,
+      'survival_desert': 2,
+      'survival_jungle': 2,
+      'tarn_riding': 1,
+      'kaiila_riding': 1
+    };
+
+    skills.forEach(skill => {
+      if (hpSkills[skill.skill_id]) {
+        hp += hpSkills[skill.skill_id] * skill.level;
+      }
+    });
+  }
+
+  return hp;
 }
 
 // ============================================================================

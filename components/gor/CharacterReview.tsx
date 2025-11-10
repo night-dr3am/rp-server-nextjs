@@ -42,22 +42,37 @@ export function CharacterReview({
 
   // Get caste or tribal role info
   let casteRoleInfo: { name: string; color?: string } | undefined;
+  let casteData: ReturnType<typeof getCasteById> | undefined;
+  let casteOrRoleData: ReturnType<typeof getCasteById> | ReturnType<typeof getTribalRoleById> | undefined;
   if (characterModel.casteRole && culture) {
     if (culture.hasCastes) {
       const caste = getCasteById(characterModel.casteRole);
       if (caste) {
         casteRoleInfo = { name: caste.name, color: caste.color };
+        casteData = caste;
+        casteOrRoleData = caste;
       }
     } else {
       const role = getTribalRoleById(culture.id, characterModel.casteRole);
       if (role) {
         casteRoleInfo = { name: role.name };
+        casteOrRoleData = role;
       }
     }
   }
 
   const region = characterModel.region ? getRegionById(characterModel.region) : undefined;
-  const healthMax = calculateHealthMax(characterModel.stats.strength);
+
+  // Calculate health max with new system (species + strength + caste/role + skills)
+  const healthMax = species
+    ? calculateHealthMax(
+        characterModel.stats.strength,
+        species,
+        casteOrRoleData,
+        characterModel.skills
+      )
+    : characterModel.stats.strength * 5; // Fallback to old formula if species not found
+
   const skillPointsSpent = calculateTotalSkillPoints(characterModel.skills);
 
   const getStatDisplay = (statName: string, value: number) => {
@@ -299,7 +314,7 @@ export function CharacterReview({
             </div>
           </div>
           <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: GoreanColors.parchmentDark }}>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <span className="font-semibold" style={{ color: GoreanColors.charcoal }}>Maximum Health:</span>
               <div className="flex items-center gap-2">
                 <span className="text-xl">❤️</span>
@@ -308,6 +323,30 @@ export function CharacterReview({
                 </span>
               </div>
             </div>
+            {/* HP Breakdown */}
+            {species && (
+              <div className="text-xs pt-2 border-t border-gray-300" style={{ color: GoreanColors.stone }}>
+                <span className="font-semibold">Breakdown: </span>
+                <span>Base: {species.hpBase}</span>
+                <span> + Strength: {characterModel.stats.strength} × {species.hpStrengthMult} = {characterModel.stats.strength * species.hpStrengthMult}</span>
+                {casteData && casteData.hpBonus && casteData.hpBonus > 0 && (
+                  <span> + Caste: +{casteData.hpBonus}%</span>
+                )}
+                {(() => {
+                  const hpSkills = characterModel.skills.filter(s =>
+                    ['unarmed_combat', 'survival_arctic', 'survival_desert', 'survival_jungle', 'tarn_riding', 'kaiila_riding'].includes(s.skill_id)
+                  );
+                  if (hpSkills.length > 0) {
+                    const skillHP = hpSkills.reduce((sum, skill) => {
+                      const bonus = ['unarmed_combat', 'survival_arctic', 'survival_desert', 'survival_jungle'].includes(skill.skill_id) ? 2 : 1;
+                      return sum + (bonus * skill.level);
+                    }, 0);
+                    return <span> + Skills: +{skillHP}</span>;
+                  }
+                  return null;
+                })()}
+              </div>
+            )}
           </div>
         </div>
 

@@ -3,9 +3,13 @@ import { prisma } from '@/lib/prisma';
 import { goreanCharacterCreateSchema } from '@/lib/validation';
 import { validateProfileToken } from '@/lib/profileTokenUtils';
 import { calculateHealthMax } from '@/lib/gor/types';
+import { loadAllGoreanData, getSpeciesById, getCasteById, getCultureById, getTribalRoleById } from '@/lib/gorData';
 
 export async function POST(request: NextRequest) {
   try {
+    // Load Gorean data files (required for species/culture/caste lookups)
+    await loadAllGoreanData();
+
     const body = await request.json();
 
     // Validate input
@@ -39,8 +43,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Load species and culture data for HP calculation
+    const species = getSpeciesById(characterData.species);
+    if (!species) {
+      return NextResponse.json(
+        { success: false, error: `Invalid species: ${characterData.species}` },
+        { status: 400 }
+      );
+    }
+
+    const culture = getCultureById(characterData.culture);
+
+    // Load caste or tribal role data for HP calculation
+    let casteOrRoleData;
+    if (characterData.casteRole && culture) {
+      if (culture.hasCastes) {
+        casteOrRoleData = getCasteById(characterData.casteRole);
+      } else {
+        casteOrRoleData = getTribalRoleById(culture.id, characterData.casteRole);
+      }
+    }
+
     // Calculate derived stats
-    const healthMax = calculateHealthMax(characterData.strength);
+    const healthMax = calculateHealthMax(
+      characterData.strength,
+      species,
+      casteOrRoleData,
+      characterData.skills
+    );
     const statPointsSpent = (characterData.strength - 1) + (characterData.agility - 1) +
                             (characterData.intellect - 1) + (characterData.perception - 1) +
                             (characterData.charisma - 1);

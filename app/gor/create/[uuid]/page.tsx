@@ -19,6 +19,8 @@ import {
   MAX_STAT_VALUE,
   getSpeciesById,
   getCultureById,
+  getCasteById,
+  getTribalRoleById,
   validateCharacterModel
 } from '@/lib/gorData';
 import {
@@ -513,12 +515,31 @@ export default function GoreanCharacterCreation() {
     </GoreanScroll>
   );
 
-  const renderStep7 = () => (
-    <StatAllocator
-      stats={characterModel.stats}
-      onStatChange={handleStatChange}
-    />
-  );
+  const renderStep7 = () => {
+    // Look up species and caste/role data from characterModel IDs (same pattern as CharacterReview)
+    const species = characterModel.species ? getSpeciesById(characterModel.species) : undefined;
+    const culture = characterModel.culture ? getCultureById(characterModel.culture) : undefined;
+
+    // Get caste or tribal role data for HP calculation
+    let casteOrRoleData: CasteData | TribalRole | undefined;
+    if (characterModel.casteRole && culture) {
+      if (culture.hasCastes) {
+        casteOrRoleData = getCasteById(characterModel.casteRole);
+      } else {
+        casteOrRoleData = getTribalRoleById(culture.id, characterModel.casteRole);
+      }
+    }
+
+    return (
+      <StatAllocator
+        stats={characterModel.stats}
+        onStatChange={handleStatChange}
+        species={species}
+        caste={casteOrRoleData}
+        skills={characterModel.skills}
+      />
+    );
+  };
 
   const renderStep8 = () => (
     <SkillSelector

@@ -8,6 +8,7 @@ import {
   MIN_STAT_VALUE,
   MAX_STAT_VALUE
 } from '@/lib/gorData';
+import type { SpeciesData, CasteData, TribalRole, CharacterSkill } from '@/lib/gor/types';
 import {
   GoreanHeading,
   GoreanButton,
@@ -17,10 +18,20 @@ import {
 interface StatAllocatorProps {
   stats: GoreanCharacterModel['stats'];
   onStatChange: (stat: keyof GoreanCharacterModel['stats'], delta: number) => void;
+  species?: SpeciesData;
+  caste?: CasteData | TribalRole;
+  skills?: CharacterSkill[];
   className?: string;
 }
 
-export function StatAllocator({ stats, onStatChange, className = '' }: StatAllocatorProps) {
+export function StatAllocator({
+  stats,
+  onStatChange,
+  species,
+  caste,
+  skills,
+  className = ''
+}: StatAllocatorProps) {
   const { strength, agility, intellect, perception, charisma, pool } = stats;
 
   const statsList = [
@@ -61,7 +72,11 @@ export function StatAllocator({ stats, onStatChange, className = '' }: StatAlloc
     }
   ];
 
-  const healthMax = calculateHealthMax(strength);
+  // Calculate HP using species-based formula if species is available, otherwise use simple fallback
+  const healthMax = species
+    ? calculateHealthMax(strength, species, caste, skills)
+    : strength * 5; // Fallback if species not yet selected
+
   const pointsSpent = DEFAULT_STAT_POINTS - pool;
 
   const getModifierDisplay = (value: number): string => {
@@ -117,7 +132,9 @@ export function StatAllocator({ stats, onStatChange, className = '' }: StatAlloc
               Maximum Health Points
             </p>
             <p className="text-xs" style={{ color: GoreanColors.stone }}>
-              Strength × 5
+              {species
+                ? `Base: ${species.hpBase} + Strength: ${strength} × ${species.hpStrengthMult}${caste?.hpBonus ? ` + Caste: +${caste.hpBonus}%` : ''}`
+                : 'Based on species + strength + caste + skills'}
             </p>
           </div>
           <div className="flex items-center gap-2">
