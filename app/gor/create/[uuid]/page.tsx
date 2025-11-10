@@ -573,6 +573,28 @@ export default function GoreanCharacterCreation() {
     }
   };
 
+  // Navigation Buttons Component (reusable for top and bottom)
+  const NavigationButtons = ({ className = '' }: { className?: string }) => (
+    <div className={`flex gap-4 justify-between ${className}`}>
+      <GoreanButton
+        onClick={goBack}
+        disabled={currentStep === 1}
+        variant="secondary"
+        size="lg"
+      >
+        ← Back
+      </GoreanButton>
+      <GoreanButton
+        onClick={goNext}
+        disabled={!canGoNext()}
+        variant="primary"
+        size="lg"
+      >
+        Next →
+      </GoreanButton>
+    </div>
+  );
+
   // Loading state (including data loading)
   if (loading || !dataLoaded) {
     return (
@@ -638,32 +660,19 @@ export default function GoreanCharacterCreation() {
           </div>
         </div>
 
-        {/* Step Content */}
-        <div className="mb-8">
-          {renderCurrentStep()}
-        </div>
+        {/* Step Content with Top and Bottom Navigation */}
+        <div className="space-y-8">
+          {/* Top Navigation Buttons */}
+          {currentStep !== 9 && <NavigationButtons />}
 
-        {/* Navigation Buttons */}
-        {currentStep !== 9 && (
-          <div className="flex gap-4 justify-between">
-            <GoreanButton
-              onClick={goBack}
-              disabled={currentStep === 1}
-              variant="secondary"
-              size="lg"
-            >
-              ← Back
-            </GoreanButton>
-            <GoreanButton
-              onClick={goNext}
-              disabled={!canGoNext()}
-              variant="primary"
-              size="lg"
-            >
-              Next →
-            </GoreanButton>
+          {/* Step Content */}
+          <div>
+            {renderCurrentStep()}
           </div>
-        )}
+
+          {/* Bottom Navigation Buttons */}
+          {currentStep !== 9 && <NavigationButtons />}
+        </div>
 
         {/* Step Indicators */}
         <div className="mt-8 flex flex-wrap justify-center gap-2">
