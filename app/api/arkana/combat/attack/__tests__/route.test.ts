@@ -12,7 +12,7 @@ import {
 import { setupTestDatabase, teardownTestDatabase } from '@/__tests__/utils/test-setup';
 import { prisma } from '@/lib/prisma';
 import { generateSignature } from '@/lib/signature';
-import type { ActiveEffect, LiveStats, ArkanaStats } from '@/lib/arkana/types';
+import type { ActiveEffect, LiveStats } from '@/lib/arkana/types';
 import { recalculateLiveStats } from '@/lib/arkana/effectsUtils';
 
 describe('/api/arkana/combat/attack', () => {
@@ -68,14 +68,14 @@ describe('/api/arkana/combat/attack', () => {
       const { loadAllData } = await import('@/lib/arkana/dataLoader');
       await loadAllData();
 
-      // Create a temporary ArkanaStats object for calculation
+      // Create a temporary stats object for calculation
       const tempStats = {
         physical: arkanaStatsData.physical,
         mental: arkanaStatsData.mental,
         dexterity: arkanaStatsData.dexterity,
         perception: arkanaStatsData.perception,
-      } as ArkanaStats;
-      calculatedLiveStats = recalculateLiveStats(tempStats, arkanaStatsData.activeEffects);
+      };
+      calculatedLiveStats = recalculateLiveStats(tempStats as never, arkanaStatsData.activeEffects);
     }
 
     await prisma.arkanaStats.create({
@@ -90,11 +90,11 @@ describe('/api/arkana/combat/attack', () => {
         dexterity: arkanaStatsData.dexterity,
         mental: arkanaStatsData.mental,
         perception: arkanaStatsData.perception,
-        maxHP: arkanaStatsData.hitPoints,
+        maxHP: arkanaStatsData.maxHP,
         commonPowers: arkanaStatsData.commonPowers || [],
         archetypePowers: arkanaStatsData.archetypePowers || [],
-        activeEffects: (arkanaStatsData.activeEffects || []) as unknown as typeof prisma.$Prisma.JsonNull,
-        liveStats: (calculatedLiveStats || {}) as unknown as typeof prisma.$Prisma.JsonNull
+        activeEffects: (arkanaStatsData.activeEffects || []) as unknown as object,
+        liveStats: (calculatedLiveStats || {}) as unknown as object
       }
     });
 
@@ -1870,6 +1870,227 @@ describe('/api/arkana/combat/attack', () => {
         if (data.data.isHit === 'true') {
           expect(data.data.damage).toBe(7); // 1 + 6 = 7
           expect(data.data.target.healthAfter).toBe(93);
+        }
+      });
+    });
+
+    describe('Weapon Type Tests (Hand-to-hand vs Weapon)', () => {
+      it('should deal base damage 1 for hand-to-hand attack (backward compatible - no weapon_type)', async () => {
+        const attacker = await createArkanaTestUser({
+          characterName: 'Brawler',
+          race: 'human',
+          archetype: 'Fighter',
+          physical: 2, // Modifier: 0 → Damage: 1 + 0 = 1
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10
+        });
+
+        const target = await createArkanaTestUser({
+          characterName: 'Target',
+          race: 'human',
+          archetype: 'Mage',
+          physical: 2,
+          dexterity: 0,
+          mental: 5,
+          perception: 3,
+          maxHP: 10
+        });
+
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        // Old-style request without weapon_type (backward compatibility)
+        const attackData = {
+          attacker_uuid: attacker.slUuid,
+          target_uuid: target.slUuid,
+          attack_type: 'physical',
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+        const response = await POST(request);
+        const data = await parseJsonResponse(response);
+
+        expectSuccess(data);
+        if (data.data.isHit === 'true') {
+          expect(data.data.damage).toBe(1); // base 1 + modifier 0 = 1
+          expect(data.data.target.healthAfter).toBe(99);
+        }
+      });
+
+      it('should deal base damage 1 for hand-to-hand attack (with weapon_type="hand_to_hand")', async () => {
+        const attacker = await createArkanaTestUser({
+          characterName: 'Martial Artist',
+          race: 'human',
+          archetype: 'Fighter',
+          physical: 3, // Modifier: +2 → Damage: 1 + 2 = 3
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10
+        });
+
+        const target = await createArkanaTestUser({
+          characterName: 'Target',
+          race: 'human',
+          archetype: 'Mage',
+          physical: 2,
+          dexterity: 0,
+          mental: 5,
+          perception: 3,
+          maxHP: 10
+        });
+
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        const attackData = {
+          attacker_uuid: attacker.slUuid,
+          target_uuid: target.slUuid,
+          attack_type: 'physical',
+          weapon_type: 'hand_to_hand',
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+        const response = await POST(request);
+        const data = await parseJsonResponse(response);
+
+        expectSuccess(data);
+        if (data.data.isHit === 'true') {
+          expect(data.data.damage).toBe(3); // base 1 + modifier 2 = 3
+          expect(data.data.target.healthAfter).toBe(97);
+        }
+      });
+
+      it('should deal base damage 2 for weapon attack (with weapon_type="weapon")', async () => {
+        const attacker = await createArkanaTestUser({
+          characterName: 'Swordsman',
+          race: 'human',
+          archetype: 'Fighter',
+          physical: 3, // Modifier: +2 → Damage: 2 + 2 = 4
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10
+        });
+
+        const target = await createArkanaTestUser({
+          characterName: 'Target',
+          race: 'human',
+          archetype: 'Mage',
+          physical: 2,
+          dexterity: 0,
+          mental: 5,
+          perception: 3,
+          maxHP: 10
+        });
+
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        const attackData = {
+          attacker_uuid: attacker.slUuid,
+          target_uuid: target.slUuid,
+          attack_type: 'physical',
+          weapon_type: 'weapon',
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const request = createMockPostRequest('/api/arkana/combat/attack', attackData);
+        const response = await POST(request);
+        const data = await parseJsonResponse(response);
+
+        expectSuccess(data);
+        if (data.data.isHit === 'true') {
+          expect(data.data.damage).toBe(4); // base 2 + modifier 2 = 4
+          expect(data.data.target.healthAfter).toBe(96);
+        }
+      });
+
+      it('should deal higher damage with weapon than hand-to-hand (same stats)', async () => {
+        const attacker = await createArkanaTestUser({
+          characterName: 'Warrior',
+          race: 'human',
+          archetype: 'Fighter',
+          physical: 4, // Modifier: +4
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10
+        });
+
+        const target1 = await createArkanaTestUser({
+          characterName: 'Target 1',
+          race: 'human',
+          archetype: 'Mage',
+          physical: 2,
+          dexterity: 0,
+          mental: 5,
+          perception: 3,
+          maxHP: 10
+        });
+
+        const target2 = await createArkanaTestUser({
+          characterName: 'Target 2',
+          race: 'human',
+          archetype: 'Mage',
+          physical: 2,
+          dexterity: 0,
+          mental: 5,
+          perception: 3,
+          maxHP: 10
+        });
+
+        const timestamp = new Date().toISOString();
+        const signature = generateSignature(timestamp, 'arkana');
+
+        // Hand-to-hand attack
+        const handToHandData = {
+          attacker_uuid: attacker.slUuid,
+          target_uuid: target1.slUuid,
+          attack_type: 'physical',
+          weapon_type: 'hand_to_hand',
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const handRequest = createMockPostRequest('/api/arkana/combat/attack', handToHandData);
+        const handResponse = await POST(handRequest);
+        const handData = await parseJsonResponse(handResponse);
+
+        // Weapon attack
+        const weaponData = {
+          attacker_uuid: attacker.slUuid,
+          target_uuid: target2.slUuid,
+          attack_type: 'physical',
+          weapon_type: 'weapon',
+          universe: 'arkana',
+          timestamp: timestamp,
+          signature: signature
+        };
+
+        const weaponRequest = createMockPostRequest('/api/arkana/combat/attack', weaponData);
+        const weaponResponse = await POST(weaponRequest);
+        const weaponDataResult = await parseJsonResponse(weaponResponse);
+
+        expectSuccess(handData);
+        expectSuccess(weaponDataResult);
+
+        // Both should hit (or miss) based on same dice roll
+        if (handData.data.isHit === 'true' && weaponDataResult.data.isHit === 'true') {
+          expect(handData.data.damage).toBe(5); // base 1 + modifier 4 = 5
+          expect(weaponDataResult.data.damage).toBe(6); // base 2 + modifier 4 = 6
+          expect(weaponDataResult.data.damage).toBe(handData.data.damage + 1); // weapon deals 1 more damage
         }
       });
     });

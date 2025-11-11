@@ -645,6 +645,7 @@ export const arkanaCombatAttackSchema = Joi.object({
   attacker_uuid: uuidSchema,
   target_uuid: uuidSchema,
   attack_type: Joi.string().valid('physical', 'ranged').required(),
+  weapon_type: Joi.string().valid('hand_to_hand', 'weapon').optional().default('hand_to_hand'),
   universe: Joi.string().valid('arkana').required(),
   timestamp: timestampSchema,
   signature: signatureSchema

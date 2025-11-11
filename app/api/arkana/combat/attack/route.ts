@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { attacker_uuid, target_uuid, attack_type, universe, timestamp, signature } = value;
+    const { attacker_uuid, target_uuid, attack_type, weapon_type, universe, timestamp, signature } = value;
 
     // Validate signature for Arkana universe
     const signatureValidation = validateSignature(timestamp, signature, universe);
@@ -140,11 +140,14 @@ export async function POST(request: NextRequest) {
     let damageReduction = 0;
 
     if (isHit) {
-      // Calculate damage based on attack type: 1 + attacker's effective stat modifier (includes buffs/debuffs)
+      // Determine base damage: hand-to-hand = 1, weapon = 2
+      const baseDamage = weapon_type === 'weapon' ? 2 : 1;
+
+      // Calculate damage based on attack type: baseDamage + attacker's effective stat modifier (includes buffs/debuffs)
       if (attack_type === 'physical') {
-        damage = 1 + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'physical');
+        damage = baseDamage + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'physical');
       } else if (attack_type === 'ranged') {
-        damage = 1 + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'dexterity');
+        damage = baseDamage + getEffectiveStatModifier(attacker.arkanaStats, attackerLiveStats, 'dexterity');
       }
       // Ensure minimum 1 damage on successful hit
       damage = Math.max(1, damage);
