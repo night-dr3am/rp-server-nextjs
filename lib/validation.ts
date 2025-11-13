@@ -537,12 +537,13 @@ export const goreanCharacterCreateSchema = Joi.object({
   perception: Joi.number().integer().min(1).max(5).required(),
   charisma: Joi.number().integer().min(1).max(5).required(),
 
-  // Skills System
+  // Skills System (15 core skills, 5 levels each, linear cost: 1 point per level)
   skills: Joi.array().items(
     Joi.object({
       skill_id: Joi.string().required(),
       skill_name: Joi.string().required(),
-      level: Joi.number().integer().min(0).max(5).required()
+      level: Joi.number().integer().min(0).max(5).required(),
+      xp: Joi.number().integer().min(0).default(0)  // XP progress towards next level
     })
   ).default([]),
   skillsAllocatedPoints: Joi.number().integer().min(0).max(20).default(5),
@@ -562,12 +563,12 @@ export const goreanCharacterCreateSchema = Joi.object({
     return helpers.message({ custom: `Stats must use exactly 10 points (each stat 1-5, total allocation = 10 + 5 base = 15). Currently using ${pointsUsed} points.` });
   }
 
-  // Validate skills point spending
+  // Validate skills point spending (linear costs: 1 point per level)
   if (value.skills && value.skills.length > 0) {
     let skillPointsSpent = 0;
     for (const skill of value.skills) {
-      // Each skill level costs cumulative points: Level 1=1pt, Level 2=3pts, Level 3=6pts, Level 4=10pts, Level 5=15pts
-      const levelCost = (skill.level * (skill.level + 1)) / 2;
+      // Linear cost: Level 1=1pt, Level 2=2pts, Level 3=3pts, Level 4=4pts, Level 5=5pts
+      const levelCost = skill.level;
       skillPointsSpent += levelCost;
     }
 

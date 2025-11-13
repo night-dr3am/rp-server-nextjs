@@ -541,13 +541,19 @@ export default function GoreanCharacterCreation() {
     );
   };
 
-  const renderStep8 = () => (
-    <SkillSelector
-      skills={characterModel.skills}
-      allocatedPoints={characterModel.skillsAllocatedPoints}
-      onSkillsChange={handleSkillsChange}
-    />
-  );
+  const renderStep8 = () => {
+    // Get species data for skill filtering
+    const speciesData = characterModel.species ? getSpeciesById(characterModel.species) : undefined;
+
+    return (
+      <SkillSelector
+        skills={characterModel.skills}
+        allocatedPoints={characterModel.skillsAllocatedPoints}
+        species={speciesData}
+        onSkillsChange={handleSkillsChange}
+      />
+    );
+  };
 
   const renderStep9 = () => (
     <CharacterReview

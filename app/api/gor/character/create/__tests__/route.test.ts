@@ -95,11 +95,11 @@ describe('POST /api/gor/character/create', () => {
       perception: 3,
       charisma: 3, // Total: 15 = 5 base + 10 points
       skills: [
-        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3 },
-        { skill_id: 'tarn_riding', skill_name: 'Tarn Riding', level: 2 }
+        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2, xp: 0 },
+        { skill_id: 'archery', skill_name: 'Archery', level: 2, xp: 0 }
       ],
-      skillsAllocatedPoints: 9, // Level 3 = 6 points, Level 2 = 3 points
-      skillsSpentPoints: 9,
+      skillsAllocatedPoints: 5, // Linear costs: Level 2 = 2 points each, total 4 points
+      skillsSpentPoints: 4,
       token: '',
       universe: 'gor',
       ...overrides
@@ -120,7 +120,7 @@ describe('POST /api/gor/character/create', () => {
     expect(data.data.goreanStats.culture).toBe('southern_cities');
     expect(data.data.goreanStats.strength).toBe(4);
     expect(data.data.goreanStats.charisma).toBe(3);
-    expect(data.data.goreanStats.healthMax).toBe(101); // 50 (human base) + 40 (str 4*10) + 9 (warrior 10%) + 2 (tarn riding lvl 2)
+    expect(data.data.goreanStats.healthMax).toBe(101); // 50 (human base) + 40 (str 4*10) + 9 (warrior 10%) + 2 (swordplay lvl 2)
     expect(data.data.goreanStats.skills).toHaveLength(2);
     expect(data.data.goreanStats.registrationCompleted).toBe(true);
     expect(data.data.user.uuid).toBe(user.slUuid);
@@ -141,7 +141,7 @@ describe('POST /api/gor/character/create', () => {
   });
 
   it('should calculate healthMax correctly from strength', async () => {
-    // Human warrior with Tarn Riding level 2: 50 base + (str*10) + 10% warrior bonus + 2 skill HP
+    // Human warrior with Swordplay level 2: 50 base + (str*10) + 10% warrior bonus + 2 skill HP
     const testCases = [
       { strength: 1, expectedHealth: 68 },  // 50 + 10 + 6 (10%) + 2 = 68
       { strength: 2, expectedHealth: 79 },  // 50 + 20 + 7 (10%) + 2 = 79
@@ -222,15 +222,15 @@ describe('POST /api/gor/character/create', () => {
   it('should validate skills point spending', async () => {
     const { token } = await createUserWithToken();
 
-    // Invalid: Level 3 = 6 points, Level 2 = 3 points, total = 9, but says 5
+    // Invalid: Level 3 = 3 points, Level 2 = 2 points, total = 5, but says 3
     const invalidData = createGoreanCharacterPayload({
       token,
       skills: [
-        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3 },
-        { skill_id: 'archery', skill_name: 'Archery', level: 2 }
+        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3, xp: 0 },
+        { skill_id: 'archery', skill_name: 'Archery', level: 2, xp: 0 }
       ],
       skillsAllocatedPoints: 5,
-      skillsSpentPoints: 5 // Should be 9!
+      skillsSpentPoints: 3 // Should be 5!
     });
 
     const request = createMockPostRequest('/api/gor/character/create', invalidData);
@@ -242,18 +242,18 @@ describe('POST /api/gor/character/create', () => {
     expect(data.error).toContain('Skill points');
   });
 
-  it('should accept correct triangular skill costs', async () => {
+  it('should accept correct linear skill costs', async () => {
     const { token } = await createUserWithToken();
 
-    // Valid: Level 2 = 3 points, Level 1 = 1 point, total = 4
+    // Valid: Level 2 = 2 points, Level 1 = 1 point, total = 3
     const validData = createGoreanCharacterPayload({
       token,
       skills: [
-        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2 },
-        { skill_id: 'tracking', skill_name: 'Tracking', level: 1 }
+        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2, xp: 0 },
+        { skill_id: 'hunting', skill_name: 'Hunting', level: 1, xp: 0 }
       ],
       skillsAllocatedPoints: 5,
-      skillsSpentPoints: 4
+      skillsSpentPoints: 3
     });
 
     const request = createMockPostRequest('/api/gor/character/create', validData);
@@ -426,11 +426,11 @@ describe('POST /api/gor/character/create', () => {
       perception: 4,
       charisma: 1,
       skills: [
-        { skill_id: 'scent_tracking', skill_name: 'Scent Tracking', level: 3 },
-        { skill_id: 'pack_tactics', skill_name: 'Pack Tactics', level: 2 }
+        { skill_id: 'hunting', skill_name: 'Hunting', level: 2, xp: 0 },
+        { skill_id: 'stealth', skill_name: 'Stealth', level: 2, xp: 0 }
       ],
-      skillsAllocatedPoints: 9,
-      skillsSpentPoints: 9 // Level 3 = 6 points, Level 2 = 3 points
+      skillsAllocatedPoints: 5,
+      skillsSpentPoints: 4 // Linear costs: Level 2 = 2 points each, total 4
     });
 
     const request = createMockPostRequest('/api/gor/character/create', animalCharacter);
@@ -536,7 +536,7 @@ describe('POST /api/gor/character/create', () => {
     // Update with lower strength
     const characterData = createGoreanCharacterPayload({
       token,
-      strength: 3, // New healthMax = 90 (50 + 30 + 8 warrior bonus + 2 tarn riding)
+      strength: 3, // New healthMax = 90 (50 + 30 + 8 warrior bonus + 2 swordplay)
       agility: 3,
       intellect: 3,
       perception: 3,
@@ -550,5 +550,110 @@ describe('POST /api/gor/character/create', () => {
     expectSuccess(data);
     expect(data.data.goreanStats.healthMax).toBe(90); // New max (50 + 30 + 8 + 2)
     expect(data.data.goreanStats.healthCurrent).toBe(25); // Preserved from old character (updating doesn't heal)
+  });
+
+  it('should reject skill level exceeding maxInitialLevel', async () => {
+    const { token } = await createUserWithToken();
+
+    // Lockpicking is a specialized skill with maxInitialLevel: 1
+    const invalidData = createGoreanCharacterPayload({
+      token,
+      skills: [
+        { skill_id: 'lockpicking', skill_name: 'Lockpicking', level: 2, xp: 0 } // Exceeds max!
+      ],
+      skillsAllocatedPoints: 5,
+      skillsSpentPoints: 2
+    });
+
+    const request = createMockPostRequest('/api/gor/character/create', invalidData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data);
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('Lockpicking');
+    expect(data.error).toContain('exceeds maximum initial level');
+  });
+
+  it('should accept skill at maxInitialLevel limit', async () => {
+    const { token } = await createUserWithToken();
+
+    // Lockpicking maxInitialLevel: 1, Blacksmithing maxInitialLevel: 1
+    const validData = createGoreanCharacterPayload({
+      token,
+      skills: [
+        { skill_id: 'lockpicking', skill_name: 'Lockpicking', level: 1, xp: 0 },
+        { skill_id: 'blacksmithing', skill_name: 'Blacksmithing', level: 1, xp: 0 },
+        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2, xp: 0 } // Regular skill at level 2
+      ],
+      skillsAllocatedPoints: 5,
+      skillsSpentPoints: 4 // 1 + 1 + 2 = 4
+    });
+
+    const request = createMockPostRequest('/api/gor/character/create', validData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.goreanStats.skills).toHaveLength(3);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'lockpicking')?.level).toBe(1);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'blacksmithing')?.level).toBe(1);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'swordplay')?.level).toBe(2);
+  });
+
+  it('should reject sapient-only skill for non-sapient species', async () => {
+    const { token } = await createUserWithToken();
+
+    // Larl is a feline species, not sapient
+    const invalidData = createGoreanCharacterPayload({
+      token,
+      species: 'larl',
+      speciesCategory: 'feline',
+      skills: [
+        { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2, xp: 0 } // Sapient-only skill
+      ],
+      skillsAllocatedPoints: 5,
+      skillsSpentPoints: 2
+    });
+
+    const request = createMockPostRequest('/api/gor/character/create', invalidData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data, 'Skill "Swordplay" is not available for Larl (feline species)');
+    expect(response.status).toBe(400);
+  });
+
+  it('should accept universal skills for non-sapient species', async () => {
+    const { token } = await createUserWithToken();
+
+    // Larl is a feline species
+    const validData = createGoreanCharacterPayload({
+      token,
+      species: 'larl',
+      speciesCategory: 'feline',
+      culture: 'wild',
+      cultureType: 'animal',
+      status: 'wild',
+      skills: [
+        { skill_id: 'unarmed_combat', skill_name: 'Unarmed Combat', level: 2, xp: 0 }, // Universal skill
+        { skill_id: 'hunting', skill_name: 'Hunting', level: 2, xp: 0 }, // Universal skill
+        { skill_id: 'stealth', skill_name: 'Stealth', level: 1, xp: 0 } // Universal skill
+      ],
+      skillsAllocatedPoints: 5,
+      skillsSpentPoints: 5 // 2 + 2 + 1 = 5
+    });
+
+    const request = createMockPostRequest('/api/gor/character/create', validData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.goreanStats.species).toBe('larl');
+    expect(data.data.goreanStats.speciesCategory).toBe('feline');
+    expect(data.data.goreanStats.skills).toHaveLength(3);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'unarmed_combat')?.level).toBe(2);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'hunting')?.level).toBe(2);
+    expect(data.data.goreanStats.skills.find((s: { skill_id: string }) => s.skill_id === 'stealth')?.level).toBe(1);
   });
 });

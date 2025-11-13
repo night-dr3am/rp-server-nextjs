@@ -202,7 +202,7 @@ export interface RegionData {
 // SKILLS TYPES
 // ============================================================================
 
-export type SkillType = 'combat' | 'survival' | 'mental' | 'social' | 'special';
+export type SkillType = 'combat' | 'subterfuge' | 'social' | 'survival' | 'crafting' | 'mental';
 
 export interface SkillData {
   id: string;
@@ -211,9 +211,12 @@ export interface SkillData {
   type: SkillType;
   baseStat: string;
   maxLevel: number;
+  maxInitialLevel: number;  // Maximum level allowed at character creation
+  xpCost: number[];
+  hpBonus?: number;  // HP bonus per level (0, 1, or 2)
+  applicableSpecies?: string[];  // Species categories that can learn this skill (e.g., ["sapient"] or ["sapient", "feline", ...])
   applicableTo?: string[];
   restrictedTo?: string[];
-  xpCost: number[];
   notes?: string;
 }
 
@@ -225,6 +228,7 @@ export interface CharacterSkill {
   skill_id: string;
   skill_name: string;
   level: number;
+  xp: number;  // Current XP progress towards next level
 }
 
 export interface GoreanCharacterModel {
@@ -342,12 +346,9 @@ export function calculateHealthMax(
   // Skill bonuses: certain skills grant +1 or +2 HP per level
   if (skills) {
     const hpSkills: Record<string, number> = {
-      'unarmed_combat': 2,
-      'survival_arctic': 2,
-      'survival_desert': 2,
-      'survival_jungle': 2,
-      'tarn_riding': 1,
-      'kaiila_riding': 1
+      'unarmed_combat': 2,  // Combat skill - significant HP bonus
+      'swordplay': 1,        // Combat skill - moderate HP bonus
+      'hunting': 1           // Survival skill - moderate HP bonus
     };
 
     skills.forEach(skill => {

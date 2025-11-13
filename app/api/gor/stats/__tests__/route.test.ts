@@ -72,8 +72,8 @@ describe('GET /api/gor/stats', () => {
             copperCoin: 100,
             xp: 50,
             skills: [
-              { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3 },
-              { skill_id: 'tarn_riding', skill_name: 'Tarn Riding', level: 2 }
+              { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3, xp: 0 },
+              { skill_id: 'archery', skill_name: 'Archery', level: 2, xp: 0 }
             ],
             skillsAllocatedPoints: 5,
             skillsSpentPoints: 5,
@@ -329,8 +329,8 @@ describe('GET /api/gor/stats', () => {
             hungerCurrent: 90,
             thirstCurrent: 95,
             skills: [
-              { skill_id: 'scent_tracking', skill_name: 'Scent Tracking', level: 4 },
-              { skill_id: 'pack_tactics', skill_name: 'Pack Tactics', level: 3 }
+              { skill_id: 'hunting', skill_name: 'Hunting', level: 2, xp: 0 },
+              { skill_id: 'stealth', skill_name: 'Stealth', level: 2, xp: 0 }
             ],
             registrationCompleted: true
           }

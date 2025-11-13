@@ -23,6 +23,49 @@ export async function POST(request: NextRequest) {
 
     const { token, universe, ...characterData } = value;
 
+    // Validate skill maxInitialLevel constraints
+    if (characterData.skills && Array.isArray(characterData.skills)) {
+      const { getSkillById } = await import('@/lib/gorData');
+      for (const skill of characterData.skills) {
+        const skillData = getSkillById(skill.skill_id);
+        if (skillData && skill.level > skillData.maxInitialLevel) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Skill "${skill.skill_name}" level ${skill.level} exceeds maximum initial level ${skillData.maxInitialLevel}`
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // Load species data early for skill validation
+    const species = getSpeciesById(characterData.species);
+    if (!species) {
+      return NextResponse.json(
+        { success: false, error: `Invalid species: ${characterData.species}` },
+        { status: 400 }
+      );
+    }
+
+    // Validate skills are applicable to species
+    if (characterData.skills && Array.isArray(characterData.skills)) {
+      const { getSkillById } = await import('@/lib/gorData');
+      for (const skill of characterData.skills) {
+        const skillData = getSkillById(skill.skill_id);
+        if (skillData && skillData.applicableSpecies && !skillData.applicableSpecies.includes(species.category)) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Skill "${skill.skill_name}" is not available for ${species.name} (${species.category} species)`
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Validate JWT token
     const tokenValidation = await validateProfileToken(token);
     if (!tokenValidation.valid) {
@@ -43,15 +86,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Load species and culture data for HP calculation
-    const species = getSpeciesById(characterData.species);
-    if (!species) {
-      return NextResponse.json(
-        { success: false, error: `Invalid species: ${characterData.species}` },
-        { status: 400 }
-      );
-    }
-
+    // Load culture data for HP calculation (species already loaded earlier for validation)
     const culture = getCultureById(characterData.culture);
 
     // Load caste or tribal role data for HP calculation

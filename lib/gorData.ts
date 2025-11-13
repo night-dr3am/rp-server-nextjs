@@ -520,13 +520,13 @@ export function getSkillByName(name: string): SkillData | undefined {
 }
 
 /**
- * Calculate triangular cost for skill level
- * Level 1 = 1 point, Level 2 = 3 points, Level 3 = 6 points, etc.
- * Formula: (level * (level + 1)) / 2
+ * Calculate linear cost for skill level at character creation
+ * Level 1 = 1 point, Level 2 = 2 points, Level 3 = 3 points, etc.
+ * Formula: level (1:1 point-to-level ratio)
  */
 export function calculateSkillCost(level: number): number {
   if (level <= 0) return 0;
-  return (level * (level + 1)) / 2;
+  return level;  // Linear cost: 1 point per level
 }
 
 /**
@@ -544,19 +544,41 @@ export function calculateTotalSkillPoints(skillsList: CharacterSkill[]): number 
 export function getSkillTypeDisplayName(type: string): string {
   const names: Record<string, string> = {
     combat: 'Combat',
-    survival: 'Survival',
-    mental: 'Mental',
+    subterfuge: 'Subterfuge',
     social: 'Social',
-    special: 'Special'
+    survival: 'Survival',
+    crafting: 'Crafting',
+    mental: 'Mental'
   };
   return names[type] || type;
+}
+
+/**
+ * Get maximum initial level allowed for a skill at character creation
+ */
+export function getSkillMaxInitialLevel(skillId: string): number {
+  const skill = getSkillById(skillId);
+  return skill?.maxInitialLevel ?? 2;  // Default to 2 if not found
 }
 
 /**
  * Get skill types for display
  */
 export function getSkillTypes(): string[] {
-  return ['combat', 'survival', 'mental', 'social', 'special'];
+  return ['combat', 'subterfuge', 'social', 'survival', 'crafting', 'mental'];
+}
+
+/**
+ * Filter skills by species category
+ * Returns only skills that the specified species category can learn
+ *
+ * @param speciesCategory - Species category (e.g., "sapient", "feline", etc.)
+ * @returns Array of skills applicable to the species
+ */
+export function getSkillsForSpecies(speciesCategory: string): SkillData[] {
+  return getAllSkills().filter(skill =>
+    skill.applicableSpecies?.includes(speciesCategory) ?? true  // If no restriction, allow all species
+  );
 }
 
 // ============================================================================
@@ -600,6 +622,17 @@ export function validateSkillPoints(
 
   if (spentPoints > allocatedPoints) {
     return { valid: false, error: `Skill points spent (${spentPoints}) exceeds allocated (${allocatedPoints})` };
+  }
+
+  // Validate each skill respects its maxInitialLevel
+  for (const skill of skillsList) {
+    const maxLevel = getSkillMaxInitialLevel(skill.skill_id);
+    if (skill.level > maxLevel) {
+      return {
+        valid: false,
+        error: `Skill "${skill.skill_name}" level ${skill.level} exceeds maximum initial level ${maxLevel}`
+      };
+    }
   }
 
   return { valid: true };
