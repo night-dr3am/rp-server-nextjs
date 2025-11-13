@@ -1,0 +1,119 @@
+[
+  {
+    "id": "tactical_command",
+    "orderNumber": 1,
+    "name": "Tactical Command",
+    "desc": "Shout encouraging commands that make your allies stronger and more confident in battle. Your words boost their fighting spirit and physical power.",
+    "category": "social",
+    "cost": 2,
+    "range": 10,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_strength_area_3", "buff_all_stats_area_1"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    },
+    "notes": "Classic leadership ability fitting Gorean military culture. Warriors and commanders can rally their troops in battle.",
+    "bookReferences": ["Tarnsman of Gor - Military command structure"]
+  },
+  {
+    "id": "combat_expertise",
+    "orderNumber": 2,
+    "name": "Combat Expertise",
+    "desc": "Focus your mind and body to fight better. You become much stronger and faster for a short time.",
+    "category": "combat",
+    "cost": 2,
+    "range": 0,
+    "targetType": "self",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_strength_5", "buff_agility_5"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 2
+      }
+    },
+    "notes": "Core warrior ability. Represents focused combat training and battle experience. Requires concentration check.",
+    "bookReferences": ["Tarnsman of Gor - Warrior caste training"]
+  },
+  {
+    "id": "battle_cry",
+    "orderNumber": 3,
+    "name": "Battle Cry",
+    "desc": "Shout a fierce battle cry at your enemy. Your intimidating roar weakens their strength and confidence.",
+    "category": "combat",
+    "cost": 2,
+    "range": 10,
+    "targetType": "single",
+    "effects": {
+      "ability": ["check_charisma_vs_charisma", "debuff_strength_3", "debuff_all_stats_1"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    },
+    "notes": "Universal intimidation ability. A larl's roar, a tarn's screech, or a kurii's bellow - all creatures can terrify their enemies. Success depends on winning a Charisma contest.",
+    "bookReferences": ["Tarnsman of Gor - Warrior intimidation tactics"]
+  },
+  {
+    "id": "second_wind",
+    "orderNumber": 4,
+    "name": "Second Wind",
+    "desc": "Take a moment to catch your breath and recover. You regain some health as your body pushes through pain and exhaustion.",
+    "category": "survival",
+    "cost": 4,
+    "cooldown": 1800,
+    "range": 0,
+    "targetType": "self",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "heal_self_percentage_maxhp_10"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 2
+      }
+    },
+    "notes": "Universal survival ability representing natural resilience. Restores 10% of maximum health. Cooldown enforced by checking recent ability usage events (30 minutes = 1800 seconds).",
+    "bookReferences": ["Tarnsman of Gor - Warriors enduring prolonged combat and recovering between engagements", "Outlaw of Gor - Tarl's natural healing and recovery in the wilderness"]
+  },
+  {
+    "id": "capture_throw",
+    "orderNumber": 5,
+    "name": "Capture Throw",
+    "desc": "Tackle and pin your enemy to the ground. You grab them and throw them down, leaving them stunned and unable to move.",
+    "category": "special",
+    "cost": 3,
+    "cooldown": 1800,
+    "range": 0,
+    "targetType": "single",
+    "effects": {
+      "ability": ["check_strength_vs_agility", "control_stun_1", "damage_physical_2"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 3
+      }
+    },
+    "notes": "Universal capture ability. Warriors subduing enemies, slavers capturing valuable merchandise, predators pinning prey. Success requires overpowering enemy's reflexes (Strength vs Agility). Stuns for 1 turn, representing being momentarily pinned. 30-minute cooldown (1800 seconds) enforced via events table.",
+    "bookReferences": ["Hunters of Gor - Capture techniques and slave binding", "Nomads of Gor - Warriors subduing enemies for interrogation", "Beasts of Gor - Predators immobilizing prey"]
+  }
+]

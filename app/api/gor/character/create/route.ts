@@ -66,6 +66,77 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Validate abilities
+    if (characterData.abilities && Array.isArray(characterData.abilities)) {
+      const { getAbilityById, calculateAbilityCost, isAbilityAvailable } = await import('@/lib/gorData');
+
+      // Validate each ability exists and calculate total cost
+      let calculatedAbilityCost = 0;
+      for (const ability of characterData.abilities) {
+        const abilityData = getAbilityById(ability.ability_id);
+        if (!abilityData) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Invalid ability: ${ability.ability_name}`
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check if ability is available to this character
+        const availabilityCheck = isAbilityAvailable(abilityData, {
+          species: species,
+          caste: characterData.casteRole,
+          status: characterData.status,
+          skills: characterData.skills,
+          stats: {
+            strength: characterData.strength,
+            agility: characterData.agility,
+            intellect: characterData.intellect,
+            perception: characterData.perception,
+            charisma: characterData.charisma,
+            pool: 0,
+            spent: 0
+          }
+        });
+
+        if (!availabilityCheck.available) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Ability "${ability.ability_name}" is not available: ${availabilityCheck.reason}`
+            },
+            { status: 400 }
+          );
+        }
+
+        calculatedAbilityCost += calculateAbilityCost(ability.ability_id);
+      }
+
+      // Verify ability points spent matches calculation
+      if (calculatedAbilityCost !== characterData.abilitiesSpentPoints) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Ability points calculation mismatch. Expected ${calculatedAbilityCost} but got ${characterData.abilitiesSpentPoints}`
+          },
+          { status: 400 }
+        );
+      }
+
+      // Verify spent doesn't exceed allocated
+      if (characterData.abilitiesSpentPoints > characterData.abilitiesAllocatedPoints) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Cannot spend more ability points (${characterData.abilitiesSpentPoints}) than allocated (${characterData.abilitiesAllocatedPoints})`
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Validate JWT token
     const tokenValidation = await validateProfileToken(token);
     if (!tokenValidation.valid) {
@@ -173,6 +244,11 @@ export async function POST(request: NextRequest) {
       skills: characterData.skills || [],
       skillsAllocatedPoints: characterData.skillsAllocatedPoints || 5,
       skillsSpentPoints: characterData.skillsSpentPoints || 0,
+
+      // Abilities
+      abilities: characterData.abilities || [],
+      abilitiesAllocatedPoints: characterData.abilitiesAllocatedPoints || 7,
+      abilitiesSpentPoints: characterData.abilitiesSpentPoints || 0,
 
       // Registration flag
       registrationCompleted: isCompleteCharacter
@@ -285,6 +361,7 @@ export async function POST(request: NextRequest) {
           copperCoin: result.copperCoin,
           xp: result.xp,
           skills: result.skills,
+          abilities: result.abilities,
           registrationCompleted: result.registrationCompleted,
           createdAt: result.createdAt
         },

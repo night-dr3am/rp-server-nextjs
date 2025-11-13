@@ -1,0 +1,409 @@
+[
+  {
+    "id": "check_strength_vs_strength",
+    "orderNumber": 1,
+    "category": "check",
+    "checkStat": "Strength",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Strength"
+  },
+  {
+    "id": "check_strength_vs_agility",
+    "orderNumber": 2,
+    "category": "check",
+    "checkStat": "Strength",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Agility"
+  },
+  {
+    "id": "check_agility_vs_agility",
+    "orderNumber": 3,
+    "category": "check",
+    "checkStat": "Agility",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Agility"
+  },
+  {
+    "id": "check_agility_vs_perception",
+    "orderNumber": 4,
+    "category": "check",
+    "checkStat": "Agility",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Perception"
+  },
+  {
+    "id": "check_intellect_vs_intellect",
+    "orderNumber": 5,
+    "category": "check",
+    "checkStat": "Intellect",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Intellect"
+  },
+  {
+    "id": "check_perception_vs_perception",
+    "orderNumber": 6,
+    "category": "check",
+    "checkStat": "Perception",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Perception"
+  },
+  {
+    "id": "check_charisma_vs_charisma",
+    "orderNumber": 7,
+    "category": "check",
+    "checkStat": "Charisma",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Charisma"
+  },
+  {
+    "id": "check_charisma_vs_intellect",
+    "orderNumber": 8,
+    "category": "check",
+    "checkStat": "Charisma",
+    "checkVs": "enemy_stat",
+    "checkVsStat": "Intellect"
+  },
+  {
+    "id": "damage_physical_2",
+    "orderNumber": 9,
+    "category": "damage",
+    "damageType": "physical",
+    "damageFormula": "2",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_physical_3",
+    "orderNumber": 10,
+    "category": "damage",
+    "damageType": "physical",
+    "damageFormula": "3",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_physical_5",
+    "orderNumber": 11,
+    "category": "damage",
+    "damageType": "physical",
+    "damageFormula": "5",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_physical_strength",
+    "orderNumber": 12,
+    "category": "damage",
+    "damageType": "physical",
+    "damageFormula": "3 + Strength",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_mental_2",
+    "orderNumber": 13,
+    "category": "damage",
+    "damageType": "mental",
+    "damageFormula": "2",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "damage_mental_3",
+    "orderNumber": 14,
+    "category": "damage",
+    "damageType": "mental",
+    "damageFormula": "3",
+    "target": "enemy",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_self_3",
+    "orderNumber": 15,
+    "category": "heal",
+    "healFormula": "3",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_self_5",
+    "orderNumber": 16,
+    "category": "heal",
+    "healFormula": "5",
+    "target": "self",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_ally_3",
+    "orderNumber": 17,
+    "category": "heal",
+    "healFormula": "3",
+    "target": "ally",
+    "duration": "immediate"
+  },
+  {
+    "id": "heal_area_2",
+    "orderNumber": 18,
+    "category": "heal",
+    "healFormula": "2",
+    "target": "all_allies",
+    "duration": "immediate"
+  },
+  {
+    "id": "buff_strength_1",
+    "orderNumber": 19,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_strength_2",
+    "orderNumber": 20,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_strength_area_2",
+    "orderNumber": 21,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "all_allies",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_agility_1",
+    "orderNumber": 22,
+    "category": "stat_modifier",
+    "stat": "Agility",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_agility_2",
+    "orderNumber": 23,
+    "category": "stat_modifier",
+    "stat": "Agility",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_intellect_1",
+    "orderNumber": 24,
+    "category": "stat_modifier",
+    "stat": "Intellect",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_intellect_2",
+    "orderNumber": 25,
+    "category": "stat_modifier",
+    "stat": "Intellect",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_perception_1",
+    "orderNumber": 26,
+    "category": "stat_modifier",
+    "stat": "Perception",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_perception_2",
+    "orderNumber": 27,
+    "category": "stat_modifier",
+    "stat": "Perception",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_charisma_1",
+    "orderNumber": 28,
+    "category": "stat_modifier",
+    "stat": "Charisma",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_charisma_2",
+    "orderNumber": 29,
+    "category": "stat_modifier",
+    "stat": "Charisma",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_strength_2",
+    "orderNumber": 30,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_agility_2",
+    "orderNumber": 31,
+    "category": "stat_modifier",
+    "stat": "Agility",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_intellect_2",
+    "orderNumber": 32,
+    "category": "stat_modifier",
+    "stat": "Intellect",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_perception_2",
+    "orderNumber": 33,
+    "category": "stat_modifier",
+    "stat": "Perception",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_all_stats_1",
+    "orderNumber": 34,
+    "category": "stat_modifier",
+    "stat": "all",
+    "modifier": -1,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "control_stun_1",
+    "orderNumber": 35,
+    "category": "control",
+    "controlType": "stun",
+    "target": "enemy",
+    "duration": "turns:1"
+  },
+  {
+    "id": "control_stun_2",
+    "orderNumber": 36,
+    "category": "control",
+    "controlType": "stun",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "control_fear",
+    "orderNumber": 37,
+    "category": "control",
+    "controlType": "fear",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "control_daze",
+    "orderNumber": 38,
+    "category": "control",
+    "controlType": "daze",
+    "target": "enemy",
+    "duration": "turns:2"
+  },
+  {
+    "id": "check_d20_vs_tn10",
+    "orderNumber": 39,
+    "category": "check",
+    "checkVs": "tn",
+    "targetNumber": 10
+  },
+  {
+    "id": "buff_strength_area_3",
+    "orderNumber": 40,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 3,
+    "modifierType": "roll_bonus",
+    "target": "all_allies_and_self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_all_stats_area_1",
+    "orderNumber": 41,
+    "category": "stat_modifier",
+    "stat": "all",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "all_allies_and_self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_strength_5",
+    "orderNumber": 42,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 5,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_agility_5",
+    "orderNumber": 43,
+    "category": "stat_modifier",
+    "stat": "Agility",
+    "modifier": 5,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_strength_3",
+    "orderNumber": 44,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": -3,
+    "modifierType": "roll_bonus",
+    "target": "enemy",
+    "duration": "turns:3"
+  },
+  {
+    "id": "heal_self_percentage_maxhp_10",
+    "orderNumber": 45,
+    "category": "heal",
+    "healFormula": "maxHP * 0.1",
+    "target": "self",
+    "duration": "immediate"
+  }
+]

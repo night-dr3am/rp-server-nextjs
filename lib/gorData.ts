@@ -9,8 +9,10 @@ import {
   TribalRole,
   RegionData,
   SkillData,
+  AbilityData,
   GoreanCharacterModel,
   CharacterSkill,
+  CharacterAbility,
   SpeciesCategory,
   CultureType,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,8 +31,10 @@ export {
   type TribalRole,
   type RegionData,
   type SkillData,
+  type AbilityData,
   type GoreanCharacterModel,
   type CharacterSkill,
+  type CharacterAbility,
   type SpeciesCategory,
   type CultureType,
   calculateGoreanStatModifier,
@@ -40,6 +44,7 @@ export {
 // Constants
 export const DEFAULT_STAT_POINTS = 10;
 export const DEFAULT_SKILL_POINTS = 5;
+export const DEFAULT_ABILITY_POINTS = 7;
 export const MIN_STAT_VALUE = 1;
 export const MAX_STAT_VALUE = 5;
 export const BASE_STAT_TOTAL = 5; // All stats start at 1
@@ -52,6 +57,7 @@ let castes: CasteData[] = [];
 let tribalRoles: Record<string, TribalRole[]> = {};
 let regions: RegionData[] = [];
 let skills: SkillData[] = [];
+let abilities: AbilityData[] = [];
 
 // Track if data has been loaded
 let dataLoaded = false;
@@ -82,7 +88,8 @@ export async function loadAllGoreanData(): Promise<void> {
       castesData,
       tribalRolesData,
       regionsData,
-      skillsData
+      skillsData,
+      abilitiesData
     ] = await Promise.all([
       import('./gor/species.json').then(m => m.default),
       import('./gor/cultures.json').then(m => m.default),
@@ -90,7 +97,8 @@ export async function loadAllGoreanData(): Promise<void> {
       import('./gor/castes.json').then(m => m.default),
       import('./gor/tribal_roles.json').then(m => m.default),
       import('./gor/regions.json').then(m => m.default),
-      import('./gor/skills.json').then(m => m.default)
+      import('./gor/skills.json').then(m => m.default),
+      import('./gor/abilities.json').then(m => m.default)
     ]);
 
     species = speciesData as Record<SpeciesCategory, SpeciesData[]>;
@@ -100,6 +108,7 @@ export async function loadAllGoreanData(): Promise<void> {
     tribalRoles = tribalRolesData as Record<string, TribalRole[]>;
     regions = regionsData as RegionData[];
     skills = skillsData as SkillData[];
+    abilities = abilitiesData as AbilityData[];
 
     dataLoaded = true;
   } catch (error) {
@@ -604,6 +613,156 @@ export function getSkillsForSpecies(speciesCategory: string): SkillData[] {
 }
 
 // ============================================================================
+// ABILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get all abilities
+ */
+export function getAllAbilities(): AbilityData[] {
+  return abilities;
+}
+
+/**
+ * Get abilities by category
+ */
+export function getAbilitiesByCategory(category: string): AbilityData[] {
+  // Return empty array if data not loaded yet
+  if (!dataLoaded || !abilities || abilities.length === 0) {
+    return [];
+  }
+  return abilities.filter(a => a && a.category === category);
+}
+
+/**
+ * Find ability by ID
+ */
+export function getAbilityById(id: string): AbilityData | undefined {
+  return abilities.find(a => a.id === id);
+}
+
+/**
+ * Get ability categories for display
+ */
+export function getAbilityCategories(): string[] {
+  return ['combat', 'social', 'survival', 'mental', 'special'];
+}
+
+/**
+ * Get ability category display name
+ */
+export function getAbilityCategoryDisplayName(category: string): string {
+  const names: Record<string, string> = {
+    combat: 'Combat',
+    social: 'Social',
+    survival: 'Survival',
+    mental: 'Mental',
+    special: 'Special'
+  };
+  return names[category] || category;
+}
+
+/**
+ * Calculate ability cost (abilities have fixed costs)
+ */
+export function calculateAbilityCost(abilityId: string): number {
+  const ability = getAbilityById(abilityId);
+  return ability?.cost || 0;
+}
+
+/**
+ * Calculate total ability points spent from abilities array
+ */
+export function calculateTotalAbilityPoints(abilitiesList: CharacterAbility[]): number {
+  return abilitiesList.reduce((total, ability) => {
+    return total + calculateAbilityCost(ability.ability_id);
+  }, 0);
+}
+
+/**
+ * Check if ability is available to character based on requirements
+ * Checks species, caste, status, skill levels, and stat minimums
+ */
+export function isAbilityAvailable(
+  ability: AbilityData,
+  character: {
+    species?: SpeciesData;
+    caste?: string;
+    status?: string;
+    skills?: CharacterSkill[];
+    stats?: GoreanCharacterModel['stats'];
+  }
+): { available: boolean; reason?: string } {
+  if (!ability.requirements) {
+    return { available: true };
+  }
+
+  const req = ability.requirements;
+
+  // Check species requirement
+  if (req.species && req.species.length > 0 && character.species) {
+    const speciesMatch = req.species.some(s =>
+      lc(s) === lc(character.species!.id) ||
+      lc(s) === lc(character.species!.category)
+    );
+    if (!speciesMatch) {
+      return { available: false, reason: 'Species requirement not met' };
+    }
+  }
+
+  // Check caste requirement
+  if (req.caste && req.caste.length > 0 && character.caste) {
+    const casteMatch = req.caste.some(c => lc(c) === lc(character.caste!));
+    if (!casteMatch) {
+      return { available: false, reason: 'Caste requirement not met' };
+    }
+  }
+
+  // Check status requirement
+  if (req.status && req.status.length > 0 && character.status) {
+    const statusMatch = req.status.some(s => lc(s) === lc(character.status!));
+    if (!statusMatch) {
+      return { available: false, reason: 'Status requirement not met' };
+    }
+  }
+
+  // Check skill requirement
+  if (req.skill && character.skills) {
+    const charSkill = character.skills.find(s => lc(s.skill_id) === lc(req.skill!.id));
+    if (!charSkill || charSkill.level < req.skill.level) {
+      return { available: false, reason: `Requires ${req.skill.id} level ${req.skill.level}` };
+    }
+  }
+
+  // Check stat minimum requirement
+  if (req.minStat && character.stats) {
+    const statName = req.minStat.stat.toLowerCase() as keyof typeof character.stats;
+    const statValue = character.stats[statName] as number;
+    if (typeof statValue === 'number' && statValue < req.minStat.value) {
+      return { available: false, reason: `Requires ${req.minStat.stat} ${req.minStat.value}+` };
+    }
+  }
+
+  return { available: true };
+}
+
+/**
+ * Get abilities available to character based on all requirements
+ */
+export function getAvailableAbilities(character: {
+  species?: SpeciesData;
+  caste?: string;
+  status?: string;
+  skills?: CharacterSkill[];
+  stats?: GoreanCharacterModel['stats'];
+}): AbilityData[] {
+  return getAllAbilities().filter(ability => {
+    const check = isAbilityAvailable(ability, character);
+    return check.available;
+  });
+}
+
+// ============================================================================
 // CHARACTER VALIDATION FUNCTIONS
 // ============================================================================
 
@@ -661,6 +820,34 @@ export function validateSkillPoints(
 }
 
 /**
+ * Validate ability point allocation
+ * Returns { valid: boolean, error?: string }
+ */
+export function validateAbilityPoints(
+  abilitiesList: CharacterAbility[],
+  allocatedPoints: number
+): { valid: boolean; error?: string } {
+  const spentPoints = calculateTotalAbilityPoints(abilitiesList);
+
+  if (spentPoints > allocatedPoints) {
+    return { valid: false, error: `Ability points spent (${spentPoints}) exceeds allocated (${allocatedPoints})` };
+  }
+
+  // Validate each ability exists
+  for (const ability of abilitiesList) {
+    const abilityData = getAbilityById(ability.ability_id);
+    if (!abilityData) {
+      return {
+        valid: false,
+        error: `Unknown ability: "${ability.ability_name}"`
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
  * Validate complete character model
  * Returns { valid: boolean, errors: string[] }
  */
@@ -702,6 +889,12 @@ export function validateCharacterModel(model: GoreanCharacterModel): { valid: bo
     errors.push(skillValidation.error || 'Invalid skill allocation');
   }
 
+  // Ability validation
+  const abilityValidation = validateAbilityPoints(model.abilities, model.abilitiesAllocatedPoints);
+  if (!abilityValidation.valid) {
+    errors.push(abilityValidation.error || 'Invalid ability allocation');
+  }
+
   return {
     valid: errors.length === 0,
     errors
@@ -735,7 +928,10 @@ export function createInitialCharacterModel(): GoreanCharacterModel {
     },
     skills: [],
     skillsAllocatedPoints: DEFAULT_SKILL_POINTS,
-    skillsSpentPoints: 0
+    skillsSpentPoints: 0,
+    abilities: [],
+    abilitiesAllocatedPoints: DEFAULT_ABILITY_POINTS,
+    abilitiesSpentPoints: 0
   };
 }
 

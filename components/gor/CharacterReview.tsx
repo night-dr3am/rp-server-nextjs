@@ -10,7 +10,9 @@ import {
   getRegionById,
   calculateGoreanStatModifier,
   calculateHealthMax,
-  calculateTotalSkillPoints
+  calculateTotalSkillPoints,
+  calculateTotalAbilityPoints,
+  calculateAbilityCost
 } from '@/lib/gorData';
 import {
   GoreanHeading,
@@ -74,6 +76,7 @@ export function CharacterReview({
     : characterModel.stats.strength * 5; // Fallback to old formula if species not found
 
   const skillPointsSpent = calculateTotalSkillPoints(characterModel.skills);
+  const abilityPointsSpent = calculateTotalAbilityPoints(characterModel.abilities);
 
   const getStatDisplay = (statName: string, value: number) => {
     const modifier = calculateGoreanStatModifier(value);
@@ -381,6 +384,44 @@ export function CharacterReview({
                   <span className="text-sm" style={{ color: GoreanColors.stone }}>Points Spent:</span>
                   <span className="font-semibold" style={{ color: GoreanColors.charcoal }}>
                     {skillPointsSpent} / {characterModel.skillsAllocatedPoints}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <GoreanDivider ornament />
+
+        {/* Abilities Section */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <GoreanHeading level={3}>Abilities</GoreanHeading>
+            <GoreanButton onClick={() => onEdit(9)} size="sm" variant="secondary">
+              Edit
+            </GoreanButton>
+          </div>
+          {characterModel.abilities.length === 0 ? (
+            <p className="text-sm italic" style={{ color: GoreanColors.stone }}>
+              No abilities selected
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {characterModel.abilities.map(ability => (
+                <div key={ability.ability_id} className="flex items-center justify-between">
+                  <span className="font-semibold" style={{ color: GoreanColors.charcoal }}>
+                    {ability.ability_name}
+                  </span>
+                  <GoreanBadge size="sm" color={GoreanColors.bloodRed}>
+                    {calculateAbilityCost(ability.ability_id)} pts
+                  </GoreanBadge>
+                </div>
+              ))}
+              <div className="mt-3 pt-3 border-t" style={{ borderColor: GoreanColors.stoneLight }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: GoreanColors.stone }}>Points Spent:</span>
+                  <span className="font-semibold" style={{ color: GoreanColors.charcoal }}>
+                    {abilityPointsSpent} / {characterModel.abilitiesAllocatedPoints}
                   </span>
                 </div>
               </div>

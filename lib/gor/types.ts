@@ -278,6 +278,11 @@ export interface GoreanCharacterModel {
   skills: CharacterSkill[];
   skillsAllocatedPoints: number;
   skillsSpentPoints: number;
+
+  // Step 10: Abilities
+  abilities: CharacterAbility[];
+  abilitiesAllocatedPoints: number;
+  abilitiesSpentPoints: number;
 }
 
 // ============================================================================
@@ -479,6 +484,121 @@ export interface GoreanCharacterResponse {
   success: boolean;
   data?: GoreanStatsDB;
   error?: string;
+}
+
+// ============================================================================
+// ABILITIES AND EFFECTS TYPES
+// ============================================================================
+
+export type EffectCategory = 'check' | 'damage' | 'heal' | 'stat_modifier' | 'control';
+export type DamageType = 'physical' | 'mental';
+export type ControlType = 'stun' | 'fear' | 'daze' | 'charm' | 'sleep';
+export type EffectTarget = 'self' | 'enemy' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'all_enemies_and_self' | 'all_allies_and_self';
+export type EffectDuration = 'immediate' | 'scene' | `turns:${number}`;
+export type ModifierType = 'roll_bonus';  // Simplified: only linear stacking for Gor
+
+export interface EffectData {
+  id: string;
+  orderNumber: number;  // Sequential position in effects.json (starting from 1)
+  category: EffectCategory;
+
+  // Check effect fields
+  checkStat?: string;
+  checkVs?: 'enemy_stat' | 'tn';
+  checkVsStat?: string;
+  targetNumber?: number;
+
+  // Damage effect fields
+  damageType?: DamageType;
+  damageFormula?: string;  // e.g., "3 + Strength" or "5"
+
+  // Heal effect fields
+  healFormula?: string;  // e.g., "3" or "2 + Intellect"
+
+  // Stat modifier fields
+  stat?: string;  // Stat name or "all" for all stats
+  modifier?: number;  // Positive for buffs, negative for debuffs
+  modifierType?: ModifierType;  // How modifier is applied
+
+  // Control effect fields
+  controlType?: ControlType;
+
+  // Common fields
+  target?: EffectTarget;
+  duration?: EffectDuration;
+  description?: string;
+}
+
+export interface AbilityRequirements {
+  species?: string[];  // Species IDs or categories (e.g., ["sapient"] or ["kurii", "larl"])
+  caste?: string[];    // Caste IDs (e.g., ["warrior", "assassin"])
+  status?: string[];   // Status IDs (e.g., ["freeMan", "freeWoman"])
+  skill?: {            // Required skill and minimum level
+    id: string;
+    level: number;
+  };
+  minStat?: {          // Minimum stat requirement
+    stat: string;
+    value: number;
+  };
+}
+
+export interface AbilityData {
+  id: string;
+  orderNumber: number;  // Sequential position in abilities.json (starting from 1)
+  name: string;
+  desc: string;
+  category: 'combat' | 'social' | 'survival' | 'mental' | 'special';
+  cost: number;        // Ability points cost
+  cooldown?: number;   // Cooldown in seconds (enforced via events table timestamp checking)
+  range?: number;      // Range in meters (0 = melee)
+  targetType?: 'single' | 'area' | 'self';  // Type of targeting (ability level)
+
+  // Effect references (matching Arkana structure)
+  effects: {
+    attack?: string[];   // Effect IDs for attack usage
+    ability?: string[];  // Effect IDs for ability usage
+    passive?: string[];  // Effect IDs that are always active (if any)
+  };
+
+  // Ability type classification
+  abilityType: ('attack' | 'ability')[];  // e.g., ["attack"], ["ability"], or ["attack", "ability"]
+
+  // Requirements and restrictions
+  requirements?: AbilityRequirements;
+
+  // Metadata
+  notes?: string;
+  bookReferences?: string[];
+}
+
+// Character's learned abilities (for database storage)
+export interface CharacterAbility {
+  ability_id: string;
+  ability_name: string;
+  learned_at?: Date;    // When ability was learned (optional tracking)
+  uses?: number;        // Number of times used (optional tracking)
+}
+
+// Active effect instance (stored in activeEffects array)
+export interface ActiveEffect {
+  effectId: string;
+  name: string;
+  category: EffectCategory;
+  sourceAbilityId?: string;
+  sourceAbilityName?: string;
+  turnsRemaining?: number;  // For turn-based effects
+  sceneEffect?: boolean;    // For scene-long effects
+  appliedBy?: string;       // User ID who applied the effect
+  appliedTo?: string;       // User ID who has the effect
+
+  // Effect data (copied from EffectData for runtime access)
+  stat?: string;
+  modifier?: number;
+  modifierType?: ModifierType;
+  controlType?: ControlType;
+  target?: EffectTarget;
+  duration?: EffectDuration;
 }
 
 // ============================================================================

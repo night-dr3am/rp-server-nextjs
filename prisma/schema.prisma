@@ -332,6 +332,11 @@ model GoreanStats {
   skillsAllocatedPoints Int       @default(5) @map("skills_allocated_points")
   skillsSpentPoints     Int       @default(0) @map("skills_spent_points")
 
+  // Abilities System (starting abilities with fixed costs)
+  abilities             Json?     @default("[]")  // Array of {ability_id, ability_name, learned_at?, uses?}
+  abilitiesAllocatedPoints Int    @default(7) @map("abilities_allocated_points")
+  abilitiesSpentPoints  Int       @default(0) @map("abilities_spent_points")
+
   // Active Effects System (same as Arkana for consistency)
   activeEffects         Json?     @default("[]") @map("active_effects")  // Array of ActiveEffect objects
   liveStats             Json?     @default("{}") @map("live_stats")      // Dynamic stat calculations

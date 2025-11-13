@@ -549,6 +549,18 @@ export const goreanCharacterCreateSchema = Joi.object({
   skillsAllocatedPoints: Joi.number().integer().min(0).max(20).default(5),
   skillsSpentPoints: Joi.number().integer().min(0).max(20).default(0),
 
+  // Abilities System (starting abilities with fixed costs: 2-4 points each)
+  abilities: Joi.array().items(
+    Joi.object({
+      ability_id: Joi.string().required(),
+      ability_name: Joi.string().required(),
+      learned_at: Joi.date().optional(),
+      uses: Joi.number().integer().min(0).optional().default(0)
+    })
+  ).default([]),
+  abilitiesAllocatedPoints: Joi.number().integer().min(0).max(15).default(7),
+  abilitiesSpentPoints: Joi.number().integer().min(0).max(15).default(0),
+
   // JWT token for authentication
   token: Joi.string().required(),
   universe: Joi.string().valid('gor').required()
@@ -581,8 +593,17 @@ export const goreanCharacterCreateSchema = Joi.object({
     }
   }
 
+  // Validate ability point spending (abilities have fixed costs that will be verified by API)
+  if (value.abilities && value.abilities.length > 0) {
+    // Basic validation: ensure spent doesn't exceed allocated
+    // Detailed cost verification happens in API route with abilities.json loaded
+    if (value.abilitiesSpentPoints > value.abilitiesAllocatedPoints) {
+      return helpers.message({ custom: `Cannot spend more ability points (${value.abilitiesSpentPoints}) than allocated (${value.abilitiesAllocatedPoints})` });
+    }
+  }
+
   return value;
-}, 'Gorean stat and skill point validation');
+}, 'Gorean stat, skill, and ability point validation');
 
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({

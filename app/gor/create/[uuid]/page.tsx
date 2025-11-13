@@ -14,6 +14,7 @@ import {
   RegionData,
   createInitialCharacterModel,
   calculateStatPointsSpent,
+  calculateTotalAbilityPoints,
   DEFAULT_STAT_POINTS,
   MIN_STAT_VALUE,
   MAX_STAT_VALUE,
@@ -37,6 +38,7 @@ import { StatusSelector } from '@/components/gor/StatusSelector';
 import { CasteSelector } from '@/components/gor/CasteSelector';
 import { StatAllocator } from '@/components/gor/StatAllocator';
 import { SkillSelector } from '@/components/gor/SkillSelector';
+import { AbilitySelector } from '@/components/gor/AbilitySelector';
 import { CharacterReview } from '@/components/gor/CharacterReview';
 
 export default function GoreanCharacterCreation() {
@@ -216,6 +218,16 @@ export default function GoreanCharacterCreation() {
     }));
   };
 
+  const handleAbilitiesChange = (abilities: GoreanCharacterModel['abilities']) => {
+    const spentPoints = calculateTotalAbilityPoints(abilities);
+
+    setCharacterModel(prev => ({
+      ...prev,
+      abilities,
+      abilitiesSpentPoints: spentPoints
+    }));
+  };
+
   // Step validation
   const canGoNext = (): boolean => {
     switch (currentStep) {
@@ -235,7 +247,9 @@ export default function GoreanCharacterCreation() {
         return characterModel.stats.pool === 0;
       case 8: // Skills (optional)
         return true;
-      case 9: // Review
+      case 9: // Abilities (optional)
+        return true;
+      case 10: // Review
         return true;
       default:
         return true;
@@ -243,7 +257,7 @@ export default function GoreanCharacterCreation() {
   };
 
   const goNext = () => {
-    if (canGoNext() && currentStep < 9) {
+    if (canGoNext() && currentStep < 10) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -257,7 +271,7 @@ export default function GoreanCharacterCreation() {
   };
 
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= 9) {
+    if (step >= 1 && step <= 10) {
       setCurrentStep(step);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -555,7 +569,28 @@ export default function GoreanCharacterCreation() {
     );
   };
 
-  const renderStep9 = () => (
+  const renderStep9 = () => {
+    // Get character context for ability filtering
+    const speciesData = characterModel.species ? getSpeciesById(characterModel.species) : undefined;
+    const cultureData = characterModel.culture ? getCultureById(characterModel.culture) : undefined;
+
+    return (
+      <AbilitySelector
+        abilities={characterModel.abilities}
+        allocatedPoints={characterModel.abilitiesAllocatedPoints}
+        character={{
+          species: speciesData,
+          caste: characterModel.casteRole,
+          status: characterModel.status,
+          skills: characterModel.skills,
+          stats: characterModel.stats
+        }}
+        onAbilitiesChange={handleAbilitiesChange}
+      />
+    );
+  };
+
+  const renderStep10 = () => (
     <CharacterReview
       characterModel={characterModel}
       onEdit={goToStep}
@@ -575,6 +610,7 @@ export default function GoreanCharacterCreation() {
       case 7: return renderStep7();
       case 8: return renderStep8();
       case 9: return renderStep9();
+      case 10: return renderStep10();
       default: return renderStep1();
     }
   };
@@ -649,17 +685,17 @@ export default function GoreanCharacterCreation() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold" style={{ color: GoreanColors.charcoal }}>
-              Step {currentStep} of 9
+              Step {currentStep} of 10
             </span>
             <span className="text-sm" style={{ color: GoreanColors.stone }}>
-              {Math.round((currentStep / 9) * 100)}% Complete
+              {Math.round((currentStep / 10) * 100)}% Complete
             </span>
           </div>
           <div className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: GoreanColors.parchmentDark }}>
             <div
               className="h-full transition-all duration-300"
               style={{
-                width: `${(currentStep / 9) * 100}%`,
+                width: `${(currentStep / 10) * 100}%`,
                 backgroundColor: GoreanColors.bronze
               }}
             />
@@ -669,7 +705,7 @@ export default function GoreanCharacterCreation() {
         {/* Step Content with Top and Bottom Navigation */}
         <div className="space-y-8">
           {/* Top Navigation Buttons */}
-          {currentStep !== 9 && <NavigationButtons />}
+          {currentStep !== 10 && <NavigationButtons />}
 
           {/* Step Content */}
           <div>
@@ -677,7 +713,7 @@ export default function GoreanCharacterCreation() {
           </div>
 
           {/* Bottom Navigation Buttons */}
-          {currentStep !== 9 && <NavigationButtons />}
+          {currentStep !== 10 && <NavigationButtons />}
         </div>
 
         {/* Step Indicators */}
@@ -691,6 +727,7 @@ export default function GoreanCharacterCreation() {
             'Region',
             'Stats',
             'Skills',
+            'Abilities',
             'Review'
           ].map((stepName, index) => {
             const stepNumber = index + 1;
