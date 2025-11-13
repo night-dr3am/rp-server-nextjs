@@ -261,7 +261,7 @@
         "No sapient interference",
         "Subject to hunting by sapients"
       ],
-      "applicableSpecies": ["all_animals"],
+      "applicableSpecies": ["feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
       "popularityRating": 4
     },
     {

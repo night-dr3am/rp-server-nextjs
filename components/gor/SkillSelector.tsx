@@ -6,7 +6,6 @@ import {
   getSkillsByType,
   getSkillTypes,
   getSkillTypeDisplayName,
-  getSkillMaxInitialLevel,
   calculateSkillCost,
   calculateTotalSkillPoints
 } from '@/lib/gorData';

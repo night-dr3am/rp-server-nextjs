@@ -376,7 +376,7 @@
         "Survival-focused existence"
       ],
       "hasCastes": false,
-      "applicableSpecies": ["all_animals"],
+      "applicableSpecies": ["feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
       "roles": ["predator", "prey", "scavenger"],
       "popularityRating": 4,
       "bookReferences": ["All books reference wild animals"]

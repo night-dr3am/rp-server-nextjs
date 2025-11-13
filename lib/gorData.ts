@@ -209,6 +209,10 @@ export function getCulturesForSpecies(speciesId: string): CultureData[] {
 
   if (!speciesId) return cultures;
 
+  // Get species data to access its category for category-based matching
+  const speciesData = getSpeciesById(speciesId);
+  const speciesCategory = speciesData?.category;
+
   return cultures.filter(culture => {
     // Safety check for culture object
     if (!culture) return false;
@@ -217,8 +221,15 @@ export function getCulturesForSpecies(speciesId: string): CultureData[] {
     if (!culture.applicableSpecies || culture.applicableSpecies.length === 0) {
       return true;
     }
-    // Check if species is in the applicable list
-    return culture.applicableSpecies.some(s => lc(s) === lc(speciesId) || s === '*');
+    // Check if applicableSpecies contains either:
+    // 1. The exact species ID (e.g., "sleen", "larl")
+    // 2. The species category (e.g., "feline", "canine_like")
+    // 3. Wildcard "*"
+    return culture.applicableSpecies.some(s =>
+      lc(s) === lc(speciesId) ||
+      (speciesCategory && lc(s) === lc(speciesCategory)) ||
+      s === '*'
+    );
   });
 }
 
@@ -266,6 +277,10 @@ export function getStatusesForSpecies(speciesId: string): StatusData[] {
 
   if (!speciesId) return statuses;
 
+  // Get species data to access its category for category-based matching
+  const speciesData = getSpeciesById(speciesId);
+  const speciesCategory = speciesData?.category;
+
   return statuses.filter(status => {
     // Safety check for status object
     if (!status) return false;
@@ -274,8 +289,15 @@ export function getStatusesForSpecies(speciesId: string): StatusData[] {
     if (!status.applicableSpecies || status.applicableSpecies.length === 0) {
       return true;
     }
-    // Check if species is in the applicable list
-    return status.applicableSpecies.some(s => lc(s) === lc(speciesId) || s === '*');
+    // Check if applicableSpecies contains either:
+    // 1. The exact species ID (e.g., "sleen", "larl")
+    // 2. The species category (e.g., "feline", "canine_like")
+    // 3. Wildcard "*"
+    return status.applicableSpecies.some(s =>
+      lc(s) === lc(speciesId) ||
+      (speciesCategory && lc(s) === lc(speciesCategory)) ||
+      s === '*'
+    );
   });
 }
 
