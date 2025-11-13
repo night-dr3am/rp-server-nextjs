@@ -19,7 +19,7 @@ export interface SpeciesData {
   playabilityNotes: string;
   mechanicalNotes: string;
   rarity: Rarity;
-  popularityRating: number;
+  rarityRating: number; // 1=very rare (standout/diverse), 2=rare (uncommon), 3=common (standard)
   size: Size;
   hpBase: number;
   hpStrengthMult: number;
@@ -96,7 +96,7 @@ export interface CultureData {
   tribes?: string[];
   roles?: string[];
   gender?: string;
-  popularityRating: number;
+  rarityRating: number; // 1=very rare (standout/diverse), 2=rare (uncommon), 3=common (standard)
   bookReferences: string[];
 }
 
@@ -136,7 +136,7 @@ export interface StatusData {
   characteristics?: string[];
   purposes?: string[];
   examples?: string[];
-  popularityRating?: number;
+  rarityRating?: number; // 1=very rare (standout/diverse), 2=rare (uncommon), 3=common (standard)
 }
 
 // ============================================================================
@@ -163,7 +163,7 @@ export interface CasteData {
   notes?: string;
   applicableSpecies: string[];
   applicableStatuses?: string[]; // Which statuses can access this caste (e.g., ["freeMan", "freeWoman"])
-  popularityRating?: number;
+  rarityRating?: number; // 1=very rare (standout/diverse), 2=rare (uncommon), 3=common (standard)
   bookReferences?: string[];
   parentCaste?: string;
 }

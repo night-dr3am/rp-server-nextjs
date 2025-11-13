@@ -152,13 +152,13 @@ export function StatusSelector({
                     )}
                   </div>
 
-                  {/* Popularity */}
-                  {status.popularityRating && (
+                  {/* Rarity */}
+                  {status.rarityRating && (
                     <div className="flex items-center gap-2">
                       <span className="text-xs" style={{ color: GoreanColors.stone }}>
-                        Popularity:
+                        Rarity:
                       </span>
-                      <PopularityStars rating={status.popularityRating} />
+                      <PopularityStars rating={status.rarityRating} />
                     </div>
                   )}
                 </div>

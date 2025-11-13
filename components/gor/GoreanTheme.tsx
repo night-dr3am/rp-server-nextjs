@@ -365,32 +365,37 @@ export function getRarityDisplayName(rarity: string): string {
 }
 
 // ============================================================================
-// POPULARITY RATING DISPLAY
+// RARITY RATING DISPLAY (1=Very Rare, 2=Rare, 3=Common)
 // ============================================================================
 
-interface PopularityStarsProps {
-  rating: number;
-  maxRating?: number;
+interface RarityIndicatorProps {
+  rating: number; // 1=very rare (standout), 2=rare (uncommon), 3=common (standard)
   className?: string;
 }
 
-export function PopularityStars({ rating, maxRating = 5, className = '' }: PopularityStarsProps) {
-  const stars = [];
+export function RarityIndicator({ rating, className = '' }: RarityIndicatorProps) {
+  const rarityData = {
+    1: { label: 'Very Rare', color: GoreanColors.gold, icon: '◆◆◆' },
+    2: { label: 'Rare', color: GoreanColors.bronze, icon: '◆◆' },
+    3: { label: 'Common', color: GoreanColors.stone, icon: '◆' }
+  };
 
-  for (let i = 1; i <= maxRating; i++) {
-    stars.push(
-      <span
-        key={i}
-        style={{ color: i <= rating ? GoreanColors.gold : GoreanColors.stoneLight }}
-        className="text-lg"
-      >
-        ★
+  const data = rarityData[rating as keyof typeof rarityData] || rarityData[3];
+
+  return (
+    <div className={`inline-flex items-center gap-1 ${className}`}>
+      <span style={{ color: data.color }} className="text-sm font-semibold">
+        {data.icon}
       </span>
-    );
-  }
-
-  return <div className={`inline-flex ${className}`}>{stars}</div>;
+      <span style={{ color: data.color }} className="text-xs font-medium">
+        {data.label}
+      </span>
+    </div>
+  );
 }
+
+// Keep PopularityStars as an alias for backward compatibility (deprecated)
+export const PopularityStars = RarityIndicator;
 
 // ============================================================================
 // LOADING SPINNER

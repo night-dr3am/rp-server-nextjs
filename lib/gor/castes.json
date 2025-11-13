@@ -2,464 +2,610 @@
   {
     "id": "initiates",
     "type": "high",
-      "name": "Initiates",
-      "color": "White",
-      "rank": 1,
-      "description": "The highest caste, priests who claim to speak for Priest-Kings. Wealthy and powerful, feared by Low Castes. Bound by many restrictions.",
-      "characteristics": [
-        "Claim to interpret will of Priest-Kings",
-        "Monopoly on religious matters",
-        "Wealthiest caste",
-        "Well-organized with temples throughout Gor",
-        "Most feared by Low Castes"
-      ],
-      "restrictions": [
-        "Must wear white robes",
-        "Must be bald (traditional for centuries)",
-        "Cannot eat meat or beans",
-        "Cannot carry weapons",
-        "Cannot shed blood or kill",
-        "Cannot touch women or be touched by them",
-        "Forbidden to have female slaves"
-      ],
-      "rights": [
-        "Can hire warriors/torturers",
-        "Control religious ceremonies",
-        "Access to 'secret tomes' (alleged magic)",
-        "Can call Flame Death (false claim)",
-        "Run own court system"
-      ],
-      "gender": "male",
-      "joinByBirth": false,
-      "hpBonus": 0,
-      "notes": "Membership by petition only, not birth. Elite few know truth about Priest-Kings. Most are true believers.",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan"],
-      "popularityRating": 2,
-      "bookReferences": ["Tarnsman of Gor", "Priest-Kings of Gor", "All books"]
-    },
-    {
-      "id": "scribes",
-      "type": "high",
-      "name": "Scribes",
-      "color": "Blue",
-      "rank": 2,
-      "description": "Scholars, historians, accountants, administrators. Keepers of records and knowledge. Second highest caste.",
-      "characteristics": [
-        "Literacy and scholarship",
-        "Record keeping and history",
-        "Accounting and administration",
-        "Some serve as city administrators",
-        "Access to scrolls and libraries"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Can serve as city Administrator",
-        "Access to archives and records",
-        "Respected for knowledge"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "builders",
-      "type": "high",
-      "name": "Builders",
-      "color": "Yellow",
-      "rank": 3,
-      "description": "Architects, engineers, construction workers. Responsible for cities' infrastructure, walls, buildings, bridges.",
-      "characteristics": [
-        "Architecture and engineering",
-        "Construction and repair",
-        "City planning and infrastructure",
-        "Fortification design",
-        "Bridge and road building"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Essential for city development",
-        "Respected for practical skills"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "physicians",
-      "type": "high",
-      "name": "Physicians",
-      "color": "Green",
-      "rank": 4,
-      "description": "Healers, surgeons, medical researchers. Bound by oath to heal all who ask, even enemies. Use Old Gorean for records.",
-      "characteristics": [
-        "Medical knowledge and healing",
-        "Surgery and treatment",
-        "Research and experimentation",
-        "Oath to heal all who ask",
-        "Use Old Gorean for records"
-      ],
-      "restrictions": [
-        "Must heal anyone who requests (even enemies)",
-        "Cannot refuse treatment"
-      ],
-      "rights": [
-        "Respected and needed in all cities",
-        "Protected by oath",
-        "Access to medical knowledge"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "notes": "Initiates blocked research into Dar-Kosis (Holy Disease) cure, destroying Physician research.",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 4,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "warriors",
-      "type": "high",
-      "name": "Warriors",
-      "color": "Scarlet/Red",
-      "rank": 5,
-      "description": "Soldiers, guards, tarnsmen, cavalry. Lowest of High Castes but most numerous. Governed by Warrior Codes (chivalry-like honor system).",
-      "characteristics": [
-        "Combat training and skill",
-        "Warrior Codes (honor system)",
-        "Tarnsmen (elite subcast)",
-        "City guards and soldiers",
-        "Mercenaries common"
-      ],
-      "restrictions": [
-        "Bound by Warrior Codes",
-        "Cannot use poisoned weapons",
-        "Cannot break sworn word",
-        "Must accept challenges"
-      ],
-      "rights": [
-        "Can capture slaves",
-        "Claim sword-right for slaves",
-        "Respected for martial skill"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 10,
-      "subcastes": ["Tarnsmen", "Tharlarion Cavalry", "City Guard", "Palace Guard"],
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "notes": "Free Women warriors are rare but allowed. More common in tribal cultures.",
-      "popularityRating": 5,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "assassins",
-      "type": "low",
-      "name": "Assassins",
-      "color": "Black",
-      "description": "Contract killers who must actively join (not born into). Highly skilled, live by own codes. Not technically a 'caste' but treated as one.",
-      "characteristics": [
-        "Elite contract killers",
-        "Must petition to join (not birth)",
-        "Own training and codes",
-        "Very high fees",
-        "Some honor codes (vary by individual)"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Legal killing for contracts",
-        "Respected for skill (and feared)"
-      ],
-      "gender": "male",
-      "joinByBirth": false,
-      "joinByChoice": true,
-      "hpBonus": 10,
-      "notes": "Must actively choose and be accepted into Assassin caste. Extensive training required.",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan"],
-      "popularityRating": 4,
-      "bookReferences": ["Assassin of Gor", "Beasts of Gor"]
-    },
-    {
-      "id": "merchants",
-      "type": "low",
-      "name": "Merchants",
-      "color": "White and Gold (varies)",
-      "description": "Traders, bankers, caravan masters. Wealth and influence through commerce. Organize Sardar Fairs.",
-      "characteristics": [
-        "Trade and commerce",
-        "Banking and loans",
-        "Caravan organization",
-        "Sardar Fair administration",
-        "Wealth through trade"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Can accumulate great wealth",
-        "Travel widely",
-        "Political influence through wealth"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 4,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "peasants",
-      "type": "low",
-      "name": "Peasants",
-      "color": "Brown/Gray",
-      "description": "Farmers and agricultural workers. Lowest formal caste but essential for food production. Backbone of Gorean economy.",
-      "characteristics": [
-        "Farming and agriculture",
-        "Food production",
-        "Rural life",
-        "Hard physical labor",
-        "Lowest caste but essential"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Can own land (in some cities)",
-        "Essential to society"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "rank": "lowest",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "players",
-      "type": "low",
-      "name": "Players",
-      "color": "Varies",
-      "description": "Entertainers, musicians, singers, poets. Must actively join. Women excluded from this caste.",
-      "characteristics": [
-        "Music and entertainment",
-        "Poetry and song",
-        "Performance arts",
-        "Travel to perform"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Can travel freely",
-        "Welcomed in many cities",
-        "Respected for art"
-      ],
-      "gender": "male",
-      "joinByBirth": false,
-      "joinByChoice": true,
-      "hpBonus": 0,
-      "notes": "Women cannot join Players caste",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan"],
-      "popularityRating": 2,
-      "bookReferences": ["Various books"]
-    },
-    {
-      "id": "slavers",
-      "type": "low",
-      "name": "Slavers",
-      "color": "Varies",
-      "description": "Capture, train, and trade slaves. Essential to Gorean slave economy. Some honorable, some brutal.",
-      "characteristics": [
-        "Slave capture and training",
-        "Slave markets and auctions",
-        "Expertise in slave quality",
-        "Knowledge of slave laws"
-      ],
-      "restrictions": [],
-      "rights": [
-        "Legal capture of certain people",
-        "Profit from slave trade"
-      ],
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3,
-      "bookReferences": ["All books"]
-    },
-    {
-      "id": "metal_workers",
-      "type": "low",
-      "name": "Metal Workers",
-      "description": "Smiths, weapon makers, tool crafters. Essential for weapons, tools, and metal goods.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3
-    },
-    {
-      "id": "leather_workers",
-      "type": "low",
-      "name": "Leather Workers",
-      "description": "Tanners, harness makers, saddle makers. Work with hides and leather goods.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 2
-    },
-    {
-      "id": "cloth_workers",
-      "type": "low",
-      "name": "Cloth Workers",
-      "description": "Weavers, dyers, tailors. Cloth production and clothing.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "subcastes": ["Rug Makers (consider themselves separate caste)"],
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3
-    },
-    {
-      "id": "bakers",
-      "type": "low",
-      "name": "Bakers",
-      "description": "Bread and pastry makers. Essential food production.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 2
-    },
-    {
-      "id": "perfumers",
-      "type": "low",
-      "name": "Perfumers",
-      "description": "Create perfumes, scented oils, cosmetics.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 2
-    },
-    {
-      "id": "saddle_makers",
-      "type": "low",
-      "name": "Saddle Makers",
-      "description": "Specialized leather workers focusing on tarn, tharlarion, and kaiila saddles.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 2
-    },
-    {
-      "id": "potters",
-      "type": "low",
-      "name": "Potters",
-      "description": "Create clay pots, vessels, storage containers.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 2
-    },
-    {
-      "id": "woodworkers",
-      "type": "low",
-      "name": "Woodworkers / Carpenters",
-      "description": "Work with wood for furniture, boats, tools, construction.",
-      "gender": "both",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 3
-    },
-    {
-      "id": "sailors",
-      "type": "low",
-      "name": "Sailors",
-      "description": "Crew ships on Thassa and rivers. Skilled in navigation and seamanship.",
-      "gender": "mostly_male",
-      "joinByBirth": true,
-      "hpBonus": 0,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "notes": "Predominantly male but some Free Women serve as sailors, especially in Port Kar",
-      "popularityRating": 3,
-      "bookReferences": ["Raiders of Gor", "Port Kar books"]
-    },
-    {
-      "id": "rarius",
-      "type": "low",
-      "name": "Rarius (Warriors - general term)",
-      "description": "General term for any warrior, not just Warrior Caste. Includes tribal warriors.",
-      "hpBonus": 0,
-      "notes": "Term for 'warrior' in general, not specific caste",
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 4
-    },
-    {
-      "id": "tarnsmen",
-      "type": "special",
-      "name": "Tarnsmen",
-      "parentCaste": "warriors",
-      "description": "Elite Warrior subcast who fly tarns. Highest prestige among warriors. Extensive training required.",
-      "characteristics": [
-        "Master tarn riders",
-        "Aerial combat specialists",
-        "Elite warrior status",
-        "Own tarn cots in cities",
-        "Extensive training (months/years)"
-      ],
-      "restrictions": [
-        "Must master tarn riding",
-        "Subject to Warrior Codes",
-        "Tarn may attack rider if not careful"
-      ],
-      "gender": "both",
-      "hpBonus": 10,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "popularityRating": 5,
-      "bookReferences": ["Tarnsman of Gor", "All books"]
-    },
-    {
-      "id": "pirates",
-      "type": "special",
-      "name": "Pirates",
-      "description": "Port Kar specialty. Sea raiders and ship captains. Not technically a caste but treated as such in Port Kar.",
-      "characteristics": [
-        "Ship captains and crews",
-        "Sea raiding and warfare",
-        "Port Kar based",
-        "Council of Captains governs",
-        "Wealth through plunder"
-      ],
-      "gender": "mostly_male",
-      "hpBonus": 10,
-      "applicableSpecies": ["human"],
-      "applicableStatuses": ["freeMan", "freeWoman"],
-      "notes": "Predominantly male but some female pirate captains exist in Port Kar lore",
-      "popularityRating": 3,
-      "bookReferences": ["Raiders of Gor", "Port Kar books"]
-    }
+    "name": "Initiates",
+    "color": "White",
+    "rank": 1,
+    "description": "The highest caste, priests who claim to speak for Priest-Kings. Wealthy and powerful, feared by Low Castes. Bound by many restrictions.",
+    "characteristics": [
+      "Claim to interpret will of Priest-Kings",
+      "Monopoly on religious matters",
+      "Wealthiest caste",
+      "Well-organized with temples throughout Gor",
+      "Most feared by Low Castes"
+    ],
+    "restrictions": [
+      "Must wear white robes",
+      "Must be bald (traditional for centuries)",
+      "Cannot eat meat or beans",
+      "Cannot carry weapons",
+      "Cannot shed blood or kill",
+      "Cannot touch women or be touched by them",
+      "Forbidden to have female slaves"
+    ],
+    "rights": [
+      "Can hire warriors/torturers",
+      "Control religious ceremonies",
+      "Access to 'secret tomes' (alleged magic)",
+      "Can call Flame Death (false claim)",
+      "Run own court system"
+    ],
+    "gender": "male",
+    "joinByBirth": false,
+    "hpBonus": 0,
+    "notes": "Membership by petition only, not birth. Elite few know truth about Priest-Kings. Most are true believers.",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan"
+    ],
+    "bookReferences": [
+      "Tarnsman of Gor",
+      "Priest-Kings of Gor",
+      "All books"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "scribes",
+    "type": "high",
+    "name": "Scribes",
+    "color": "Blue",
+    "rank": 2,
+    "description": "Scholars, historians, accountants, administrators. Keepers of records and knowledge. Second highest caste.",
+    "characteristics": [
+      "Literacy and scholarship",
+      "Record keeping and history",
+      "Accounting and administration",
+      "Some serve as city administrators",
+      "Access to scrolls and libraries"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Can serve as city Administrator",
+      "Access to archives and records",
+      "Respected for knowledge"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "builders",
+    "type": "high",
+    "name": "Builders",
+    "color": "Yellow",
+    "rank": 3,
+    "description": "Architects, engineers, construction workers. Responsible for cities' infrastructure, walls, buildings, bridges.",
+    "characteristics": [
+      "Architecture and engineering",
+      "Construction and repair",
+      "City planning and infrastructure",
+      "Fortification design",
+      "Bridge and road building"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Essential for city development",
+      "Respected for practical skills"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "physicians",
+    "type": "high",
+    "name": "Physicians",
+    "color": "Green",
+    "rank": 4,
+    "description": "Healers, surgeons, medical researchers. Bound by oath to heal all who ask, even enemies. Use Old Gorean for records.",
+    "characteristics": [
+      "Medical knowledge and healing",
+      "Surgery and treatment",
+      "Research and experimentation",
+      "Oath to heal all who ask",
+      "Use Old Gorean for records"
+    ],
+    "restrictions": [
+      "Must heal anyone who requests (even enemies)",
+      "Cannot refuse treatment"
+    ],
+    "rights": [
+      "Respected and needed in all cities",
+      "Protected by oath",
+      "Access to medical knowledge"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "notes": "Initiates blocked research into Dar-Kosis (Holy Disease) cure, destroying Physician research.",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "warriors",
+    "type": "high",
+    "name": "Warriors",
+    "color": "Scarlet/Red",
+    "rank": 5,
+    "description": "Soldiers, guards, tarnsmen, cavalry. Lowest of High Castes but most numerous. Governed by Warrior Codes (chivalry-like honor system).",
+    "characteristics": [
+      "Combat training and skill",
+      "Warrior Codes (honor system)",
+      "Tarnsmen (elite subcast)",
+      "City guards and soldiers",
+      "Mercenaries common"
+    ],
+    "restrictions": [
+      "Bound by Warrior Codes",
+      "Cannot use poisoned weapons",
+      "Cannot break sworn word",
+      "Must accept challenges"
+    ],
+    "rights": [
+      "Can capture slaves",
+      "Claim sword-right for slaves",
+      "Respected for martial skill"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 10,
+    "subcastes": [
+      "Tarnsmen",
+      "Tharlarion Cavalry",
+      "City Guard",
+      "Palace Guard"
+    ],
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "notes": "Free Women warriors are rare but allowed. More common in tribal cultures.",
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "assassins",
+    "type": "low",
+    "name": "Assassins",
+    "color": "Black",
+    "description": "Contract killers who must actively join (not born into). Highly skilled, live by own codes. Not technically a 'caste' but treated as one.",
+    "characteristics": [
+      "Elite contract killers",
+      "Must petition to join (not birth)",
+      "Own training and codes",
+      "Very high fees",
+      "Some honor codes (vary by individual)"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Legal killing for contracts",
+      "Respected for skill (and feared)"
+    ],
+    "gender": "male",
+    "joinByBirth": false,
+    "joinByChoice": true,
+    "hpBonus": 10,
+    "notes": "Must actively choose and be accepted into Assassin caste. Extensive training required.",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan"
+    ],
+    "bookReferences": [
+      "Assassin of Gor",
+      "Beasts of Gor"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "merchants",
+    "type": "low",
+    "name": "Merchants",
+    "color": "White and Gold (varies)",
+    "description": "Traders, bankers, caravan masters. Wealth and influence through commerce. Organize Sardar Fairs.",
+    "characteristics": [
+      "Trade and commerce",
+      "Banking and loans",
+      "Caravan organization",
+      "Sardar Fair administration",
+      "Wealth through trade"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Can accumulate great wealth",
+      "Travel widely",
+      "Political influence through wealth"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "peasants",
+    "type": "low",
+    "name": "Peasants",
+    "color": "Brown/Gray",
+    "description": "Farmers and agricultural workers. Lowest formal caste but essential for food production. Backbone of Gorean economy.",
+    "characteristics": [
+      "Farming and agriculture",
+      "Food production",
+      "Rural life",
+      "Hard physical labor",
+      "Lowest caste but essential"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Can own land (in some cities)",
+      "Essential to society"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "rank": "lowest",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "players",
+    "type": "low",
+    "name": "Players",
+    "color": "Varies",
+    "description": "Entertainers, musicians, singers, poets. Must actively join. Women excluded from this caste.",
+    "characteristics": [
+      "Music and entertainment",
+      "Poetry and song",
+      "Performance arts",
+      "Travel to perform"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Can travel freely",
+      "Welcomed in many cities",
+      "Respected for art"
+    ],
+    "gender": "male",
+    "joinByBirth": false,
+    "joinByChoice": true,
+    "hpBonus": 0,
+    "notes": "Women cannot join Players caste",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan"
+    ],
+    "bookReferences": [
+      "Various books"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "slavers",
+    "type": "low",
+    "name": "Slavers",
+    "color": "Varies",
+    "description": "Capture, train, and trade slaves. Essential to Gorean slave economy. Some honorable, some brutal.",
+    "characteristics": [
+      "Slave capture and training",
+      "Slave markets and auctions",
+      "Expertise in slave quality",
+      "Knowledge of slave laws"
+    ],
+    "restrictions": [],
+    "rights": [
+      "Legal capture of certain people",
+      "Profit from slave trade"
+    ],
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "All books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "metal_workers",
+    "type": "low",
+    "name": "Metal Workers",
+    "description": "Smiths, weapon makers, tool crafters. Essential for weapons, tools, and metal goods.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "leather_workers",
+    "type": "low",
+    "name": "Leather Workers",
+    "description": "Tanners, harness makers, saddle makers. Work with hides and leather goods.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "cloth_workers",
+    "type": "low",
+    "name": "Cloth Workers",
+    "description": "Weavers, dyers, tailors. Cloth production and clothing.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "subcastes": [
+      "Rug Makers (consider themselves separate caste)"
+    ],
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "bakers",
+    "type": "low",
+    "name": "Bakers",
+    "description": "Bread and pastry makers. Essential food production.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "perfumers",
+    "type": "low",
+    "name": "Perfumers",
+    "description": "Create perfumes, scented oils, cosmetics.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "saddle_makers",
+    "type": "low",
+    "name": "Saddle Makers",
+    "description": "Specialized leather workers focusing on tarn, tharlarion, and kaiila saddles.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "potters",
+    "type": "low",
+    "name": "Potters",
+    "description": "Create clay pots, vessels, storage containers.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "woodworkers",
+    "type": "low",
+    "name": "Woodworkers / Carpenters",
+    "description": "Work with wood for furniture, boats, tools, construction.",
+    "gender": "both",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "sailors",
+    "type": "low",
+    "name": "Sailors",
+    "description": "Crew ships on Thassa and rivers. Skilled in navigation and seamanship.",
+    "gender": "mostly_male",
+    "joinByBirth": true,
+    "hpBonus": 0,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "notes": "Predominantly male but some Free Women serve as sailors, especially in Port Kar",
+    "bookReferences": [
+      "Raiders of Gor",
+      "Port Kar books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "rarius",
+    "type": "low",
+    "name": "Rarius (Warriors - general term)",
+    "description": "General term for any warrior, not just Warrior Caste. Includes tribal warriors.",
+    "hpBonus": 0,
+    "notes": "Term for 'warrior' in general, not specific caste",
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "tarnsmen",
+    "type": "special",
+    "name": "Tarnsmen",
+    "parentCaste": "warriors",
+    "description": "Elite Warrior subcast who fly tarns. Highest prestige among warriors. Extensive training required.",
+    "characteristics": [
+      "Master tarn riders",
+      "Aerial combat specialists",
+      "Elite warrior status",
+      "Own tarn cots in cities",
+      "Extensive training (months/years)"
+    ],
+    "restrictions": [
+      "Must master tarn riding",
+      "Subject to Warrior Codes",
+      "Tarn may attack rider if not careful"
+    ],
+    "gender": "both",
+    "hpBonus": 10,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "bookReferences": [
+      "Tarnsman of Gor",
+      "All books"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "pirates",
+    "type": "special",
+    "name": "Pirates",
+    "description": "Port Kar specialty. Sea raiders and ship captains. Not technically a caste but treated as such in Port Kar.",
+    "characteristics": [
+      "Ship captains and crews",
+      "Sea raiding and warfare",
+      "Port Kar based",
+      "Council of Captains governs",
+      "Wealth through plunder"
+    ],
+    "gender": "mostly_male",
+    "hpBonus": 10,
+    "applicableSpecies": [
+      "human"
+    ],
+    "applicableStatuses": [
+      "freeMan",
+      "freeWoman"
+    ],
+    "notes": "Predominantly male but some female pirate captains exist in Port Kar lore",
+    "bookReferences": [
+      "Raiders of Gor",
+      "Port Kar books"
+    ],
+    "rarityRating": 2
+  }
 ]

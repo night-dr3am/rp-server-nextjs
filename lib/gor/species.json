@@ -9,12 +9,16 @@
       "playabilityNotes": "Default choice with maximum versatility. Can belong to any culture, caste, or status. No restrictions.",
       "mechanicalNotes": "No stat modifiers. Balanced baseline for all builds.",
       "rarity": "common",
-      "popularityRating": 5,
       "size": "medium",
       "hpBase": 50,
       "hpStrengthMult": 10,
-      "habitat": ["All regions"],
-      "bookReferences": ["All books in series"]
+      "habitat": [
+        "All regions"
+      ],
+      "bookReferences": [
+        "All books in series"
+      ],
+      "rarityRating": 3
     },
     {
       "id": "kurii",
@@ -25,13 +29,24 @@
       "playabilityNotes": "EXTREME ROLEPLAY: Hostile species at war with Priest-Kings. Best for special storylines, outcasts, or secret agent plots. Likely to face suspicion/hostility from other characters.",
       "mechanicalNotes": "+3 Strength, +1 Perception, -2 Charisma (with non-Kurii), -1 Intellect (Degenerate variant only)",
       "rarity": "very_rare",
-      "popularityRating": 2,
       "size": "large",
       "hpBase": 100,
       "hpStrengthMult": 15,
-      "habitat": ["Steel Worlds (space)", "Frozen north (Degenerate)"],
-      "variants": ["steel_world_kurii", "degenerate_kurii"],
-      "bookReferences": ["Priest-Kings of Gor", "Beasts of Gor", "Marauders of Gor", "Savages of Gor"]
+      "habitat": [
+        "Steel Worlds (space)",
+        "Frozen north (Degenerate)"
+      ],
+      "variants": [
+        "steel_world_kurii",
+        "degenerate_kurii"
+      ],
+      "bookReferences": [
+        "Priest-Kings of Gor",
+        "Beasts of Gor",
+        "Marauders of Gor",
+        "Savages of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "priestKing",
@@ -42,12 +57,18 @@
       "playabilityNotes": "EXTREME ROLEPLAY: God-like beings with extreme power level. Requires very special storyline justification. Rarely interact with surface Gor. Best for admin/special event characters only.",
       "mechanicalNotes": "+5 Intellect, +3 Perception, +2 Strength, -5 Charisma (incomprehensible to most), -3 Agility (due to size)",
       "rarity": "extremely_rare",
-      "popularityRating": 1,
       "size": "gigantic",
       "hpBase": 150,
       "hpStrengthMult": 20,
-      "habitat": ["Sardar Mountains", "The Nest"],
-      "bookReferences": ["Priest-Kings of Gor", "Nomads of Gor"]
+      "habitat": [
+        "Sardar Mountains",
+        "The Nest"
+      ],
+      "bookReferences": [
+        "Priest-Kings of Gor",
+        "Nomads of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "spiderPeople",
@@ -58,12 +79,16 @@
       "playabilityNotes": "EXTREME ROLEPLAY: Very rare with extreme appearance challenges. Minimal surface interaction documented. Best for underground/cavern storylines. Requires creative justification for surface presence.",
       "mechanicalNotes": "+2 Agility, +2 Perception, -3 Charisma (frightening appearance), -1 Strength",
       "rarity": "extremely_rare",
-      "popularityRating": 1,
       "size": "large",
       "hpBase": 60,
       "hpStrengthMult": 12,
-      "habitat": ["Underground caverns"],
-      "bookReferences": ["Explorers of Gor"]
+      "habitat": [
+        "Underground caverns"
+      ],
+      "bookReferences": [
+        "Explorers of Gor"
+      ],
+      "rarityRating": 1
     }
   ],
   "feline": [
@@ -76,13 +101,28 @@
       "playabilityNotes": "Embody the ultimate predator! Perfect for furry combat RP. Territorial, proud, deadly. Limited tool use (paws not hands), primarily primal instincts and hunting. Can be played solo or as part of pride.",
       "mechanicalNotes": "+3 Strength, +2 Perception, -2 Intellect (animal intelligence), -2 Charisma (with non-predators)",
       "rarity": "uncommon",
-      "popularityRating": 5,
       "size": "large",
       "hpBase": 70,
       "hpStrengthMult": 12,
-      "habitat": ["Voltai Mountains", "Mountain ranges", "Forests", "Plains"],
-      "variants": ["red_larl", "black_larl", "white_larl", "mountain_larl", "jungle_larl"],
-      "bookReferences": ["Tarnsman of Gor", "Outlaw of Gor", "All books"]
+      "habitat": [
+        "Voltai Mountains",
+        "Mountain ranges",
+        "Forests",
+        "Plains"
+      ],
+      "variants": [
+        "red_larl",
+        "black_larl",
+        "white_larl",
+        "mountain_larl",
+        "jungle_larl"
+      ],
+      "bookReferences": [
+        "Tarnsman of Gor",
+        "Outlaw of Gor",
+        "All books"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "panther",
@@ -93,13 +133,23 @@
       "playabilityNotes": "Stealthy forest hunter roleplay. Excellent for ambush tactics, tree-climbing, nocturnal hunting. More solitary than larls.",
       "mechanicalNotes": "+2 Agility, +2 Perception, +1 Strength, -2 Intellect, -1 Charisma",
       "rarity": "uncommon",
-      "popularityRating": 4,
       "size": "medium",
       "hpBase": 35,
       "hpStrengthMult": 7,
-      "habitat": ["Forests", "Jungles"],
-      "variants": ["forest_panther", "jungle_panther", "yellow_panther"],
-      "bookReferences": ["Hunters of Gor", "Explorers of Gor"]
+      "habitat": [
+        "Forests",
+        "Jungles"
+      ],
+      "variants": [
+        "forest_panther",
+        "jungle_panther",
+        "yellow_panther"
+      ],
+      "bookReferences": [
+        "Hunters of Gor",
+        "Explorers of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "giani",
@@ -110,12 +160,16 @@
       "playabilityNotes": "Adorable tiny predator! Perfect for cute but fierce RP. Solitary hunter of small prey. Non-threatening to larger species.",
       "mechanicalNotes": "+3 Agility, +2 Perception, -3 Strength (tiny), -1 Intellect, +1 Charisma (cute!)",
       "rarity": "uncommon",
-      "popularityRating": 3,
       "size": "tiny",
       "hpBase": 15,
       "hpStrengthMult": 3,
-      "habitat": ["Rainforests near Schendi"],
-      "bookReferences": ["Explorers of Gor"]
+      "habitat": [
+        "Rainforests near Schendi"
+      ],
+      "bookReferences": [
+        "Explorers of Gor"
+      ],
+      "rarityRating": 2
     }
   ],
   "canine_like": [
@@ -128,13 +182,26 @@
       "playabilityNotes": "Ultimate tracker and hunter! Six-legged movement unique and fascinating. Can be wild or domesticated. Used for hunting, herding, guarding. Extremely efficient predator with infallible scent tracking.",
       "mechanicalNotes": "+2 Strength, +3 Perception (scent tracking master!), +1 Agility, -2 Intellect, -2 Charisma (dirty, dangerous)",
       "rarity": "common",
-      "popularityRating": 5,
       "size": "large",
       "hpBase": 65,
       "hpStrengthMult": 12,
-      "habitat": ["Forests", "Plains", "Mountains", "Most regions"],
-      "variants": ["forest_sleen", "gray_sleen", "prairie_sleen", "snow_sleen", "sea_sleen"],
-      "bookReferences": ["All books in series"]
+      "habitat": [
+        "Forests",
+        "Plains",
+        "Mountains",
+        "Most regions"
+      ],
+      "variants": [
+        "forest_sleen",
+        "gray_sleen",
+        "prairie_sleen",
+        "snow_sleen",
+        "sea_sleen"
+      ],
+      "bookReferences": [
+        "All books in series"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "prairie_sleen",
@@ -145,12 +212,17 @@
       "playabilityNotes": "Domesticated herding dog equivalent! Loyal to masters, excellent with livestock. Less intimidating than forest sleen but still capable hunter.",
       "mechanicalNotes": "+1 Strength, +3 Perception, +1 Agility, -2 Intellect, -1 Charisma",
       "rarity": "common",
-      "popularityRating": 4,
       "size": "medium",
       "hpBase": 40,
       "hpStrengthMult": 8,
-      "habitat": ["Plains", "Barrens"],
-      "bookReferences": ["Nomads of Gor"]
+      "habitat": [
+        "Plains",
+        "Barrens"
+      ],
+      "bookReferences": [
+        "Nomads of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "snow_sleen",
@@ -161,12 +233,18 @@
       "playabilityNotes": "Arctic survival specialist! Sled-pulling, hunting in extreme cold. Can be used as emergency food source (grimly practical).",
       "mechanicalNotes": "+2 Strength, +2 Perception, +1 Agility, -2 Intellect, -1 Charisma",
       "rarity": "uncommon",
-      "popularityRating": 3,
       "size": "large",
       "hpBase": 65,
       "hpStrengthMult": 12,
-      "habitat": ["Arctic", "Polar regions", "Red Hunter territories"],
-      "bookReferences": ["Beasts of Gor"]
+      "habitat": [
+        "Arctic",
+        "Polar regions",
+        "Red Hunter territories"
+      ],
+      "bookReferences": [
+        "Beasts of Gor"
+      ],
+      "rarityRating": 2
     }
   ],
   "hooved": [
@@ -179,13 +257,28 @@
       "playabilityNotes": "Peaceful herbivore roleplay with dangerous horn! Herd dynamics, prey animal experience, swift evasive runner. Balance between grace and deadly capability when cornered.",
       "mechanicalNotes": "+3 Agility, +2 Perception, -1 Strength, -2 Intellect, +1 Charisma (graceful)",
       "rarity": "common",
-      "popularityRating": 4,
       "size": "medium",
       "hpBase": 45,
       "hpStrengthMult": 8,
-      "habitat": ["Ka-la-na thickets", "Tundra", "Prairies", "Rainforests"],
-      "variants": ["common_tabuk", "northern_tabuk", "prairie_tabuk", "rainforest_tabuk"],
-      "bookReferences": ["Hunters of Gor", "Marauders of Gor", "Beasts of Gor", "Blood Brothers of Gor"]
+      "habitat": [
+        "Ka-la-na thickets",
+        "Tundra",
+        "Prairies",
+        "Rainforests"
+      ],
+      "variants": [
+        "common_tabuk",
+        "northern_tabuk",
+        "prairie_tabuk",
+        "rainforest_tabuk"
+      ],
+      "bookReferences": [
+        "Hunters of Gor",
+        "Marauders of Gor",
+        "Beasts of Gor",
+        "Blood Brothers of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "kailiauk",
@@ -196,13 +289,24 @@
       "playabilityNotes": "Massive herd animal! Migrating with millions, thundering stampedes, sacred to Red Savages. Powerful but gentle unless provoked.",
       "mechanicalNotes": "+4 Strength, +1 Perception, -3 Agility, -2 Intellect, 0 Charisma",
       "rarity": "common",
-      "popularityRating": 3,
       "size": "very_large",
       "hpBase": 80,
       "hpStrengthMult": 15,
-      "habitat": ["Plains", "Savannahs", "Barrens", "Forests"],
-      "variants": ["yellow_kailiauk", "barrens_kailiauk"],
-      "bookReferences": ["Blood Brothers of Gor", "Savages of Gor"]
+      "habitat": [
+        "Plains",
+        "Savannahs",
+        "Barrens",
+        "Forests"
+      ],
+      "variants": [
+        "yellow_kailiauk",
+        "barrens_kailiauk"
+      ],
+      "bookReferences": [
+        "Blood Brothers of Gor",
+        "Savages of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "bosk",
@@ -213,13 +317,24 @@
       "playabilityNotes": "Essential sacred animal! Provides everything for Wagon Peoples: meat, milk, hide, bone. Fierce protector, dangerous when angry. Herd bond strong.",
       "mechanicalNotes": "+4 Strength, -2 Agility, -2 Intellect, 0 Perception, -1 Charisma (ill-tempered)",
       "rarity": "common",
-      "popularityRating": 4,
       "size": "very_large",
       "hpBase": 80,
       "hpStrengthMult": 15,
-      "habitat": ["Plains", "Farms"],
-      "variants": ["brown_bosk", "red_bosk", "milk_bosk", "wild_bosk"],
-      "bookReferences": ["Nomads of Gor", "All books"]
+      "habitat": [
+        "Plains",
+        "Farms"
+      ],
+      "variants": [
+        "brown_bosk",
+        "red_bosk",
+        "milk_bosk",
+        "wild_bosk"
+      ],
+      "bookReferences": [
+        "Nomads of Gor",
+        "All books"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "verr",
@@ -230,13 +345,21 @@
       "playabilityNotes": "Mountain climber specialist! Grumpy goat personality. Wool and milk provider when domesticated. Wild variants dangerous on cliffs.",
       "mechanicalNotes": "+1 Strength, +2 Agility (climbing), +1 Perception, -2 Intellect, -2 Charisma (ill-tempered)",
       "rarity": "common",
-      "popularityRating": 2,
       "size": "medium",
       "hpBase": 55,
       "hpStrengthMult": 10,
-      "habitat": ["Voltai Mountains", "Mountain ranges"],
-      "variants": ["wild_verr", "domestic_verr"],
-      "bookReferences": ["All books"]
+      "habitat": [
+        "Voltai Mountains",
+        "Mountain ranges"
+      ],
+      "variants": [
+        "wild_verr",
+        "domestic_verr"
+      ],
+      "bookReferences": [
+        "All books"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "hurt",
@@ -247,12 +370,17 @@
       "playabilityNotes": "Bouncing wool producer! Gentle farm animal, social herds. Fun hopping movement mechanics.",
       "mechanicalNotes": "+2 Agility (hopping), +1 Perception, -1 Strength, -2 Intellect, +1 Charisma (cute)",
       "rarity": "common",
-      "popularityRating": 2,
       "size": "medium",
       "hpBase": 45,
       "hpStrengthMult": 8,
-      "habitat": ["Northern cities", "Farms"],
-      "bookReferences": ["Referenced in multiple books"]
+      "habitat": [
+        "Northern cities",
+        "Farms"
+      ],
+      "bookReferences": [
+        "Referenced in multiple books"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "kaiila",
@@ -263,13 +391,24 @@
       "playabilityNotes": "Elite cavalry mount! Carnivorous hunter, extremely fast and agile. Trained to avoid spears. Outmaneuvers tharlarions. Pride of warriors.",
       "mechanicalNotes": "+2 Strength, +3 Agility, +2 Perception, -2 Intellect, 0 Charisma",
       "rarity": "uncommon",
-      "popularityRating": 5,
       "size": "very_large",
       "hpBase": 80,
       "hpStrengthMult": 15,
-      "habitat": ["Plains", "Barrens", "Tahari Desert"],
-      "variants": ["southern_kaiila", "desert_kaiila"],
-      "bookReferences": ["Nomads of Gor", "Blood Brothers of Gor", "Tribesmen of Gor"]
+      "habitat": [
+        "Plains",
+        "Barrens",
+        "Tahari Desert"
+      ],
+      "variants": [
+        "southern_kaiila",
+        "desert_kaiila"
+      ],
+      "bookReferences": [
+        "Nomads of Gor",
+        "Blood Brothers of Gor",
+        "Tribesmen of Gor"
+      ],
+      "rarityRating": 2
     }
   ],
   "avian": [
@@ -282,13 +421,28 @@
       "playabilityNotes": "ULTIMATE PRESTIGE! Flight RP, aerial combat, tarnsman warrior culture. Master of skies. Carnivorous hunter (tabuk, wild bull). Half-wild temperament - may attack own rider! Requires tarn goad for control.",
       "mechanicalNotes": "+3 Perception, +3 Agility (flight master!), +2 Strength, -2 Intellect, +1 Charisma (majestic!)",
       "rarity": "uncommon",
-      "popularityRating": 5,
       "size": "gigantic",
       "hpBase": 90,
       "hpStrengthMult": 15,
-      "habitat": ["Cities with tarn cots", "Mountain crags", "Sky"],
-      "variants": ["war_tarn", "racing_tarn", "draft_tarn", "saddle_tarn", "jungle_tarn", "black_tarn", "white_tarn"],
-      "bookReferences": ["Tarnsman of Gor", "All books"]
+      "habitat": [
+        "Cities with tarn cots",
+        "Mountain crags",
+        "Sky"
+      ],
+      "variants": [
+        "war_tarn",
+        "racing_tarn",
+        "draft_tarn",
+        "saddle_tarn",
+        "jungle_tarn",
+        "black_tarn",
+        "white_tarn"
+      ],
+      "bookReferences": [
+        "Tarnsman of Gor",
+        "All books"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "herlit",
@@ -299,12 +453,19 @@
       "playabilityNotes": "Majestic predatory bird! Sacred spiritual significance to Red Savages. Honored in ceremonies, feathers extremely valuable for bonnets.",
       "mechanicalNotes": "+2 Perception, +2 Agility, +1 Strength, -2 Intellect, +1 Charisma (majestic)",
       "rarity": "uncommon",
-      "popularityRating": 3,
       "size": "large",
       "hpBase": 50,
       "hpStrengthMult": 10,
-      "habitat": ["Barrens", "Plains", "Sky"],
-      "bookReferences": ["Blood Brothers of Gor", "Savages of Gor"]
+      "habitat": [
+        "Barrens",
+        "Plains",
+        "Sky"
+      ],
+      "bookReferences": [
+        "Blood Brothers of Gor",
+        "Savages of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "vart",
@@ -315,13 +476,25 @@
       "playabilityNotes": "Creepy swarm creature! Pack tactics, carrion feeding, weaponized on some islands. Nocturnal terror.",
       "mechanicalNotes": "+2 Agility (flight), +1 Perception (echolocation), -2 Strength (small), -3 Intellect, -3 Charisma (horrifying)",
       "rarity": "common",
-      "popularityRating": 2,
       "size": "small",
       "hpBase": 20,
       "hpStrengthMult": 5,
-      "habitat": ["Caves", "Ruins", "Jungles", "Cities"],
-      "variants": ["common_vart", "jungle_vart", "weaponized_vart"],
-      "bookReferences": ["Assassin of Gor", "Explorers of Gor"]
+      "habitat": [
+        "Caves",
+        "Ruins",
+        "Jungles",
+        "Cities"
+      ],
+      "variants": [
+        "common_vart",
+        "jungle_vart",
+        "weaponized_vart"
+      ],
+      "bookReferences": [
+        "Assassin of Gor",
+        "Explorers of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "ul",
@@ -332,13 +505,21 @@
       "playabilityNotes": "Prehistoric terror of the skies! Silent predator, swamp hunter, territorial. Smaller than tarn but still impressive.",
       "mechanicalNotes": "+2 Strength, +2 Agility (flight), +1 Perception, -3 Intellect, -2 Charisma (prehistoric horror)",
       "rarity": "uncommon",
-      "popularityRating": 3,
       "size": "very_large",
       "hpBase": 60,
       "hpStrengthMult": 12,
-      "habitat": ["Vosk Delta swamps", "Marshes"],
-      "variants": ["giant_ul", "small_ul"],
-      "bookReferences": ["Raiders of Gor"]
+      "habitat": [
+        "Vosk Delta swamps",
+        "Marshes"
+      ],
+      "variants": [
+        "giant_ul",
+        "small_ul"
+      ],
+      "bookReferences": [
+        "Raiders of Gor"
+      ],
+      "rarityRating": 2
     }
   ],
   "reptilian": [
@@ -351,13 +532,29 @@
       "playabilityNotes": "Common ground mount alternative to tarns! Slow but powerful, shock-absorbing ride. Racing variants popular in Venna. Sea tharlarions for aquatic RP.",
       "mechanicalNotes": "+3 Strength, -2 Agility, -1 Perception, -2 Intellect, -1 Charisma",
       "rarity": "common",
-      "popularityRating": 4,
       "size": "very_large",
       "hpBase": 75,
       "hpStrengthMult": 15,
-      "habitat": ["Swamps", "Deserts", "Cities", "Rivers", "Seas"],
-      "variants": ["high_tharlarion", "draft_tharlarion", "war_tharlarion", "racing_tharlarion", "sea_tharlarion", "marsh_tharlarion", "river_tharlarion"],
-      "bookReferences": ["All books in series"]
+      "habitat": [
+        "Swamps",
+        "Deserts",
+        "Cities",
+        "Rivers",
+        "Seas"
+      ],
+      "variants": [
+        "high_tharlarion",
+        "draft_tharlarion",
+        "war_tharlarion",
+        "racing_tharlarion",
+        "sea_tharlarion",
+        "marsh_tharlarion",
+        "river_tharlarion"
+      ],
+      "bookReferences": [
+        "All books in series"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "mamba",
@@ -368,12 +565,17 @@
       "playabilityNotes": "River ambush predator! Lurking hunter, powerful bite, riverbank territory. Dangerous to swimmers.",
       "mechanicalNotes": "+3 Strength, -2 Agility (on land), +2 Perception (in water), -2 Intellect, -2 Charisma",
       "rarity": "uncommon",
-      "popularityRating": 2,
       "size": "large",
       "hpBase": 60,
       "hpStrengthMult": 12,
-      "habitat": ["Rainforest rivers", "Swamps"],
-      "bookReferences": ["Explorers of Gor"]
+      "habitat": [
+        "Rainforest rivers",
+        "Swamps"
+      ],
+      "bookReferences": [
+        "Explorers of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "hith",
@@ -384,13 +586,21 @@
       "playabilityNotes": "Constrictor predator! Silent stalker, crushing coils, swamp/forest ambusher. Patient hunter.",
       "mechanicalNotes": "+2 Strength (constriction!), +1 Agility, +2 Perception, -3 Intellect, -2 Charisma (serpent fear)",
       "rarity": "uncommon",
-      "popularityRating": 2,
       "size": "very_large",
       "hpBase": 75,
       "hpStrengthMult": 15,
-      "habitat": ["Great Forests", "Swamps"],
-      "variants": ["great_banded_horned_hith", "golden_hith"],
-      "bookReferences": ["Referenced in multiple books"]
+      "habitat": [
+        "Great Forests",
+        "Swamps"
+      ],
+      "variants": [
+        "great_banded_horned_hith",
+        "golden_hith"
+      ],
+      "bookReferences": [
+        "Referenced in multiple books"
+      ],
+      "rarityRating": 1
     }
   ],
   "aquatic": [
@@ -403,13 +613,23 @@
       "playabilityNotes": "Aquatic predator of polar waters! Pack hunting parsit schools, surfacing to breathe every quarter Ahn. Can be harpooned and hunted by Red Hunters.",
       "mechanicalNotes": "+2 Strength, +3 Perception (underwater), +1 Agility (swimming), -2 Intellect, -1 Charisma",
       "rarity": "common",
-      "popularityRating": 3,
       "size": "large",
       "hpBase": 55,
       "hpStrengthMult": 11,
-      "habitat": ["Polar seas", "Northern waters"],
-      "variants": ["black_sleen", "brown_sleen", "tusked_sleen", "flat_nosed_sleen"],
-      "bookReferences": ["Beasts of Gor"]
+      "habitat": [
+        "Polar seas",
+        "Northern waters"
+      ],
+      "variants": [
+        "black_sleen",
+        "brown_sleen",
+        "tusked_sleen",
+        "flat_nosed_sleen"
+      ],
+      "bookReferences": [
+        "Beasts of Gor"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "shark",
@@ -420,13 +640,27 @@
       "playabilityNotes": "Deadly aquatic predator! Ocean/river/marsh hunting, attracted to blood. Brine pit dweller (salt sharks).",
       "mechanicalNotes": "+2 Strength, +2 Perception (blood scent), +1 Agility (swimming), -3 Intellect, -2 Charisma",
       "rarity": "common",
-      "popularityRating": 3,
       "size": "large",
       "hpBase": 55,
       "hpStrengthMult": 11,
-      "habitat": ["Thassa", "Rivers", "Marshes", "Brine pits"],
-      "variants": ["common_shark", "salt_shark", "marsh_shark", "river_shark", "vosk_shark", "white_shark"],
-      "bookReferences": ["Multiple books"]
+      "habitat": [
+        "Thassa",
+        "Rivers",
+        "Marshes",
+        "Brine pits"
+      ],
+      "variants": [
+        "common_shark",
+        "salt_shark",
+        "marsh_shark",
+        "river_shark",
+        "vosk_shark",
+        "white_shark"
+      ],
+      "bookReferences": [
+        "Multiple books"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "whale",
@@ -437,13 +671,22 @@
       "playabilityNotes": "Majestic ocean giant! Rare to hunt (maybe 2 per season for Red Hunters). Blubber harvesting, oil lamps. Peaceful herbivores mostly.",
       "mechanicalNotes": "+5 Strength (massive!), -3 Agility, +1 Perception, -2 Intellect, +2 Charisma (majestic)",
       "rarity": "rare",
-      "popularityRating": 2,
       "size": "gigantic",
       "hpBase": 120,
       "hpStrengthMult": 20,
-      "habitat": ["Polar seas", "Northern waters"],
-      "variants": ["hunjer_long_whale", "karl_whale", "blunt_fin"],
-      "bookReferences": ["Beasts of Gor"]
+      "habitat": [
+        "Polar seas",
+        "Northern waters"
+      ],
+      "variants": [
+        "hunjer_long_whale",
+        "karl_whale",
+        "blunt_fin"
+      ],
+      "bookReferences": [
+        "Beasts of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "parsit",
@@ -454,12 +697,18 @@
       "playabilityNotes": "Schooling prey fish! Migration RP, swarm movement, prey for larger predators. Social school dynamics.",
       "mechanicalNotes": "-2 Strength (tiny), +3 Agility (schooling), +1 Perception, -3 Intellect, 0 Charisma",
       "rarity": "very_common",
-      "popularityRating": 1,
       "size": "tiny",
       "hpBase": 10,
       "hpStrengthMult": 2,
-      "habitat": ["Northern seas", "Rivers"],
-      "bookReferences": ["Marauders of Gor", "Beasts of Gor"]
+      "habitat": [
+        "Northern seas",
+        "Rivers"
+      ],
+      "bookReferences": [
+        "Marauders of Gor",
+        "Beasts of Gor"
+      ],
+      "rarityRating": 1
     }
   ],
   "small": [
@@ -472,13 +721,31 @@
       "playabilityNotes": "Scrappy underdog RP! Urban survival (canal urts), pack dynamics, messy noisy attacks. Giant urts can be domesticated for combat! Migration swarms dangerous.",
       "mechanicalNotes": "Varies by size: Tiny: -3 STR, +3 AGI, +2 PER | Giant: +2 STR, 0 AGI, +1 PER. All: -2 INT, -2 CHA",
       "rarity": "very_common",
-      "popularityRating": 3,
       "size": "tiny_to_large",
       "hpBase": 30,
       "hpStrengthMult": 6,
-      "habitat": ["Cities", "Forests", "Rainforests", "Canals", "Everywhere!"],
-      "variants": ["common_urt", "canal_urt", "forest_urt", "giant_urt", "gliding_urt", "ground_urt", "leaf_urt", "tree_urt", "brush_urt"],
-      "bookReferences": ["All books in series"]
+      "habitat": [
+        "Cities",
+        "Forests",
+        "Rainforests",
+        "Canals",
+        "Everywhere!"
+      ],
+      "variants": [
+        "common_urt",
+        "canal_urt",
+        "forest_urt",
+        "giant_urt",
+        "gliding_urt",
+        "ground_urt",
+        "leaf_urt",
+        "tree_urt",
+        "brush_urt"
+      ],
+      "bookReferences": [
+        "All books in series"
+      ],
+      "rarityRating": 2
     },
     {
       "id": "leem",
@@ -489,12 +756,17 @@
       "playabilityNotes": "Tiny arctic prey animal! Hibernation cycles, hunted by snow larts. Small but resilient.",
       "mechanicalNotes": "-4 Strength (tiny!), +3 Agility, +1 Perception, -3 Intellect, +1 Charisma (cute)",
       "rarity": "common",
-      "popularityRating": 1,
       "size": "tiny",
       "hpBase": 12,
       "hpStrengthMult": 3,
-      "habitat": ["Arctic", "Polar basin"],
-      "bookReferences": ["Beasts of Gor"]
+      "habitat": [
+        "Arctic",
+        "Polar basin"
+      ],
+      "bookReferences": [
+        "Beasts of Gor"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "quala",
@@ -505,12 +777,16 @@
       "playabilityNotes": "Cute herd animal! Scampering flock movement, social dynamics. Non-threatening herbivore.",
       "mechanicalNotes": "-2 Strength (small), +3 Agility (scampering!), +1 Perception, -3 Intellect, +1 Charisma",
       "rarity": "uncommon",
-      "popularityRating": 2,
       "size": "small",
       "hpBase": 25,
       "hpStrengthMult": 5,
-      "habitat": ["Various regions"],
-      "bookReferences": ["Referenced in books"]
+      "habitat": [
+        "Various regions"
+      ],
+      "bookReferences": [
+        "Referenced in books"
+      ],
+      "rarityRating": 1
     },
     {
       "id": "tarsk",
@@ -521,13 +797,24 @@
       "playabilityNotes": "Wild boar hunting RP! Dangerous when cornered, hunted from kaiila-back with lances. Domesticated by rencers. Fierce fighter.",
       "mechanicalNotes": "+2 Strength, 0 Agility, +1 Perception, -2 Intellect, -1 Charisma",
       "rarity": "common",
-      "popularityRating": 3,
       "size": "medium",
       "hpBase": 35,
       "hpStrengthMult": 7,
-      "habitat": ["Forests", "Rainforests", "Farms (domesticated)"],
-      "variants": ["wild_tarsk", "giant_tarsk", "domestic_tarsk", "rainforest_tarsk"],
-      "bookReferences": ["All books"]
+      "habitat": [
+        "Forests",
+        "Rainforests",
+        "Farms (domesticated)"
+      ],
+      "variants": [
+        "wild_tarsk",
+        "giant_tarsk",
+        "domestic_tarsk",
+        "rainforest_tarsk"
+      ],
+      "bookReferences": [
+        "All books"
+      ],
+      "rarityRating": 2
     }
   ]
 }

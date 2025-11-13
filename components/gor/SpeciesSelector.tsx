@@ -170,12 +170,12 @@ export function SpeciesSelector({ selectedSpecies, onSelectSpecies, className = 
                     </GoreanBadge>
                   </div>
 
-                  {/* Popularity */}
+                  {/* Rarity */}
                   <div className="flex items-center gap-2">
                     <span className="text-xs" style={{ color: GoreanColors.stone }}>
-                      Popularity:
+                      Rarity:
                     </span>
-                    <PopularityStars rating={species.popularityRating} />
+                    <PopularityStars rating={species.rarityRating} />
                   </div>
                 </div>
 

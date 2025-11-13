@@ -1,426 +1,620 @@
 [
   {
     "id": "southern_cities",
-      "name": "Southern Cities",
-      "type": "cityState",
-      "description": "Civilized city-states with formal caste system, Home Stones, and complex social hierarchy. Most populous human culture on Gor.",
-      "characteristics": [
-        "Formal five High Castes plus 40+ Low Castes",
-        "Home Stone culture (civic pride)",
-        "Complex social hierarchy and laws",
-        "Veiled free women in most cities",
-        "Extensive slavery system",
-        "Trade, warfare, and diplomacy between cities"
-      ],
-      "hasCastes": true,
-      "applicableSpecies": ["human"],
-      "examples": [
-        "Ar (largest city)",
-        "Ko-ro-ba (Tarl Cabot's Home Stone)",
-        "Turia (Ar of the south)",
-        "Port Kar (pirate city)",
-        "Tharna",
-        "Schendi",
-        "Lydius",
-        "Venna"
-      ],
-      "popularityRating": 5,
-      "bookReferences": ["All books in series"]
-    },
-    {
-      "id": "pani",
-      "name": "Pani",
-      "type": "cityState",
-      "description": "Asian-inspired isolationist civilization far to the east. Unique customs, different aesthetic from western cities.",
-      "characteristics": [
-        "Isolationist foreign policy",
-        "Eastern cultural aesthetics",
-        "Unique customs and traditions",
-        "Own caste-like structure",
-        "Advanced seafaring",
-        "Rare contact with western Gor"
-      ],
-      "hasCastes": true,
-      "applicableSpecies": ["human"],
-      "popularityRating": 2,
-      "bookReferences": ["Mariners of Gor", "Quarry of Gor", "Rebels of Gor"]
-    },
-    {
-      "id": "torvaldsland",
-      "name": "Torvaldslanders",
-      "type": "northern",
-      "description": "Viking-inspired northern warriors and raiders. No caste system - all men are warriors, hunters, and seamen. Bond-maids common.",
-      "characteristics": [
-        "No caste system - all generalists",
-        "All men are warriors/hunters/seamen",
-        "Raiding culture - serpent ships",
-        "Bond-maids (slave women) common",
-        "Free women have more power than south",
-        "Jarl leadership system",
-        "Worship Odin and Thor (heresy to Initiates)",
-        "Harsh northern climate",
-        "Thing-fairs for tournaments"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["jarl", "warrior", "skald", "rune_priest", "farmer"],
-      "popularityRating": 4,
-      "bookReferences": ["Marauders of Gor"]
-    },
-    {
-      "id": "red_hunters",
-      "name": "Red Hunters (Innuit)",
-      "type": "northern",
-      "description": "Inuit-inspired polar survival culture. Hunting, fishing, carving. No formal leadership except best hunters. Welcoming to strangers.",
-      "characteristics": [
-        "Polar basin survival specialists",
-        "Hunting tabuk, sea sleen, whales",
-        "Fishing year-round",
-        "Carving ivory/bone art",
-        "Song creation (everyone sings)",
-        "No formal castes or strict leadership",
-        "Best hunters have most prestige",
-        "Welcoming to strangers (need friends not enemies)",
-        "Optimistic despite harsh conditions",
-        "Magic and shapeshifting beliefs"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["hunter", "singer", "carver"],
-      "popularityRating": 3,
-      "bookReferences": ["Beasts of Gor"]
-    },
-    {
-      "id": "red_savages",
-      "name": "Red Savages",
-      "type": "nomadic",
-      "description": "Native American-inspired nomadic tribes of the Barrens. Kaiila riders, kailiauk hunters, warrior societies, coup counting. The Memory - distrust of whites.",
-      "characteristics": [
-        "Tribal confederations and bands",
-        "Kaiila (carnivorous horse) riders",
-        "Kailiauk (buffalo) hunting sacred",
-        "Warrior societies (All Comrades, Sleen Soldiers, etc.)",
-        "Coup counting for honor/prowess",
-        "Medicine chiefs and shamans",
-        "The Memory - historical grudge against whites",
-        "White women considered automatic slaves",
-        "Waniyanpi - agricultural slave villages",
-        "Spiritual connection to land and animals"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "tribes": [
-        "Dust Legs (peaceful traders)",
-        "Kaiila / Cutthroat Tribe (5 bands: Isbu, Casmu, Isanna, Napoktan, Wismahi)",
-        "Yellow Knives",
-        "Sleen",
-        "Fleer",
-        "Kinyanpi (tarn masters!)",
-        "Many others unnamed"
-      ],
-      "roles": ["chief", "warrior", "medicine_chief", "hunter", "council_member"],
-      "popularityRating": 4,
-      "bookReferences": ["Savages of Gor", "Blood Brothers of Gor"]
-    },
-    {
-      "id": "wagon_peoples",
-      "name": "Wagon Peoples",
-      "type": "nomadic",
-      "description": "Mongol-inspired nomadic bosk herders of the plains. Four tribes, each with Ubar and specialized clans. Bosk is sacred.",
-      "characteristics": [
-        "Bosk (cattle) herders - sacred animal",
-        "Four great tribes in constant migration",
-        "Ubar leadership (can be challenged)",
-        "All men are warriors",
-        "Specialized clans (healers, torturers, salt hunters, etc.)",
-        "Wagon-based nomadic life",
-        "Kaiila cavalry (carnivorous mounts)",
-        "Bosk provides everything: meat, milk, hide, bone, dung fuel",
-        "Lance and bow primary weapons",
-        "Annual gather of tribes"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "tribes": ["Tuchuks (Kamchak's tribe)", "Kataii", "Kassars", "Paravaci"],
-      "roles": ["ubar", "warrior", "healer_clan", "torturer_clan", "leather_worker_clan", "salt_hunter_clan", "camp_singer_clan", "year_keeper_clan", "scarers_clan"],
-      "popularityRating": 4,
-      "bookReferences": ["Nomads of Gor"]
-    },
-    {
-      "id": "tahari_tribes",
-      "name": "Tahari Tribes",
-      "type": "nomadic",
-      "description": "Bedouin-inspired desert nomads and oasis dwellers. Tribal confederations, askari warriors, desert survival. Kaiila riders.",
-      "characteristics": [
-        "Desert and oasis survival",
-        "Tribal confederations (Aretai, Kavars, vassals)",
-        "Askari (warrior) culture",
-        "Desert kaiila riders",
-        "Oasis farming and date cultivation",
-        "Water conservation sacred",
-        "Destroying water source = worst crime",
-        "Nomadic raiders vs settled oasis dwellers",
-        "Djellaba and kaffiyeh clothing",
-        "Haik-veiled women in cities/oases"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "tribes": [
-        "Aretai (led by Suleiman)",
-        "Kavars (led by Haroun)",
-        "Tashid (vassals of Aretai, semi-autonomous)",
-        "Ta'Kara (Kavar vassals)",
-        "Bakahs (Kavar vassals)",
-        "Char (Kavar vassals)",
-        "Kashani (Kavar vassals)",
-        "Tajuk (not vassals, but allied to Aretai)",
-        "Raviri, Luraz, Ti, Zevar, Arani (Aretai allies)"
-      ],
-      "roles": ["ubar", "high_pasha", "askari", "merchant", "desert_raider", "oasis_farmer"],
-      "popularityRating": 3,
-      "bookReferences": ["Tribesmen of Gor"]
-    },
-    {
-      "id": "alars",
-      "name": "Alars",
-      "type": "nomadic",
-      "description": "Nordic-appearance nomadic herders (bosk, verr, tarsk). Superb tharlarion cavalry. Wagon camps (laager). Fierce but pragmatic.",
-      "characteristics": [
-        "Nordic appearance (blond, blue-eyed)",
-        "Nomadic herders (bosk, verr, tarsk)",
-        "Superb medium-weight tharlarion cavalry",
-        "Wagon laager defensive formations",
-        "Francisca (war axe) primary weapon",
-        "Steal from settlements (not seen as crime)",
-        "Male infants scarred on cheeks",
-        "Women have high standing, few slaves",
-        "Children highly valued (healthy only)",
-        "Based on Earth Alans/Huns/Franks"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["chieftain", "warrior", "herder", "cavalry"],
-      "popularityRating": 2,
-      "bookReferences": ["Mercenaries of Gor"]
-    },
-    {
-      "id": "rencers",
-      "name": "Rencers (Growers of Rence)",
-      "type": "marshForestJungle",
-      "description": "Paper-makers living on floating rence islands in Vosk Delta marshes. Rence plant culture. Evolution: women gained freedom, then men enslaved some.",
-      "characteristics": [
-        "Floating man-made islands (rence stems)",
-        "Paper-making primary trade",
-        "Rence plant used for everything: paper, food, boats, cloth, fuel",
-        "Each island 50-60 people, isolated",
-        "Marsh spear primary weapon, longbow adopted recently",
-        "Originally women equals to men, evolution toward enslavement",
-        "Warning marks: white cloths (stay away), red cloths (death/slavery)",
-        "Se'Kara festival largest celebration",
-        "Tabuk and fish hunting, rence cultivation"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["ubar", "grower_of_rence", "paper_maker", "hunter", "fisher"],
-      "popularityRating": 2,
-      "bookReferences": ["Raiders of Gor", "Vagabonds of Gor"]
-    },
-    {
-      "id": "panther_girls",
-      "name": "Panther Girls (Northern Forests)",
-      "type": "marshForestJungle",
-      "description": "Women-only outlaw bands in northern forests. Escaped slaves and free women who fled cities. Hunt, fight, fiercely independent. Eventually enslaved when captured.",
-      "characteristics": [
-        "Women-only bands (no men tolerated)",
-        "Escaped slaves or fled free women",
-        "Forest survival: hunting, gathering",
-        "Skilled with bow and knife",
-        "Fiercely independent, hate men",
-        "Often capture men to enslave/ransom",
-        "Eventually captured and enslaved (canon fate)",
-        "Repressed femininity",
-        "Similar to Talunas but northern climate",
-        "Cat's cradle games popular"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "gender": "female",
-      "roles": ["band_leader", "hunter", "warrior", "scout"],
-      "popularityRating": 3,
-      "bookReferences": ["Hunters of Gor", "Marauders of Gor", "Beasts of Gor"]
-    },
-    {
-      "id": "talunas",
-      "name": "Talunas (Jungle Outlaws)",
-      "type": "marshForestJungle",
-      "description": "Women-only outlaw bands in equatorial jungles. Similar to Panther Girls but adapted to rainforest. Escaped slaves seeking freedom.",
-      "characteristics": [
-        "Women-only jungle bands",
-        "Rainforest survival specialists",
-        "Similar ethos to Panther Girls",
-        "Jungle hunting and warfare",
-        "Fiercely independent",
-        "Eventual enslavement when captured",
-        "Adapted to tropical climate",
-        "Blowguns, spears, knives"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "gender": "female",
-      "roles": ["band_leader", "hunter", "warrior"],
-      "popularityRating": 2,
-      "bookReferences": ["Explorers of Gor"]
-    },
-    {
-      "id": "schendi_tribes",
-      "name": "Schendi/Jungle Tribes",
-      "type": "marshForestJungle",
-      "description": "Equatorial jungle villages and tribes. Fishing, farming, drum communication. Schendi is major port city on coast.",
-      "characteristics": [
-        "Jungle/rainforest adaptation",
-        "Fishing and farming villages",
-        "Drum communication networks",
-        "Schendi port city for trade",
-        "Diverse tribes in interior",
-        "Askari (warriors)",
-        "Tropical crops and hunting",
-        "River travel",
-        "Influenced by both native and port cultures"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "tribes": ["Ushindi", "Ukungu", "Mamba", "Pygmies", "Many others"],
-      "roles": ["chief", "askari", "fisherman", "farmer", "drummer", "trader"],
-      "popularityRating": 2,
-      "bookReferences": ["Explorers of Gor"]
-    },
-    {
-      "id": "outlaw",
-      "name": "Outlaw (Casteless)",
-      "type": "special",
-      "description": "Individuals without Caste or Home Stone, living outside society. Hunted, exiled, or fled. Wilderness survival, brigandage, or mercenary work.",
-      "characteristics": [
-        "No caste membership",
-        "No Home Stone",
-        "Exiled or fled from cities",
-        "Often hunted (impalement if caught in city)",
-        "Wilderness survival skills essential",
-        "Some become brigands/bandits",
-        "Some become mercenaries",
-        "Some seek redemption/new Home Stone",
-        "Hamstringing or hanging punishments",
-        "Can petition for caste membership elsewhere"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human", "kurii"],
-      "roles": ["brigand", "mercenary", "hermit", "exile"],
-      "popularityRating": 3,
-      "bookReferences": ["All books reference outlaws"]
-    },
-    {
-      "id": "earth_origin",
-      "name": "Earth-origin",
-      "type": "special",
-      "description": "Brought to Gor via Voyages of Acquisition by Priest-Kings or Kurii. Learning Gorean culture, may eventually adopt caste/Home Stone.",
-      "characteristics": [
-        "Originally from Earth",
-        "Brought via Voyages of Acquisition",
-        "Learning Gorean language and customs",
-        "May be taken as slave initially",
-        "May eventually adopt caste and Home Stone",
-        "Often possess Earth knowledge unknown on Gor",
-        "Priest-Kings or Kurii-acquired",
-        "Adjustment to counter-Earth challenges",
-        "Special perspective on Gorean society"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["none_yet", "learning"],
-      "popularityRating": 4,
-      "bookReferences": ["Tarnsman of Gor and most books feature Earth people"]
-    },
-    {
-      "id": "sardar",
-      "name": "Sardar",
-      "type": "special",
-      "description": "Those who have lived with or served Priest-Kings in the Sardar. Extremely rare. Special knowledge and perspective.",
-      "characteristics": [
-        "Lived in/served at Sardar Mountains",
-        "Direct Priest-King contact/service",
-        "Special technological knowledge",
-        "Understanding of true Priest-King nature",
-        "Possibly implanted (old practice)",
-        "Extremely rare",
-        "May have special missions",
-        "Cannot reveal Priest-King secrets easily"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["human"],
-      "roles": ["agent", "servant", "observer"],
-      "popularityRating": 1,
-      "bookReferences": ["Priest-Kings of Gor", "Nomads of Gor"]
-    },
-    {
-      "id": "wild",
-      "name": "Wild Animal",
-      "type": "animal",
-      "description": "Untamed creature living by natural instincts. No sapient culture, purely animal behavior and territory.",
-      "characteristics": [
-        "Natural habitat and instincts",
-        "Territory-based",
-        "Hunting/grazing natural prey",
-        "Mating rituals and seasons",
-        "Pack/pride/herd dynamics (species dependent)",
-        "No tool use",
-        "Limited to no speech",
-        "Survival-focused existence"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
-      "roles": ["predator", "prey", "scavenger"],
-      "popularityRating": 4,
-      "bookReferences": ["All books reference wild animals"]
-    },
-    {
-      "id": "domesticated",
-      "name": "Domesticated Animal",
-      "type": "animal",
-      "description": "Trained or raised by sapients. Serves masters, performs tasks, follows commands. Still animal intelligence but loyal.",
-      "characteristics": [
-        "Trained by sapient species",
-        "Follows commands and signals",
-        "Performs specific tasks (mount, guard, herd, hunt, etc.)",
-        "Loyalty to master/owner",
-        "May still have wild instincts",
-        "Breeding for specific traits",
-        "Housed/sheltered by masters",
-        "Fed and cared for"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["sleen", "tarn", "tharlarion", "kaiila", "bosk", "hurt", "verr", "tarsk", "vulo"],
-      "roles": ["mount", "guard", "herder", "hunter", "worker"],
-      "popularityRating": 5,
-      "bookReferences": ["All books feature domesticated animals"]
-    },
-    {
-      "id": "companion",
-      "name": "Companion Animal",
-      "type": "animal",
-      "description": "Bonded with specific sapient character. Loyal partnership, mutual respect. Goes beyond simple domestication.",
-      "characteristics": [
-        "Deep bond with specific individual",
-        "Mutual loyalty and respect",
-        "May fight to death to protect companion",
-        "Understands companion's moods/signals",
-        "Companion understands animal's needs",
-        "Partnership rather than ownership",
-        "Rare and special relationship",
-        "May involve choosing each other (tarn-warrior bond)"
-      ],
-      "hasCastes": false,
-      "applicableSpecies": ["sleen", "tarn", "kaiila", "larl"],
-      "roles": ["companion", "partner"],
-      "popularityRating": 4,
-      "bookReferences": ["Tarnsman of Gor (tarn bonds)", "Nomads of Gor (kaiila bonds)"]
-    }
+    "name": "Southern Cities",
+    "type": "cityState",
+    "description": "Civilized city-states with formal caste system, Home Stones, and complex social hierarchy. Most populous human culture on Gor.",
+    "characteristics": [
+      "Formal five High Castes plus 40+ Low Castes",
+      "Home Stone culture (civic pride)",
+      "Complex social hierarchy and laws",
+      "Veiled free women in most cities",
+      "Extensive slavery system",
+      "Trade, warfare, and diplomacy between cities"
+    ],
+    "hasCastes": true,
+    "applicableSpecies": [
+      "human"
+    ],
+    "examples": [
+      "Ar (largest city)",
+      "Ko-ro-ba (Tarl Cabot's Home Stone)",
+      "Turia (Ar of the south)",
+      "Port Kar (pirate city)",
+      "Tharna",
+      "Schendi",
+      "Lydius",
+      "Venna"
+    ],
+    "bookReferences": [
+      "All books in series"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "pani",
+    "name": "Pani",
+    "type": "cityState",
+    "description": "Asian-inspired isolationist civilization far to the east. Unique customs, different aesthetic from western cities.",
+    "characteristics": [
+      "Isolationist foreign policy",
+      "Eastern cultural aesthetics",
+      "Unique customs and traditions",
+      "Own caste-like structure",
+      "Advanced seafaring",
+      "Rare contact with western Gor"
+    ],
+    "hasCastes": true,
+    "applicableSpecies": [
+      "human"
+    ],
+    "bookReferences": [
+      "Mariners of Gor",
+      "Quarry of Gor",
+      "Rebels of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "torvaldsland",
+    "name": "Torvaldslanders",
+    "type": "northern",
+    "description": "Viking-inspired northern warriors and raiders. No caste system - all men are warriors, hunters, and seamen. Bond-maids common.",
+    "characteristics": [
+      "No caste system - all generalists",
+      "All men are warriors/hunters/seamen",
+      "Raiding culture - serpent ships",
+      "Bond-maids (slave women) common",
+      "Free women have more power than south",
+      "Jarl leadership system",
+      "Worship Odin and Thor (heresy to Initiates)",
+      "Harsh northern climate",
+      "Thing-fairs for tournaments"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "jarl",
+      "warrior",
+      "skald",
+      "rune_priest",
+      "farmer"
+    ],
+    "bookReferences": [
+      "Marauders of Gor"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "red_hunters",
+    "name": "Red Hunters (Innuit)",
+    "type": "northern",
+    "description": "Inuit-inspired polar survival culture. Hunting, fishing, carving. No formal leadership except best hunters. Welcoming to strangers.",
+    "characteristics": [
+      "Polar basin survival specialists",
+      "Hunting tabuk, sea sleen, whales",
+      "Fishing year-round",
+      "Carving ivory/bone art",
+      "Song creation (everyone sings)",
+      "No formal castes or strict leadership",
+      "Best hunters have most prestige",
+      "Welcoming to strangers (need friends not enemies)",
+      "Optimistic despite harsh conditions",
+      "Magic and shapeshifting beliefs"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "hunter",
+      "singer",
+      "carver"
+    ],
+    "bookReferences": [
+      "Beasts of Gor"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "red_savages",
+    "name": "Red Savages",
+    "type": "nomadic",
+    "description": "Native American-inspired nomadic tribes of the Barrens. Kaiila riders, kailiauk hunters, warrior societies, coup counting. The Memory - distrust of whites.",
+    "characteristics": [
+      "Tribal confederations and bands",
+      "Kaiila (carnivorous horse) riders",
+      "Kailiauk (buffalo) hunting sacred",
+      "Warrior societies (All Comrades, Sleen Soldiers, etc.)",
+      "Coup counting for honor/prowess",
+      "Medicine chiefs and shamans",
+      "The Memory - historical grudge against whites",
+      "White women considered automatic slaves",
+      "Waniyanpi - agricultural slave villages",
+      "Spiritual connection to land and animals"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "tribes": [
+      "Dust Legs (peaceful traders)",
+      "Kaiila / Cutthroat Tribe (5 bands: Isbu, Casmu, Isanna, Napoktan, Wismahi)",
+      "Yellow Knives",
+      "Sleen",
+      "Fleer",
+      "Kinyanpi (tarn masters!)",
+      "Many others unnamed"
+    ],
+    "roles": [
+      "chief",
+      "warrior",
+      "medicine_chief",
+      "hunter",
+      "council_member"
+    ],
+    "bookReferences": [
+      "Savages of Gor",
+      "Blood Brothers of Gor"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "wagon_peoples",
+    "name": "Wagon Peoples",
+    "type": "nomadic",
+    "description": "Mongol-inspired nomadic bosk herders of the plains. Four tribes, each with Ubar and specialized clans. Bosk is sacred.",
+    "characteristics": [
+      "Bosk (cattle) herders - sacred animal",
+      "Four great tribes in constant migration",
+      "Ubar leadership (can be challenged)",
+      "All men are warriors",
+      "Specialized clans (healers, torturers, salt hunters, etc.)",
+      "Wagon-based nomadic life",
+      "Kaiila cavalry (carnivorous mounts)",
+      "Bosk provides everything: meat, milk, hide, bone, dung fuel",
+      "Lance and bow primary weapons",
+      "Annual gather of tribes"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "tribes": [
+      "Tuchuks (Kamchak's tribe)",
+      "Kataii",
+      "Kassars",
+      "Paravaci"
+    ],
+    "roles": [
+      "ubar",
+      "warrior",
+      "healer_clan",
+      "torturer_clan",
+      "leather_worker_clan",
+      "salt_hunter_clan",
+      "camp_singer_clan",
+      "year_keeper_clan",
+      "scarers_clan"
+    ],
+    "bookReferences": [
+      "Nomads of Gor"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "tahari_tribes",
+    "name": "Tahari Tribes",
+    "type": "nomadic",
+    "description": "Bedouin-inspired desert nomads and oasis dwellers. Tribal confederations, askari warriors, desert survival. Kaiila riders.",
+    "characteristics": [
+      "Desert and oasis survival",
+      "Tribal confederations (Aretai, Kavars, vassals)",
+      "Askari (warrior) culture",
+      "Desert kaiila riders",
+      "Oasis farming and date cultivation",
+      "Water conservation sacred",
+      "Destroying water source = worst crime",
+      "Nomadic raiders vs settled oasis dwellers",
+      "Djellaba and kaffiyeh clothing",
+      "Haik-veiled women in cities/oases"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "tribes": [
+      "Aretai (led by Suleiman)",
+      "Kavars (led by Haroun)",
+      "Tashid (vassals of Aretai, semi-autonomous)",
+      "Ta'Kara (Kavar vassals)",
+      "Bakahs (Kavar vassals)",
+      "Char (Kavar vassals)",
+      "Kashani (Kavar vassals)",
+      "Tajuk (not vassals, but allied to Aretai)",
+      "Raviri, Luraz, Ti, Zevar, Arani (Aretai allies)"
+    ],
+    "roles": [
+      "ubar",
+      "high_pasha",
+      "askari",
+      "merchant",
+      "desert_raider",
+      "oasis_farmer"
+    ],
+    "bookReferences": [
+      "Tribesmen of Gor"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "alars",
+    "name": "Alars",
+    "type": "nomadic",
+    "description": "Nordic-appearance nomadic herders (bosk, verr, tarsk). Superb tharlarion cavalry. Wagon camps (laager). Fierce but pragmatic.",
+    "characteristics": [
+      "Nordic appearance (blond, blue-eyed)",
+      "Nomadic herders (bosk, verr, tarsk)",
+      "Superb medium-weight tharlarion cavalry",
+      "Wagon laager defensive formations",
+      "Francisca (war axe) primary weapon",
+      "Steal from settlements (not seen as crime)",
+      "Male infants scarred on cheeks",
+      "Women have high standing, few slaves",
+      "Children highly valued (healthy only)",
+      "Based on Earth Alans/Huns/Franks"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "chieftain",
+      "warrior",
+      "herder",
+      "cavalry"
+    ],
+    "bookReferences": [
+      "Mercenaries of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "rencers",
+    "name": "Rencers (Growers of Rence)",
+    "type": "marshForestJungle",
+    "description": "Paper-makers living on floating rence islands in Vosk Delta marshes. Rence plant culture. Evolution: women gained freedom, then men enslaved some.",
+    "characteristics": [
+      "Floating man-made islands (rence stems)",
+      "Paper-making primary trade",
+      "Rence plant used for everything: paper, food, boats, cloth, fuel",
+      "Each island 50-60 people, isolated",
+      "Marsh spear primary weapon, longbow adopted recently",
+      "Originally women equals to men, evolution toward enslavement",
+      "Warning marks: white cloths (stay away), red cloths (death/slavery)",
+      "Se'Kara festival largest celebration",
+      "Tabuk and fish hunting, rence cultivation"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "ubar",
+      "grower_of_rence",
+      "paper_maker",
+      "hunter",
+      "fisher"
+    ],
+    "bookReferences": [
+      "Raiders of Gor",
+      "Vagabonds of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "panther_girls",
+    "name": "Panther Girls (Northern Forests)",
+    "type": "marshForestJungle",
+    "description": "Women-only outlaw bands in northern forests. Escaped slaves and free women who fled cities. Hunt, fight, fiercely independent. Eventually enslaved when captured.",
+    "characteristics": [
+      "Women-only bands (no men tolerated)",
+      "Escaped slaves or fled free women",
+      "Forest survival: hunting, gathering",
+      "Skilled with bow and knife",
+      "Fiercely independent, hate men",
+      "Often capture men to enslave/ransom",
+      "Eventually captured and enslaved (canon fate)",
+      "Repressed femininity",
+      "Similar to Talunas but northern climate",
+      "Cat's cradle games popular"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "gender": "female",
+    "roles": [
+      "band_leader",
+      "hunter",
+      "warrior",
+      "scout"
+    ],
+    "bookReferences": [
+      "Hunters of Gor",
+      "Marauders of Gor",
+      "Beasts of Gor"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "talunas",
+    "name": "Talunas (Jungle Outlaws)",
+    "type": "marshForestJungle",
+    "description": "Women-only outlaw bands in equatorial jungles. Similar to Panther Girls but adapted to rainforest. Escaped slaves seeking freedom.",
+    "characteristics": [
+      "Women-only jungle bands",
+      "Rainforest survival specialists",
+      "Similar ethos to Panther Girls",
+      "Jungle hunting and warfare",
+      "Fiercely independent",
+      "Eventual enslavement when captured",
+      "Adapted to tropical climate",
+      "Blowguns, spears, knives"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "gender": "female",
+    "roles": [
+      "band_leader",
+      "hunter",
+      "warrior"
+    ],
+    "bookReferences": [
+      "Explorers of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "schendi_tribes",
+    "name": "Schendi/Jungle Tribes",
+    "type": "marshForestJungle",
+    "description": "Equatorial jungle villages and tribes. Fishing, farming, drum communication. Schendi is major port city on coast.",
+    "characteristics": [
+      "Jungle/rainforest adaptation",
+      "Fishing and farming villages",
+      "Drum communication networks",
+      "Schendi port city for trade",
+      "Diverse tribes in interior",
+      "Askari (warriors)",
+      "Tropical crops and hunting",
+      "River travel",
+      "Influenced by both native and port cultures"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "tribes": [
+      "Ushindi",
+      "Ukungu",
+      "Mamba",
+      "Pygmies",
+      "Many others"
+    ],
+    "roles": [
+      "chief",
+      "askari",
+      "fisherman",
+      "farmer",
+      "drummer",
+      "trader"
+    ],
+    "bookReferences": [
+      "Explorers of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "outlaw",
+    "name": "Outlaw (Casteless)",
+    "type": "special",
+    "description": "Individuals without Caste or Home Stone, living outside society. Hunted, exiled, or fled. Wilderness survival, brigandage, or mercenary work.",
+    "characteristics": [
+      "No caste membership",
+      "No Home Stone",
+      "Exiled or fled from cities",
+      "Often hunted (impalement if caught in city)",
+      "Wilderness survival skills essential",
+      "Some become brigands/bandits",
+      "Some become mercenaries",
+      "Some seek redemption/new Home Stone",
+      "Hamstringing or hanging punishments",
+      "Can petition for caste membership elsewhere"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human",
+      "kurii"
+    ],
+    "roles": [
+      "brigand",
+      "mercenary",
+      "hermit",
+      "exile"
+    ],
+    "bookReferences": [
+      "All books reference outlaws"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "earth_origin",
+    "name": "Earth-origin",
+    "type": "special",
+    "description": "Brought to Gor via Voyages of Acquisition by Priest-Kings or Kurii. Learning Gorean culture, may eventually adopt caste/Home Stone.",
+    "characteristics": [
+      "Originally from Earth",
+      "Brought via Voyages of Acquisition",
+      "Learning Gorean language and customs",
+      "May be taken as slave initially",
+      "May eventually adopt caste and Home Stone",
+      "Often possess Earth knowledge unknown on Gor",
+      "Priest-Kings or Kurii-acquired",
+      "Adjustment to counter-Earth challenges",
+      "Special perspective on Gorean society"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "none_yet",
+      "learning"
+    ],
+    "bookReferences": [
+      "Tarnsman of Gor and most books feature Earth people"
+    ],
+    "rarityRating": 3
+  },
+  {
+    "id": "sardar",
+    "name": "Sardar",
+    "type": "special",
+    "description": "Those who have lived with or served Priest-Kings in the Sardar. Extremely rare. Special knowledge and perspective.",
+    "characteristics": [
+      "Lived in/served at Sardar Mountains",
+      "Direct Priest-King contact/service",
+      "Special technological knowledge",
+      "Understanding of true Priest-King nature",
+      "Possibly implanted (old practice)",
+      "Extremely rare",
+      "May have special missions",
+      "Cannot reveal Priest-King secrets easily"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "human"
+    ],
+    "roles": [
+      "agent",
+      "servant",
+      "observer"
+    ],
+    "bookReferences": [
+      "Priest-Kings of Gor",
+      "Nomads of Gor"
+    ],
+    "rarityRating": 1
+  },
+  {
+    "id": "wild",
+    "name": "Wild Animal",
+    "type": "animal",
+    "description": "Untamed creature living by natural instincts. No sapient culture, purely animal behavior and territory.",
+    "characteristics": [
+      "Natural habitat and instincts",
+      "Territory-based",
+      "Hunting/grazing natural prey",
+      "Mating rituals and seasons",
+      "Pack/pride/herd dynamics (species dependent)",
+      "No tool use",
+      "Limited to no speech",
+      "Survival-focused existence"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "feline",
+      "canine_like",
+      "hooved",
+      "avian",
+      "reptilian",
+      "aquatic",
+      "small"
+    ],
+    "roles": [
+      "predator",
+      "prey",
+      "scavenger"
+    ],
+    "bookReferences": [
+      "All books reference wild animals"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "domesticated",
+    "name": "Domesticated Animal",
+    "type": "animal",
+    "description": "Trained or raised by sapients. Serves masters, performs tasks, follows commands. Still animal intelligence but loyal.",
+    "characteristics": [
+      "Trained by sapient species",
+      "Follows commands and signals",
+      "Performs specific tasks (mount, guard, herd, hunt, etc.)",
+      "Loyalty to master/owner",
+      "May still have wild instincts",
+      "Breeding for specific traits",
+      "Housed/sheltered by masters",
+      "Fed and cared for"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "sleen",
+      "tarn",
+      "tharlarion",
+      "kaiila",
+      "bosk",
+      "hurt",
+      "verr",
+      "tarsk",
+      "vulo"
+    ],
+    "roles": [
+      "mount",
+      "guard",
+      "herder",
+      "hunter",
+      "worker"
+    ],
+    "bookReferences": [
+      "All books feature domesticated animals"
+    ],
+    "rarityRating": 2
+  },
+  {
+    "id": "companion",
+    "name": "Companion Animal",
+    "type": "animal",
+    "description": "Bonded with specific sapient character. Loyal partnership, mutual respect. Goes beyond simple domestication.",
+    "characteristics": [
+      "Deep bond with specific individual",
+      "Mutual loyalty and respect",
+      "May fight to death to protect companion",
+      "Understands companion's moods/signals",
+      "Companion understands animal's needs",
+      "Partnership rather than ownership",
+      "Rare and special relationship",
+      "May involve choosing each other (tarn-warrior bond)"
+    ],
+    "hasCastes": false,
+    "applicableSpecies": [
+      "sleen",
+      "tarn",
+      "kaiila",
+      "larl"
+    ],
+    "roles": [
+      "companion",
+      "partner"
+    ],
+    "bookReferences": [
+      "Tarnsman of Gor (tarn bonds)",
+      "Nomads of Gor (kaiila bonds)"
+    ],
+    "rarityRating": 2
+  }
 ]
