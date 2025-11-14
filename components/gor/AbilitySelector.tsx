@@ -90,7 +90,7 @@ export function AbilitySelector({
       social: GoreanColors.gold,
       survival: GoreanColors.forestGreen,
       mental: GoreanColors.casteBlue,
-      special: GoreanColors.castePurple
+      special: GoreanColors.deepBlue
     };
     return colorMap[category] || GoreanColors.stone;
   };
@@ -100,7 +100,7 @@ export function AbilitySelector({
     const colorMap: Record<string, string> = {
       self: GoreanColors.casteBlue,
       single: GoreanColors.casteScarlet,
-      area: GoreanColors.castePurple
+      area: GoreanColors.deepBlue
     };
     return targetType ? (colorMap[targetType] || GoreanColors.stone) : GoreanColors.stone;
   };
@@ -283,7 +283,7 @@ export function AbilitySelector({
                 style={{
                   backgroundColor: isSelected ? GoreanColors.bloodRed : canSelect ? GoreanColors.bronze : GoreanColors.stoneLight,
                   color: 'white',
-                  border: `2px solid ${isSelected ? GoreanColors.bloodRedDark : !availabilityCheck.available ? GoreanColors.bloodRed : GoreanColors.bronzeDark}`
+                  border: `2px solid ${isSelected ? GoreanColors.charcoal : !availabilityCheck.available ? GoreanColors.bloodRed : GoreanColors.bronzeDark}`
                 }}
                 title={!availabilityCheck.available ? availabilityCheck.reason : undefined}
               >

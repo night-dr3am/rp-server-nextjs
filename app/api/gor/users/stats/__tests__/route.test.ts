@@ -96,33 +96,48 @@ describe('GET /api/gor/stats', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.characterName).toBe('Tarl of Ko-ro-ba');
-    expect(data.data.agentName).toBe('Tarl, Warrior of the Scarlet Caste');
-    expect(data.data.title).toBe('Captain of the Guard');
-    expect(data.data.species).toBe('human');
-    expect(data.data.speciesCategory).toBe('sapient');
-    expect(data.data.culture).toBe('southern_cities');
-    expect(data.data.status).toBe('free_man');
-    expect(data.data.casteRole).toBe('warriors');
-    expect(data.data.region).toBe('ar');
-    expect(data.data.homeStoneName).toBe('Ko-ro-ba');
-    expect(data.data.strength).toBe(4);
-    expect(data.data.agility).toBe(3);
-    expect(data.data.intellect).toBe(2);
-    expect(data.data.perception).toBe(3);
-    expect(data.data.charisma).toBe(2);
-    expect(data.data.healthMax).toBe(20);
-    expect(data.data.healthCurrent).toBe(15);
-    expect(data.data.hungerCurrent).toBe(80);
-    expect(data.data.thirstCurrent).toBe(90);
-    expect(data.data.goldCoin).toBe(5);
-    expect(data.data.silverCoin).toBe(25);
-    expect(data.data.copperCoin).toBe(100);
-    expect(data.data.xp).toBe(50);
-    expect(data.data.skills).toHaveLength(2);
-    expect(data.data.skills[0].skill_id).toBe('swordplay');
-    expect(data.data.registrationCompleted).toBe(true);
-    expect(data.data.username).toBe(username);
+    // Check nested structure
+    expect(data.data.user).toBeDefined();
+    expect(data.data.stats).toBeDefined();
+    expect(data.data.goreanStats).toBeDefined();
+    expect(data.data.hasGoreanCharacter).toBe("true");
+
+    // Check user fields
+    expect(data.data.user.slUuid).toBe(uuid);
+    expect(data.data.user.username).toBe(username);
+    expect(data.data.user.role).toBe('FREE');
+    expect(data.data.user.universe).toBe('gor');
+
+    // Check stats (should only have status, no duplicates)
+    expect(data.data.stats.status).toBeDefined();
+    expect(data.data.stats.health).toBeUndefined(); // Should not be in stats
+    expect(data.data.stats.goldCoin).toBeUndefined(); // Should not be in stats
+
+    // Check goreanStats (strings are URL-encoded for LSL compatibility)
+    expect(data.data.goreanStats.characterName).toBe('Tarl%20of%20Ko-ro-ba');
+    expect(data.data.goreanStats.agentName).toBe('Tarl%2C%20Warrior%20of%20the%20Scarlet%20Caste');
+    expect(data.data.goreanStats.title).toBe('Captain%20of%20the%20Guard');
+    expect(data.data.goreanStats.species).toBe('human');
+    expect(data.data.goreanStats.speciesCategory).toBe('sapient');
+    expect(data.data.goreanStats.culture).toBe('southern_cities');
+    expect(data.data.goreanStats.status).toBe('free_man');
+    expect(data.data.goreanStats.casteRole).toBe('warriors');
+    expect(data.data.goreanStats.region).toBe('ar');
+    expect(data.data.goreanStats.homeStoneName).toBe('Ko-ro-ba');
+    expect(data.data.goreanStats.strength).toBe(4);
+    expect(data.data.goreanStats.agility).toBe(3);
+    expect(data.data.goreanStats.intellect).toBe(2);
+    expect(data.data.goreanStats.perception).toBe(3);
+    expect(data.data.goreanStats.charisma).toBe(2);
+    expect(data.data.goreanStats.healthMax).toBe(20);
+    expect(data.data.goreanStats.healthCurrent).toBe(15);
+    expect(data.data.goreanStats.hungerCurrent).toBe(80);
+    expect(data.data.goreanStats.thirstCurrent).toBe(90);
+    expect(data.data.goreanStats.goldCoin).toBe(5);
+    expect(data.data.goreanStats.silverCoin).toBe(25);
+    expect(data.data.goreanStats.copperCoin).toBe(100);
+    expect(data.data.goreanStats.xp).toBe(50);
+    expect(data.data.goreanStats.registrationCompleted).toBe(true);
   });
 
   it('should return 404 for non-existent user', async () => {
@@ -138,7 +153,7 @@ describe('GET /api/gor/stats', () => {
     const response = await GET(request);
     const data = await parseJsonResponse(response);
 
-    expectError(data, 'User not found');
+    expectError(data, 'User not found in Gor universe');
     expect(response.status).toBe(404);
   });
 
@@ -175,7 +190,7 @@ describe('GET /api/gor/stats', () => {
     const response = await GET(request);
     const data = await parseJsonResponse(response);
 
-    expectError(data, 'Gorean character not created');
+    expectError(data, 'User registration incomplete');
     expect(response.status).toBe(404);
   });
 
@@ -351,13 +366,12 @@ describe('GET /api/gor/stats', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.characterName).toBe('Thunder');
-    expect(data.data.species).toBe('larl');
-    expect(data.data.speciesCategory).toBe('feline');
-    expect(data.data.culture).toBe('wild');
-    expect(data.data.status).toBe('wild');
-    expect(data.data.strength).toBe(5);
-    expect(data.data.skills).toHaveLength(2);
+    expect(data.data.goreanStats.characterName).toBe('Thunder');
+    expect(data.data.goreanStats.species).toBe('larl');
+    expect(data.data.goreanStats.speciesCategory).toBe('feline');
+    expect(data.data.goreanStats.culture).toBe('wild');
+    expect(data.data.goreanStats.status).toBe('wild');
+    expect(data.data.goreanStats.strength).toBe(5);
   });
 
   it('should retrieve active effects if present', async () => {
@@ -431,9 +445,27 @@ describe('GET /api/gor/stats', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.activeEffects).toHaveLength(1);
-    expect(data.data.activeEffects[0].name).toBe('Strength Buff');
-    expect(data.data.activeEffects[0].modifier).toBe(2);
-    expect(data.data.liveStats.strength).toBe(5);
+    expect(data.data.goreanStats.activeEffects).toHaveLength(1);
+    expect(data.data.goreanStats.activeEffects[0].name).toBe('Strength Buff');
+    expect(data.data.goreanStats.activeEffects[0].modifier).toBe(2);
+    expect(data.data.goreanStats.liveStats.strength).toBe(5);
+  });
+
+  it('should return 400 for non-Gor universe', async () => {
+    const uuid = generateTestUUID();
+    const timestamp = new Date().toISOString();
+    const signature = generateSignature(timestamp, 'Gor');
+    const request = createMockGetRequest('/api/gor/stats', {
+      sl_uuid: uuid,
+      universe: 'Arkana', // Wrong universe
+      timestamp,
+      signature
+    });
+
+    const response = await GET(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data, 'This endpoint is only for Gor universe');
+    expect(response.status).toBe(400);
   });
 });

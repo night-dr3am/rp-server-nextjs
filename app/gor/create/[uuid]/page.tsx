@@ -572,7 +572,6 @@ export default function GoreanCharacterCreation() {
   const renderStep9 = () => {
     // Get character context for ability filtering
     const speciesData = characterModel.species ? getSpeciesById(characterModel.species) : undefined;
-    const cultureData = characterModel.culture ? getCultureById(characterModel.culture) : undefined;
 
     return (
       <AbilitySelector

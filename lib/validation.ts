@@ -480,17 +480,17 @@ export const goreanCheckUserSchema = Joi.object({
 
 export const goreanStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().valid('gor').required(),
+  universe: Joi.string().required(), // Validate in route handler for custom error message
   timestamp: timestampSchema,
   signature: signatureSchema
 });
 
 export const goreanUpdateStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().valid('gor').required(),
-  health: Joi.number().integer().optional(), // Allow any value for clamping
-  hunger: Joi.number().integer().optional(), // Allow any value for clamping
-  thirst: Joi.number().integer().optional(), // Allow any value for clamping
+  universe: Joi.string().required(), // Validate in route handler for custom error message
+  healthCurrent: Joi.number().integer().optional(), // Allow any value for clamping
+  hungerCurrent: Joi.number().integer().optional(), // Allow any value for clamping
+  thirstCurrent: Joi.number().integer().optional(), // Allow any value for clamping
   goldCoin: currencySchema,
   silverCoin: currencySchema,
   copperCoin: currencySchema,

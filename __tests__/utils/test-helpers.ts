@@ -409,6 +409,103 @@ export async function createTestUserWithInventory(testUser: TestUser, items: Tes
   return user
 }
 
+// Create test user with complete Gorean character registration
+export async function createTestUserWithGoreanStats(testUser: TestUser) {
+  const user = await prisma.user.create({
+    data: {
+      slUuid: testUser.sl_uuid,
+      universe: testUser.universe,
+      username: testUser.username,
+      role: testUser.role.toUpperCase() as any,
+      stats: {
+        create: {
+          health: 100,
+          hunger: 100,
+          thirst: 100,
+          goldCoin: 10,
+          silverCoin: 50,
+          copperCoin: 100,
+        },
+      },
+      goreanStats: {
+        create: {
+          // Identity
+          characterName: testUser.username + " Character",
+          agentName: testUser.username,
+          title: "Test Character",
+          background: "Test background for character",
+
+          // Taxonomy
+          species: "human",
+          speciesCategory: "sapient",
+          speciesVariant: null,
+          culture: "ko_ro_ba",
+          cultureType: "cityState",
+          status: "freeMan",
+          statusSubtype: null,
+          casteRole: "warrior",
+          casteRoleType: "highCaste",
+          region: "Ko-ro-ba",
+          homeStoneName: "Ko-ro-ba",
+
+          // Base Stats (5 stats, 10 points allocated)
+          strength: 3,
+          agility: 2,
+          intellect: 2,
+          perception: 2,
+          charisma: 1,
+          statPointsPool: 10,
+          statPointsSpent: 10,
+
+          // Derived Stats
+          healthMax: 15, // strength * 5
+          hungerMax: 100,
+          thirstMax: 100,
+
+          // Current State
+          healthCurrent: 15,
+          hungerCurrent: 100,
+          thirstCurrent: 100,
+
+          // Economy
+          goldCoin: 10,
+          silverCoin: 50,
+          copperCoin: 100,
+          xp: 0,
+
+          // Skills (sample)
+          skills: [
+            { skill_id: "skill_sword", skill_name: "Sword Combat", level: 1 }
+          ],
+          skillsAllocatedPoints: 5,
+          skillsSpentPoints: 3,
+
+          // Abilities (sample)
+          abilities: [
+            { ability_id: "tactical_command", ability_name: "Tactical Command" }
+          ],
+          abilitiesAllocatedPoints: 7,
+          abilitiesSpentPoints: 2,
+
+          // Active Effects & Live Stats
+          activeEffects: [],
+          liveStats: {},
+
+          // Metadata
+          registrationCompleted: true,
+          gorRole: "player",
+        },
+      },
+    },
+    include: {
+      stats: true,
+      goreanStats: true,
+    },
+  });
+
+  return user;
+}
+
 // Generate unique UUIDs for testing
 export function generateTestUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

@@ -85,9 +85,9 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10,
-      hunger: 80,
-      thirst: 90,
+      healthCurrent: 10,
+      hungerCurrent: 80,
+      thirstCurrent: 90,
       goldCoin: 15,
       silverCoin: 75,
       copperCoin: 150
@@ -98,14 +98,20 @@ describe('POST /api/gor/stats/update', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.healthCurrent).toBe(10);
-    expect(data.data.healthMax).toBe(15);
-    expect(data.data.hungerCurrent).toBe(80);
-    expect(data.data.thirstCurrent).toBe(90);
-    expect(data.data.goldCoin).toBe(15);
-    expect(data.data.silverCoin).toBe(75);
-    expect(data.data.copperCoin).toBe(150);
-    expect(data.data.updatedAt).toBeDefined();
+    // Check nested structure
+    expect(data.data.user).toBeDefined();
+    expect(data.data.stats).toBeDefined();
+    expect(data.data.goreanStats).toBeDefined();
+    expect(data.data.hasGoreanCharacter).toBe("true");
+
+    // Check updated goreanStats
+    expect(data.data.goreanStats.healthCurrent).toBe(10);
+    expect(data.data.goreanStats.healthMax).toBe(15);
+    expect(data.data.goreanStats.hungerCurrent).toBe(80);
+    expect(data.data.goreanStats.thirstCurrent).toBe(90);
+    expect(data.data.goreanStats.goldCoin).toBe(15);
+    expect(data.data.goreanStats.silverCoin).toBe(75);
+    expect(data.data.goreanStats.copperCoin).toBe(150);
   });
 
   it('should update partial stats successfully', async () => {
@@ -115,8 +121,8 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 5,
-      hunger: 75
+      healthCurrent: 5,
+      hungerCurrent: 75
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -124,13 +130,13 @@ describe('POST /api/gor/stats/update', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.healthCurrent).toBe(5);
-    expect(data.data.hungerCurrent).toBe(75);
+    expect(data.data.goreanStats.healthCurrent).toBe(5);
+    expect(data.data.goreanStats.hungerCurrent).toBe(75);
     // Other stats should remain unchanged
-    expect(data.data.thirstCurrent).toBe(100);
-    expect(data.data.goldCoin).toBe(10);
-    expect(data.data.silverCoin).toBe(50);
-    expect(data.data.copperCoin).toBe(100);
+    expect(data.data.goreanStats.thirstCurrent).toBe(100);
+    expect(data.data.goreanStats.goldCoin).toBe(10);
+    expect(data.data.goreanStats.silverCoin).toBe(50);
+    expect(data.data.goreanStats.copperCoin).toBe(100);
   });
 
   it('should clamp health to valid range (0 to healthMax)', async () => {
@@ -140,7 +146,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData1 = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 25 // Above healthMax of 15
+      healthCurrent: 25 // Above healthMax of 15
     }, 'gor');
 
     const request1 = createMockPostRequest('/api/gor/stats/update', updateData1);
@@ -148,13 +154,13 @@ describe('POST /api/gor/stats/update', () => {
     const data1 = await parseJsonResponse(response1);
 
     expectSuccess(data1);
-    expect(data1.data.healthCurrent).toBe(15); // Clamped to healthMax
+    expect(data1.data.goreanStats.healthCurrent).toBe(15); // Clamped to healthMax
 
     // Try negative health
     const updateData2 = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: -5 // Below 0
+      healthCurrent: -5 // Below 0
     }, 'gor');
 
     const request2 = createMockPostRequest('/api/gor/stats/update', updateData2);
@@ -162,7 +168,7 @@ describe('POST /api/gor/stats/update', () => {
     const data2 = await parseJsonResponse(response2);
 
     expectSuccess(data2);
-    expect(data2.data.healthCurrent).toBe(0); // Clamped to 0
+    expect(data2.data.goreanStats.healthCurrent).toBe(0); // Clamped to 0
   });
 
   it('should clamp hunger and thirst to valid range (0-100)', async () => {
@@ -171,8 +177,8 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      hunger: 150, // Above 100
-      thirst: -10  // Below 0
+      hungerCurrent: 150, // Above 100
+      thirstCurrent: -10  // Below 0
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -180,8 +186,8 @@ describe('POST /api/gor/stats/update', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.hungerCurrent).toBe(100); // Clamped to max
-    expect(data.data.thirstCurrent).toBe(0);   // Clamped to min
+    expect(data.data.goreanStats.hungerCurrent).toBe(100); // Clamped to max
+    expect(data.data.goreanStats.thirstCurrent).toBe(0);   // Clamped to min
   });
 
   it('should allow negative currency values for debts', async () => {
@@ -200,9 +206,9 @@ describe('POST /api/gor/stats/update', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.goldCoin).toBe(-5);
-    expect(data.data.silverCoin).toBe(-10);
-    expect(data.data.copperCoin).toBe(-20);
+    expect(data.data.goreanStats.goldCoin).toBe(-5);
+    expect(data.data.goreanStats.silverCoin).toBe(-10);
+    expect(data.data.goreanStats.copperCoin).toBe(-20);
   });
 
   it('should return 401 for invalid signature', async () => {
@@ -211,7 +217,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = {
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10,
+      healthCurrent: 10,
       timestamp: new Date().toISOString(),
       signature: 'invalid-signature-here'
     };
@@ -229,14 +235,14 @@ describe('POST /api/gor/stats/update', () => {
       const updateData = createApiBody({
         sl_uuid: generateTestUUID(),
         universe: 'gor',
-        health: 10
+        healthCurrent: 10
       }, 'gor');
 
       const request = createMockPostRequest('/api/gor/stats/update', updateData);
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'User not found');
+      expectError(data, 'User not found in Gor universe');
       expect(response.status).toBe(404);
     });
   });
@@ -265,14 +271,14 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10
+      healthCurrent: 10
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
     const response = await POST(request);
     const data = await parseJsonResponse(response);
 
-    expectError(data, 'Gorean character not created');
+    expectError(data, 'User registration incomplete');
     expect(response.status).toBe(404);
   });
 
@@ -280,7 +286,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: 'not-a-valid-uuid',
       universe: 'gor',
-      health: 10
+      healthCurrent: 10
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -295,7 +301,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       // missing sl_uuid
       universe: 'gor',
-      health: 10
+      healthCurrent: 10
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -352,7 +358,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10
+      healthCurrent: 10
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -373,7 +379,7 @@ describe('POST /api/gor/stats/update', () => {
     const update1 = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10,
+      healthCurrent: 10,
       goldCoin: 20
     }, 'gor');
 
@@ -382,15 +388,15 @@ describe('POST /api/gor/stats/update', () => {
     const data1 = await parseJsonResponse(response1);
 
     expectSuccess(data1);
-    expect(data1.data.healthCurrent).toBe(10);
-    expect(data1.data.goldCoin).toBe(20);
+    expect(data1.data.goreanStats.healthCurrent).toBe(10);
+    expect(data1.data.goreanStats.goldCoin).toBe(20);
 
     // Second update
     const update2 = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 12,
-      hunger: 90,
+      healthCurrent: 12,
+      hungerCurrent: 90,
       silverCoin: 100
     }, 'gor');
 
@@ -399,10 +405,10 @@ describe('POST /api/gor/stats/update', () => {
     const data2 = await parseJsonResponse(response2);
 
     expectSuccess(data2);
-    expect(data2.data.healthCurrent).toBe(12);
-    expect(data2.data.hungerCurrent).toBe(90);
-    expect(data2.data.silverCoin).toBe(100);
-    expect(data2.data.goldCoin).toBe(20); // Should retain previous value
+    expect(data2.data.goreanStats.healthCurrent).toBe(12);
+    expect(data2.data.goreanStats.hungerCurrent).toBe(90);
+    expect(data2.data.goreanStats.silverCoin).toBe(100);
+    expect(data2.data.goreanStats.goldCoin).toBe(20); // Should retain previous value
   });
 
   it('should work for characters with different healthMax values', async () => {
@@ -453,7 +459,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 20
+      healthCurrent: 20
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -461,14 +467,14 @@ describe('POST /api/gor/stats/update', () => {
     const data = await parseJsonResponse(response);
 
     expectSuccess(data);
-    expect(data.data.healthCurrent).toBe(20);
-    expect(data.data.healthMax).toBe(25);
+    expect(data.data.goreanStats.healthCurrent).toBe(20);
+    expect(data.data.goreanStats.healthMax).toBe(25);
 
     // Try to set health above this character's max
     const updateData2 = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 30
+      healthCurrent: 30
     }, 'gor');
 
     const request2 = createMockPostRequest('/api/gor/stats/update', updateData2);
@@ -476,7 +482,7 @@ describe('POST /api/gor/stats/update', () => {
     const data2 = await parseJsonResponse(response2);
 
     expectSuccess(data2);
-    expect(data2.data.healthCurrent).toBe(25); // Clamped to character's healthMax
+    expect(data2.data.goreanStats.healthCurrent).toBe(25); // Clamped to character's healthMax
   });
 
   it('should update updatedAt timestamp in goreanStats', async () => {
@@ -494,7 +500,7 @@ describe('POST /api/gor/stats/update', () => {
     const updateData = createApiBody({
       sl_uuid: uuid,
       universe: 'gor',
-      health: 10
+      healthCurrent: 10
     }, 'gor');
 
     const request = createMockPostRequest('/api/gor/stats/update', updateData);
@@ -508,5 +514,21 @@ describe('POST /api/gor/stats/update', () => {
       where: { user: { slUuid: uuid, universe: 'gor' } }
     });
     expect(updatedStats?.updatedAt.getTime()).toBeGreaterThan(initialUpdatedAt!.getTime());
+  });
+
+  it('should return 400 for non-Gor universe', async () => {
+    const { uuid } = await createTestGoreanCharacter();
+    const updateData = createApiBody({
+      sl_uuid: uuid,
+      universe: 'Arkana', // Wrong universe
+      healthCurrent: 10
+    }, 'Gor'); // Use Gor signature
+
+    const request = createMockPostRequest('/api/gor/stats/update', updateData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectError(data, 'This endpoint is only for Gor universe');
+    expect(response.status).toBe(400);
   });
 });
