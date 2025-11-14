@@ -14,6 +14,7 @@ import {
   RegionData,
   createInitialCharacterModel,
   calculateStatPointsSpent,
+  calculateSkillCost,
   calculateTotalAbilityPoints,
   DEFAULT_STAT_POINTS,
   MIN_STAT_VALUE,
