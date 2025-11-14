@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         slUuid: sl_uuid!,
         universe: {
           equals: universe!,
-          mode: 'insensitive' // Case-insensitive match for "Gor" or "gor"
+          mode: 'insensitive'
         }
       },
       include: {

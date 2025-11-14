@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   loadAllGoreanData,
   GoreanCharacterModel,
@@ -45,7 +45,6 @@ import { CharacterReview } from '@/components/gor/CharacterReview';
 export default function GoreanCharacterCreation() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const uuid = params?.uuid as string;
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
@@ -63,7 +62,7 @@ export default function GoreanCharacterCreation() {
   // Load data and validate token on mount
   useEffect(() => {
     const initializeApp = async () => {
-      if (!token || universe !== 'gor') {
+      if (!token || universe?.toLowerCase() !== 'gor') {
         setError('Invalid or missing token');
         setLoading(false);
         return;
@@ -350,8 +349,9 @@ export default function GoreanCharacterCreation() {
       const data = await response.json();
 
       if (data.success) {
-        // Redirect to profile page
-        router.push(`/profile/${uuid}`);
+        alert('Your Gorean Character is created successfully! Please go back to the game and touch your Gor HUD to refresh your stats.');
+        // Close the page after user confirms the alert
+        window.close();
       } else {
         setError(data.error || 'Failed to create character');
         setIsSubmitting(false);

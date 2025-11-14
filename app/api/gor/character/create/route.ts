@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
     const profileToken = tokenValidation.profileToken!;
     const user = profileToken.user;
 
-    // Verify token is for Gor universe
-    if (user.universe !== universe || universe !== 'gor') {
+    // Verify token is for Gor universe (case-insensitive)
+    if (user.universe.toLowerCase() !== universe.toLowerCase() || universe.toLowerCase() !== 'gor') {
       return NextResponse.json(
         { success: false, error: 'Token is not valid for Gor universe' },
         { status: 401 }
@@ -180,22 +180,6 @@ export async function POST(request: NextRequest) {
     const statPointsSpent = (characterData.strength - 1) + (characterData.agility - 1) +
                             (characterData.intellect - 1) + (characterData.perception - 1) +
                             (characterData.charisma - 1);
-
-    // Check if this is a complete character (has all required fields)
-    const isCompleteCharacter = !!(
-      characterData.characterName &&
-      characterData.agentName &&
-      characterData.species &&
-      characterData.speciesCategory &&
-      characterData.culture &&
-      characterData.cultureType &&
-      characterData.status &&
-      characterData.strength >= 1 &&
-      characterData.agility >= 1 &&
-      characterData.intellect >= 1 &&
-      characterData.perception >= 1 &&
-      characterData.charisma >= 1
-    );
 
     // Base Gorean stats data for both create and update
     const baseGoreanStatsData = {
@@ -250,8 +234,9 @@ export async function POST(request: NextRequest) {
       abilitiesAllocatedPoints: characterData.abilitiesAllocatedPoints || 7,
       abilitiesSpentPoints: characterData.abilitiesSpentPoints || 0,
 
-      // Registration flag
-      registrationCompleted: isCompleteCharacter
+      // Registration flag - Always true when web form successfully submits
+      // (Web wizard validates all required fields before allowing submission)
+      registrationCompleted: true
     };
 
     // Data for creating new character (includes initial currency and current state)
@@ -369,7 +354,9 @@ export async function POST(request: NextRequest) {
           username: user.username,
           uuid: user.slUuid,
           universe: user.universe
-        }
+        },
+        // String boolean for LSL compatibility (follows Arkana pattern)
+        hasGoreanCharacter: result.registrationCompleted ? "true" : "false"
       }
     });
 

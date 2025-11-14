@@ -28,9 +28,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find or create user in Gor universe
+    // Find or create user in Gor universe (case-insensitive match for consistency)
     let user = await prisma.user.findFirst({
-      where: { slUuid: sl_uuid, universe: universe },
+      where: {
+        slUuid: sl_uuid,
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
+      },
       include: { goreanStats: true, stats: true }
     });
 

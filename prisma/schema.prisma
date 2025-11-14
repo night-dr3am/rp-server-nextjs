@@ -13,7 +13,7 @@ datasource db {
 model User {
   id           String      @id @default(uuid())
   slUuid       String      @map("sl_uuid") // Second Life UUID
-  universe     String      @default("Gor") @map("universe") // Universe identifier (e.g., "Gor", "Fantasy", etc.)
+  universe     String      @default("gor") @map("universe") // Universe identifier (e.g., "gor", "arkana", etc.)
   username     String
   role         Role        @default(FREE)
   title        String?     @db.VarChar(512) // Optional RP title (max 512 chars)
@@ -75,7 +75,7 @@ model RpItem {
   id                      Int              @id @default(autoincrement())
   name                    String
   shortName               String           @map("short_name")
-  universe                String           @default("Gor")  // Universe this item belongs to
+  universe                String           @default("gor")  // Universe this item belongs to
   isShortNameDifferent    Boolean          @default(false) @map("is_short_name_different")
   category                String
   tags                    String           @default("")
@@ -137,7 +137,7 @@ model ProfileToken {
 model Estate {
   id              Int       @id @default(autoincrement())
   estateId        String    @map("estate_id")  // Estate identifier from LSL
-  universe        String    @default("Gor")     // Universe this estate belongs to
+  universe        String    @default("gor")     // Universe this estate belongs to
   name            String
   description     String?
   rentPricePerDay Int       @map("rent_price_per_day")  // Price per day in copper coins
@@ -357,7 +357,7 @@ model GoreanStats {
 model NPC {
   id              Int        @id @default(autoincrement())
   npcId           String     @map("npc_id")       // Unique identifier from LSL notecard
-  universe        String     @default("Gor")
+  universe        String     @default("gor")
   name            String
   description     String?    @db.Text
   location        String?
@@ -413,7 +413,7 @@ model Recipe {
   id                    Int       @id @default(autoincrement())
   name                  String    @db.VarChar(255)
   shortName             String    @map("short_name") @db.VarChar(100)
-  universe              String    @default("Gor")
+  universe              String    @default("gor")
   craftingStationType   String    @map("crafting_station_type") @db.VarChar(100)
   ingredients           Json      // Array of {quantity: number, rpItemShortName: string}
   craftingTime          Int       @map("crafting_time") // Time in seconds
@@ -441,7 +441,7 @@ model Recipe {
 model CraftingStation {
   id                    Int       @id @default(autoincrement())
   stationId             String    @map("station_id") @db.VarChar(100) // Station identifier from LSL
-  universe              String    @default("Gor")
+  universe              String    @default("gor")
   name                  String    @db.VarChar(255)
   type                  String    @db.VarChar(100) // Type of crafting station (cooking, forge, etc.)
   busy                  Boolean   @default(false)
@@ -459,7 +459,7 @@ model CraftingStation {
 // Individual crafting sessions
 model Crafting {
   id                    Int       @id @default(autoincrement())
-  universe              String    @default("Gor")
+  universe              String    @default("gor")
   userId                String    @map("user_id")
   craftingStationId     Int       @map("crafting_station_id")
   recipeShortName       String    @map("recipe_short_name") @db.VarChar(100)

@@ -132,7 +132,7 @@ export default function ArkanaCharacterCreation() {
   // Load data and validate token on mount
   useEffect(() => {
     const initializeApp = async () => {
-      if (!token || !uuid || universe !== 'arkana') {
+      if (!token || !uuid || universe?.toLowerCase() !== 'arkana') {
         setError('Invalid or missing token');
         setLoading(false);
         return;
