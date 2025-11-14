@@ -207,7 +207,7 @@ export default function GoreanCharacterCreation() {
 
   const handleSkillsChange = (skills: GoreanCharacterModel['skills']) => {
     const spentPoints = skills.reduce((total, skill) => {
-      const cost = (skill.level * (skill.level + 1)) / 2;
+      const cost = calculateSkillCost(skill.level);  // Linear cost: 1 point per level
       return total + cost;
     }, 0);
 
