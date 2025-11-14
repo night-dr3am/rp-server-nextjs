@@ -37,7 +37,13 @@ export async function GET(request: NextRequest) {
 
     // Find user in Arkana universe with all related data
     const user = await prisma.user.findFirst({
-      where: { slUuid: validatedParams.sl_uuid, universe: validatedParams.universe },
+      where: {
+        slUuid: validatedParams.sl_uuid,
+        universe: {
+          equals: validatedParams.universe,
+          mode: 'insensitive'
+        }
+      },
       include: {
         stats: true,
         arkanaStats: true
@@ -183,13 +189,28 @@ export async function POST(request: NextRequest) {
     if (hunger !== undefined) updateData.hunger = Math.max(0, Math.min(100, hunger));
     if (thirst !== undefined) updateData.thirst = Math.max(0, Math.min(100, thirst));
 
+    // Find user first with case-insensitive universe matching
+    const user = await prisma.user.findFirst({
+      where: {
+        slUuid: sl_uuid,
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found in Arkana universe' },
+        { status: 404 }
+      );
+    }
+
     // Update user stats using a nested upsert through user relation
     const updatedUser = await prisma.user.update({
       where: {
-        slUuid_universe: {
-          slUuid: sl_uuid,
-          universe: universe
-        }
+        id: user.id
       },
       data: {
         lastActive: new Date(),

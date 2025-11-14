@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findFirst({
       where: {
         slUuid: sl_uuid!,
-        universe: universe!
+        universe: {
+          equals: universe!,
+          mode: 'insensitive'
+        }
       },
       include: { stats: true }
     });
@@ -129,13 +132,28 @@ export async function POST(request: NextRequest) {
     if (silverCoin !== undefined) updateData.silverCoin = silverCoin;
     if (copperCoin !== undefined) updateData.copperCoin = copperCoin;
 
+    // Find user first with case-insensitive universe matching
+    const user = await prisma.user.findFirst({
+      where: {
+        slUuid: sl_uuid,
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     // Update user stats using a nested upsert through user relation
     const updatedUser = await prisma.user.update({
       where: {
-        slUuid_universe: {
-          slUuid: sl_uuid,
-          universe: universe
-        }
+        id: user.id
       },
       data: {
         lastActive: new Date(),

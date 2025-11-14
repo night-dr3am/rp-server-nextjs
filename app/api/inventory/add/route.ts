@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
       const user = await tx.user.findFirst({
         where: {
           slUuid: sl_uuid,
-          universe: universe
+          universe: {
+            equals: universe,
+            mode: 'insensitive'
+          }
         }
       });
       if (!user) throw new Error('User not found');

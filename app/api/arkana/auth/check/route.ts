@@ -44,7 +44,10 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findFirst({
       where: {
         slUuid: sl_uuid!,
-        universe: universe!
+        universe: {
+          equals: universe!,
+          mode: 'insensitive'
+        }
       },
       include: {
         stats: true,
@@ -191,7 +194,10 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findFirst({
       where: {
         slUuid: sl_uuid,
-        universe: universe
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
       },
       include: {
         stats: true,

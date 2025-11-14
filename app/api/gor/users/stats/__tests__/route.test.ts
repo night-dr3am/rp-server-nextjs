@@ -465,7 +465,8 @@ describe('GET /api/gor/stats', () => {
     const response = await GET(request);
     const data = await parseJsonResponse(response);
 
-    expectError(data, 'This endpoint is only for Gor universe');
+    // Joi validation now rejects non-gor universe at schema level
+    expectError(data, '"universe" must be [gor]');
     expect(response.status).toBe(400);
   });
 });

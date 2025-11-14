@@ -466,28 +466,28 @@ export const arkanaCharacterCreateSchema = Joi.object({
 // Gorean character creation validation schemas
 export const goreanRegisterSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().valid('gor').required(),
+  universe: Joi.string().lowercase().valid('gor').required(), // Normalize to lowercase for case-insensitive matching
   timestamp: timestampSchema,
   signature: signatureSchema
 });
 
 export const goreanCheckUserSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().valid('gor').required(),
+  universe: Joi.string().lowercase().valid('gor').required(), // Normalize to lowercase for case-insensitive matching
   timestamp: timestampSchema,
   signature: signatureSchema
 });
 
 export const goreanStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().required(), // Validate in route handler for custom error message
+  universe: Joi.string().lowercase().valid('gor').required(), // Normalize to lowercase for case-insensitive matching
   timestamp: timestampSchema,
   signature: signatureSchema
 });
 
 export const goreanUpdateStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
-  universe: Joi.string().required(), // Validate in route handler for custom error message
+  universe: Joi.string().lowercase().valid('gor').required(), // Normalize to lowercase for case-insensitive matching
   healthCurrent: Joi.number().integer().optional(), // Allow any value for clamping
   hungerCurrent: Joi.number().integer().optional(), // Allow any value for clamping
   thirstCurrent: Joi.number().integer().optional(), // Allow any value for clamping
@@ -563,7 +563,7 @@ export const goreanCharacterCreateSchema = Joi.object({
 
   // JWT token for authentication
   token: Joi.string().required(),
-  universe: Joi.string().valid('gor').required()
+  universe: Joi.string().lowercase().valid('gor').required() // Normalize to lowercase for case-insensitive matching
 }).custom((value, helpers) => {
   // Validate stat point allocation for Gorean stats (5 stats, 10 points total)
   const baseStats = 5; // 1 point each in 5 stats

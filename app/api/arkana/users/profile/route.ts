@@ -41,7 +41,10 @@ export async function POST(request: NextRequest) {
     const existingUser = await prisma.user.findFirst({
       where: {
         slUuid: sl_uuid,
-        universe: universe
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
       },
       include: {
         arkanaStats: true,
@@ -112,10 +115,7 @@ export async function POST(request: NextRequest) {
       if (Object.keys(userUpdateData).length > 1) { // More than just lastActive
         updatedUser = await tx.user.update({
           where: {
-            slUuid_universe: {
-              slUuid: sl_uuid,
-              universe: universe
-            }
+            id: existingUser.id
           },
           data: userUpdateData,
           include: {

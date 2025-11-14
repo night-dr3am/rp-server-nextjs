@@ -27,11 +27,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user exists in Gor universe
+    // Check if user exists in Gor universe (case-insensitive universe matching)
     const user = await prisma.user.findFirst({
       where: {
         slUuid: sl_uuid,
-        universe: universe
+        universe: {
+          equals: universe,
+          mode: 'insensitive'
+        }
       },
       include: {
         goreanStats: true
