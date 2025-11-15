@@ -68,44 +68,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prepare update data, only including fields if they're provided
-    const updateData: {
+    // Prepare update data for GoreanStats (health/hunger/thirst only)
+    const goreanUpdateData: {
       healthCurrent?: number;
       hungerCurrent?: number;
       thirstCurrent?: number;
-      goldCoin?: number;
-      silverCoin?: number;
-      copperCoin?: number;
       updatedAt: Date;
     } = {
       updatedAt: new Date()
     };
 
+    // Prepare update data for UserStats (health/hunger/thirst for sync + coins)
+    const userStatsUpdateData: {
+      health?: number;
+      hunger?: number;
+      thirst?: number;
+      goldCoin?: number;
+      silverCoin?: number;
+      copperCoin?: number;
+      lastUpdated: Date;
+    } = {
+      lastUpdated: new Date()
+    };
+
     // Clamp health to valid range (0 to healthMax)
     if (healthCurrent !== undefined) {
-      updateData.healthCurrent = Math.max(0, Math.min(user.goreanStats.healthMax, healthCurrent));
+      const clampedHealth = Math.max(0, Math.min(user.goreanStats.healthMax, healthCurrent));
+      goreanUpdateData.healthCurrent = clampedHealth;
+      userStatsUpdateData.health = clampedHealth; // Sync to UserStats
     }
 
     // Clamp hunger and thirst to valid ranges (0-100)
     if (hungerCurrent !== undefined) {
-      updateData.hungerCurrent = Math.max(0, Math.min(100, hungerCurrent));
+      const clampedHunger = Math.max(0, Math.min(100, hungerCurrent));
+      goreanUpdateData.hungerCurrent = clampedHunger;
+      userStatsUpdateData.hunger = clampedHunger; // Sync to UserStats
     }
 
     if (thirstCurrent !== undefined) {
-      updateData.thirstCurrent = Math.max(0, Math.min(100, thirstCurrent));
+      const clampedThirst = Math.max(0, Math.min(100, thirstCurrent));
+      goreanUpdateData.thirstCurrent = clampedThirst;
+      userStatsUpdateData.thirst = clampedThirst; // Sync to UserStats
     }
 
-    // Update currency fields (no clamping, can be negative for debts)
-    if (goldCoin !== undefined) updateData.goldCoin = goldCoin;
-    if (silverCoin !== undefined) updateData.silverCoin = silverCoin;
-    if (copperCoin !== undefined) updateData.copperCoin = copperCoin;
+    // Update currency fields in UserStats (authoritative source, no clamping)
+    if (goldCoin !== undefined) userStatsUpdateData.goldCoin = goldCoin;
+    if (silverCoin !== undefined) userStatsUpdateData.silverCoin = silverCoin;
+    if (copperCoin !== undefined) userStatsUpdateData.copperCoin = copperCoin;
 
-    // Update Gorean stats
+    // Update Gorean stats (health/hunger/thirst only)
     const updatedStats = await prisma.goreanStats.update({
       where: {
         userId: user.id
       },
-      data: updateData
+      data: goreanUpdateData
+    });
+
+    // Update UserStats (health/hunger/thirst for sync + coins as authoritative)
+    const updatedUserStats = await prisma.userStats.update({
+      where: {
+        userId: user.id
+      },
+      data: userStatsUpdateData
     });
 
     // Update user's last active timestamp
@@ -176,10 +200,10 @@ export async function POST(request: NextRequest) {
           hungerCurrent: updatedStats.hungerCurrent,
           thirstCurrent: updatedStats.thirstCurrent,
 
-          // Economy
-          goldCoin: updatedStats.goldCoin,
-          silverCoin: updatedStats.silverCoin,
-          copperCoin: updatedStats.copperCoin,
+          // Economy (read from UserStats, not GoreanStats)
+          goldCoin: updatedUserStats.goldCoin,
+          silverCoin: updatedUserStats.silverCoin,
+          copperCoin: updatedUserStats.copperCoin,
           xp: updatedStats.xp,
 
           // Active Effects & Live Stats

@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
             healthCurrent: user.goreanStats.healthCurrent,
             hungerCurrent: user.goreanStats.hungerCurrent,
             thirstCurrent: user.goreanStats.thirstCurrent,
-            goldCoin: user.goreanStats.goldCoin,
-            silverCoin: user.goreanStats.silverCoin,
-            copperCoin: user.goreanStats.copperCoin,
+            goldCoin: user.stats?.goldCoin ?? 0,
+            silverCoin: user.stats?.silverCoin ?? 0,
+            copperCoin: user.stats?.copperCoin ?? 10,
             xp: user.goreanStats.xp,
             createdAt: user.goreanStats.createdAt
           },

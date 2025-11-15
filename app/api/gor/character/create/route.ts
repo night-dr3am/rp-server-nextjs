@@ -239,59 +239,60 @@ export async function POST(request: NextRequest) {
       registrationCompleted: true
     };
 
-    // Data for creating new character (includes initial currency and current state)
+    // Data for creating new character (current state only, no coins)
     const newCharacterData = {
       ...baseGoreanStatsData,
       healthCurrent: healthMax,  // Start at full health
       hungerCurrent: 100,
       thirstCurrent: 100,
-      goldCoin: 0,
-      silverCoin: 5,   // Initial currency for new Gorean characters
-      copperCoin: 50,
+      // goldCoin, silverCoin, copperCoin removed - now managed in UserStats only
       xp: 0
     };
 
     // Use transaction to ensure atomicity
     const result = await prisma.$transaction(async (tx) => {
-      // Check if user already has Gorean character
+      // Check if user already has Gorean character and UserStats
       const existingGoreanStats = await tx.goreanStats.findUnique({
+        where: { userId: user.id }
+      });
+
+      const existingUserStats = await tx.userStats.findUnique({
         where: { userId: user.id }
       });
 
       let goreanStats;
 
       if (existingGoreanStats) {
-        // Update existing character (preserve existing currency and state)
+        // Update existing character (no coins to preserve in GoreanStats)
         goreanStats = await tx.goreanStats.update({
           where: { userId: user.id },
           data: {
             ...baseGoreanStatsData,
-            // Preserve existing currency and state when updating character
-            goldCoin: existingGoreanStats.goldCoin,
-            silverCoin: existingGoreanStats.silverCoin,
-            copperCoin: existingGoreanStats.copperCoin,
+            // Preserve existing XP and state when updating character
             xp: existingGoreanStats.xp,
             // Update healthMax (from baseGoreanStatsData), but clamp current health if it exceeds new max
             healthCurrent: Math.min(existingGoreanStats.healthCurrent, healthMax)
           }
         });
       } else {
-        // Create new character (include initial currency and state)
+        // Create new character (no coins in GoreanStats)
         goreanStats = await tx.goreanStats.create({
           data: newCharacterData
         });
       }
 
-      // Update or create UserStats to sync with Gorean character health
-      await tx.userStats.upsert({
+      // Update or create UserStats (health/hunger/thirst from goreanStats, coins managed here)
+      const userStats = await tx.userStats.upsert({
         where: { userId: user.id },
         update: {
+          // Sync health/hunger/thirst from goreanStats
           health: goreanStats.healthCurrent,
           hunger: goreanStats.hungerCurrent,
           thirst: goreanStats.thirstCurrent,
-          goldCoin: goreanStats.goldCoin,
-          silverCoin: goreanStats.silverCoin,
-          copperCoin: goreanStats.copperCoin,
+          // For NEW character: set initial defaults. For EXISTING character: preserve coins.
+          goldCoin: existingGoreanStats ? (existingUserStats?.goldCoin ?? 0) : 0,
+          silverCoin: existingGoreanStats ? (existingUserStats?.silverCoin ?? 0) : 5,
+          copperCoin: existingGoreanStats ? (existingUserStats?.copperCoin ?? 10) : 50,
           lastUpdated: new Date()
         },
         create: {
@@ -300,9 +301,10 @@ export async function POST(request: NextRequest) {
           hunger: goreanStats.hungerCurrent,
           thirst: goreanStats.thirstCurrent,
           status: 0,
-          goldCoin: goreanStats.goldCoin,
-          silverCoin: goreanStats.silverCoin,
-          copperCoin: goreanStats.copperCoin,
+          // Initial currency for new Gorean characters
+          goldCoin: 0,
+          silverCoin: 5,
+          copperCoin: 50,
           lastUpdated: new Date()
         }
       });
@@ -318,7 +320,7 @@ export async function POST(request: NextRequest) {
         data: { lastActive: new Date() }
       });
 
-      return goreanStats;
+      return { goreanStats, userStats };
     });
 
     return NextResponse.json({
@@ -326,29 +328,29 @@ export async function POST(request: NextRequest) {
       data: {
         message: 'Gorean character created successfully',
         goreanStats: {
-          id: result.id,
-          characterName: result.characterName,
-          agentName: result.agentName,
-          species: result.species,
-          speciesCategory: result.speciesCategory,
-          culture: result.culture,
-          status: result.status,
-          casteRole: result.casteRole,
-          strength: result.strength,
-          agility: result.agility,
-          intellect: result.intellect,
-          perception: result.perception,
-          charisma: result.charisma,
-          healthMax: result.healthMax,
-          healthCurrent: result.healthCurrent,
-          goldCoin: result.goldCoin,
-          silverCoin: result.silverCoin,
-          copperCoin: result.copperCoin,
-          xp: result.xp,
-          skills: result.skills,
-          abilities: result.abilities,
-          registrationCompleted: result.registrationCompleted,
-          createdAt: result.createdAt
+          id: result.goreanStats.id,
+          characterName: result.goreanStats.characterName,
+          agentName: result.goreanStats.agentName,
+          species: result.goreanStats.species,
+          speciesCategory: result.goreanStats.speciesCategory,
+          culture: result.goreanStats.culture,
+          status: result.goreanStats.status,
+          casteRole: result.goreanStats.casteRole,
+          strength: result.goreanStats.strength,
+          agility: result.goreanStats.agility,
+          intellect: result.goreanStats.intellect,
+          perception: result.goreanStats.perception,
+          charisma: result.goreanStats.charisma,
+          healthMax: result.goreanStats.healthMax,
+          healthCurrent: result.goreanStats.healthCurrent,
+          goldCoin: result.userStats.goldCoin,
+          silverCoin: result.userStats.silverCoin,
+          copperCoin: result.userStats.copperCoin,
+          xp: result.goreanStats.xp,
+          skills: result.goreanStats.skills,
+          abilities: result.goreanStats.abilities,
+          registrationCompleted: result.goreanStats.registrationCompleted,
+          createdAt: result.goreanStats.createdAt
         },
         user: {
           username: user.username,
@@ -356,7 +358,7 @@ export async function POST(request: NextRequest) {
           universe: user.universe
         },
         // String boolean for LSL compatibility (follows Arkana pattern)
-        hasGoreanCharacter: result.registrationCompleted ? "true" : "false"
+        hasGoreanCharacter: result.goreanStats.registrationCompleted ? "true" : "false"
       }
     });
 

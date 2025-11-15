@@ -39,7 +39,10 @@ describe('GET /api/gor/stats', () => {
           create: {
             health: 15,
             hunger: 80,
-            thirst: 90
+            thirst: 90,
+            goldCoin: 5,
+            silverCoin: 25,
+            copperCoin: 100
           }
         },
         goreanStats: {
@@ -67,9 +70,7 @@ describe('GET /api/gor/stats', () => {
             healthCurrent: 15,
             hungerCurrent: 80,
             thirstCurrent: 90,
-            goldCoin: 5,
-            silverCoin: 25,
-            copperCoin: 100,
+            // goldCoin, silverCoin, copperCoin removed - now in UserStats only
             xp: 50,
             skills: [
               { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3, xp: 0 },

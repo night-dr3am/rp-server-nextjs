@@ -334,7 +334,20 @@ describe('POST /api/gor/character/create', () => {
   it('should update existing character instead of creating duplicate', async () => {
     const { user, token } = await createUserWithToken();
 
-    // Create initial character
+    // Update UserStats with old currency (user already has UserStats from createUserWithToken)
+    await prisma.userStats.update({
+      where: { userId: user.id },
+      data: {
+        health: 10,
+        hunger: 100,
+        thirst: 100,
+        goldCoin: 100, // Old currency to be preserved
+        silverCoin: 50,
+        copperCoin: 200
+      }
+    });
+
+    // Create initial character (no coins in GoreanStats)
     await prisma.goreanStats.create({
       data: {
         userId: user.id,
@@ -353,9 +366,7 @@ describe('POST /api/gor/character/create', () => {
         statPointsPool: 5,
         statPointsSpent: 5,
         healthMax: 10,
-        goldCoin: 100, // Old currency
-        silverCoin: 50,
-        copperCoin: 200,
+        // goldCoin, silverCoin, copperCoin removed - now in UserStats only
         registrationCompleted: false
       }
     });

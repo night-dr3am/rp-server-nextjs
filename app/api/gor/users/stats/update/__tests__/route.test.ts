@@ -67,9 +67,7 @@ describe('POST /api/gor/stats/update', () => {
             healthCurrent: 15,
             hungerCurrent: 100,
             thirstCurrent: 100,
-            goldCoin: 10,
-            silverCoin: 50,
-            copperCoin: 100,
+            // goldCoin, silverCoin, copperCoin removed - now in UserStats only
             registrationCompleted: true
           }
         }

@@ -135,10 +135,10 @@ export async function GET(request: NextRequest) {
           hungerCurrent: user.goreanStats.hungerCurrent,
           thirstCurrent: user.goreanStats.thirstCurrent,
 
-          // Economy
-          goldCoin: user.goreanStats.goldCoin,
-          silverCoin: user.goreanStats.silverCoin,
-          copperCoin: user.goreanStats.copperCoin,
+          // Economy (read from UserStats, not GoreanStats)
+          goldCoin: user.stats?.goldCoin ?? 0,
+          silverCoin: user.stats?.silverCoin ?? 0,
+          copperCoin: user.stats?.copperCoin ?? 10,
           xp: user.goreanStats.xp,
 
           // Active Effects & Live Stats
@@ -301,10 +301,10 @@ export async function POST(request: NextRequest) {
           hungerCurrent: user.goreanStats.hungerCurrent,
           thirstCurrent: user.goreanStats.thirstCurrent,
 
-          // Economy
-          goldCoin: user.goreanStats.goldCoin,
-          silverCoin: user.goreanStats.silverCoin,
-          copperCoin: user.goreanStats.copperCoin,
+          // Economy (read from UserStats, not GoreanStats)
+          goldCoin: user.stats?.goldCoin ?? 0,
+          silverCoin: user.stats?.silverCoin ?? 0,
+          copperCoin: user.stats?.copperCoin ?? 10,
           xp: user.goreanStats.xp,
 
           // Active Effects & Live Stats

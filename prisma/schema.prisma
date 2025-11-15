@@ -321,10 +321,7 @@ model GoreanStats {
   hungerCurrent         Int       @default(100) @map("hunger_current")
   thirstCurrent         Int       @default(100) @map("thirst_current")
 
-  // Game Economy (Gor uses gold/silver/copper, not credits/chips)
-  goldCoin              Int       @default(0) @map("gold_coin")
-  silverCoin            Int       @default(0) @map("silver_coin")
-  copperCoin            Int       @default(0) @map("copper_coin")
+  // Game Economy (XP only; coins managed in UserStats)
   xp                    Int       @default(0)
 
   // Skills System (similar to Arkana)

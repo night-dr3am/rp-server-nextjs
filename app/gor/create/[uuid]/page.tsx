@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   loadAllGoreanData,
   GoreanCharacterModel,
@@ -43,9 +43,8 @@ import { AbilitySelector } from '@/components/gor/AbilitySelector';
 import { CharacterReview } from '@/components/gor/CharacterReview';
 
 export default function GoreanCharacterCreation() {
-  const params = useParams();
+  // Note: uuid from params ([uuid] route) is not used - authentication is done via token
   const searchParams = useSearchParams();
-  const uuid = params?.uuid as string;
   const token = searchParams?.get('token');
   const universe = searchParams?.get('universe');
 

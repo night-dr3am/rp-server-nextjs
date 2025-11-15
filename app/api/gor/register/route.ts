@@ -37,7 +37,10 @@ export async function POST(request: NextRequest) {
           mode: 'insensitive'
         }
       },
-      include: { goreanStats: true }
+      include: {
+        stats: true,
+        goreanStats: true
+      }
     });
 
     // If user doesn't exist, create them with default values
@@ -58,6 +61,7 @@ export async function POST(request: NextRequest) {
           }
         },
         include: {
+          stats: true,
           goreanStats: true
         }
       });
@@ -82,9 +86,9 @@ export async function POST(request: NextRequest) {
             perception: user.goreanStats.perception,
             charisma: user.goreanStats.charisma,
             healthMax: user.goreanStats.healthMax,
-            goldCoin: user.goreanStats.goldCoin,
-            silverCoin: user.goreanStats.silverCoin,
-            copperCoin: user.goreanStats.copperCoin,
+            goldCoin: user.stats?.goldCoin ?? 0,
+            silverCoin: user.stats?.silverCoin ?? 0,
+            copperCoin: user.stats?.copperCoin ?? 10,
             xp: user.goreanStats.xp,
             createdAt: user.goreanStats.createdAt
           },

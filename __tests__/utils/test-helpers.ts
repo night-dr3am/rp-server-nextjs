@@ -467,10 +467,7 @@ export async function createTestUserWithGoreanStats(testUser: TestUser) {
           hungerCurrent: 100,
           thirstCurrent: 100,
 
-          // Economy
-          goldCoin: 10,
-          silverCoin: 50,
-          copperCoin: 100,
+          // Economy (coins removed - now in UserStats only)
           xp: 0,
 
           // Skills (sample)

@@ -80,7 +80,10 @@ describe('POST /api/gor/character/register', () => {
           create: {
             health: 15,
             hunger: 100,
-            thirst: 100
+            thirst: 100,
+            goldCoin: 10,
+            silverCoin: 50,
+            copperCoin: 100
           }
         },
         goreanStats: {
@@ -105,9 +108,7 @@ describe('POST /api/gor/character/register', () => {
             healthCurrent: 15,
             hungerCurrent: 100,
             thirstCurrent: 100,
-            goldCoin: 10,
-            silverCoin: 50,
-            copperCoin: 100,
+            // goldCoin, silverCoin, copperCoin removed - now in UserStats only
             xp: 50,
             registrationCompleted: true
           }
