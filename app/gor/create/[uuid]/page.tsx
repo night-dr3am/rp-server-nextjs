@@ -370,6 +370,11 @@ export default function GoreanCharacterCreation() {
         skillsAllocatedPoints: characterModel.skillsAllocatedPoints,
         skillsSpentPoints: characterModel.skillsSpentPoints,
 
+        // Abilities
+        abilities: characterModel.abilities,
+        abilitiesAllocatedPoints: characterModel.abilitiesAllocatedPoints,
+        abilitiesSpentPoints: characterModel.abilitiesSpentPoints,
+
         // Auth
         token,
         universe: 'gor'
