@@ -290,10 +290,10 @@ export async function POST(request: NextRequest) {
           health: goreanStats.healthCurrent,
           hunger: goreanStats.hungerCurrent,
           thirst: goreanStats.thirstCurrent,
-          // For NEW character: set initial defaults. For EXISTING character: preserve coins.
-          goldCoin: existingGoreanStats ? (existingUserStats?.goldCoin ?? 0) : 0,
-          silverCoin: existingGoreanStats ? (existingUserStats?.silverCoin ?? 0) : 0,
-          copperCoin: existingGoreanStats ? (existingUserStats?.copperCoin ?? 10) : 10,
+          // Preserve existing coins if UserStats exists, otherwise use defaults
+          goldCoin: existingUserStats?.goldCoin ?? 0,
+          silverCoin: existingUserStats?.silverCoin ?? 0,
+          copperCoin: existingUserStats?.copperCoin ?? 10,
           lastUpdated: new Date()
         },
         create: {
@@ -302,10 +302,10 @@ export async function POST(request: NextRequest) {
           hunger: goreanStats.hungerCurrent,
           thirst: goreanStats.thirstCurrent,
           status: 0,
-          // Initial currency for new Gorean characters
-          goldCoin: 0,
-          silverCoin: 0,
-          copperCoin: 10,
+          // Preserve existing coins if UserStats exists, otherwise use defaults for new users
+          goldCoin: existingUserStats?.goldCoin ?? 0,
+          silverCoin: existingUserStats?.silverCoin ?? 0,
+          copperCoin: existingUserStats?.copperCoin ?? 10,
           lastUpdated: new Date()
         }
       });
