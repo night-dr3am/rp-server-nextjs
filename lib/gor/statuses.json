@@ -63,8 +63,8 @@
     "rarityRating": 3
   },
   {
-    "id": "kajira",
-    "name": "Kajira (Female Slave)",
+    "id": "female_slave",
+    "name": "Female Slave",
     "category": "slave",
     "description": "Female slave, legal property with no rights. Only 2-3% of women on Gor are slaves. Marked with brand (usually Kef mark) and collar.",
     "rights": [],
@@ -81,6 +81,20 @@
     ],
     "applicableSpecies": [
       "human"
+    ],
+    "slaveTypes": [
+      {
+        "id": "kajira",
+        "name": "Kajira",
+        "description": "Standard term for female slave in southern Gorean cities. The most common designation.",
+        "culturalOrigin": "Southern Cities"
+      },
+      {
+        "id": "bondmaid",
+        "name": "Bondmaid",
+        "description": "Northern term for female slave, used in Torvaldsland. Reflects Viking-like culture.",
+        "culturalOrigin": "Torvaldsland (Northern)"
+      }
     ],
     "subtypes": [
       {
@@ -163,8 +177,8 @@
     "rarityRating": 3
   },
   {
-    "id": "kajirus",
-    "name": "Kajirus (Male Slave)",
+    "id": "male_slave",
+    "name": "Male Slave",
     "category": "slave",
     "description": "Male slave, much rarer than female slaves. Primarily used for heavy labor, though some special categories exist.",
     "rights": [],
@@ -180,6 +194,20 @@
     ],
     "applicableSpecies": [
       "human"
+    ],
+    "slaveTypes": [
+      {
+        "id": "kajirus",
+        "name": "Kajirus",
+        "description": "Standard term for male slave in southern Gorean cities. The most common designation.",
+        "culturalOrigin": "Southern Cities"
+      },
+      {
+        "id": "thrall",
+        "name": "Thrall",
+        "description": "Northern term for male slave, used in Torvaldsland. Reflects Viking-like culture.",
+        "culturalOrigin": "Torvaldsland (Northern)"
+      }
     ],
     "subtypes": [
       {

@@ -202,6 +202,7 @@ export async function POST(request: NextRequest) {
 
       // Status
       status: characterData.status,
+      slaveType: characterData.slaveType || null, // Cultural variant (kajira, bondmaid, kajirus, thrall)
       statusSubtype: characterData.statusSubtype || null,
 
       // Caste/Role (optional, depends on culture)

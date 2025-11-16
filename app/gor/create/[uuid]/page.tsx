@@ -9,6 +9,7 @@ import {
   CultureData,
   StatusData,
   StatusSubtype,
+  SlaveType,
   CasteData,
   TribalRole,
   RegionData,
@@ -23,7 +24,9 @@ import {
   getCultureById,
   getCasteById,
   getTribalRoleById,
-  validateCharacterModel
+  validateCharacterModel,
+  isSlaveStatus,
+  statusHasSlaveTypes
 } from '@/lib/gorData';
 import {
   GoreanHeading,
@@ -36,6 +39,7 @@ import {
 import { SpeciesSelector } from '@/components/gor/SpeciesSelector';
 import { CultureSelector } from '@/components/gor/CultureSelector';
 import { StatusSelector } from '@/components/gor/StatusSelector';
+import { SlaveTypeSelector } from '@/components/gor/SlaveTypeSelector';
 import { CasteSelector } from '@/components/gor/CasteSelector';
 import { StatAllocator } from '@/components/gor/StatAllocator';
 import { SkillSelector } from '@/components/gor/SkillSelector';
@@ -136,7 +140,30 @@ export default function GoreanCharacterCreation() {
       ...prev,
       status: status.id,
       statusSubtype: subtype, // Set subtype if provided
-      // Reset role when status changes (status determines available roles)
+      // Reset slave type and role when status changes
+      slaveType: undefined,
+      casteRole: undefined,
+      casteRoleType: undefined
+    }));
+  };
+
+  const updateSlaveType = (slaveType: SlaveType) => {
+    setCharacterModel(prev => ({
+      ...prev,
+      slaveType: slaveType.id,
+      // Reset subtype when slave type changes
+      statusSubtype: undefined,
+      casteRole: undefined,
+      casteRoleType: undefined
+    }));
+  };
+
+  const clearSlaveType = () => {
+    setCharacterModel(prev => ({
+      ...prev,
+      slaveType: undefined,
+      // Reset subtype when slave type is cleared
+      statusSubtype: undefined,
       casteRole: undefined,
       casteRoleType: undefined
     }));
@@ -238,7 +265,15 @@ export default function GoreanCharacterCreation() {
         return !!characterModel.culture;
       case 4: // Status
         return !!characterModel.status;
-      case 5: // Caste/Role (optional)
+      case 5: // Caste/Role/Slave Type
+        // For slave statuses with slave types, require slave type selection first
+        if (characterModel.status &&
+            isSlaveStatus(characterModel.status) &&
+            statusHasSlaveTypes(characterModel.status)) {
+          // Must have slave type selected before proceeding
+          return !!characterModel.slaveType;
+        }
+        // Non-slave statuses: caste/role is optional
         return true;
       case 6: // Region (optional)
         return true;
@@ -312,6 +347,7 @@ export default function GoreanCharacterCreation() {
 
         // Status
         status: characterModel.status,
+        slaveType: characterModel.slaveType || '', // Cultural variant (kajira, bondmaid, etc.)
         statusSubtype: characterModel.statusSubtype || '',
 
         // Caste/Role
@@ -466,14 +502,36 @@ export default function GoreanCharacterCreation() {
     />
   );
 
-  const renderStep5 = () => (
-    <CasteSelector
-      selectedCultureId={characterModel.culture}
-      selectedStatusId={characterModel.status}
-      selectedCasteOrRole={characterModel.casteRole || characterModel.statusSubtype}
-      onSelectCasteOrRole={updateCasteOrRole}
-    />
-  );
+  const renderStep5 = () => {
+    // Check if this is a slave status that requires slave type selection first
+    const needsSlaveTypeSelection = characterModel.status &&
+      isSlaveStatus(characterModel.status) &&
+      statusHasSlaveTypes(characterModel.status) &&
+      !characterModel.slaveType;
+
+    if (needsSlaveTypeSelection) {
+      // Show slave type selector first (e.g., Kajira vs Bondmaid)
+      return (
+        <SlaveTypeSelector
+          selectedStatusId={characterModel.status}
+          selectedSlaveType={characterModel.slaveType}
+          onSelectSlaveType={updateSlaveType}
+        />
+      );
+    }
+
+    // Show caste, tribal role, or slave subtype selector
+    return (
+      <CasteSelector
+        selectedCultureId={characterModel.culture}
+        selectedStatusId={characterModel.status}
+        selectedSlaveType={characterModel.slaveType}
+        selectedCasteOrRole={characterModel.casteRole || characterModel.statusSubtype}
+        onSelectCasteOrRole={updateCasteOrRole}
+        onChangeSlaveType={clearSlaveType}
+      />
+    );
+  };
 
   const renderStep6 = () => (
     <GoreanScroll className="p-6">

@@ -8,7 +8,8 @@ import {
   getStatusById,
   getCastesForStatus,
   getTribalRolesForStatus,
-  getSlaveSubtypesAsRoles
+  getSlaveSubtypesAsRoles,
+  getSlaveTypeById
 } from '@/lib/gorData';
 import {
   GoreanCard,
@@ -21,16 +22,20 @@ import {
 interface CasteSelectorProps {
   selectedCultureId: string | undefined;
   selectedStatusId: string | undefined;
+  selectedSlaveType?: string | undefined; // Cultural variant (kajira, bondmaid, etc.)
   selectedCasteOrRole: string | undefined;
   onSelectCasteOrRole: (casteOrRole: CasteData | TribalRole | StatusSubtype) => void;
+  onChangeSlaveType?: () => void; // Callback to allow changing the selected slave type
   className?: string;
 }
 
 export function CasteSelector({
   selectedCultureId,
   selectedStatusId,
+  selectedSlaveType,
   selectedCasteOrRole,
   onSelectCasteOrRole,
+  onChangeSlaveType,
   className = ''
 }: CasteSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -153,15 +158,55 @@ export function CasteSelector({
 
   // If slave status, show slave subtype selection UI
   if (isSlaveStatus) {
+    // Get the selected slave type name for display
+    const slaveTypeData = selectedSlaveType && selectedStatusId
+      ? getSlaveTypeById(selectedStatusId, selectedSlaveType)
+      : undefined;
+    const slaveTypeName = slaveTypeData?.name || 'slave';
+
     return (
       <div className={`space-y-6 ${className}`}>
         {/* Header */}
         <div>
           <GoreanHeading level={2}>Choose Your Slave Subtype</GoreanHeading>
           <p className="text-sm mt-2" style={{ color: GoreanColors.stone }}>
-            Slave subtypes define your specialization, training, and primary duties.
+            {selectedSlaveType ? (
+              <>As a <strong style={{ color: GoreanColors.bronze }}>{slaveTypeName}</strong>, select your specialization, training, and primary duties.</>
+            ) : (
+              'Slave subtypes define your specialization, training, and primary duties.'
+            )}
           </p>
         </div>
+
+        {/* Change Slave Type Button */}
+        {selectedSlaveType && onChangeSlaveType && (
+          <div
+            className="p-3 rounded-lg border-2 flex items-center justify-between"
+            style={{
+              borderColor: GoreanColors.bronze,
+              backgroundColor: GoreanColors.parchmentDark
+            }}
+          >
+            <div>
+              <span className="text-sm font-semibold" style={{ color: GoreanColors.charcoal }}>
+                Selected Slave Type:
+              </span>
+              <span className="ml-2 text-sm font-bold" style={{ color: GoreanColors.bronze }}>
+                {slaveTypeName}
+              </span>
+            </div>
+            <button
+              onClick={onChangeSlaveType}
+              className="px-3 py-1 rounded text-sm font-semibold hover:opacity-80 transition-opacity flex items-center gap-1"
+              style={{
+                backgroundColor: GoreanColors.leather,
+                color: GoreanColors.cream
+              }}
+            >
+              ⟳ Change Slave Type
+            </button>
+          </div>
+        )}
 
         {/* Search Box */}
         <div className="relative">

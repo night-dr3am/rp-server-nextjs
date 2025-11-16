@@ -116,6 +116,13 @@ export interface StatusSubtype {
   notes?: string;
 }
 
+export interface SlaveType {
+  id: string;
+  name: string;
+  description: string;
+  culturalOrigin: string;
+}
+
 export interface StatusData {
   id: string;
   name: string;
@@ -124,6 +131,7 @@ export interface StatusData {
   rights?: string[];
   restrictions?: string[];
   applicableSpecies: string[];
+  slaveTypes?: SlaveType[]; // Cultural variants of slave type (Kajira/Bondmaid for female, Kajirus/Thrall for male)
   subtypes?: StatusSubtype[];
   culturalVariations?: Record<string, string>;
   virginityStatus?: {
@@ -253,6 +261,7 @@ export interface GoreanCharacterModel {
 
   // Step 5: Status
   status?: string;
+  slaveType?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   statusSubtype?: string;
 
   // Step 6: Caste/Role
@@ -391,6 +400,7 @@ export interface GoreanStatsDB {
 
   // Status
   status: string;
+  slaveType?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   statusSubtype?: string;
 
   // Caste/Role
@@ -461,6 +471,7 @@ export interface GoreanCharacterCreateRequest {
   culture_type: string;
 
   status: string;
+  slave_type?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   status_subtype?: string;
 
   caste_role?: string;

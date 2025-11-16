@@ -2,7 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import {
   StatusData,
-  getStatusesForSpecies
+  getStatusesForSpecies,
+  isSlaveStatus,
+  statusHasSlaveTypes
 } from '@/lib/gorData';
 import {
   GoreanCard,
@@ -36,7 +38,14 @@ export function StatusSelector({
   }, [selectedSpeciesId]);
 
   const handleStatusClick = (status: StatusData) => {
-    // If status has subtypes, expand it to show subtype selection
+    // Slave statuses with slave types should be selected directly
+    // The slave type and subtype selection happens in subsequent steps
+    if (isSlaveStatus(status.id) && statusHasSlaveTypes(status.id)) {
+      onSelectStatus(status);
+      return;
+    }
+
+    // Non-slave statuses with subtypes expand to show inline selection
     if (status.subtypes && status.subtypes.length > 0) {
       setExpandedStatus(expandedStatus === status.id ? null : status.id);
       // Don't select yet - wait for subtype selection
@@ -112,6 +121,7 @@ export function StatusSelector({
             const isSelected = selectedStatus === status.id;
             const isExpanded = expandedStatus === status.id;
             const hasSubtypes = status.subtypes && status.subtypes.length > 0;
+            const hasSlaveTypes = isSlaveStatus(status.id) && statusHasSlaveTypes(status.id);
 
             return (
               <GoreanCard
@@ -127,7 +137,7 @@ export function StatusSelector({
                     <GoreanHeading level={4} className="flex-1">
                       {status.name}
                     </GoreanHeading>
-                    {isSelected && !hasSubtypes && (
+                    {isSelected && (
                       <span className="text-2xl ml-2" style={{ color: GoreanColors.bronze }}>
                         ✓
                       </span>
@@ -142,7 +152,15 @@ export function StatusSelector({
                     >
                       {getStatusCategoryDisplayName(status.category)}
                     </GoreanBadge>
-                    {hasSubtypes && (
+                    {hasSlaveTypes && (
+                      <GoreanBadge
+                        size="sm"
+                        color={GoreanColors.leather}
+                      >
+                        {status.slaveTypes!.length} Slave Types
+                      </GoreanBadge>
+                    )}
+                    {hasSubtypes && !hasSlaveTypes && (
                       <GoreanBadge
                         size="sm"
                         color={GoreanColors.leather}
@@ -168,8 +186,8 @@ export function StatusSelector({
                   {status.description}
                 </p>
 
-                {/* Subtypes Selection (if status has subtypes) */}
-                {hasSubtypes && isExpanded && (
+                {/* Subtypes Selection (if status has subtypes and is NOT a slave status) */}
+                {hasSubtypes && !hasSlaveTypes && isExpanded && (
                   <div className="space-y-2 mb-3 pt-3 border-t-2" style={{ borderColor: GoreanColors.bronze }}>
                     <p className="text-xs font-semibold mb-2" style={{ color: GoreanColors.bronze }}>
                       Select Subtype:
@@ -206,6 +224,15 @@ export function StatusSelector({
                         );
                       })}
                     </div>
+                  </div>
+                )}
+
+                {/* Slave Types Info (shown for slave statuses) */}
+                {hasSlaveTypes && (
+                  <div className="mt-3 p-2 rounded" style={{ backgroundColor: GoreanColors.parchmentDark }}>
+                    <p className="text-xs italic" style={{ color: GoreanColors.bronze }}>
+                      ⚔️ Select this status to choose your slave type (e.g., {status.slaveTypes!.map(st => st.name).join(' or ')}) on the next step.
+                    </p>
                   </div>
                 )}
 
@@ -291,9 +318,11 @@ export function StatusSelector({
       {/* Help Text */}
       <div className="text-center text-sm" style={{ color: GoreanColors.stone }}>
         <p>
-          {availableStatuses.some(s => s.subtypes && s.subtypes.length > 0)
-            ? 'Some statuses have subtypes. Click to expand and select a specific subtype.'
-            : 'Select the status that best fits your character concept.'}
+          {availableStatuses.some(s => statusHasSlaveTypes(s.id))
+            ? 'Slave statuses offer cultural variants (Kajira/Bondmaid, Kajirus/Thrall) on the next step.'
+            : availableStatuses.some(s => s.subtypes && s.subtypes.length > 0)
+              ? 'Some statuses have subtypes. Click to expand and select a specific subtype.'
+              : 'Select the status that best fits your character concept.'}
         </p>
       </div>
     </div>

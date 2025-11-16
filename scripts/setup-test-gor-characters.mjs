@@ -46,7 +46,8 @@ async function createTestCharacters() {
             speciesVariant: '',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            status: 'freeMan',
+            slaveType: null, // Not a slave
             statusSubtype: '',
             casteRole: 'warriors',
             casteRoleType: 'highCaste',
@@ -60,22 +61,21 @@ async function createTestCharacters() {
             charisma: 3,
             statPointsPool: 0,
             statPointsSpent: 10,
-            healthMax: 20, // strength * 5
-            healthCurrent: 20,
+            // HP: 50 (human base) + 40 (str 4 * 10) + 10% (warrior caste) + 3 (swordplay) + 4 (unarmed) = 106
+            healthMax: 106,
+            healthCurrent: 106,
             hungerMax: 100,
             hungerCurrent: 100,
             thirstMax: 100,
             thirstCurrent: 100,
             skills: [
-              { skill_id: 'swordplay', skill_name: 'Swordplay', level: 3 },
-              { skill_id: 'tarn_riding', skill_name: 'Tarn Riding', level: 2 }
+              { skill_id: 'swordplay', skill_name: 'Swordplay', level: 2, xp: 0 },
+              { skill_id: 'unarmed_combat', skill_name: 'Unarmed Combat', level: 2, xp: 0 },
+              { skill_id: 'hunting', skill_name: 'Hunting', level: 1, xp: 0 }
             ],
-            skillsAllocatedPoints: 9,
-            skillsSpentPoints: 9, // Level 3 = 6pts, Level 2 = 3pts
+            skillsAllocatedPoints: 5,
+            skillsSpentPoints: 5, // Level 2 = 2pts, Level 2 = 2pts, Level 1 = 1pt (linear cost)
             activeEffects: [],
-            goldCoin: 10,
-            silverCoin: 50,
-            copperCoin: 100,
             xp: 0,
             registrationCompleted: true
           }
@@ -115,7 +115,8 @@ async function createTestCharacters() {
             speciesVariant: '',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            status: 'freeMan',
+            slaveType: null, // Not a slave
             statusSubtype: '',
             casteRole: 'scribes',
             casteRoleType: 'highCaste',
@@ -129,22 +130,21 @@ async function createTestCharacters() {
             charisma: 3,
             statPointsPool: 0,
             statPointsSpent: 10,
-            healthMax: 10, // strength * 5
-            healthCurrent: 10,
+            // HP: 50 (human base) + 20 (str 2 * 10) + 0% (scribe caste) = 70
+            healthMax: 70,
+            healthCurrent: 70,
             hungerMax: 100,
             hungerCurrent: 100,
             thirstMax: 100,
             thirstCurrent: 100,
             skills: [
-              { skill_id: 'scribing', skill_name: 'Scribing', level: 4 },
-              { skill_id: 'law', skill_name: 'Law', level: 1 }
+              { skill_id: 'literacy', skill_name: 'Literacy', level: 2, xp: 0 },
+              { skill_id: 'medicine', skill_name: 'Medicine', level: 2, xp: 0 },
+              { skill_id: 'cooking', skill_name: 'Cooking', level: 1, xp: 0 }
             ],
-            skillsAllocatedPoints: 11,
-            skillsSpentPoints: 11, // Level 4 = 10pts, Level 1 = 1pt
+            skillsAllocatedPoints: 5,
+            skillsSpentPoints: 5, // Level 2 = 2pts, Level 2 = 2pts, Level 1 = 1pt (linear cost)
             activeEffects: [],
-            goldCoin: 100,
-            silverCoin: 500,
-            copperCoin: 1000,
             xp: 500,
             registrationCompleted: true
           }

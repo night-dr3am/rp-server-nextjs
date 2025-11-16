@@ -5,6 +5,7 @@ import {
   CultureData,
   StatusData,
   StatusSubtype,
+  SlaveType,
   CasteData,
   TribalRole,
   RegionData,
@@ -27,6 +28,7 @@ export {
   type CultureData,
   type StatusData,
   type StatusSubtype,
+  type SlaveType,
   type CasteData,
   type TribalRole,
   type RegionData,
@@ -487,6 +489,52 @@ export function getSlaveSubtypesAsRoles(statusId: string): StatusSubtype[] {
 
   // Return subtypes if they exist
   return status.subtypes || [];
+}
+
+/**
+ * Get slave types (cultural variants) for a parent slave status
+ * E.g., for "female_slave" returns [Kajira, Bondmaid]
+ * For "male_slave" returns [Kajirus, Thrall]
+ */
+export function getSlaveTypesForStatus(statusId: string): SlaveType[] {
+  // Return empty array if data not loaded yet
+  if (!dataLoaded || !statuses || statuses.length === 0) {
+    return [];
+  }
+
+  // Find the status
+  const status = statuses.find(s => lc(s.id) === lc(statusId));
+  if (!status) return [];
+
+  // Return slave types if they exist
+  return status.slaveTypes || [];
+}
+
+/**
+ * Get a specific slave type by ID within a parent status
+ * E.g., getSlaveTypeById("female_slave", "kajira") returns the Kajira slave type object
+ */
+export function getSlaveTypeById(statusId: string, slaveTypeId: string): SlaveType | undefined {
+  const slaveTypes = getSlaveTypesForStatus(statusId);
+  return slaveTypes.find(st => lc(st.id) === lc(slaveTypeId));
+}
+
+/**
+ * Check if a status has slave types (i.e., is a parent slave status)
+ * Only "female_slave" and "male_slave" should have slave types
+ */
+export function statusHasSlaveTypes(statusId: string): boolean {
+  const slaveTypes = getSlaveTypesForStatus(statusId);
+  return slaveTypes.length > 0;
+}
+
+/**
+ * Check if status is a slave status category
+ * Returns true for female_slave and male_slave
+ */
+export function isSlaveStatus(statusId: string): boolean {
+  const status = getStatusById(statusId);
+  return status?.category === 'slave';
 }
 
 // ============================================================================

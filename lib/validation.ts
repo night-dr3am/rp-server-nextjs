@@ -520,6 +520,7 @@ export const goreanCharacterCreateSchema = Joi.object({
 
   // Status
   status: Joi.string().required(),
+  slaveType: Joi.string().max(100).allow('').optional(), // Cultural variant (kajira, bondmaid, kajirus, thrall)
   statusSubtype: Joi.string().max(255).allow('').optional(),
 
   // Caste/Role (optional - depends on culture)

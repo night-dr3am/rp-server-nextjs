@@ -291,8 +291,9 @@ model GoreanStats {
   cultureType           String    @map("culture_type")  // "cityState", "northern", "nomadic", "animal", etc.
 
   // Step 4: Status
-  status                String    // "freeMan", "freeWoman", "kajira", "kajirus", "wild", "domesticated", etc.
-  statusSubtype         String?   @map("status_subtype")  // Specific slave type or animal bond type
+  status                String    // "freeMan", "freeWoman", "female_slave", "male_slave", "wild", "domesticated", etc.
+  slaveType             String?   @map("slave_type")  // Cultural variant: "kajira", "bondmaid", "kajirus", "thrall"
+  statusSubtype         String?   @map("status_subtype")  // Specific slave role: "pleasure_slave", "work_slave", etc.
 
   // Step 5: Caste/Role (varies by culture - castes for cities, roles for tribes)
   casteRole             String?   @map("caste_role")  // Caste for cities, Role for tribal/animal
