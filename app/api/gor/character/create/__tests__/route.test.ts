@@ -410,8 +410,8 @@ describe('POST /api/gor/character/create', () => {
     expect(userStats?.hunger).toBe(100);
     expect(userStats?.thirst).toBe(100);
     expect(userStats?.goldCoin).toBe(0); // New character defaults
-    expect(userStats?.silverCoin).toBe(5);
-    expect(userStats?.copperCoin).toBe(50);
+    expect(userStats?.silverCoin).toBe(0);
+    expect(userStats?.copperCoin).toBe(10);
   });
 
   it('should create character for animal species', async () => {
