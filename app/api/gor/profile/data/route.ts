@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
       },
       include: {
         stats: true,
+        goreanStats: true,
         inventories: {
           include: {
             item: true
@@ -128,6 +129,22 @@ export async function GET(request: NextRequest) {
           silverCoin: user.stats.silverCoin,
           copperCoin: user.stats.copperCoin,
           lastUpdated: user.stats.lastUpdated
+        } : null,
+        goreanStats: user.goreanStats ? {
+          characterName: user.goreanStats.characterName,
+          species: user.goreanStats.species,
+          speciesVariant: user.goreanStats.speciesVariant,
+          culture: user.goreanStats.culture,
+          status: user.goreanStats.status,
+          statusSubtype: user.goreanStats.statusSubtype,
+          slaveType: user.goreanStats.slaveType,
+          casteRole: user.goreanStats.casteRole,
+          maxHealth: user.goreanStats.healthMax,
+          maxHunger: user.goreanStats.hungerMax,
+          maxThirst: user.goreanStats.thirstMax,
+          skills: user.goreanStats.skills,
+          createdAt: user.goreanStats.createdAt,
+          updatedAt: user.goreanStats.updatedAt
         } : null,
         inventory: {
           summary: inventorySummary,
