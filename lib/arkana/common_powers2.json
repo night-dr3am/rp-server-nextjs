@@ -12,10 +12,9 @@
     },
     "species": "strigoi",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:strigoi_hypnosis",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "strigoi_shapeshifting",
@@ -30,10 +29,9 @@
     },
     "species": "strigoi",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:strigoi_shapeshifting",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "strigoi_wall_walking",
@@ -44,16 +42,13 @@
     "tags": ["utility", "movement"],
     "range": 0,
     "effects": {
-      "passive": [
-        "movement_wall_climbing"
-      ]
+      "passive": ["movement_wall_climbing"]
     },
     "species": "strigoi",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:strigoi_wall_walking",
     "targetType": "self",
-    "abilityType": [
-      "passive"
-    ]
+    "abilityType": ["passive"]
   },
   {
     "id": "strigoi_dreamwalking",
@@ -69,6 +64,7 @@
     },
     "species": "strigoi",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:strigoi_dreamwalking",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -85,10 +81,9 @@
     },
     "species": "strigoi",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:strigoi_voice_of_command",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "strigoi_shadowform",
@@ -103,10 +98,9 @@
     },
     "species": "strigoi",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:strigoi_shadowform",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "strigoi_true_polymorph",
@@ -121,10 +115,9 @@
     },
     "species": "strigoi",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:strigoi_true_polymorph",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "strigoi_domination",
@@ -139,10 +132,9 @@
     },
     "species": "strigoi",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:strigoi_domination",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "strigoi_mist_form",
@@ -157,10 +149,9 @@
     },
     "species": "strigoi",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:strigoi_mist_form",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "gaki_chi_manipulation",
@@ -172,12 +163,11 @@
     "range": 5,
     "effects": {
       "attack": ["check_mental_vs_mental", "debuff_mental_minus_1"],
-      "ability": [
-        "ability_chi_balance_restore"
-      ]
+      "ability": ["ability_chi_balance_restore"]
     },
     "species": "gaki",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:gaki_chi_manipulation",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -195,6 +185,7 @@
     },
     "species": "gaki",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:gaki_dreamwalking",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -211,10 +202,9 @@
     },
     "species": "gaki",
     "baseStat": "Dexterity",
+    "_uniqueId": "commonPower:gaki_chi_step",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "gaki_yin_shroud",
@@ -225,14 +215,13 @@
     "tags": ["stealth", "utility"],
     "range": 0,
     "effects": {
-      "ability": ["check_physical_vs_tn10", "buff_stealth_4"]
+      "ability": ["check_dexterity_vs_tn12", "buff_stealth_4"]
     },
     "species": "gaki",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:gaki_yin_shroud",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "gaki_yang_flame",
@@ -247,10 +236,9 @@
     },
     "species": "gaki",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:gaki_yang_flame",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "gaki_spectral_grip",
@@ -266,6 +254,7 @@
     },
     "species": "gaki",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:gaki_spectral_grip",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -278,16 +267,13 @@
     "tags": ["utility", "movement"],
     "range": 0,
     "effects": {
-      "passive": [
-        "movement_wall_climbing"
-      ]
+      "passive": ["movement_wall_climbing"]
     },
     "species": "spliced",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:spliced_climbing",
     "targetType": "self",
-    "abilityType": [
-      "passive"
-    ]
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_tail_slap",
@@ -302,10 +288,9 @@
     },
     "species": "spliced",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:spliced_tail_slap",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "spliced_pheromone_cloud",
@@ -316,16 +301,13 @@
     "tags": ["debuff", "mental"],
     "range": 5,
     "effects": {
-      "attack": [
-        "debuff_mental_minus_1_area"
-      ]
+      "attack": ["debuff_mental_minus_1_area"]
     },
     "species": "spliced",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:spliced_pheromone_cloud",
     "targetType": "area",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "spliced_burrow",
@@ -340,10 +322,9 @@
     },
     "species": "spliced",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:spliced_burrow",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "spliced_quill_cloud",
@@ -355,12 +336,11 @@
     "range": 20,
     "effects": {
       "attack": ["check_physical_vs_physical", "damage_physical_2_ranged"],
-      "onDefense": [
-        "passive_reflect_damage_1"
-      ]
+      "onDefense": ["passive_reflect_damage_1"]
     },
     "species": "spliced",
     "baseStat": "Physical",
+    "_uniqueId": "commonPower:spliced_quill_cloud",
     "targetType": "single",
     "abilityType": ["attack", "passive"]
   },
@@ -379,10 +359,7 @@
     "baseStat": "Mental",
     "_uniqueId": "commonPower:veil_biofusion",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ],
-    "arkanaDataType": "commonPower"
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_circuit_whisper",
@@ -397,10 +374,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_circuit_whisper",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_pulse_bloom",
@@ -415,10 +391,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_pulse_bloom",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_echo_memory",
@@ -426,19 +401,16 @@
     "cost": 2,
     "desc": "Access residual emotional imprints; replay/interpret past events in biodomes/spaces.",
     "name": "Echo Memory",
-    "tags": [
-      "utility"
-    ],
+    "tags": ["utility"],
     "range": 0,
     "effects": {
       "ability": ["check_perception_vs_tn10", "utility_echo_memory"]
     },
     "species": "veilborn",
     "baseStat": "Perception",
+    "_uniqueId": "commonPower:veil_echo_memory",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_sanctuary_field",
@@ -453,10 +425,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_sanctuary_field",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_shadow_archive",
@@ -464,19 +435,16 @@
     "cost": 3,
     "desc": "Absorb/store memories/data fragments; retrieve later for leverage/insight.",
     "name": "Shadow Archive",
-    "tags": [
-      "utility"
-    ],
+    "tags": ["utility"],
     "range": 0,
     "effects": {
       "ability": ["check_mental_vs_tn10", "utility_memory_archive"]
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_shadow_archive",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_glimmerstep",
@@ -491,10 +459,9 @@
     },
     "species": "veilborn",
     "baseStat": "Dexterity",
+    "_uniqueId": "commonPower:veil_glimmerstep",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_emotion_theft",
@@ -509,10 +476,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_emotion_theft",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "veil_mask_of_echoes",
@@ -527,10 +493,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_mask_of_echoes",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_entropy_pulse",
@@ -545,9 +510,26 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "commonPower:veil_entropy_pulse",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
+  },
+  {
+    "id": "spliced_regen_1",
+    "orderNumber": 31,
+    "cost": 0,
+    "desc": "Automatic Regeneration",
+    "name": "Regeneration",
+    "tags": ["utility", "movement"],
+    "range": 0,
+    "effects": {
+      "ability": [],
+      "passive": ["heal_regeneration_1"]
+    },
+    "species": ["spliced"],
+    "baseStat": "Physical",
+    "_uniqueId": "commonPower:spliced_regen_1",
+    "targetType": "self",
+    "abilityType": ["passive"]
   }
 ]

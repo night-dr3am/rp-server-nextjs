@@ -6,7 +6,8 @@
     "desc": "Instinctual magic integrated with machines; “felt in the bones” of the practitioner.",
     "name": "Technomancy (Synthrals only)",
     "section": "Technomancy",
-    "species": "synthral"
+    "species": "synthral",
+    "_uniqueId": "magicSchool:school_technomancy"
   },
   {
     "id": "school_enchantment",
@@ -14,7 +15,8 @@
     "cost": 1,
     "desc": "Unlock School of Enchantment",
     "name": "Enchantment",
-    "section": "Enchantment"
+    "section": "Enchantment",
+    "_uniqueId": "magicSchool:school_enchantment"
   },
   {
     "id": "school_conjuration",
@@ -22,7 +24,8 @@
     "cost": 1,
     "desc": "Unlock School of Conjuration.",
     "name": "Conjuration",
-    "section": "Conjuration"
+    "section": "Conjuration",
+    "_uniqueId": "magicSchool:school_conjuration"
   },
   {
     "id": "school_necromancy",
@@ -30,7 +33,8 @@
     "cost": 1,
     "desc": "Unlock School of Necromancy",
     "name": "Necromancy",
-    "section": "Necromancy"
+    "section": "Necromancy",
+    "_uniqueId": "magicSchool:school_necromancy"
   },
   {
     "id": "school_evocation",
@@ -38,7 +42,8 @@
     "cost": 1,
     "desc": "Unlock School of Evocation",
     "name": "Evocation",
-    "section": "Evocation"
+    "section": "Evocation",
+    "_uniqueId": "magicSchool:school_evocation"
   },
   {
     "id": "school_abjuration",
@@ -46,7 +51,8 @@
     "cost": 1,
     "desc": "Unlock School of Abjuration",
     "name": "Abjuration",
-    "section": "Abjuration"
+    "section": "Abjuration",
+    "_uniqueId": "magicSchool:school_abjuration"
   },
   {
     "id": "school_divination",
@@ -54,7 +60,8 @@
     "cost": 1,
     "desc": "Unlock School of Divination",
     "name": "Divination",
-    "section": "Divination"
+    "section": "Divination",
+    "_uniqueId": "magicSchool:school_divination"
   },
   {
     "id": "technomancy_sync_device",
@@ -69,10 +76,9 @@
     "section": "Technomancy",
     "species": "synthral",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:technomancy_sync_device",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "technomancy_build_device",
@@ -87,10 +93,9 @@
     "section": "Technomancy",
     "species": "synthral",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:technomancy_build_device",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "technomancy_laser",
@@ -105,10 +110,9 @@
     "section": "Technomancy",
     "species": "synthral",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:technomancy_laser",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "technomancy_hack_computer",
@@ -123,10 +127,9 @@
     "section": "Technomancy",
     "species": "synthral",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:technomancy_hack_computer",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "technomancy_speak_machinery",
@@ -141,10 +144,9 @@
     "section": "Technomancy",
     "species": "synthral",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:technomancy_speak_machinery",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_item",
@@ -158,10 +160,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_item",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_creature",
@@ -171,16 +172,13 @@
     "name": "Enchant Creature",
     "range": 10,
     "effects": {
-      "ability": [
-        "check_mental_vs_mental"
-      ]
+      "ability": ["check_mental_vs_mental"]
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_creature",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_strength",
@@ -194,10 +192,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_strength",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_speed",
@@ -211,10 +208,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_speed",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_mind",
@@ -228,10 +224,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_mind",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_endurance",
@@ -245,10 +240,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_endurance",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_sleep",
@@ -262,10 +256,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_sleep",
     "targetType": "enemy",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "enchant_element",
@@ -279,10 +272,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_element",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_recall",
@@ -296,10 +288,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_recall",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_light",
@@ -313,10 +304,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_light",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_storage",
@@ -330,10 +320,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_storage",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_bind",
@@ -347,10 +336,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_bind",
     "targetType": "enemy",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "enchant_confuse",
@@ -364,10 +352,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_confuse",
     "targetType": "enemy",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "enchant_silence",
@@ -381,10 +368,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_silence",
     "targetType": "enemy",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "enchant_hex",
@@ -398,10 +384,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_hex",
     "targetType": "enemy",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "enchant_flight",
@@ -415,10 +400,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_flight",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_echo",
@@ -432,10 +416,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_echo",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_link",
@@ -449,10 +432,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_link",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_illusion",
@@ -466,10 +448,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:enchant_illusion",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "enchant_permanence",
@@ -483,10 +464,9 @@
     },
     "section": "Enchantment",
     "baseStat": "Mental",
-    "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "_uniqueId": "magicWave:enchant_permanence",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_weapon",
@@ -500,10 +480,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_weapon",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_armor",
@@ -517,10 +496,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_armor",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_familiar",
@@ -534,10 +512,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_familiar",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_clone",
@@ -551,10 +528,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_clone",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_gateway",
@@ -568,10 +544,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_gateway",
     "targetType": "all_allies",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "conjure_swarm",
@@ -585,10 +560,9 @@
     },
     "section": "Conjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:conjure_swarm",
     "targetType": "area",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "necromancy_animate_corpse",
@@ -602,10 +576,9 @@
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_animate_corpse",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "necromancy_raise_spirit",
@@ -619,10 +592,9 @@
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_raise_spirit",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "necromancy_drain",
@@ -636,27 +608,25 @@
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_drain",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "necromancy_inflict_pain",
     "orderNumber": 34,
     "cost": 1,
-    "desc": "Deals 4 + Mental damage. Mental vs TN12.",
+    "desc": "Deals 2 + Mental damage. Mental vs TN12.",
     "name": "Inflict Pain",
     "range": 10,
     "effects": {
-      "attack": ["check_mental_vs_tn12", "damage_necrotic_4_mental"]
+      "attack": ["check_mental_vs_tn12", "damage_necrotic_2_mental"]
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_inflict_pain",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "necromancy_empower_undead",
@@ -670,27 +640,25 @@
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_empower_undead",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "necromancy_heal",
     "orderNumber": 36,
     "cost": 2,
-    "desc": "Restores 6 HP. Mental vs TN12.",
+    "desc": "Restores 3+ Men Mod HP. ",
     "name": "Heal",
     "range": 10,
     "effects": {
-      "ability": ["check_mental_vs_tn12", "heal_6"]
+      "ability": ["check_mental_vs_tn12", "heal_necromancy_3"]
     },
     "section": "Necromancy",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:necromancy_heal",
     "targetType": "ally",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "evocation_create_element_minor",
@@ -705,6 +673,7 @@
     },
     "section": "Evocation",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:evocation_create_element_minor",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -721,6 +690,7 @@
     },
     "section": "Evocation",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:evocation_create_element_major",
     "targetType": "single",
     "abilityType": ["attack", "ability"]
   },
@@ -736,10 +706,9 @@
     },
     "section": "Evocation",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:evocation_shape_element_minor",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "evocation_shape_element_major",
@@ -753,10 +722,9 @@
     },
     "section": "Evocation",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:evocation_shape_element_major",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "abjuration_create_barrier",
@@ -766,14 +734,13 @@
     "name": "Create Barrier (Minor)",
     "range": 0,
     "effects": {
-      "ability": ["check_mental_vs_tn12", "defense_damage_reduction_2_2turns"]
+      "ability": ["check_mental_vs_tn12", "defense_damage_reduction_2_2turns", "defense_damage_reduction_self_2_2turns_copy"]
     },
     "section": "Abjuration",
     "baseStat": "Mental",
-    "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "_uniqueId": "magicWave:abjuration_create_barrier",
+    "targetType": "single",
+    "abilityType": ["ability"]
   },
   {
     "id": "abjuration_absorb",
@@ -781,16 +748,16 @@
     "cost": 3,
     "desc": "Absorb magical/elemental energy, store briefly to release. Mental vs TN12.",
     "name": "Absorb",
-    "range": 0,
+    "range": 10,
     "effects": {
-      "ability": ["check_mental_vs_tn12", "utility_absorb_energy"]
+      "attack": ["check_mental_vs_physical", "heal_4", "damage_heal_6_mental"],
+      "ability": []
     },
     "section": "Abjuration",
     "baseStat": "Mental",
-    "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "_uniqueId": "magicWave:abjuration_absorb",
+    "targetType": "single",
+    "abilityType": ["attack"]
   },
   {
     "id": "abjuration_seal",
@@ -804,10 +771,9 @@
     },
     "section": "Abjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:abjuration_seal",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "abjuration_dispel",
@@ -821,10 +787,9 @@
     },
     "section": "Abjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:abjuration_dispel",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "abjuration_damage",
@@ -838,10 +803,9 @@
     },
     "section": "Abjuration",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:abjuration_damage",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "divination_veilglimpse",
@@ -855,10 +819,9 @@
     },
     "section": "Divination",
     "baseStat": "Perception",
+    "_uniqueId": "magicWave:divination_veilglimpse",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_thread_sense",
@@ -872,10 +835,9 @@
     },
     "section": "Divination",
     "baseStat": "Perception",
+    "_uniqueId": "magicWave:divination_thread_sense",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_echo_of_whatisnt",
@@ -889,10 +851,9 @@
     },
     "section": "Divination",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:divination_echo_of_whatisnt",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_beast_speaking",
@@ -906,10 +867,9 @@
     },
     "section": "Divination",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:divination_beast_speaking",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_whisper_beyond",
@@ -923,10 +883,9 @@
     },
     "section": "Divination",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:divination_whisper_beyond",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_moment_fracture",
@@ -940,10 +899,9 @@
     },
     "section": "Divination",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:divination_moment_fracture",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_shard_of_truth",
@@ -957,10 +915,9 @@
     },
     "section": "Divination",
     "baseStat": "Perception",
+    "_uniqueId": "magicWave:divination_shard_of_truth",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_omenmark",
@@ -974,10 +931,9 @@
     },
     "section": "Divination",
     "baseStat": "Mental",
+    "_uniqueId": "magicWave:divination_omenmark",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "divination_fate_ripple",
@@ -991,9 +947,8 @@
     },
     "section": "Divination",
     "baseStat": "Perception",
+    "_uniqueId": "magicWave:divination_fate_ripple",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   }
 ]

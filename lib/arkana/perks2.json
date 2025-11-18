@@ -9,9 +9,8 @@
       "passive": ["buff_mental_1_social", "buff_perception_1"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_emotional_resonance",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_unnatural_beauty",
@@ -20,30 +19,27 @@
     "desc": "Gifted with unnatural beauty; mortals and supernaturals stare in awe or dread. (+3 Mental in Social Situations or use of Mental Powers)",
     "name": "Unnatural Beauty",
     "effects": {
-      "passive": [
-        "buff_mental_3_social"
-      ]
+      "passive": ["buff_mental_3_social"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_unnatural_beauty",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_unyielding_will",
     "orderNumber": 2,
     "cost": 3,
     "desc": "Mind-influencing powers (fear, charms, compulsions) find it harder to affect you. (-2 to Attackers' Roll)",
-    "name": "Unyielding Will",
+    "name": "Unyielding Will - Gaki",
     "effects": {
-      "passive": [
-        "defense_attacker_penalty_2"
-      ]
+      "ability": ["defense_attacker_penalty_2"],
+      "passive": []
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Mental",
+    "_uniqueId": "perk:vamp_unyielding_will",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "vamp_shadows_veil",
@@ -52,14 +48,11 @@
     "desc": "Blend into darkness comes easy; (+1 to Stealth Rolls)",
     "name": "Shadow's Veil",
     "effects": {
-      "passive": [
-        "buff_stealth_2"
-      ]
+      "passive": ["buff_stealth_2"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_shadows_veil",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_ancient_wisdom",
@@ -68,14 +61,13 @@
     "desc": "You speak one additional language and can decipher arcane text. Grants a single starting school of Magic.",
     "name": "Ancient Wisdom",
     "effects": {
-      "passive": [
-        "buff_mental_2_glyphs"
-      ]
+      "passive": ["buff_mental_2_glyphs"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Mental",
+    "_uniqueId": "perk:vamp_ancient_wisdom",
+    "targetType": "self",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_neural_disruptive_vitae",
@@ -84,14 +76,11 @@
     "desc": "Your blood acts as a short-lived poison, disabling cybernetic linkages temporarily.",
     "name": "Neural Disruptive Vitae",
     "effects": {
-      "onHit": [
-        "damage_cyber_disrupt_onhit"
-      ]
+      "onHit": ["damage_cyber_disrupt_onhit"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_neural_disruptive_vitae",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_predators_cunning",
@@ -100,14 +89,11 @@
     "desc": "Sense violence before it happens; seize the initiative (Go first).",
     "name": "Predator's Cunning",
     "effects": {
-      "passive": [
-        "buff_initiative"
-      ]
+      "passive": ["buff_initiative"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_predators_cunning",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_pulse_of_ark",
@@ -115,16 +101,15 @@
     "cost": 2,
     "desc": "Sense clusters of humanity/life across the Ark's levels. Helps guide your hunt.",
     "name": "Pulse of the Ark",
-    "range": 0,
+    "range": 20,
     "effects": {
       "ability": ["check_perception_vs_tn10", "utility_sense_life"]
     },
     "species": "gaki",
     "baseStat": "Perception",
+    "_uniqueId": "perk:vamp_pulse_of_ark",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "vamp_blood_economy",
@@ -133,14 +118,11 @@
     "desc": "Store blood/Chi more efficiently, reducing need to feed and enhancing resource management.",
     "name": "Blood Economy",
     "effects": {
-      "passive": [
-        "utility_resource_efficiency"
-      ]
+      "passive": ["utility_resource_efficiency"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_blood_economy",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_cybernetic_adaptation",
@@ -149,14 +131,11 @@
     "desc": "Your nature entwines seamlessly with cybernetics, allowing implants and augmentations to shift with your essence.",
     "name": "Cybernetic Adaptation",
     "effects": {
-      "passive": [
-        "utility_cybernetic_compatibility"
-      ]
+      "passive": ["utility_cybernetic_compatibility"]
     },
     "species": "gaki",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_cybernetic_adaptation",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_emotional_resonance_strigoi",
@@ -168,9 +147,8 @@
       "passive": ["buff_mental_1_social", "buff_perception_1"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_emotional_resonance_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_unnatural_beauty_strigoi",
@@ -179,14 +157,11 @@
     "desc": "Gifted with unnatural beauty; mortals and supernaturals stare in awe or dread. (+3 Mental in Social Situations or use of Mental Powers)",
     "name": "Unnatural Beauty",
     "effects": {
-      "passive": [
-        "buff_mental_3_social"
-      ]
+      "passive": ["buff_mental_3_social"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_unnatural_beauty_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_unyielding_will_strigoi",
@@ -195,14 +170,14 @@
     "desc": "Mind-influencing powers (fear, charms, compulsions) find it harder to affect you. (-2 to Attackers' Roll)",
     "name": "Unyielding Will",
     "effects": {
-      "passive": [
-        "defense_attacker_penalty_2"
-      ]
+      "ability": ["defense_attacker_penalty_2"],
+      "passive": ["defense_attacker_penalty_2"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Mental",
+    "_uniqueId": "perk:vamp_unyielding_will_strigoi",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "vamp_shadows_veil_strigoi",
@@ -211,14 +186,11 @@
     "desc": "Blend into darkness comes easy; (+1 to Stealth Rolls)",
     "name": "Shadow's Veil",
     "effects": {
-      "passive": [
-        "buff_stealth_2"
-      ]
+      "passive": ["buff_stealth_2"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_shadows_veil_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_ancient_wisdom_strigoi",
@@ -227,14 +199,11 @@
     "desc": "You speak one additional language and can decipher arcane text. Grants a single starting school of Magic.",
     "name": "Ancient Wisdom",
     "effects": {
-      "passive": [
-        "buff_mental_2_glyphs"
-      ]
+      "passive": ["buff_mental_2_glyphs"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_ancient_wisdom_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_neural_disruptive_vitae_strigoi",
@@ -243,14 +212,11 @@
     "desc": "Your blood acts as a short-lived poison, disabling cybernetic linkages temporarily.",
     "name": "Neural Disruptive Vitae",
     "effects": {
-      "onHit": [
-        "damage_cyber_disrupt_onhit"
-      ]
+      "onHit": ["damage_cyber_disrupt_onhit"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_neural_disruptive_vitae_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_predators_cunning_strigoi",
@@ -259,14 +225,11 @@
     "desc": "Sense violence before it happens; seize the initiative (Go first).",
     "name": "Predator's Cunning",
     "effects": {
-      "passive": [
-        "buff_initiative"
-      ]
+      "passive": ["buff_initiative"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_predators_cunning_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_pulse_of_ark_strigoi",
@@ -280,10 +243,9 @@
     },
     "species": "strigoi",
     "baseStat": "Perception",
+    "_uniqueId": "perk:vamp_pulse_of_ark_strigoi",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "vamp_blood_economy_strigoi",
@@ -292,14 +254,11 @@
     "desc": "Store blood/Chi more efficiently, reducing need to feed and enhancing resource management.",
     "name": "Blood Economy",
     "effects": {
-      "passive": [
-        "utility_resource_efficiency"
-      ]
+      "passive": ["utility_resource_efficiency"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_blood_economy_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "vamp_cybernetic_adaptation_strigoi",
@@ -308,14 +267,11 @@
     "desc": "Your nature entwines seamlessly with cybernetics, allowing implants and augmentations to shift with your essence.",
     "name": "Cybernetic Adaptation",
     "effects": {
-      "passive": [
-        "utility_cybernetic_compatibility"
-      ]
+      "passive": ["utility_cybernetic_compatibility"]
     },
     "species": "strigoi",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:vamp_cybernetic_adaptation_strigoi",
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_ssl_hsl",
@@ -324,14 +280,11 @@
     "desc": "Learn Beast and Hybrid Shifter Sign Languages. Communicate silently with other Spliced in shifted forms.",
     "name": "SSL & HSL",
     "effects": {
-      "passive": [
-        "utility_language_communication"
-      ]
+      "passive": ["utility_language_communication"]
     },
     "species": "spliced",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:spliced_ssl_hsl",
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_designers_gift",
@@ -340,12 +293,13 @@
     "desc": "Thrive in hostile environments; +2 Physical or Mental rolls vs hazards. Immune to suffocation/temperature penalties.",
     "name": "Designer's Gift",
     "effects": {
-      "passive": ["buff_physical_2_environmental", "defense_environmental"]
+      "ability": ["buff_physical_2_environmental", "defense_environmental"],
+      "passive": []
     },
     "species": "spliced",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:spliced_designers_gift",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "spliced_mate_bond",
@@ -354,14 +308,11 @@
     "desc": "Supernatural/genetic bond with Spliced or human mate. Telepathic/empathic comms; +1 Mental rolls when coordinating.",
     "name": "Mate Bond",
     "effects": {
-      "passive": [
-        "buff_mental_1_social"
-      ]
+      "passive": ["buff_mental_1_social"]
     },
     "species": "spliced",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:spliced_mate_bond",
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_maximized_shift",
@@ -373,9 +324,8 @@
       "ability": ["buff_physical_2", "buff_health_10"]
     },
     "species": "spliced",
-    "abilityType": [
-      "ability"
-    ]
+    "_uniqueId": "perk:spliced_maximized_shift",
+    "abilityType": ["ability"]
   },
   {
     "id": "spliced_unnatural_weapons",
@@ -390,10 +340,9 @@
     },
     "species": "spliced",
     "baseStat": "Physical",
+    "_uniqueId": "perk:spliced_unnatural_weapons",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "spliced_adaptive_biology",
@@ -402,14 +351,11 @@
     "desc": "Resistant to toxins and hostile environments; resistant to non-magical poisons/diseases.",
     "name": "Adaptive Biology",
     "effects": {
-      "passive": [
-        "defense_poison_resistance"
-      ]
+      "passive": ["defense_poison_resistance"]
     },
     "species": "spliced",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:spliced_adaptive_biology",
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_cybernetic_adaptation",
@@ -418,14 +364,11 @@
     "desc": "Cybernetic limbs/implants function across all forms; prosthetics retain stats/damage in Hybrid/Chimerical; all combat powers compatible.",
     "name": "Cybernetic Adaptation",
     "effects": {
-      "passive": [
-        "utility_cybernetic_compatibility"
-      ]
+      "passive": ["utility_cybernetic_compatibility"]
     },
     "species": "spliced",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:spliced_cybernetic_adaptation",
+    "abilityType": ["passive"]
   },
   {
     "id": "spliced_bioelectric_resonance",
@@ -436,12 +379,11 @@
     "range": 0,
     "effects": {
       "attack": ["check_mental_vs_physical", "damage_energy_6_bioelectric"],
-      "passive": [
-        "buff_mental_2_electronics"
-      ]
+      "passive": ["buff_mental_2_electronics"]
     },
     "species": "spliced",
     "baseStat": "Mental",
+    "_uniqueId": "perk:spliced_bioelectric_resonance",
     "targetType": "single",
     "abilityType": ["attack", "passive"]
   },
@@ -453,14 +395,11 @@
     "name": "Pulse Sense",
     "tier": 1,
     "effects": {
-      "passive": [
-        "buff_perception_2"
-      ]
+      "passive": ["buff_perception_2"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_pulse_sense",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_echo_imprint",
@@ -475,10 +414,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "perk:veil_echo_imprint",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_emotional_reading",
@@ -488,14 +426,11 @@
     "name": "Emotional Reading",
     "tier": 1,
     "effects": {
-      "passive": [
-        "buff_perception_1_empathy"
-      ]
+      "passive": ["buff_perception_1_empathy"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_emotional_reading",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_veil_touched_aura",
@@ -505,14 +440,11 @@
     "name": "Veil-Touched Aura",
     "tier": 1,
     "effects": {
-      "passive": [
-        "buff_mental_1_social"
-      ]
+      "passive": ["buff_mental_1_social"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_veil_touched_aura",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_veil_touched_presence",
@@ -522,14 +454,11 @@
     "name": "Veil-Touched Presence",
     "tier": 2,
     "effects": {
-      "passive": [
-        "buff_mental_3_social"
-      ]
+      "passive": ["buff_mental_3_social"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_veil_touched_presence",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_circuit_sympathy",
@@ -544,10 +473,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "perk:veil_circuit_sympathy",
     "targetType": "single",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_memory_echo",
@@ -562,10 +490,9 @@
     },
     "species": "veilborn",
     "baseStat": "Perception",
+    "_uniqueId": "perk:veil_memory_echo",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_unnatural_composure",
@@ -575,14 +502,11 @@
     "name": "Unnatural Composure",
     "tier": 2,
     "effects": {
-      "passive": [
-        "defense_mental_resistance"
-      ]
+      "passive": ["defense_mental_resistance"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_unnatural_composure",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_illusion_drift",
@@ -592,14 +516,11 @@
     "name": "Illusion Drift",
     "tier": 2,
     "effects": {
-      "passive": [
-        "buff_stealth_2"
-      ]
+      "passive": ["buff_stealth_2"]
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:veil_illusion_drift",
+    "abilityType": ["passive"]
   },
   {
     "id": "veil_veils_favor",
@@ -610,16 +531,13 @@
     "tier": 3,
     "range": 0,
     "effects": {
-      "ability": [
-        "utility_reroll"
-      ]
+      "ability": ["utility_reroll"]
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "perk:veil_veils_favor",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_ancient_wisdom",
@@ -629,14 +547,14 @@
     "name": "Ancient Wisdom",
     "tier": 3,
     "effects": {
-      "passive": [
-        "buff_mental_2_glyphs"
-      ]
+      "ability": ["buff_mental_2_glyphs"],
+      "passive": []
     },
     "species": "veilborn",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Mental",
+    "_uniqueId": "perk:veil_ancient_wisdom",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "veil_phantom_walk",
@@ -651,10 +569,9 @@
     },
     "species": "veilborn",
     "baseStat": "Mental",
+    "_uniqueId": "perk:veil_phantom_walk",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "human_adaptive_instinct",
@@ -663,14 +580,11 @@
     "desc": "Gain +1 to any single Stat roll (Physical, Dex, or Mental) when adjusting to new environments, systems, or social structures.",
     "name": "Adaptive Instinct",
     "effects": {
-      "passive": [
-        "buff_stat_adaptive_1"
-      ]
+      "passive": ["buff_stat_adaptive_1"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_adaptive_instinct",
+    "abilityType": ["passive"]
   },
   {
     "id": "human_survival_drive",
@@ -682,9 +596,8 @@
       "passive": ["buff_hp_2_temporary", "buff_save_1"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_survival_drive",
+    "abilityType": ["passive"]
   },
   {
     "id": "human_alliance_builder",
@@ -693,14 +606,14 @@
     "desc": "+1 to Social/Mental rolls when forming bonds, negotiating, or influencing other factions/gifted beings.",
     "name": "Alliance Builder",
     "effects": {
-      "passive": [
-        "buff_mental_1_social"
-      ]
+      "ability": ["buff_mental_1_social"],
+      "passive": []
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Mental",
+    "_uniqueId": "perk:human_alliance_builder",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "human_augment_access",
@@ -709,14 +622,11 @@
     "desc": "Gain 2 free slots in a cybernetic prosthetic and 1 (2pt) augment. Can use more points for higher level augments.",
     "name": "Augment Access",
     "effects": {
-      "passive": [
-        "buff_augment_slots"
-      ]
+      "passive": ["buff_augment_slots"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_augment_access",
+    "abilityType": ["passive"]
   },
   {
     "id": "human_artifact_resonance",
@@ -725,14 +635,14 @@
     "desc": "Near ancient Earth artifacts or magical relics, gain +2 Mental rolls/insight checks for one scene.",
     "name": "Artifact Resonance",
     "effects": {
-      "passive": [
-        "buff_mental_2_artifacts"
-      ]
+      "ability": ["buff_mental_2_artifacts"],
+      "passive": ["buff_mental_2_artifacts"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "baseStat": "Perception",
+    "_uniqueId": "perk:human_artifact_resonance",
+    "targetType": "self",
+    "abilityType": ["ability"]
   },
   {
     "id": "human_magiventive",
@@ -742,14 +652,11 @@
     "desc": "(Synthral only) Access 2 extra Magitech blueprints for crafting/effect.",
     "name": "Magiventive",
     "effects": {
-      "passive": [
-        "utility_magitech_blueprints"
-      ]
+      "passive": ["utility_magitech_blueprints"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_magiventive",
+    "abilityType": ["passive"]
   },
   {
     "id": "human_spell_coding",
@@ -764,10 +671,9 @@
     },
     "species": "human",
     "baseStat": "Mental",
+    "_uniqueId": "perk:human_spell_coding",
     "targetType": "area",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "human_symbolic_literacy",
@@ -777,14 +683,11 @@
     "desc": "(Arcanist only) +2 Mental rolls for deciphering glyphs, runes, or magical symbols.",
     "name": "Symbolic Literacy",
     "effects": {
-      "passive": [
-        "buff_mental_2_glyphs"
-      ]
+      "passive": ["buff_mental_2_glyphs"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_symbolic_literacy",
+    "abilityType": ["passive"]
   },
   {
     "id": "human_cognitive_shielding",
@@ -794,13 +697,10 @@
     "desc": "(Psion only) Resistance to manipulation, illusions, or emotional coercion. TN increased by 2 for any such effect.",
     "name": "Cognitive Shielding",
     "effects": {
-      "passive": [
-        "defense_mental_resistance"
-      ]
+      "passive": ["defense_mental_resistance"]
     },
     "species": "human",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "perk:human_cognitive_shielding",
+    "abilityType": ["passive"]
   }
 ]

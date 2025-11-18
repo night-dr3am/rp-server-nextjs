@@ -172,13 +172,14 @@ export default function ArkanaDataTab({ token }: ArkanaDataTabProps) {
           for (const item of result.data.items) {
             // Extract only metadata fields, keep everything else including data's 'type' field
             // IMPORTANT: Extract 'arkanaDataType', NOT 'type' - Skills/Effects have their own 'type' field!
+            // IMPORTANT: Keep '_uniqueId' in jsonData - it's a data field, not metadata!
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { id, createdAt, updatedAt, _uniqueId, _dbMeta, arkanaDataType, ...jsonData } = item;
+            const { id, createdAt, updatedAt, _dbMeta, arkanaDataType, ...jsonData } = item;
 
             bulkData.push({
               id: String(id),
               type: type, // Use loop variable for arkanaDataType category (always correct)
-              jsonData: jsonData as Record<string, unknown> // Preserves all data fields including type
+              jsonData: jsonData as Record<string, unknown> // Preserves all data fields including type and _uniqueId
             });
           }
         } else {

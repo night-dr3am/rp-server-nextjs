@@ -6,6 +6,7 @@
     "type": "situational",
     "maxLevel": 3,
     "mechanic": "Creates TN for Perception rolls, changes State",
+    "_uniqueId": "skill:skill_stealth",
     "description": "Move unseen through shadows."
   },
   {
@@ -15,6 +16,7 @@
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for hacking, +1 bonus to Mental rolls",
+    "_uniqueId": "skill:skill_hack",
     "description": "Breach firewalls, override systems, or manipulate digital constructs."
   },
   {
@@ -24,6 +26,7 @@
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for cybernetics work, +1 Mental roll",
+    "_uniqueId": "skill:skill_cybernetics",
     "description": "Maintain, upgrade, implants and synthetic limbs."
   },
   {
@@ -33,6 +36,7 @@
     "type": "automatic",
     "maxLevel": 3,
     "mechanic": "Automatically increases melee damage",
+    "_uniqueId": "skill:skill_combat_arts",
     "description": "Master martial techniques."
   },
   {
@@ -42,6 +46,7 @@
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for rituals, +1 to Magic rolls",
+    "_uniqueId": "skill:skill_ritualism",
     "description": "Perform complex rites, summon entities, or bind arcane forces."
   },
   {
@@ -51,6 +56,7 @@
     "type": "simple_roll",
     "maxLevel": 3,
     "mechanic": "Grants +1 to Mental rolls, situational",
+    "_uniqueId": "skill:skill_deception",
     "description": "Lie, forge identities, or manipulate perception."
   },
   {
@@ -60,6 +66,7 @@
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for engineering, +1 Mental roll",
+    "_uniqueId": "skill:skill_engineering",
     "description": "Build, repair, or modify tech — from drones to dimensional gates."
   },
   {
@@ -69,6 +76,7 @@
     "type": "situational",
     "maxLevel": 3,
     "mechanic": "+1 to Physical rolls, situational",
+    "_uniqueId": "skill:skill_survival",
     "description": "Endure harsh zones, scavenge resources, or adapt to anomalies."
   },
   {
@@ -78,16 +86,18 @@
     "type": "simple_roll",
     "maxLevel": 3,
     "mechanic": "Grants +1 to Mental rolls, situational",
+    "_uniqueId": "skill:skill_charm",
     "description": "Influence others through charisma."
   },
   {
     "id": "skill_medicine",
     "orderNumber": 9,
+    "desc": "Grants +2 levels of healing on a successful check.",
     "name": "Medicine",
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for healing, +2 to Heal levels",
-    "description": "Heal wounds, treat curses, or stabilize cybernetic failures."
+    "_uniqueId": "skill:skill_medicine"
   },
   {
     "id": "skill_tracking",
@@ -96,6 +106,7 @@
     "type": "simple_roll",
     "maxLevel": 3,
     "mechanic": "Grants +1 to Mental rolls, situational",
+    "_uniqueId": "skill:skill_tracking",
     "description": "Follow trails, digital footprints, or psychic echoes."
   },
   {
@@ -105,6 +116,7 @@
     "type": "required",
     "maxLevel": 3,
     "mechanic": "Required for tinkering, +1 to Mental rolls",
+    "_uniqueId": "skill:skill_tinkering",
     "description": "Improvise gadgets, traps, or arcane devices."
   },
   {
@@ -114,6 +126,7 @@
     "type": "simple_roll",
     "maxLevel": 3,
     "mechanic": "Grants +1 to Mental rolls, situational",
+    "_uniqueId": "skill:skill_lore",
     "description": "Recall mythic history, faction secrets, or forbidden knowledge."
   },
   {
@@ -123,6 +136,7 @@
     "type": "situational",
     "maxLevel": 3,
     "mechanic": "Grants +1 to Physical and Dexterity rolls",
+    "_uniqueId": "skill:skill_athletics",
     "description": "Run, climb, swim, and perform physical feats."
   },
   {
@@ -132,6 +146,7 @@
     "type": "automatic",
     "maxLevel": 3,
     "mechanic": "Automatically adds +2 damage to Ranged attacks",
+    "_uniqueId": "skill:skill_firearms",
     "description": "Handle pistols, rifles, and ranged weapons."
   },
   {
@@ -141,6 +156,7 @@
     "type": "automatic",
     "maxLevel": 3,
     "mechanic": "Automatically adds +1 damage to Melee attacks",
+    "_uniqueId": "skill:skill_melee",
     "description": "Handle melee weapons, knives, swords, etc."
   },
   {
@@ -150,6 +166,7 @@
     "type": "special",
     "maxLevel": 3,
     "mechanic": "Adds one language per skill level",
+    "_uniqueId": "skill:skill_linguistics",
     "description": "Understand and speak multiple languages or dialects."
   }
 ]

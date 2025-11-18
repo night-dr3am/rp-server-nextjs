@@ -39,88 +39,99 @@ function reconstructOriginalStructure<T extends { id: string; orderNumber?: numb
 /**
  * Format JSON with compact arrays (arrays on single line with their key)
  * This matches the production file format for better readability
+ *
+ * Uses recursive semantic traversal instead of regex string manipulation
+ * to preserve data integrity (especially for objects with multiple array properties)
  */
 function formatCompactJSON(data: unknown): string {
-  // First pass: Convert to JSON with standard formatting
-  const standardJson = JSON.stringify(data, null, 2);
+  return formatValue(data, 0);
+}
 
-  // Replace array patterns with compact versions
-  // Pattern: Match arrays that span multiple lines
-  const compactJson = standardJson.replace(
-    /"(\w+)":\s*\[\s*([\s\S]*?)\s*\]/g,
-    (match, key, content) => {
-      // Skip if already on one line or empty
-      if (!content.includes('\n') || content.trim() === '') {
-        return match;
-      }
+/**
+ * Recursively format a value with appropriate indentation
+ */
+function formatValue(value: unknown, indent: number): string {
+  if (value === null) {
+    return 'null';
+  }
 
-      // Extract array items (handle strings, numbers, objects)
-      const items: string[] = [];
-      let depth = 0;
-      let currentItem = '';
-      let inString = false;
-      let escapeNext = false;
+  if (value === undefined) {
+    return 'undefined';
+  }
 
-      for (let i = 0; i < content.length; i++) {
-        const char = content[i];
+  const type = typeof value;
 
-        // Handle escape sequences
-        if (escapeNext) {
-          currentItem += char;
-          escapeNext = false;
-          continue;
-        }
+  // Primitives
+  if (type === 'string') {
+    return JSON.stringify(value);
+  }
 
-        if (char === '\\') {
-          currentItem += char;
-          escapeNext = true;
-          continue;
-        }
+  if (type === 'number' || type === 'boolean') {
+    return String(value);
+  }
 
-        // Track string boundaries
-        if (char === '"') {
-          inString = !inString;
-          currentItem += char;
-          continue;
-        }
+  // Arrays
+  if (Array.isArray(value)) {
+    return formatArray(value, indent);
+  }
 
-        if (inString) {
-          currentItem += char;
-          continue;
-        }
+  // Objects
+  if (type === 'object') {
+    return formatObject(value as Record<string, unknown>, indent);
+  }
 
-        // Track object/array depth
-        if (char === '{' || char === '[') {
-          depth++;
-          currentItem += char;
-        } else if (char === '}' || char === ']') {
-          depth--;
-          currentItem += char;
-        } else if (char === ',' && depth === 0) {
-          // Item separator at root level
-          items.push(currentItem.trim());
-          currentItem = '';
-        } else if (char !== '\n' && char !== '\r') {
-          // Skip newlines, keep everything else
-          currentItem += char;
-        }
-      }
+  // Fallback
+  return JSON.stringify(value);
+}
 
-      // Add last item if exists
-      if (currentItem.trim()) {
-        items.push(currentItem.trim());
-      }
+/**
+ * Format an array - compact if it contains only primitives, otherwise multiline
+ */
+function formatArray(arr: unknown[], indent: number): string {
+  if (arr.length === 0) {
+    return '[]';
+  }
 
-      // Format as compact array
-      if (items.length === 0) {
-        return `"${key}": []`;
-      }
+  // Check if all items are primitives (not objects or arrays)
+  const allPrimitives = arr.every(item => {
+    const type = typeof item;
+    return item === null || type === 'string' || type === 'number' || type === 'boolean';
+  });
 
-      return `"${key}": [${items.join(', ')}]`;
-    }
-  );
+  if (allPrimitives) {
+    // Compact format: ["item1", "item2", "item3"]
+    const items = arr.map(item => formatValue(item, indent));
+    return `[${items.join(', ')}]`;
+  } else {
+    // Multiline format for arrays containing objects/arrays
+    const spaces = '  '.repeat(indent + 1);
+    const items = arr.map(item => `${spaces}${formatValue(item, indent + 1)}`);
+    const closingSpaces = '  '.repeat(indent);
+    return `[\n${items.join(',\n')}\n${closingSpaces}]`;
+  }
+}
 
-  return compactJson;
+/**
+ * Format an object with proper indentation
+ */
+function formatObject(obj: Record<string, unknown>, indent: number): string {
+  const keys = Object.keys(obj);
+
+  if (keys.length === 0) {
+    return '{}';
+  }
+
+  const spaces = '  '.repeat(indent + 1);
+  const closingSpaces = '  '.repeat(indent);
+
+  const entries = keys.map((key, index) => {
+    const value = obj[key];
+    const formattedValue = formatValue(value, indent + 1);
+    const comma = index < keys.length - 1 ? ',' : '';
+    return `${spaces}"${key}": ${formattedValue}${comma}`;
+  });
+
+  return `{\n${entries.join('\n')}\n${closingSpaces}}`;
 }
 
 /**

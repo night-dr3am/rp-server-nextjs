@@ -10,9 +10,8 @@
       "passive": ["utility_multispectrum_vision", "buff_perception_1"]
     },
     "section": "Sensory Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_spectra_vision",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_echo_sense",
@@ -22,14 +21,11 @@
     "name": "EchoSense",
     "type": "sensory",
     "effects": {
-      "passive": [
-        "utility_echolocation"
-      ]
+      "passive": ["utility_echolocation"]
     },
     "section": "Sensory Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_echo_sense",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_ghostlight_optics",
@@ -42,9 +38,8 @@
       "passive": ["buff_perception_1_lowlight", "utility_heat_vision"]
     },
     "section": "Sensory Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_ghostlight_optics",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_clarity_node",
@@ -54,14 +49,11 @@
     "name": "Clarity Node",
     "type": "sensory",
     "effects": {
-      "passive": [
-        "buff_perception_1"
-      ]
+      "passive": ["buff_perception_1"]
     },
     "section": "Sensory Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_clarity_node",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_street_eye_mkiv",
@@ -71,14 +63,11 @@
     "name": "Street-Eye Mk IV",
     "type": "sensory",
     "effects": {
-      "passive": [
-        "buff_perception_1"
-      ]
+      "passive": ["buff_perception_1"]
     },
     "section": "Sensory Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_street_eye_mkiv",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_razorjack_interface",
@@ -93,10 +82,9 @@
     },
     "section": "Combat/Utility Mods",
     "baseStat": "Physical",
+    "_uniqueId": "cybernetic:cyb_razorjack_interface",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "cyb_impact_coil",
@@ -107,14 +95,13 @@
     "type": "combat",
     "range": 5,
     "effects": {
-      "attack": ["check_physical_vs_physical", "damage_force_3", "control_push"]
+      "attack": ["damage_force_3", "control_push", "check_physical_vs_tn10"]
     },
     "section": "Combat/Utility Mods",
     "baseStat": "Physical",
-    "targetType": "area",
-    "abilityType": [
-      "attack"
-    ]
+    "_uniqueId": "cybernetic:cyb_impact_coil",
+    "targetType": "single",
+    "abilityType": ["attack"]
   },
   {
     "id": "cyb_grav_lock_anchors",
@@ -124,14 +111,11 @@
     "name": "Grav-Lock Anchors",
     "type": "combat",
     "effects": {
-      "passive": [
-        "movement_wall_climbing"
-      ]
+      "passive": ["movement_wall_climbing"]
     },
     "section": "Combat/Utility Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_grav_lock_anchors",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_pulse_injector",
@@ -146,10 +130,9 @@
     },
     "section": "Combat/Utility Mods",
     "baseStat": "Dexterity",
+    "_uniqueId": "cybernetic:cyb_pulse_injector",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "cyb_wraith_grip",
@@ -159,14 +142,11 @@
     "name": "Wraith Grip",
     "type": "combat",
     "effects": {
-      "passive": [
-        "buff_stealth_3_sound"
-      ]
+      "passive": ["buff_stealth_3_sound"]
     },
     "section": "Combat/Utility Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_wraith_grip",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_shadeskin",
@@ -181,10 +161,9 @@
     },
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Dexterity",
+    "_uniqueId": "cybernetic:cyb_shadeskin",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "cyb_veil_circuit",
@@ -194,14 +173,11 @@
     "name": "Veil Circuit",
     "type": "stealth",
     "effects": {
-      "passive": [
-        "buff_stealth_3_sound"
-      ]
+      "passive": ["buff_stealth_3_sound"]
     },
     "section": "Stealth/Infiltration - Hacking",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_veil_circuit",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_ghoststep_relay",
@@ -211,14 +187,11 @@
     "name": "Ghoststep Relay",
     "type": "stealth",
     "effects": {
-      "passive": [
-        "buff_stealth_2"
-      ]
+      "passive": ["buff_stealth_2"]
     },
     "section": "Stealth/Infiltration - Hacking",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_ghoststep_relay",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_null_sigil",
@@ -228,14 +201,11 @@
     "name": "Null Sigil",
     "type": "stealth",
     "effects": {
-      "passive": [
-        "utility_electronic_masking"
-      ]
+      "passive": ["utility_electronic_masking"]
     },
     "section": "Stealth/Infiltration - Hacking",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_null_sigil",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_cold_veins",
@@ -245,14 +215,11 @@
     "name": "Cold Veins",
     "type": "stealth",
     "effects": {
-      "passive": [
-        "buff_stealth_2"
-      ]
+      "passive": ["buff_stealth_2"]
     },
     "section": "Stealth/Infiltration - Hacking",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_cold_veins",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_titan_frame",
@@ -262,14 +229,11 @@
     "name": "Titan Frame",
     "type": "durability",
     "effects": {
-      "passive": [
-        "defense_damage_reduction_2"
-      ]
+      "passive": ["defense_damage_reduction_2"]
     },
     "section": "Augmented Strength/Durability",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_titan_frame",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_servocore_overdrive",
@@ -284,10 +248,9 @@
     },
     "section": "Augmented Strength/Durability",
     "baseStat": "Physical",
+    "_uniqueId": "cybernetic:cyb_servocore_overdrive",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "cyb_ironlung_node",
@@ -297,14 +260,11 @@
     "name": "Ironlung Node",
     "type": "durability",
     "effects": {
-      "passive": [
-        "defense_environmental"
-      ]
+      "passive": ["defense_environmental"]
     },
     "section": "Augmented Strength/Durability",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_ironlung_node",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_shock_spine",
@@ -314,14 +274,11 @@
     "name": "Shock-Spine",
     "type": "durability",
     "effects": {
-      "passive": [
-        "passive_reflect_damage_2_electric"
-      ]
+      "passive": ["passive_reflect_damage_2_electric"]
     },
     "section": "Augmented Strength/Durability",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_shock_spine",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_grinder_arm",
@@ -336,10 +293,9 @@
     },
     "section": "Augmented Strength/Durability",
     "baseStat": "Physical",
+    "_uniqueId": "cybernetic:cyb_grinder_arm",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "cyb_carapace_full",
@@ -349,14 +305,11 @@
     "name": "Carapace (full)",
     "type": "durability",
     "effects": {
-      "passive": [
-        "defense_damage_reduction_3"
-      ]
+      "passive": ["defense_damage_reduction_3"]
     },
     "section": "Augmented Strength/Durability",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_carapace_full",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_meatjackers",
@@ -371,10 +324,9 @@
     },
     "section": "Street-Level Popular Mods",
     "baseStat": "Physical",
+    "_uniqueId": "cybernetic:cyb_meatjackers",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "cyb_glowsticks",
@@ -384,14 +336,11 @@
     "name": "Glowsticks",
     "type": "street",
     "effects": {
-      "passive": [
-        "buff_social_intimidation"
-      ]
+      "passive": ["buff_social_intimidation"]
     },
     "section": "Street-Level Popular Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_glowsticks",
+    "abilityType": ["passive"]
   },
   {
     "id": "cyb_bonecrackers",
@@ -406,10 +355,9 @@
     },
     "section": "Street-Level Popular Mods",
     "baseStat": "Physical",
+    "_uniqueId": "cybernetic:cyb_bonecrackers",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "cyb_spiderjoints",
@@ -419,14 +367,11 @@
     "name": "Spiderjoints",
     "type": "street",
     "effects": {
-      "passive": [
-        "buff_dexterity_2"
-      ]
+      "passive": ["buff_dexterity_2"]
     },
     "section": "Street-Level Popular Mods",
-    "abilityType": [
-      "passive"
-    ]
+    "_uniqueId": "cybernetic:cyb_spiderjoints",
+    "abilityType": ["passive"]
   },
   {
     "id": "hack_silkveil",
@@ -443,10 +388,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_silkveil",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_shadowstep",
@@ -463,10 +407,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_shadowstep",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_nightloom",
@@ -483,10 +426,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_nightloom",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_mutepatch",
@@ -503,10 +445,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_mutepatch",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_glasscloak",
@@ -523,10 +464,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_glasscloak",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_hushkit",
@@ -543,10 +483,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_hushkit",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_fogline",
@@ -563,10 +502,9 @@
     "section": "Stealth/Infiltration - Hacking",
     "baseStat": "Mental",
     "category": "stealth",
+    "_uniqueId": "cybernetic:hack_fogline",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_wardhalo",
@@ -583,10 +521,9 @@
     "section": "Defensive/Countermeasures - Hacking",
     "baseStat": "Mental",
     "category": "defense",
+    "_uniqueId": "cybernetic:hack_wardhalo",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_glassguard",
@@ -603,10 +540,9 @@
     "section": "Defensive/Countermeasures - Hacking",
     "baseStat": "Mental",
     "category": "defense",
+    "_uniqueId": "cybernetic:hack_glassguard",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_mistscreen",
@@ -623,10 +559,9 @@
     "section": "Defensive/Countermeasures - Hacking",
     "baseStat": "Mental",
     "category": "defense",
+    "_uniqueId": "cybernetic:hack_mistscreen",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_pulsefence",
@@ -643,10 +578,9 @@
     "section": "Defensive/Countermeasures - Hacking",
     "baseStat": "Mental",
     "category": "defense",
+    "_uniqueId": "cybernetic:hack_pulsefence",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_brickwave",
@@ -663,10 +597,9 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_brickwave",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "hack_glassrend",
@@ -683,10 +616,9 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_glassrend",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "hack_thunderclasp",
@@ -703,10 +635,9 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_thunderclasp",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   },
   {
     "id": "hack_clockmender",
@@ -723,10 +654,9 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_clockmender",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_signalsmith",
@@ -743,10 +673,9 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_signalsmith",
     "targetType": "self",
-    "abilityType": [
-      "ability"
-    ]
+    "abilityType": ["ability"]
   },
   {
     "id": "hack_wreckline",
@@ -763,9 +692,8 @@
     "section": "Breaching/Intrusion Protocols - Hacking",
     "baseStat": "Mental",
     "category": "breach",
+    "_uniqueId": "cybernetic:hack_wreckline",
     "targetType": "single",
-    "abilityType": [
-      "attack"
-    ]
+    "abilityType": ["attack"]
   }
 ]

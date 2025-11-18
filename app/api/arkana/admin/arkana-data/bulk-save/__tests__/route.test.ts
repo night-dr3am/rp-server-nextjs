@@ -257,4 +257,179 @@ describe('POST /api/arkana/admin/arkana-data/bulk-save', () => {
     // But if it had failed, count should remain unchanged
     // This is more of a documentation of expected behavior
   });
+
+  it('should preserve all fields including _uniqueId in round-trip import/export', async () => {
+    // This test verifies that importing JSON with _uniqueId and then exporting preserves all data
+    const originalData = [
+      {
+        id: 'check_physical_vs_tn0',
+        type: 'effect',
+        orderNumber: 2,
+        jsonData: {
+          name: 'Physical Check vs TN 0',
+          desc: 'Roll 1d20 + Physical modifier vs TN 0',
+          category: 'check',
+          checkStat: 'Physical',
+          checkVs: 'fixed',
+          checkTN: 0,
+          _uniqueId: 'effect:check_physical_vs_tn0'
+        }
+      },
+      {
+        id: 'check_physical_vs_tn10',
+        type: 'effect',
+        orderNumber: 2,
+        jsonData: {
+          name: 'Physical Check vs TN 10',
+          desc: 'Roll 1d20 + Physical modifier vs TN 10',
+          category: 'check',
+          checkStat: 'Physical',
+          checkVs: 'fixed',
+          checkTN: 10,
+          _uniqueId: 'effect:check_physical_vs_tn10'
+        }
+      },
+      {
+        id: 'check_physical_vs_tn15',
+        type: 'effect',
+        orderNumber: 2,
+        jsonData: {
+          name: 'Physical Check vs TN 15',
+          desc: 'Roll 1d20 + Physical modifier vs TN 15',
+          category: 'check',
+          checkStat: 'Physical',
+          checkVs: 'fixed',
+          checkTN: 15,
+          _uniqueId: 'effect:check_physical_vs_tn15'
+        }
+      }
+    ];
+
+    // 1. Import via bulk-save
+    const importRequest = createMockPostRequest('/api/arkana/admin/arkana-data/bulk-save', {
+      token: adminToken,
+      data: originalData
+    });
+
+    const importResponse = await POST(importRequest);
+    const importData = await parseJsonResponse(importResponse);
+
+    expectSuccess(importData);
+    expect(importData.data.created).toBe(3);
+
+    // 2. Export via export endpoint
+    const { POST: ExportPOST } = await import('../../export/route');
+    const exportRequest = createMockPostRequest('/api/arkana/admin/arkana-data/export', {
+      token: adminToken,
+      type: 'effect'
+    });
+
+    const exportResponse = await ExportPOST(exportRequest);
+    const exportedJson = await exportResponse.text();
+    const exportedData = JSON.parse(exportedJson);
+
+    // 3. Verify all three records are present
+    const tn0 = exportedData.find((e: { id: string }) => e.id === 'check_physical_vs_tn0');
+    const tn10 = exportedData.find((e: { id: string }) => e.id === 'check_physical_vs_tn10');
+    const tn15 = exportedData.find((e: { id: string }) => e.id === 'check_physical_vs_tn15');
+
+    expect(tn0).toBeDefined();
+    expect(tn10).toBeDefined();
+    expect(tn15).toBeDefined();
+
+    // 4. Verify all fields are preserved
+    expect(tn0.orderNumber).toBe(2);
+    expect(tn0.name).toBe('Physical Check vs TN 0');
+    expect(tn0.checkTN).toBe(0);
+    expect(tn0._uniqueId).toBe('effect:check_physical_vs_tn0');
+
+    expect(tn10.orderNumber).toBe(2);
+    expect(tn10.name).toBe('Physical Check vs TN 10');
+    expect(tn10.checkTN).toBe(10);
+    expect(tn10._uniqueId).toBe('effect:check_physical_vs_tn10');
+
+    expect(tn15.orderNumber).toBe(2);
+    expect(tn15.name).toBe('Physical Check vs TN 15');
+    expect(tn15.checkTN).toBe(15);
+    expect(tn15._uniqueId).toBe('effect:check_physical_vs_tn15');
+
+    // 5. Verify exported data matches original structure (excluding type field)
+    const compareFields = (original: typeof originalData[0], exported: typeof tn0) => {
+      expect(exported.id).toBe(original.id);
+      expect(exported.orderNumber).toBe(original.orderNumber);
+      Object.keys(original.jsonData).forEach(key => {
+        expect(exported[key]).toEqual(original.jsonData[key]);
+      });
+    };
+
+    compareFields(originalData[0], tn0);
+    compareFields(originalData[1], tn10);
+    compareFields(originalData[2], tn15);
+  });
+
+  it('should preserve effect IDs in power abilities (gaki_yin_shroud test case)', async () => {
+    // This test reproduces the bug where check_dexterity_vs_tn12 gets changed to something else
+    const originalPower = {
+      id: 'gaki_yin_shroud',
+      type: 'commonPower',
+      orderNumber: 12,
+      jsonData: {
+        cost: 3,
+        desc: 'Cloak themselves in shadow and silence.',
+        name: 'Yin Shroud',
+        tags: ['stealth', 'utility'],
+        range: 0,
+        effects: {
+          ability: ['check_dexterity_vs_tn12', 'buff_stealth_4']
+        },
+        species: 'gaki',
+        baseStat: 'Physical',
+        _uniqueId: 'commonPower:gaki_yin_shroud',
+        targetType: 'self',
+        abilityType: ['ability']
+      }
+    };
+
+    // 1. Import via bulk-save
+    const importRequest = createMockPostRequest('/api/arkana/admin/arkana-data/bulk-save', {
+      token: adminToken,
+      data: [originalPower]
+    });
+
+    const importResponse = await POST(importRequest);
+    const importData = await parseJsonResponse(importResponse);
+
+    expectSuccess(importData);
+    expect(importData.data.created).toBe(1);
+
+    // 2. Export via export endpoint
+    const { POST: ExportPOST } = await import('../../export/route');
+    const exportRequest = createMockPostRequest('/api/arkana/admin/arkana-data/export', {
+      token: adminToken,
+      type: 'commonPower'
+    });
+
+    const exportResponse = await ExportPOST(exportRequest);
+    const exportedJson = await exportResponse.text();
+    const exportedData = JSON.parse(exportedJson);
+
+    // 3. Find the exported power
+    const exportedPower = exportedData.find((p: { id: string }) => p.id === 'gaki_yin_shroud');
+
+    expect(exportedPower).toBeDefined();
+    expect(exportedPower.effects).toBeDefined();
+    expect(exportedPower.effects.ability).toBeDefined();
+
+    // 4. CRITICAL: Verify effect IDs are NOT mutated
+    expect(exportedPower.effects.ability).toEqual(['check_dexterity_vs_tn12', 'buff_stealth_4']);
+
+    // Also verify the first effect specifically (this is what the user says is being changed)
+    expect(exportedPower.effects.ability[0]).toBe('check_dexterity_vs_tn12');
+    expect(exportedPower.effects.ability[1]).toBe('buff_stealth_4');
+
+    // 5. Verify other fields are preserved
+    expect(exportedPower.name).toBe('Yin Shroud');
+    expect(exportedPower.cost).toBe(3);
+    expect(exportedPower._uniqueId).toBe('commonPower:gaki_yin_shroud');
+  });
 });

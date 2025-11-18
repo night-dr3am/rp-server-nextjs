@@ -249,6 +249,128 @@ describe('Arkana Data Export Endpoint', () => {
       expectError(data);
       expect(response.status).toBe(400);
     });
+
+    it('should preserve effects with empty attack and non-empty ability arrays', async () => {
+      // This test reproduces the bug where effects.ability content gets moved to effects.attack
+      await prisma.arkanaData.create({
+        data: {
+          id: 'test_power_effects_bug',
+          arkanaDataType: 'archetypePower',
+          jsonData: {
+            name: 'Mind Control',
+            cost: 3,
+            description: 'Control the mind of your target',
+            effects: {
+              attack: [],
+              ability: ['check_mental_vs_mental', 'control_command']
+            }
+          }
+        }
+      });
+
+      const request = createMockPostRequest('/api/arkana/admin/arkana-data/export', {
+        token: adminToken,
+        type: 'archetypePower'
+      });
+
+      const response = await POST(request);
+      const jsonText = await response.text();
+      const exported = JSON.parse(jsonText);
+
+      const power = exported.find((p: { id: string }) => p.id === 'test_power_effects_bug');
+      expect(power).toBeDefined();
+      expect(power.effects).toBeDefined();
+
+      // The bug causes ability array to be moved to attack, and ability field to be removed
+      // This test should FAIL with the current buggy code and PASS after the fix
+      expect(power.effects.attack).toEqual([]);
+      expect(power.effects.ability).toEqual(['check_mental_vs_mental', 'control_command']);
+    });
+
+    it('should preserve all records with same orderNumber but different IDs', async () => {
+      // This test reproduces the bug where records with same orderNumber get lost
+      // Example: check_physical_vs_tn0 and check_physical_vs_tn10 both have orderNumber: 2
+      await prisma.arkanaData.createMany({
+        data: [
+          {
+            id: 'check_physical_vs_tn0',
+            arkanaDataType: 'effect',
+            orderNumber: 2,
+            jsonData: {
+              name: 'Physical Check vs TN 0',
+              desc: 'Roll 1d20 + Physical modifier vs TN 0',
+              category: 'check',
+              checkStat: 'Physical',
+              checkVs: 'fixed',
+              checkTN: 0,
+              _uniqueId: 'effect:check_physical_vs_tn0'
+            }
+          },
+          {
+            id: 'check_physical_vs_tn10',
+            arkanaDataType: 'effect',
+            orderNumber: 2,
+            jsonData: {
+              name: 'Physical Check vs TN 10',
+              desc: 'Roll 1d20 + Physical modifier vs TN 10',
+              category: 'check',
+              checkStat: 'Physical',
+              checkVs: 'fixed',
+              checkTN: 10,
+              _uniqueId: 'effect:check_physical_vs_tn10'
+            }
+          },
+          {
+            id: 'check_physical_vs_tn15',
+            arkanaDataType: 'effect',
+            orderNumber: 2,
+            jsonData: {
+              name: 'Physical Check vs TN 15',
+              desc: 'Roll 1d20 + Physical modifier vs TN 15',
+              category: 'check',
+              checkStat: 'Physical',
+              checkVs: 'fixed',
+              checkTN: 15,
+              _uniqueId: 'effect:check_physical_vs_tn15'
+            }
+          }
+        ]
+      });
+
+      const request = createMockPostRequest('/api/arkana/admin/arkana-data/export', {
+        token: adminToken,
+        type: 'effect'
+      });
+
+      const response = await POST(request);
+      const jsonText = await response.text();
+      const exported = JSON.parse(jsonText);
+
+      // Find all three effects
+      const tn0 = exported.find((e: { id: string }) => e.id === 'check_physical_vs_tn0');
+      const tn10 = exported.find((e: { id: string }) => e.id === 'check_physical_vs_tn10');
+      const tn15 = exported.find((e: { id: string }) => e.id === 'check_physical_vs_tn15');
+
+      // All three should be present
+      expect(tn0).toBeDefined();
+      expect(tn10).toBeDefined();
+      expect(tn15).toBeDefined();
+
+      // Verify they all have the same orderNumber
+      expect(tn0.orderNumber).toBe(2);
+      expect(tn10.orderNumber).toBe(2);
+      expect(tn15.orderNumber).toBe(2);
+
+      // Verify their unique properties are preserved
+      expect(tn0.checkTN).toBe(0);
+      expect(tn10.checkTN).toBe(10);
+      expect(tn15.checkTN).toBe(15);
+
+      // Verify _uniqueId is preserved
+      expect(tn0._uniqueId).toBe('effect:check_physical_vs_tn0');
+      expect(tn10._uniqueId).toBe('effect:check_physical_vs_tn10');
+      expect(tn15._uniqueId).toBe('effect:check_physical_vs_tn15');
+    });
   });
 
   describe('GET /api/arkana/admin/arkana-data/export (stats)', () => {

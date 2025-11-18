@@ -6,6 +6,7 @@
     "name": "Mental Check vs Mental Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_mental_vs_mental",
     "checkStat": "Mental",
     "checkVsStat": "Mental"
   },
@@ -18,8 +19,20 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_suggestion",
     "resistType": "Mental",
     "controlType": "suggestion"
+  },
+  {
+    "id": "check_physical_vs_tn0",
+    "orderNumber": 2,
+    "desc": "Roll 1d20 + Physical modifier vs TN 10",
+    "name": "Physical Check vs TN 10",
+    "checkTN": 1,
+    "checkVs": "fixed",
+    "category": "check",
+    "_uniqueId": "effect:check_physical_vs_tn0",
+    "checkStat": "Physical"
   },
   {
     "id": "check_physical_vs_tn10",
@@ -29,6 +42,7 @@
     "checkTN": 10,
     "checkVs": "fixed",
     "category": "check",
+    "_uniqueId": "effect:check_physical_vs_tn10",
     "checkStat": "Physical"
   },
   {
@@ -40,6 +54,7 @@
     "target": "self",
     "category": "special",
     "duration": "scene",
+    "_uniqueId": "effect:transform_mist_wolf_bat",
     "utilityType": "movement"
   },
   {
@@ -51,6 +66,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:movement_wall_climbing",
     "utilityType": "movement"
   },
   {
@@ -62,6 +78,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_dreamwalk",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -74,6 +91,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_mental_2",
     "damageType": "mental",
     "damageFormula": "2 + Mental"
   },
@@ -86,6 +104,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "immediate",
+    "_uniqueId": "effect:control_command",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -97,7 +116,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_shadowform"
   },
   {
     "id": "buff_stealth_3",
@@ -110,6 +130,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 3,
+    "_uniqueId": "effect:buff_stealth_3",
     "modifierType": "roll_bonus"
   },
   {
@@ -120,7 +141,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_animal_wolf_bat"
   },
   {
     "id": "control_domination_full",
@@ -131,6 +153,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_domination_full",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -142,7 +165,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "turns:3"
+    "duration": "turns:3",
+    "_uniqueId": "effect:transform_mist_full"
   },
   {
     "id": "defense_immunity_physical",
@@ -153,6 +177,7 @@
     "target": "self",
     "category": "defense",
     "duration": "turns:3",
+    "_uniqueId": "effect:defense_immunity_physical",
     "defenseType": "immunity"
   },
   {
@@ -166,6 +191,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": 5,
+    "_uniqueId": "effect:buff_stealth_5",
     "modifierType": "roll_bonus"
   },
   {
@@ -179,6 +205,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": -1,
+    "_uniqueId": "effect:debuff_mental_minus_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -190,7 +217,8 @@
     "type": "cleanse",
     "target": "ally",
     "category": "heal",
-    "duration": "immediate"
+    "duration": "immediate",
+    "_uniqueId": "effect:ability_chi_balance_restore"
   },
   {
     "id": "check_dexterity_vs_tn10",
@@ -200,6 +228,18 @@
     "checkTN": 10,
     "checkVs": "fixed",
     "category": "check",
+    "_uniqueId": "effect:check_dexterity_vs_tn10",
+    "checkStat": "Dexterity"
+  },
+  {
+    "id": "check_dexterity_vs_tn12",
+    "orderNumber": 17,
+    "desc": "Roll 1d20 + Dexterity modifier vs TN 12",
+    "name": "Dexterity Check vs TN 12",
+    "checkTN": 12,
+    "checkVs": "fixed",
+    "category": "check",
+    "_uniqueId": "effect:check_dexterity_vs_tn12",
     "checkStat": "Dexterity"
   },
   {
@@ -213,19 +253,21 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 3,
+    "_uniqueId": "effect:buff_dexterity_3",
     "modifierType": "roll_bonus"
   },
   {
     "id": "buff_stealth_4",
     "orderNumber": 19,
-    "desc": "Grants +4 bonus to stealth-related rolls (shadow and silence)",
+    "desc": "Grants +4 bonus to stealth-related rolls (shadow and silence) Used before Stealth",
     "name": "Stealth Bonus +4",
-    "stat": "Stealth",
+    "stat": "Dexterity",
     "type": "roll_bonus",
     "target": "self",
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 4,
+    "_uniqueId": "effect:buff_stealth_4",
     "modifierType": "roll_bonus"
   },
   {
@@ -237,6 +279,7 @@
     "target": "all_enemies",
     "category": "damage",
     "duration": "turns:3",
+    "_uniqueId": "effect:aura_yang_flame_damage",
     "damageType": "fire",
     "damageFixed": 2
   },
@@ -249,6 +292,7 @@
     "target": "all_allies_and_self",
     "category": "heal",
     "duration": "turns:3",
+    "_uniqueId": "effect:aura_yang_flame_vitality",
     "healFormula": "1"
   },
   {
@@ -258,6 +302,7 @@
     "name": "Physical Check vs Physical Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_physical_vs_physical",
     "checkStat": "Physical",
     "checkVsStat": "Physical"
   },
@@ -270,6 +315,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_3",
     "damageType": "physical",
     "damageFormula": "3 + Physical"
   },
@@ -282,6 +328,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_restrain",
     "resistType": "Physical",
     "controlType": "bind"
   },
@@ -294,6 +341,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_4",
     "damageType": "physical",
     "damageFormula": "4 + Physical"
   },
@@ -308,6 +356,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": -1,
+    "_uniqueId": "effect:debuff_mental_minus_1_area",
     "modifierType": "roll_bonus"
   },
   {
@@ -319,6 +368,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:movement_burrow",
     "utilityType": "movement"
   },
   {
@@ -330,6 +380,7 @@
     "target": "enemy",
     "category": "defense",
     "duration": "permanent",
+    "_uniqueId": "effect:passive_reflect_damage_1",
     "damageFixed": 1,
     "defenseType": "reflect"
   },
@@ -342,6 +393,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_2_ranged",
     "damageType": "physical",
     "damageFormula": "2 + Physical"
   },
@@ -353,6 +405,7 @@
     "checkTN": 10,
     "checkVs": "fixed",
     "category": "check",
+    "_uniqueId": "effect:check_mental_vs_tn10",
     "checkStat": "Mental"
   },
   {
@@ -365,8 +418,7 @@
     "duration": "immediate",
     "healType": "direct",
     "_uniqueId": "effect:heal_biofusion_3",
-    "healFormula": "3 + Mental",
-    "arkanaDataType": "effect"
+    "healFormula": "3 + Mental"
   },
   {
     "id": "heal_biofusion_4",
@@ -379,8 +431,7 @@
     "duration": "immediate",
     "healType": "direct",
     "_uniqueId": "effect:heal_biofusion_4",
-    "healFormula": "4 + Mental",
-    "arkanaDataType": "effect"
+    "healFormula": "4 + Mental"
   },
   {
     "id": "utility_machine_repair",
@@ -391,6 +442,7 @@
     "target": "ally",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_machine_repair",
     "utilityType": "social"
   },
   {
@@ -404,6 +456,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2_area",
     "modifierType": "roll_bonus"
   },
   {
@@ -414,6 +467,7 @@
     "checkTN": 10,
     "checkVs": "fixed",
     "category": "check",
+    "_uniqueId": "effect:check_perception_vs_tn10",
     "checkStat": "Perception"
   },
   {
@@ -425,6 +479,7 @@
     "target": "self",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_echo_memory",
     "utilityType": "perception"
   },
   {
@@ -436,6 +491,7 @@
     "target": "all_allies_and_self",
     "category": "defense",
     "duration": "scene",
+    "_uniqueId": "effect:aura_sanctuary_field",
     "defenseType": "immunity"
   },
   {
@@ -447,6 +503,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_memory_archive",
     "utilityType": "social"
   },
   {
@@ -460,6 +517,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 6,
+    "_uniqueId": "effect:buff_stealth_6",
     "modifierType": "roll_bonus"
   },
   {
@@ -473,6 +531,7 @@
     "category": "stat_modifier",
     "duration": "turns:1",
     "modifier": 1,
+    "_uniqueId": "effect:buff_mental_1_turn",
     "modifierType": "roll_bonus"
   },
   {
@@ -483,7 +542,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "turns:3"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_mimic"
   },
   {
     "id": "debuff_entropy_disruption",
@@ -496,6 +556,7 @@
     "category": "stat_modifier",
     "duration": "turns:1",
     "modifier": -1,
+    "_uniqueId": "effect:debuff_entropy_disruption",
     "modifierType": "roll_bonus"
   },
   {
@@ -507,6 +568,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_attraction",
     "resistType": "Mental",
     "controlType": "charm"
   },
@@ -518,7 +580,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_glamour"
   },
   {
     "id": "damage_physical_2",
@@ -529,6 +592,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_2",
     "damageType": "physical",
     "damageFormula": "2 + Physical"
   },
@@ -543,6 +607,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": -2,
+    "_uniqueId": "effect:debuff_exhaustion",
     "modifierType": "roll_bonus"
   },
   {
@@ -554,6 +619,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_desire",
     "resistType": "Mental",
     "controlType": "suggestion"
   },
@@ -566,6 +632,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_summon_vermin",
     "utilityType": "social"
   },
   {
@@ -577,6 +644,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_corpse_memory",
     "utilityType": "perception"
   },
   {
@@ -586,6 +654,7 @@
     "name": "Mental Check vs Physical Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_mental_vs_physical",
     "checkStat": "Mental",
     "checkVsStat": "Physical"
   },
@@ -598,6 +667,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_necrotic_3",
     "damageType": "necrotic",
     "damageFormula": "3 + Mental"
   },
@@ -609,7 +679,8 @@
     "type": "destruction",
     "target": "single",
     "category": "special",
-    "duration": "immediate"
+    "duration": "immediate",
+    "_uniqueId": "effect:utility_corrode"
   },
   {
     "id": "control_fear",
@@ -620,6 +691,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_fear",
     "resistType": "Mental",
     "controlType": "fear"
   },
@@ -634,6 +706,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": -2,
+    "_uniqueId": "effect:debuff_physical_minus_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -645,6 +718,7 @@
     "target": "self",
     "category": "defense",
     "duration": "scene",
+    "_uniqueId": "effect:defense_damage_reduction_3",
     "damageReduction": 3
   },
   {
@@ -654,6 +728,7 @@
     "name": "Physical Check vs Mental Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_physical_vs_mental",
     "checkStat": "Physical",
     "checkVsStat": "Mental"
   },
@@ -664,11 +739,12 @@
     "name": "Attack Roll Debuff -1",
     "stat": "Physical",
     "type": "debuff",
-    "target": "enemy",
+    "target": "area",
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": -1,
-    "modifierType": "roll_bonus"
+    "_uniqueId": "effect:debuff_attack_minus_1",
+    "modifierType": "stat_value"
   },
   {
     "id": "utility_frighten_animals",
@@ -679,6 +755,7 @@
     "target": "area",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_frighten_animals",
     "utilityType": "social"
   },
   {
@@ -692,6 +769,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_attack_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -703,6 +781,7 @@
     "target": "area",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_social_influence",
     "resistType": "Mental",
     "controlType": "charm"
   },
@@ -715,6 +794,7 @@
     "target": "single",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_curse",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -729,6 +809,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 2,
+    "_uniqueId": "effect:buff_social_authority",
     "modifierType": "roll_bonus"
   },
   {
@@ -740,6 +821,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_silence",
     "resistType": "Mental",
     "controlType": "silence"
   },
@@ -751,7 +833,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_corpse"
   },
   {
     "id": "utility_command_spirits",
@@ -762,6 +845,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_command_spirits",
     "utilityType": "social"
   },
   {
@@ -773,6 +857,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:movement_phase",
     "utilityType": "movement"
   },
   {
@@ -784,6 +869,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_soul_extraction",
     "utilityType": "social"
   },
   {
@@ -795,6 +881,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_reveal_corruption",
     "utilityType": "perception"
   },
   {
@@ -806,6 +893,7 @@
     "target": "all_enemies",
     "category": "damage",
     "duration": "turns:3",
+    "_uniqueId": "effect:damage_fire_5_area_blind",
     "damageType": "fire",
     "damageFormula": "5 + Mental"
   },
@@ -815,9 +903,10 @@
     "desc": "Blinds target with radiant light",
     "name": "Blind Target",
     "type": "debuff",
-    "target": "enemy",
+    "target": "area",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_blind",
     "resistType": "Mental",
     "controlType": "confusion"
   },
@@ -829,7 +918,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_living"
   },
   {
     "id": "utility_chi_feast",
@@ -840,6 +930,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_chi_feast",
     "utilityType": "social"
   },
   {
@@ -853,6 +944,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 3,
+    "_uniqueId": "effect:buff_movement_3",
     "modifierType": "roll_bonus"
   },
   {
@@ -864,6 +956,7 @@
     "target": "self",
     "category": "heal",
     "duration": "immediate",
+    "_uniqueId": "effect:heal_yang_3",
     "healFormula": "3"
   },
   {
@@ -875,6 +968,7 @@
     "target": "all_enemies",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_fire_6_area",
     "damageType": "fire",
     "damageFormula": "6 + Mental"
   },
@@ -887,6 +981,7 @@
     "target": "all_allies_and_self",
     "category": "heal",
     "duration": "immediate",
+    "_uniqueId": "effect:heal_area_3",
     "healFormula": "3"
   },
   {
@@ -898,6 +993,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_mental_5",
     "damageType": "mental",
     "damageFormula": "5 + Mental"
   },
@@ -909,7 +1005,8 @@
     "type": "resource",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_self_harm_resource"
   },
   {
     "id": "transform_oni",
@@ -919,7 +1016,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_oni"
   },
   {
     "id": "control_karmic_torment",
@@ -930,6 +1028,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:3",
+    "_uniqueId": "effect:control_karmic_torment",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -941,7 +1040,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_personas"
   },
   {
     "id": "control_memory_alter",
@@ -952,6 +1052,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "permanent",
+    "_uniqueId": "effect:control_memory_alter",
     "resistType": "Mental",
     "controlType": "suggestion"
   },
@@ -964,6 +1065,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_body_control",
     "resistType": "Mental",
     "controlType": "domination"
   },
@@ -978,6 +1080,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 1,
+    "_uniqueId": "effect:buff_perception_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -988,7 +1091,8 @@
     "type": "shapeshift",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:transform_environmental"
   },
   {
     "id": "utility_mimic_power",
@@ -998,7 +1102,8 @@
     "type": "copy",
     "target": "self",
     "category": "special",
-    "duration": "turns:3"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_mimic_power"
   },
   {
     "id": "buff_hp_4",
@@ -1011,6 +1116,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 4,
+    "_uniqueId": "effect:buff_hp_4",
     "modifierType": "stat_value"
   },
   {
@@ -1022,6 +1128,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_detect_magic",
     "utilityType": "perception"
   },
   {
@@ -1033,6 +1140,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_energy_6",
     "damageType": "energy",
     "damageFormula": "6 + Mental"
   },
@@ -1045,6 +1153,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_summon_drones",
     "utilityType": "social"
   },
   {
@@ -1058,6 +1167,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 1,
+    "_uniqueId": "effect:buff_extra_attack",
     "modifierType": "roll_bonus"
   },
   {
@@ -1069,6 +1179,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_grapple",
     "resistType": "Physical",
     "controlType": "grapple"
   },
@@ -1081,6 +1192,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_force_4",
     "damageType": "force",
     "damageFormula": "4 + Mental"
   },
@@ -1092,7 +1204,8 @@
     "type": "transformation",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_grow_limb"
   },
   {
     "id": "check_mental_vs_dexterity",
@@ -1101,6 +1214,7 @@
     "name": "Mental Check vs Dexterity Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_mental_vs_dexterity",
     "checkStat": "Mental",
     "checkVsStat": "Dexterity"
   },
@@ -1113,6 +1227,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_energy_8",
     "damageType": "energy",
     "damageFormula": "8 + Mental"
   },
@@ -1125,6 +1240,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_web_create",
     "utilityType": "movement"
   },
   {
@@ -1136,6 +1252,7 @@
     "target": "self",
     "category": "defense",
     "duration": "turns:2",
+    "_uniqueId": "effect:defense_damage_reduction_3_temp",
     "damageReduction": 3
   },
   {
@@ -1147,6 +1264,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_paralyze",
     "resistType": "Physical",
     "controlType": "paralyze"
   },
@@ -1159,6 +1277,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_poison_2",
     "damageType": "poison",
     "damageFormula": "2 + Physical"
   },
@@ -1171,6 +1290,7 @@
     "target": "all_allies_and_self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_telepathy",
     "utilityType": "social"
   },
   {
@@ -1184,6 +1304,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": -3,
+    "_uniqueId": "effect:debuff_mental_minus_3",
     "modifierType": "roll_bonus"
   },
   {
@@ -1195,6 +1316,7 @@
     "target": "area",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_disruption",
     "resistType": "Mental",
     "controlType": "confusion"
   },
@@ -1207,6 +1329,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_vision_360",
     "utilityType": "perception"
   },
   {
@@ -1218,6 +1341,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:3",
+    "_uniqueId": "effect:control_cocoon",
     "resistType": "Mental",
     "controlType": "bind"
   },
@@ -1232,6 +1356,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 1,
+    "_uniqueId": "effect:buff_physical_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -1245,6 +1370,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": -1,
+    "_uniqueId": "effect:debuff_dexterity_minus_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -1256,6 +1382,7 @@
     "target": "self",
     "category": "defense",
     "duration": "turns:3",
+    "_uniqueId": "effect:defense_damage_reduction_2",
     "damageReduction": 2
   },
   {
@@ -1267,6 +1394,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:3",
+    "_uniqueId": "effect:control_constrict",
     "resistType": "Physical",
     "controlType": "grapple"
   },
@@ -1279,6 +1407,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "turns:3",
+    "_uniqueId": "effect:damage_constrict_2",
     "damageType": "physical",
     "damageFormula": "2 + Physical"
   },
@@ -1290,7 +1419,8 @@
     "type": "utility",
     "target": "self",
     "category": "special",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_limb_detach"
   },
   {
     "id": "heal_cleanse",
@@ -1300,7 +1430,8 @@
     "type": "cleanse",
     "target": "self",
     "category": "heal",
-    "duration": "immediate"
+    "duration": "immediate",
+    "_uniqueId": "effect:heal_cleanse"
   },
   {
     "id": "buff_stealth_2",
@@ -1313,6 +1444,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_stealth_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -1324,6 +1456,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_trance",
     "resistType": "Mental",
     "controlType": "charm"
   },
@@ -1336,6 +1469,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_heat_vision",
     "utilityType": "perception"
   },
   {
@@ -1347,6 +1481,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_keen_sight",
     "utilityType": "perception"
   },
   {
@@ -1358,6 +1493,7 @@
     "target": "area",
     "category": "control",
     "duration": "turns:1",
+    "_uniqueId": "effect:control_stun",
     "resistType": "Mental",
     "controlType": "stun"
   },
@@ -1368,6 +1504,7 @@
     "name": "Physical Check vs Dexterity Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_physical_vs_dexterity",
     "checkStat": "Physical",
     "checkVsStat": "Dexterity"
   },
@@ -1380,6 +1517,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:1",
+    "_uniqueId": "effect:control_knockdown",
     "resistType": "Dexterity",
     "controlType": "knockdown"
   },
@@ -1394,6 +1532,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 1,
+    "_uniqueId": "effect:buff_attack_dex_flying",
     "modifierType": "roll_bonus"
   },
   {
@@ -1403,6 +1542,7 @@
     "name": "Dexterity Check vs Dexterity Defense",
     "checkVs": "enemy_stat",
     "category": "check",
+    "_uniqueId": "effect:check_dexterity_vs_dexterity",
     "checkStat": "Dexterity",
     "checkVsStat": "Dexterity"
   },
@@ -1415,6 +1555,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_dexterity_2",
     "damageType": "physical",
     "damageFormula": "2 + Dexterity"
   },
@@ -1427,6 +1568,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_summon_spirit_flock",
     "utilityType": "perception"
   },
   {
@@ -1438,6 +1580,7 @@
     "target": "area",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_energy_2",
     "damageType": "energy",
     "damageFormula": "2 + Mental"
   },
@@ -1450,7 +1593,20 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_voice_mimic",
     "utilityType": "social"
+  },
+  {
+    "id": "damage_physical_2_blade",
+    "orderNumber": 125,
+    "desc": "Deals 2 + Physical modifier damage from a Blade",
+    "name": "Physical Damage +2",
+    "target": "enemy",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_2_blade",
+    "damageType": "physical",
+    "damageFormula": "2 + Physical"
   },
   {
     "id": "utility_spirit_message",
@@ -1461,6 +1617,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_spirit_message",
     "utilityType": "social"
   },
   {
@@ -1474,6 +1631,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 2,
+    "_uniqueId": "effect:buff_dexterity_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -1485,6 +1643,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "turns:3",
+    "_uniqueId": "effect:damage_bleed_1",
     "damageType": "physical",
     "damageFixed": 1
   },
@@ -1497,6 +1656,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_echolocation",
     "utilityType": "perception"
   },
   {
@@ -1508,6 +1668,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_5",
     "damageType": "physical",
     "damageFormula": "5 + Physical"
   },
@@ -1520,8 +1681,21 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_physical_3_ranged",
     "damageType": "physical",
     "damageFormula": "3 + Physical"
+  },
+  {
+    "id": "damage_solarflame_4",
+    "orderNumber": 130,
+    "desc": "Deals 4 + Mental modifier Flame Damage",
+    "name": "Solar Radiance Fire +4",
+    "target": "area",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_solarflame_4",
+    "damageType": "fire",
+    "damageFormula": "4 + Mental"
   },
   {
     "id": "utility_consume_inorganic",
@@ -1531,7 +1705,8 @@
     "type": "special",
     "target": "self",
     "category": "utility",
-    "duration": "permanent"
+    "duration": "permanent",
+    "_uniqueId": "effect:utility_consume_inorganic"
   },
   {
     "id": "damage_lightning_3",
@@ -1542,6 +1717,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_lightning_3",
     "damageType": "lightning",
     "damageFormula": "3 + Physical"
   },
@@ -1554,8 +1730,21 @@
     "target": "area",
     "category": "control",
     "duration": "immediate",
+    "_uniqueId": "effect:control_push",
     "resistType": "Physical",
     "controlType": "push"
+  },
+  {
+    "id": "damage_solarflame_6",
+    "orderNumber": 134,
+    "desc": "Deals 6 + Mental modifier Flame Damage",
+    "name": "Solar Radiance Fire +6",
+    "target": "area",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_solarflame_6",
+    "damageType": "fire",
+    "damageFormula": "6 + Mental"
   },
   {
     "id": "damage_sonic_2",
@@ -1566,6 +1755,7 @@
     "target": "area",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_sonic_2",
     "damageType": "physical",
     "damageFormula": "2 + Physical"
   },
@@ -1578,6 +1768,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_scent_tracking",
     "utilityType": "perception"
   },
   {
@@ -1589,6 +1780,7 @@
     "target": "area",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_force_3",
     "damageType": "force",
     "damageFormula": "3 + Physical"
   },
@@ -1601,6 +1793,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_darkvision",
     "utilityType": "perception"
   },
   {
@@ -1612,6 +1805,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_territory_mark",
     "utilityType": "perception"
   },
   {
@@ -1622,7 +1816,8 @@
     "type": "fear",
     "target": "area",
     "category": "control",
-    "duration": "scene",
+    "duration": "turns:2",
+    "_uniqueId": "effect:control_fear_area",
     "resistType": "Mental",
     "controlType": "fear"
   },
@@ -1635,6 +1830,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_charge_4",
     "damageType": "physical",
     "damageFormula": "4 + Physical"
   },
@@ -1647,6 +1843,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_illusion_create",
     "utilityType": "social"
   },
   {
@@ -1658,6 +1855,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_data_ghost",
     "utilityType": "movement"
   },
   {
@@ -1669,6 +1867,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_eavesdrop",
     "utilityType": "perception"
   },
   {
@@ -1680,6 +1879,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_plant_growth",
     "utilityType": "movement"
   },
   {
@@ -1691,6 +1891,7 @@
     "target": "area",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:control_emotion_influence",
     "resistType": "Mental",
     "controlType": "charm"
   },
@@ -1703,6 +1904,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:1",
+    "_uniqueId": "effect:control_dazzle",
     "resistType": "Mental",
     "controlType": "confusion"
   },
@@ -1717,6 +1919,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 3,
+    "_uniqueId": "effect:buff_transparency",
     "modifierType": "roll_bonus"
   },
   {
@@ -1728,6 +1931,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_thaumaturgy",
     "utilityType": "social"
   },
   {
@@ -1739,6 +1943,7 @@
     "target": "area",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_detect_residual_magic",
     "utilityType": "perception"
   },
   {
@@ -1752,7 +1957,19 @@
     "category": "stat_modifier",
     "duration": "immediate",
     "modifier": 2,
+    "_uniqueId": "effect:buff_damage_2",
     "modifierType": "roll_bonus"
+  },
+  {
+    "id": "defense_damage_reduction_self_2_2turns_copy",
+    "orderNumber": 150,
+    "desc": "Reduces incoming damage to self by 2 for 2 turns (conjured armor)",
+    "name": "Damage Reduction -2 (2 Turns)",
+    "target": "self",
+    "category": "defense",
+    "duration": "turns:2",
+    "_uniqueId": "effect:defense_damage_reduction_self_2_2turns_copy",
+    "damageReduction": 2
   },
   {
     "id": "utility_ley_detection",
@@ -1763,6 +1980,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_ley_detection",
     "utilityType": "perception"
   },
   {
@@ -1774,6 +1992,7 @@
     "target": "single",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_tech_influence",
     "utilityType": "social"
   },
   {
@@ -1787,6 +2006,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 1,
+    "_uniqueId": "effect:buff_tech_mastery",
     "modifierType": "roll_bonus"
   },
   {
@@ -1798,6 +2018,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_tech_control",
     "utilityType": "social"
   },
   {
@@ -1809,6 +2030,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_summon_cyber_sprites",
     "utilityType": "social"
   },
   {
@@ -1820,6 +2042,7 @@
     "target": "area",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_confusion_memory",
     "resistType": "Mental",
     "controlType": "confusion"
   },
@@ -1831,19 +2054,33 @@
     "type": "special",
     "target": "area",
     "category": "utility",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_telekinesis"
+  },
+  {
+    "id": "damage_solar_flame_6",
+    "orderNumber": 158,
+    "desc": "Deals 4 + Mental modifier force damage from telekinetic crush",
+    "name": "Telekinetic Crush Damage +4",
+    "target": "area",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_solar_flame_6",
+    "damageType": "force",
+    "damageFormula": "4 + Mental"
   },
   {
     "id": "damage_tk_crush_4",
     "orderNumber": 158,
-    "desc": "Deals 4 + Mental modifier force damage from telekinetic crush",
-    "name": "Telekinetic Crush Damage +4",
+    "desc": "Deals 3 + Mental modifier force damage from telekinetic crush",
+    "name": "Telekinetic Crush Damage +3",
     "type": "stat_based",
-    "target": "area",
+    "target": "all_enemies",
     "category": "damage",
     "duration": "immediate",
-    "damageType": "force",
-    "damageFormula": "4 + Mental"
+    "_uniqueId": "effect:damage_tk_crush_4",
+    "damageType": "physical",
+    "damageFormula": "3 + Mental"
   },
   {
     "id": "utility_read_thoughts",
@@ -1854,6 +2091,7 @@
     "target": "single",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_read_thoughts",
     "utilityType": "perception"
   },
   {
@@ -1865,6 +2103,7 @@
     "target": "all_allies_and_self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_mind_link",
     "utilityType": "social"
   },
   {
@@ -1876,6 +2115,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_fire_4",
     "damageType": "fire",
     "damageFormula": "4 + Mental"
   },
@@ -1888,6 +2128,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_heat_manipulation",
     "utilityType": "social"
   },
   {
@@ -1899,6 +2140,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_precognition",
     "utilityType": "perception"
   },
   {
@@ -1910,6 +2152,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:3",
+    "_uniqueId": "effect:control_emotion_memory_sculpt",
     "resistType": "Mental",
     "controlType": "suggestion"
   },
@@ -1924,6 +2167,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": 1,
+    "_uniqueId": "effect:buff_biokinetic_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -1937,6 +2181,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 3,
+    "_uniqueId": "effect:buff_mental_3_social",
     "modifierType": "roll_bonus"
   },
   {
@@ -1949,6 +2194,7 @@
     "category": "defense",
     "duration": "permanent",
     "modifier": -2,
+    "_uniqueId": "effect:defense_attacker_penalty_2",
     "defenseType": "mental_resistance"
   },
   {
@@ -1962,6 +2208,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 999,
+    "_uniqueId": "effect:buff_initiative",
     "modifierType": "roll_bonus"
   },
   {
@@ -1973,8 +2220,9 @@
     "type": "roll_bonus",
     "target": "self",
     "category": "stat_modifier",
-    "duration": "permanent",
+    "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_physical_2_environmental",
     "modifierType": "roll_bonus"
   },
   {
@@ -1985,7 +2233,8 @@
     "type": "immunity",
     "target": "self",
     "category": "defense",
-    "duration": "permanent",
+    "duration": "scene",
+    "_uniqueId": "effect:defense_environmental",
     "defenseType": "environmental"
   },
   {
@@ -1996,9 +2245,14 @@
     "stat": "Mental",
     "type": "roll_bonus",
     "target": "self",
+    "checkTN": 12,
+    "checkVs": "fixed",
     "category": "stat_modifier",
-    "duration": "permanent",
+    "duration": "scene",
     "modifier": 1,
+    "_uniqueId": "effect:buff_mental_1_social",
+    "checkStat": "Mental",
+    "utilityType": "social",
     "modifierType": "roll_bonus"
   },
   {
@@ -2011,6 +2265,7 @@
     "category": "defense",
     "duration": "permanent",
     "modifier": 2,
+    "_uniqueId": "effect:defense_mental_resistance",
     "defenseType": "mental_resistance"
   },
   {
@@ -2022,6 +2277,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_energy_6_bioelectric",
     "damageType": "energy",
     "damageFormula": "6 + Mental"
   },
@@ -2036,6 +2292,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2_electronics",
     "modifierType": "roll_bonus"
   },
   {
@@ -2047,6 +2304,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_multispectrum_vision",
     "utilityType": "perception"
   },
   {
@@ -2060,6 +2318,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 1,
+    "_uniqueId": "effect:buff_perception_1_lowlight",
     "modifierType": "roll_bonus"
   },
   {
@@ -2071,6 +2330,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_electronic_masking",
     "utilityType": "perception"
   },
   {
@@ -2084,6 +2344,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 3,
+    "_uniqueId": "effect:buff_stealth_3_sound",
     "modifierType": "roll_bonus"
   },
   {
@@ -2095,6 +2356,7 @@
     "target": "enemy",
     "category": "defense",
     "duration": "permanent",
+    "_uniqueId": "effect:passive_reflect_damage_2_electric",
     "damageType": "lightning",
     "damageFixed": 2,
     "defenseType": "reflect"
@@ -2110,6 +2372,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 4,
+    "_uniqueId": "effect:buff_physical_4_strength",
     "modifierType": "roll_bonus"
   },
   {
@@ -2123,6 +2386,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_stealth_hacking",
     "modifierType": "roll_bonus"
   },
   {
@@ -2134,6 +2398,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_breach",
     "damageType": "breach",
     "damageFixed": 1
   },
@@ -2145,7 +2410,21 @@
     "checkTN": 12,
     "checkVs": "fixed",
     "category": "check",
+    "_uniqueId": "effect:check_mental_vs_tn12",
     "checkStat": "Mental"
+  },
+  {
+    "id": "damage_absorb_4",
+    "orderNumber": 184,
+    "desc": "Deals 4 + Mental damage to target, healing caster for same amount",
+    "name": "Drain (Damage + Heal)",
+    "target": "enemy",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_absorb_4",
+    "damageType": "energy",
+    "healFormula": "6 + Mental",
+    "damageFormula": "4 + Mental"
   },
   {
     "id": "damage_heal_6_mental",
@@ -2156,9 +2435,22 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_heal_6_mental",
     "damageType": "necrotic",
     "healFormula": "6 + Mental",
     "damageFormula": "6 + Mental"
+  },
+  {
+    "id": "heal_4",
+    "orderNumber": 185,
+    "desc": "Restores 4 HP to target",
+    "name": "Heal 4 HP",
+    "target": "self",
+    "category": "heal",
+    "duration": "immediate",
+    "healType": "direct",
+    "_uniqueId": "effect:heal_4",
+    "healFormula": "4 + Mental"
   },
   {
     "id": "heal_6",
@@ -2169,6 +2461,7 @@
     "target": "ally",
     "category": "heal",
     "duration": "immediate",
+    "_uniqueId": "effect:heal_6",
     "healFormula": "6"
   },
   {
@@ -2180,6 +2473,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_elemental_6_mental",
     "damageType": "elemental",
     "damageFormula": "6 + Mental"
   },
@@ -2192,6 +2486,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_elemental_4_mental",
     "damageType": "elemental",
     "damageFormula": "4 + Mental"
   },
@@ -2204,6 +2499,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_elemental_8_mental",
     "damageType": "elemental",
     "damageFormula": "8 + Mental"
   },
@@ -2216,6 +2512,7 @@
     "target": "single",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_enchant_item",
     "utilityType": "social"
   },
   {
@@ -2227,6 +2524,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_create_element_minor",
     "utilityType": "social"
   },
   {
@@ -2240,6 +2538,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 2,
+    "_uniqueId": "effect:buff_physical_2_2turns",
     "modifierType": "roll_bonus"
   },
   {
@@ -2253,6 +2552,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 2,
+    "_uniqueId": "effect:buff_dexterity_2_2turns",
     "modifierType": "roll_bonus"
   },
   {
@@ -2266,6 +2566,7 @@
     "category": "stat_modifier",
     "duration": "turns:2",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2_2turns",
     "modifierType": "roll_bonus"
   },
   {
@@ -2277,6 +2578,7 @@
     "target": "enemy",
     "category": "control",
     "duration": "turns:2",
+    "_uniqueId": "effect:control_sleep",
     "resistType": "Mental",
     "controlType": "sleep"
   },
@@ -2286,9 +2588,10 @@
     "desc": "Reduces incoming damage by 2 for 2 turns (conjured armor)",
     "name": "Damage Reduction -2 (2 Turns)",
     "type": "reduction",
-    "target": "self",
+    "target": "ally",
     "category": "defense",
     "duration": "turns:2",
+    "_uniqueId": "effect:defense_damage_reduction_2_2turns",
     "damageReduction": 2
   },
   {
@@ -2302,6 +2605,7 @@
     "category": "stat_modifier",
     "duration": "turns:3",
     "modifier": 1,
+    "_uniqueId": "effect:buff_stat_choice_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -2312,7 +2616,8 @@
     "type": "cleanse",
     "target": "single",
     "category": "utility",
-    "duration": "immediate"
+    "duration": "immediate",
+    "_uniqueId": "effect:utility_dispel"
   },
   {
     "id": "damage_magical_6_mental",
@@ -2323,6 +2628,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_magical_6_mental",
     "damageType": "energy",
     "damageFormula": "6 + Mental"
   },
@@ -2335,6 +2641,7 @@
     "target": "single",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_magical_2_mental",
     "damageType": "energy",
     "damageFormula": "2 + Mental"
   },
@@ -2349,6 +2656,7 @@
     "category": "stat_modifier",
     "duration": "turns:1",
     "modifier": 2,
+    "_uniqueId": "effect:buff_defense_2_1turn",
     "modifierType": "roll_bonus"
   },
   {
@@ -2362,6 +2670,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_physical_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -2375,6 +2684,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 10,
+    "_uniqueId": "effect:buff_health_10",
     "modifierType": "stat_value"
   },
   {
@@ -2385,9 +2695,10 @@
     "stat": "Mental",
     "type": "roll_bonus",
     "target": "self",
-    "category": "stat_modifier",
+    "category": "defense",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -2401,6 +2712,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_perception_2",
     "modifierType": "roll_bonus"
   },
   {
@@ -2412,6 +2724,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_tech_hack",
     "utilityType": "social"
   },
   {
@@ -2423,6 +2736,7 @@
     "target": "single",
     "category": "utility",
     "duration": "turns:1",
+    "_uniqueId": "effect:utility_device_sync",
     "utilityType": "perception"
   },
   {
@@ -2434,7 +2748,20 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_device_creation",
     "utilityType": "social"
+  },
+  {
+    "id": "damage_necrotic_2_mental",
+    "orderNumber": 208,
+    "desc": "Deals 2 + Mental necrotic damage (inflict pain)",
+    "name": "Necrotic Damage +2",
+    "target": "enemy",
+    "category": "damage",
+    "duration": "immediate",
+    "_uniqueId": "effect:damage_necrotic_2_mental",
+    "damageType": "necrotic",
+    "damageFormula": "2 + Mental"
   },
   {
     "id": "damage_necrotic_4_mental",
@@ -2445,6 +2772,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_necrotic_4_mental",
     "damageType": "necrotic",
     "damageFormula": "4 + Mental"
   },
@@ -2459,6 +2787,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 1,
+    "_uniqueId": "effect:buff_perception_1_empathy",
     "modifierType": "roll_bonus"
   },
   {
@@ -2470,6 +2799,7 @@
     "target": "self",
     "category": "defense",
     "duration": "permanent",
+    "_uniqueId": "effect:defense_poison_resistance",
     "defenseType": "poison_resistance"
   },
   {
@@ -2481,6 +2811,7 @@
     "target": "self",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_phase_veil",
     "utilityType": "movement"
   },
   {
@@ -2492,6 +2823,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "turns:2",
+    "_uniqueId": "effect:damage_cyber_disrupt_onhit",
     "damageType": "poison",
     "damageFixed": 1
   },
@@ -2506,6 +2838,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2_artifacts",
     "modifierType": "roll_bonus"
   },
   {
@@ -2517,8 +2850,9 @@
     "type": "roll_bonus",
     "target": "self",
     "category": "stat_modifier",
-    "duration": "permanent",
+    "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_mental_2_glyphs",
     "modifierType": "roll_bonus"
   },
   {
@@ -2530,6 +2864,7 @@
     "target": "enemy",
     "category": "damage",
     "duration": "immediate",
+    "_uniqueId": "effect:damage_melee_weapon_4",
     "damageType": "physical",
     "damageFormula": "4 + Physical"
   },
@@ -2544,6 +2879,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:buff_hp_2_temporary",
     "modifierType": "stat_value"
   },
   {
@@ -2557,6 +2893,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 1,
+    "_uniqueId": "effect:buff_stat_adaptive_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -2570,6 +2907,7 @@
     "category": "stat_modifier",
     "duration": "immediate",
     "modifier": 1,
+    "_uniqueId": "effect:buff_save_1",
     "modifierType": "roll_bonus"
   },
   {
@@ -2583,6 +2921,7 @@
     "category": "stat_modifier",
     "duration": "permanent",
     "modifier": 1,
+    "_uniqueId": "effect:buff_social_intimidation",
     "modifierType": "roll_bonus"
   },
   {
@@ -2594,6 +2933,7 @@
     "target": "all_allies_and_self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_language_communication",
     "utilityType": "social"
   },
   {
@@ -2605,6 +2945,7 @@
     "target": "area",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_sense_life",
     "utilityType": "perception"
   },
   {
@@ -2616,6 +2957,7 @@
     "target": "self",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_resource_efficiency",
     "utilityType": "social"
   },
   {
@@ -2626,7 +2968,8 @@
     "type": "special",
     "target": "self",
     "category": "utility",
-    "duration": "permanent"
+    "duration": "permanent",
+    "_uniqueId": "effect:utility_cybernetic_compatibility"
   },
   {
     "id": "utility_leave_trace",
@@ -2637,6 +2980,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_leave_trace",
     "utilityType": "social"
   },
   {
@@ -2648,6 +2992,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_sense_memory",
     "utilityType": "perception"
   },
   {
@@ -2658,7 +3003,8 @@
     "type": "luck",
     "target": "self",
     "category": "special",
-    "duration": "immediate"
+    "duration": "immediate",
+    "_uniqueId": "effect:utility_reroll"
   },
   {
     "id": "utility_summon_undead",
@@ -2669,6 +3015,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_summon_undead",
     "utilityType": "social"
   },
   {
@@ -2680,6 +3027,7 @@
     "target": "all_allies_and_self",
     "category": "utility",
     "duration": "turns:1",
+    "_uniqueId": "effect:utility_teleport_portal",
     "utilityType": "movement"
   },
   {
@@ -2691,6 +3039,7 @@
     "target": "self",
     "category": "defense",
     "duration": "scene",
+    "_uniqueId": "effect:utility_illusory_clone",
     "defenseType": "absorb"
   },
   {
@@ -2704,6 +3053,7 @@
     "category": "stat_modifier",
     "duration": "scene",
     "modifier": 2,
+    "_uniqueId": "effect:utility_elemental_weapon",
     "modifierType": "roll_bonus"
   },
   {
@@ -2715,6 +3065,7 @@
     "target": "self",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_item_recall",
     "utilityType": "movement"
   },
   {
@@ -2726,6 +3077,7 @@
     "target": "single",
     "category": "utility",
     "duration": "turns:6",
+    "_uniqueId": "effect:utility_item_light",
     "utilityType": "perception"
   },
   {
@@ -2736,7 +3088,8 @@
     "type": "special",
     "target": "self",
     "category": "utility",
-    "duration": "permanent"
+    "duration": "permanent",
+    "_uniqueId": "effect:utility_pocket_storage"
   },
   {
     "id": "utility_item_flight",
@@ -2747,6 +3100,7 @@
     "target": "single",
     "category": "utility",
     "duration": "turns:5",
+    "_uniqueId": "effect:utility_item_flight",
     "utilityType": "movement"
   },
   {
@@ -2758,6 +3112,7 @@
     "target": "single",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_item_echo",
     "utilityType": "social"
   },
   {
@@ -2768,7 +3123,8 @@
     "type": "special",
     "target": "area",
     "category": "utility",
-    "duration": "scene"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_item_link"
   },
   {
     "id": "utility_item_illusion",
@@ -2779,6 +3135,7 @@
     "target": "single",
     "category": "utility",
     "duration": "turns:5",
+    "_uniqueId": "effect:utility_item_illusion",
     "utilityType": "social"
   },
   {
@@ -2789,7 +3146,8 @@
     "type": "enchantment",
     "target": "single",
     "category": "special",
-    "duration": "permanent"
+    "duration": "scene",
+    "_uniqueId": "effect:utility_permanence"
   },
   {
     "id": "utility_shape_element",
@@ -2800,6 +3158,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_shape_element",
     "utilityType": "social"
   },
   {
@@ -2811,6 +3170,7 @@
     "target": "self",
     "category": "defense",
     "duration": "turns:3",
+    "_uniqueId": "effect:utility_absorb_energy",
     "defenseType": "absorb"
   },
   {
@@ -2822,6 +3182,7 @@
     "target": "single",
     "category": "control",
     "duration": "scene",
+    "_uniqueId": "effect:utility_seal_suppress",
     "controlType": "bind"
   },
   {
@@ -2833,6 +3194,7 @@
     "target": "self",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_veilglimpse",
     "utilityType": "perception"
   },
   {
@@ -2844,6 +3206,7 @@
     "target": "single",
     "category": "utility",
     "duration": "immediate",
+    "_uniqueId": "effect:utility_fate_sense",
     "utilityType": "perception"
   },
   {
@@ -2855,6 +3218,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_past_vision",
     "utilityType": "perception"
   },
   {
@@ -2866,6 +3230,7 @@
     "target": "single",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_beast_speak",
     "utilityType": "social"
   },
   {
@@ -2877,6 +3242,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_translate",
     "utilityType": "social"
   },
   {
@@ -2888,6 +3254,7 @@
     "target": "self",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_truth_sight",
     "utilityType": "perception"
   },
   {
@@ -2899,6 +3266,7 @@
     "target": "single",
     "category": "utility",
     "duration": "permanent",
+    "_uniqueId": "effect:utility_location_mark",
     "utilityType": "perception"
   },
   {
@@ -2910,6 +3278,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_detect_poison",
     "utilityType": "perception"
   },
   {
@@ -2920,7 +3289,8 @@
     "type": "enhancement",
     "target": "self",
     "category": "special",
-    "duration": "permanent"
+    "duration": "permanent",
+    "_uniqueId": "effect:buff_augment_slots"
   },
   {
     "id": "utility_magitech_blueprints",
@@ -2930,7 +3300,8 @@
     "type": "special",
     "target": "self",
     "category": "utility",
-    "duration": "permanent"
+    "duration": "permanent",
+    "_uniqueId": "effect:utility_magitech_blueprints"
   },
   {
     "id": "utility_sprite_spell_cast",
@@ -2941,6 +3312,7 @@
     "target": "area",
     "category": "utility",
     "duration": "scene",
+    "_uniqueId": "effect:utility_sprite_spell_cast",
     "utilityType": "social"
   },
   {
@@ -2952,6 +3324,31 @@
     "target": "self",
     "category": "heal",
     "duration": "immediate",
+    "_uniqueId": "effect:heal_drain_6",
     "healFormula": "6"
+  },
+  {
+    "id": "heal_necromancy_3",
+    "orderNumber": 255,
+    "desc": "Heals 3 + Men Mod HP",
+    "name": "Necromancy Heal",
+    "target": "all_allies_and_self",
+    "category": "heal",
+    "duration": "immediate",
+    "healType": "direct",
+    "_uniqueId": "effect:heal_necromancy_3",
+    "healFormula": "3 + Mental"
+  },
+  {
+    "id": "heal_regeneration_1",
+    "orderNumber": 256,
+    "desc": "Spliced Heals 1 HP Over Time",
+    "name": "Regeneration",
+    "target": "self",
+    "category": "heal",
+    "duration": "immediate",
+    "healType": "regeneration",
+    "_uniqueId": "effect:heal_regeneration_1",
+    "healFormula": "1"
   }
 ]
