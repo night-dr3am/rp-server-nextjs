@@ -35,7 +35,7 @@ interface PowerAbilityEditorProps {
 
 const ABILITY_TYPES = ['attack', 'ability', 'passive'];
 const STATS = ['Physical', 'Dexterity', 'Mental', 'Perception', 'Stealth'];
-const TARGET_TYPES = ['single', 'self', 'area', 'cone', 'line', 'all', 'all_enemies', 'all_allies'];
+const TARGET_TYPES = ['single', 'self', 'area'];
 const SPECIES_LIST = ['human', 'strigoi', 'gaki', 'spliced', 'veilborn', 'synthral'];
 
 // Effect contexts
