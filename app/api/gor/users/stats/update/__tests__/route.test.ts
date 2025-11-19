@@ -112,6 +112,73 @@ describe('POST /api/gor/stats/update', () => {
     expect(data.data.goreanStats.copperCoin).toBe(150);
   });
 
+  it('should update RPG status field when provided', async () => {
+    const { uuid } = await createTestGoreanCharacter();
+
+    // Verify initial status is 0 (default)
+    const initialUser = await prisma.user.findFirst({
+      where: { slUuid: uuid },
+      include: { stats: true }
+    });
+    expect(initialUser?.stats?.status).toBe(0);
+
+    // Update status to 3 (RP Mode)
+    const updateData = createApiBody({
+      sl_uuid: uuid,
+      universe: 'gor',
+      status: 3,
+      healthCurrent: 15
+    }, 'gor');
+
+    const request = createMockPostRequest('/api/gor/stats/update', updateData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.stats.status).toBe(3);
+
+    // Verify database was updated
+    const updatedUser = await prisma.user.findFirst({
+      where: { slUuid: uuid },
+      include: { stats: true }
+    });
+    expect(updatedUser?.stats?.status).toBe(3);
+  });
+
+  it('should clamp status to valid range (0-4)', async () => {
+    const { uuid } = await createTestGoreanCharacter();
+
+    // Try to set status to invalid value (99)
+    const updateData = createApiBody({
+      sl_uuid: uuid,
+      universe: 'gor',
+      status: 99,
+      healthCurrent: 15
+    }, 'gor');
+
+    const request = createMockPostRequest('/api/gor/stats/update', updateData);
+    const response = await POST(request);
+    const data = await parseJsonResponse(response);
+
+    expectSuccess(data);
+    expect(data.data.stats.status).toBe(4); // Clamped to max value
+
+    // Try negative value
+    const updateData2 = createApiBody({
+      sl_uuid: uuid,
+      universe: 'gor',
+      status: -5,
+      healthCurrent: 15
+    }, 'gor');
+
+    const request2 = createMockPostRequest('/api/gor/stats/update', updateData2);
+    const response2 = await POST(request2);
+    const data2 = await parseJsonResponse(response2);
+
+    expectSuccess(data2);
+    expect(data2.data.stats.status).toBe(0); // Clamped to min value
+  });
+
   it('should update partial stats successfully', async () => {
     const { uuid } = await createTestGoreanCharacter();
 

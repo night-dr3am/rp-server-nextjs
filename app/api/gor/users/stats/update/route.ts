@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { sl_uuid, universe, healthCurrent, hungerCurrent, thirstCurrent, goldCoin, silverCoin, copperCoin, timestamp, signature } = value;
+    const { sl_uuid, universe, status, healthCurrent, hungerCurrent, thirstCurrent, goldCoin, silverCoin, copperCoin, timestamp, signature } = value;
 
     // Ensure universe is gor (case-insensitive)
     const universeStr = universe.toLowerCase();
@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare update data for UserStats (health/hunger/thirst for sync + coins)
     const userStatsUpdateData: {
+      status?: number;
       health?: number;
       hunger?: number;
       thirst?: number;
@@ -90,6 +91,11 @@ export async function POST(request: NextRequest) {
     } = {
       lastUpdated: new Date()
     };
+
+    // Update RPG status if provided (clamp to 0-4 range for safety)
+    if (status !== undefined) {
+      userStatsUpdateData.status = Math.max(0, Math.min(4, status));
+    }
 
     // Clamp health to valid range (0 to healthMax)
     if (healthCurrent !== undefined) {

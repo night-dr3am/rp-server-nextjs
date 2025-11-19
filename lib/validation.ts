@@ -488,6 +488,7 @@ export const goreanStatsSchema = Joi.object({
 export const goreanUpdateStatsSchema = Joi.object({
   sl_uuid: uuidSchema,
   universe: Joi.string().lowercase().valid('gor').required(), // Normalize to lowercase for case-insensitive matching
+  status: Joi.number().integer().optional(), // RPG status: 0=Full, 1=Survival, 2=Combat, 3=RP, 4=OOC (allow any value for clamping)
   healthCurrent: Joi.number().integer().optional(), // Allow any value for clamping
   hungerCurrent: Joi.number().integer().optional(), // Allow any value for clamping
   thirstCurrent: Joi.number().integer().optional(), // Allow any value for clamping
