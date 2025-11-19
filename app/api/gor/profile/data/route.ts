@@ -142,7 +142,13 @@ export async function GET(request: NextRequest) {
           maxHealth: user.goreanStats.healthMax,
           maxHunger: user.goreanStats.hungerMax,
           maxThirst: user.goreanStats.thirstMax,
+          strength: user.goreanStats.strength,
+          agility: user.goreanStats.agility,
+          intellect: user.goreanStats.intellect,
+          perception: user.goreanStats.perception,
+          charisma: user.goreanStats.charisma,
           skills: user.goreanStats.skills,
+          abilities: user.goreanStats.abilities,
           createdAt: user.goreanStats.createdAt,
           updatedAt: user.goreanStats.updatedAt
         } : null,

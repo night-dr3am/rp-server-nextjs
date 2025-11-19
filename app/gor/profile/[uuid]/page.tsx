@@ -14,6 +14,8 @@ import {
   GoreanButton
 } from '@/components/gor/GoreanTheme';
 import { HealthBar, HungerBar, ThirstBar } from '@/components/gor/StatBar';
+import skillsData from '@/lib/gor/skills.json';
+import abilitiesData from '@/lib/gor/abilities.json';
 
 interface User {
   id: string;
@@ -35,6 +37,69 @@ interface Stats {
   lastUpdated: string;
 }
 
+interface CharacterSkill {
+  skill_id: string;
+  skill_name: string;
+  level: number;
+  xp: number;
+}
+
+interface SkillData {
+  id: string;
+  name: string;
+  description: string;
+  type: 'combat' | 'subterfuge' | 'social' | 'survival' | 'crafting' | 'mental';
+  baseStat: string;
+  maxLevel: number;
+  maxInitialLevel: number;
+  xpCost: number[];
+  hpBonus: number;
+  applicableSpecies: string[];
+  applicableTo?: string[];
+  restrictedTo?: string[];
+  notes: string;
+}
+
+interface CharacterAbility {
+  ability_id: string;
+  ability_name: string;
+  learned_at?: string;
+  uses?: number;
+}
+
+interface AbilityData {
+  id: string;
+  orderNumber: number;
+  name: string;
+  desc: string;
+  category: 'combat' | 'social' | 'survival' | 'mental' | 'special';
+  cost: number;
+  cooldown?: number;
+  range?: number;
+  targetType?: 'single' | 'area' | 'self';
+  effects: {
+    attack?: string[];
+    ability?: string[];
+    passive?: string[];
+  };
+  abilityType: ('attack' | 'ability')[];
+  requirements?: {
+    species?: string[];
+    caste?: string[];
+    status?: string[];
+    skill?: {
+      id: string;
+      level: number;
+    };
+    minStat?: {
+      stat: string;
+      value: number;
+    };
+  };
+  notes?: string;
+  bookReferences?: string[];
+}
+
 interface GoreanStats {
   characterName: string;
   species: string;
@@ -47,7 +112,13 @@ interface GoreanStats {
   maxHealth: number;
   maxHunger: number;
   maxThirst: number;
-  skills: unknown;
+  strength: number;
+  agility: number;
+  intellect: number;
+  perception: number;
+  charisma: number;
+  skills: CharacterSkill[];
+  abilities: CharacterAbility[];
   createdAt: string;
   updatedAt: string;
 }
@@ -163,6 +234,60 @@ export default function GoreanProfilePage() {
     return statusMap[status] || { label: status, color: GoreanColors.stone };
   };
 
+  const getRPGStatusInfo = (status: number): { label: string; color: string; description: string } => {
+    const statusMap: Record<number, { label: string; color: string; description: string }> = {
+      0: { label: 'Full Mode', color: GoreanColors.forestGreen, description: 'Default active gameplay mode' },
+      1: { label: 'Survival Mode', color: GoreanColors.bronze, description: 'Survival-focused gameplay' },
+      2: { label: 'Combat Mode', color: GoreanColors.bloodRed, description: 'Combat-focused gameplay' },
+      3: { label: 'RP Mode', color: GoreanColors.gold, description: 'Pure roleplay mode' },
+      4: { label: 'OOC Mode', color: GoreanColors.stone, description: 'Out of character' },
+      5: { label: 'AFK Mode', color: GoreanColors.charcoal, description: 'Away from keyboard' }
+    };
+    return statusMap[status] || { label: 'Unknown Mode', color: GoreanColors.stone, description: 'Unknown status' };
+  };
+
+  const StatCell = ({ label, value }: { label: string; value: number }) => {
+    return (
+      <div
+        className="p-3 rounded text-center"
+        style={{
+          backgroundColor: GoreanColors.parchmentDark,
+          border: `1px solid ${GoreanColors.bronze}`
+        }}
+      >
+        <p className="text-xs font-medium mb-1" style={{ color: GoreanColors.charcoal }}>
+          {label}
+        </p>
+        <p className="text-2xl font-bold" style={{ color: GoreanColors.bronze }}>
+          {value}
+        </p>
+      </div>
+    );
+  };
+
+  const getSkillTypeColor = (skillType: string): string => {
+    const colorMap: Record<string, string> = {
+      combat: GoreanColors.bloodRed,
+      subterfuge: GoreanColors.charcoal,
+      social: GoreanColors.gold,
+      survival: GoreanColors.forestGreen,
+      crafting: GoreanColors.bronze,
+      mental: GoreanColors.casteBlue
+    };
+    return colorMap[skillType] || GoreanColors.stone;
+  };
+
+  const getAbilityCategoryColor = (category: string): string => {
+    const colorMap: Record<string, string> = {
+      combat: GoreanColors.bloodRed,
+      social: GoreanColors.gold,
+      survival: GoreanColors.forestGreen,
+      mental: GoreanColors.casteBlue,
+      special: GoreanColors.bronze
+    };
+    return colorMap[category] || GoreanColors.stone;
+  };
+
   const renderEventDetails = (event: EventData) => {
     try {
       if (typeof event.details === 'object' && event.details !== null) {
@@ -250,126 +375,373 @@ export default function GoreanProfilePage() {
         </div>
 
         <GoreanScroll>
-          {/* Character Info Card */}
+          {/* Unified Character Overview Card */}
           <GoreanCard className="mb-6">
             <div className="p-6">
-              <div className="flex items-start space-x-6">
-                {/* Avatar */}
-                <div
-                  className="w-24 h-24 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: `linear-gradient(135deg, ${GoreanColors.bronze}, ${GoreanColors.bronzeDark})`,
-                    boxShadow: `0 4px 12px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3)`
-                  }}
-                >
-                  <span className="text-4xl font-bold text-white">
-                    {(goreanStats?.characterName || user.username).charAt(0).toUpperCase()}
-                  </span>
-                </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Character Details */}
-                <div className="flex-1">
-                  <GoreanHeading level={2} className="mb-3">
-                    {goreanStats?.characterName || user.username}
-                  </GoreanHeading>
+                {/* LEFT COLUMN: Character Identity */}
+                <div className="flex items-start space-x-4">
+                  {/* Avatar */}
+                  <div
+                    className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, ${GoreanColors.bronze}, ${GoreanColors.bronzeDark})`,
+                      boxShadow: `0 4px 12px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3)`
+                    }}
+                  >
+                    <span className="text-3xl font-bold text-white">
+                      {(goreanStats?.characterName || user.username).charAt(0).toUpperCase()}
+                    </span>
+                  </div>
 
-                  {goreanStats && (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <GoreanBadge color={GoreanColors.leather} size="md">
-                          {goreanStats.species}
-                          {goreanStats.speciesVariant && ` • ${goreanStats.speciesVariant}`}
-                        </GoreanBadge>
+                  {/* Character Details */}
+                  <div className="flex-1">
+                    <GoreanHeading level={2} className="mb-3">
+                      {goreanStats?.characterName || user.username}
+                    </GoreanHeading>
+
+                    {goreanStats && (
+                      <div className="space-y-1 text-sm">
+                        <p style={{ color: GoreanColors.charcoal }}>
+                          <span className="font-semibold">Species:</span> {goreanStats.species}
+                          {goreanStats.speciesVariant && ` (${goreanStats.speciesVariant})`}
+                        </p>
 
                         {statusInfo && (
-                          <GoreanBadge color={statusInfo.color} size="md">
-                            {statusInfo.label}
-                            {goreanStats.statusSubtype && ` • ${goreanStats.statusSubtype}`}
-                          </GoreanBadge>
+                          <p style={{ color: GoreanColors.charcoal }}>
+                            <span className="font-semibold">Status:</span>{' '}
+                            <span style={{ color: statusInfo.color, fontWeight: 600 }}>
+                              {statusInfo.label}
+                              {goreanStats.statusSubtype && ` • ${goreanStats.statusSubtype}`}
+                            </span>
+                          </p>
+                        )}
+
+                        {goreanStats.culture && (
+                          <p style={{ color: GoreanColors.charcoal }}>
+                            <span className="font-semibold">Culture:</span> {goreanStats.culture}
+                          </p>
                         )}
 
                         {goreanStats.casteRole && (
-                          <GoreanBadge color={GoreanColors.bronze} size="md">
-                            {goreanStats.casteRole}
-                          </GoreanBadge>
+                          <p style={{ color: GoreanColors.charcoal }}>
+                            <span className="font-semibold">Caste/Role:</span> {goreanStats.casteRole}
+                          </p>
                         )}
 
                         {goreanStats.slaveType && (
-                          <GoreanBadge color={GoreanColors.bloodRed} size="md">
-                            {goreanStats.slaveType}
-                          </GoreanBadge>
+                          <p style={{ color: GoreanColors.charcoal }}>
+                            <span className="font-semibold">Slave Type:</span>{' '}
+                            <span style={{ color: GoreanColors.bloodRed, fontWeight: 600 }}>
+                              {goreanStats.slaveType}
+                            </span>
+                          </p>
                         )}
                       </div>
+                    )}
 
-                      {goreanStats.culture && (
-                        <p className="text-sm" style={{ color: GoreanColors.charcoal }}>
-                          <span className="font-semibold">Culture:</span> {goreanStats.culture}
-                        </p>
-                      )}
+                    <div
+                      className="mt-4 pt-3 text-xs space-y-1"
+                      style={{
+                        color: GoreanColors.stone,
+                        borderTop: `1px solid ${GoreanColors.bronze}30`
+                      }}
+                    >
+                      <p>
+                        <span className="font-semibold">Joined:</span> {formatDate(user.createdAt)}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Last Active:</span> {formatDate(user.lastActive)}
+                      </p>
                     </div>
-                  )}
-
-                  <div className="mt-4 text-xs space-y-1" style={{ color: GoreanColors.stone }}>
-                    <p>
-                      <span className="font-semibold">Player Role:</span> {user.role}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Joined:</span> {formatDate(user.createdAt)}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Last Active:</span> {formatDate(user.lastActive)}
-                    </p>
                   </div>
                 </div>
+
+                {/* RIGHT COLUMN: Character Stats */}
+                <div>
+                  {stats && goreanStats ? (
+                    <div className="space-y-4">
+                      {/* RPG Status as text, not badge */}
+                      <p className="text-sm font-medium" style={{ color: GoreanColors.charcoal }}>
+                        <span className="font-semibold">Mode:</span>{' '}
+                        <span style={{ color: getRPGStatusInfo(stats.status).color, fontWeight: 600 }}>
+                          {getRPGStatusInfo(stats.status).label}
+                        </span>
+                      </p>
+
+                      {/* Health/Hunger/Thirst Bars */}
+                      <div className="space-y-2">
+                        <HealthBar
+                          current={stats.health}
+                          max={goreanStats.maxHealth}
+                        />
+                        <HungerBar
+                          current={stats.hunger}
+                          max={goreanStats.maxHunger}
+                        />
+                        <ThirstBar
+                          current={stats.thirst}
+                          max={goreanStats.maxThirst}
+                        />
+                      </div>
+
+                      {/* Core Stats Grid */}
+                      <div
+                        className="pt-4 mt-4"
+                        style={{ borderTop: `2px solid ${GoreanColors.bronze}` }}
+                      >
+                        <p className="text-sm font-semibold mb-3" style={{ color: GoreanColors.charcoal }}>
+                          Core Attributes:
+                        </p>
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                          <StatCell label="Strength" value={goreanStats.strength} />
+                          <StatCell label="Agility" value={goreanStats.agility} />
+                          <StatCell label="Intellect" value={goreanStats.intellect} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <StatCell label="Perception" value={goreanStats.perception} />
+                          <StatCell label="Charisma" value={goreanStats.charisma} />
+                        </div>
+                      </div>
+
+                      {/* Currency */}
+                      <div
+                        className="pt-4 mt-4"
+                        style={{ borderTop: `2px solid ${GoreanColors.bronze}` }}
+                      >
+                        <p className="text-sm font-semibold mb-2" style={{ color: GoreanColors.charcoal }}>
+                          Currency:
+                        </p>
+                        <p className="text-2xl font-bold" style={{ color: GoreanColors.gold }}>
+                          {formatCurrency(stats.goldCoin, stats.silverCoin, stats.copperCoin)}
+                        </p>
+                      </div>
+
+                      <p className="text-xs mt-3" style={{ color: GoreanColors.stone }}>
+                        Last updated: {formatDate(stats.lastUpdated)}
+                      </p>
+                    </div>
+                  ) : (
+                    <p style={{ color: GoreanColors.stone }}>No stats available</p>
+                  )}
+                </div>
+
               </div>
             </div>
           </GoreanCard>
 
-          {/* Stats Card */}
-          <GoreanCard className="mb-6">
-            <div className="p-6">
-              <GoreanHeading level={3} className="mb-4">
-                Character Statistics
-              </GoreanHeading>
-
-              {stats && goreanStats ? (
-                <div className="space-y-4">
-                  {/* Stat Bars */}
-                  <HealthBar
-                    current={stats.health}
-                    max={goreanStats.maxHealth}
-                    className="mb-3"
-                  />
-                  <HungerBar
-                    current={stats.hunger}
-                    max={goreanStats.maxHunger}
-                    className="mb-3"
-                  />
-                  <ThirstBar
-                    current={stats.thirst}
-                    max={goreanStats.maxThirst}
-                    className="mb-3"
-                  />
-
-                  {/* Currency */}
-                  <div className="pt-3 mt-3" style={{ borderTop: `2px solid ${GoreanColors.bronze}` }}>
-                    <p className="text-sm font-semibold mb-2" style={{ color: GoreanColors.charcoal }}>
-                      Currency:
-                    </p>
-                    <p className="text-2xl font-bold" style={{ color: GoreanColors.gold }}>
-                      {formatCurrency(stats.goldCoin, stats.silverCoin, stats.copperCoin)}
-                    </p>
-                  </div>
-
-                  <p className="text-xs mt-3" style={{ color: GoreanColors.stone }}>
-                    Last updated: {formatDate(stats.lastUpdated)}
-                  </p>
+          {/* Skills Section */}
+          {goreanStats && Array.isArray(goreanStats.skills) && goreanStats.skills.length > 0 && (
+            <GoreanCard className="mb-6">
+              <div className="p-6">
+                <GoreanHeading level={3} className="mb-4">
+                  Skills
+                </GoreanHeading>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {goreanStats.skills.map((characterSkill, idx) => {
+                    const skillDef = (skillsData as SkillData[]).find(s => s.id === characterSkill.skill_id);
+                    return (
+                      <div
+                        key={idx}
+                        className="border-2 rounded p-3"
+                        style={{
+                          borderColor: GoreanColors.leather,
+                          backgroundColor: GoreanColors.cream
+                        }}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <p className="font-medium mb-1" style={{ color: GoreanColors.charcoal }}>
+                              {characterSkill.skill_name}
+                            </p>
+                            {skillDef && (
+                              <>
+                                <GoreanBadge
+                                  size="sm"
+                                  color={getSkillTypeColor(skillDef.type)}
+                                >
+                                  {skillDef.type}
+                                </GoreanBadge>
+                                <p
+                                  className="text-xs mt-2"
+                                  style={{ color: GoreanColors.stone }}
+                                >
+                                  {skillDef.description}
+                                </p>
+                                {skillDef.hpBonus > 0 && (
+                                  <p
+                                    className="text-xs mt-1 font-semibold"
+                                    style={{ color: GoreanColors.bloodRed }}
+                                  >
+                                    +{skillDef.hpBonus} HP per level
+                                  </p>
+                                )}
+                              </>
+                            )}
+                          </div>
+                          <GoreanBadge color={GoreanColors.forestGreen} size="sm">
+                            Lv {characterSkill.level}
+                          </GoreanBadge>
+                        </div>
+                        {/* XP Progress */}
+                        {skillDef && characterSkill.level < skillDef.maxLevel && (
+                          <div className="mt-2">
+                            <div
+                              className="h-1.5 rounded-full overflow-hidden"
+                              style={{ backgroundColor: GoreanColors.parchmentDark }}
+                            >
+                              <div
+                                className="h-full transition-all duration-300"
+                                style={{
+                                  width: `${(characterSkill.xp / skillDef.xpCost[characterSkill.level]) * 100}%`,
+                                  backgroundColor: GoreanColors.forestGreen
+                                }}
+                              />
+                            </div>
+                            <p className="text-xs mt-1 text-center" style={{ color: GoreanColors.stone }}>
+                              {characterSkill.xp} / {skillDef.xpCost[characterSkill.level]} XP
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ) : (
-                <p style={{ color: GoreanColors.stone }}>No stats available</p>
-              )}
-            </div>
-          </GoreanCard>
+              </div>
+            </GoreanCard>
+          )}
+
+          {/* Abilities Section */}
+          {goreanStats && Array.isArray(goreanStats.abilities) && goreanStats.abilities.length > 0 && (
+            <GoreanCard className="mb-6">
+              <div className="p-6">
+                <GoreanHeading level={3} className="mb-4">
+                  Abilities
+                </GoreanHeading>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {goreanStats.abilities.map((characterAbility, idx) => {
+                    const abilityDef = (abilitiesData as AbilityData[]).find(a => a.id === characterAbility.ability_id);
+                    return (
+                      <div
+                        key={idx}
+                        className="border-2 rounded p-4"
+                        style={{
+                          borderColor: GoreanColors.leather,
+                          backgroundColor: GoreanColors.cream
+                        }}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <p className="font-bold text-lg mb-1" style={{ color: GoreanColors.charcoal }}>
+                              {characterAbility.ability_name}
+                            </p>
+                            {abilityDef && (
+                              <>
+                                <div className="flex gap-2 mb-2 flex-wrap">
+                                  <GoreanBadge
+                                    size="sm"
+                                    color={getAbilityCategoryColor(abilityDef.category)}
+                                  >
+                                    {abilityDef.category}
+                                  </GoreanBadge>
+                                  <GoreanBadge size="sm" color={GoreanColors.bronze}>
+                                    Cost: {abilityDef.cost}
+                                  </GoreanBadge>
+                                  {abilityDef.cooldown && (
+                                    <GoreanBadge size="sm" color={GoreanColors.stone}>
+                                      Cooldown: {abilityDef.cooldown / 60}m
+                                    </GoreanBadge>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          {characterAbility.uses !== undefined && (
+                            <GoreanBadge color={GoreanColors.casteBlue} size="sm">
+                              Used: {characterAbility.uses}x
+                            </GoreanBadge>
+                          )}
+                        </div>
+
+                        {abilityDef && (
+                          <>
+                            {/* Description */}
+                            <p
+                              className="text-sm mb-3"
+                              style={{ color: GoreanColors.charcoal }}
+                            >
+                              {abilityDef.desc}
+                            </p>
+
+                            {/* Target Type and Range */}
+                            <div className="flex gap-3 mb-2 text-xs">
+                              {abilityDef.targetType && (
+                                <div>
+                                  <span className="font-semibold" style={{ color: GoreanColors.bronze }}>
+                                    Target:
+                                  </span>{' '}
+                                  <span style={{ color: GoreanColors.stone }}>
+                                    {abilityDef.targetType}
+                                  </span>
+                                </div>
+                              )}
+                              {abilityDef.range !== undefined && (
+                                <div>
+                                  <span className="font-semibold" style={{ color: GoreanColors.bronze }}>
+                                    Range:
+                                  </span>{' '}
+                                  <span style={{ color: GoreanColors.stone }}>
+                                    {abilityDef.range}m
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Requirements */}
+                            {abilityDef.requirements && (
+                              <div className="mt-2 text-xs">
+                                <p className="font-semibold mb-1" style={{ color: GoreanColors.bronze }}>
+                                  Requirements:
+                                </p>
+                                <ul className="list-disc list-inside" style={{ color: GoreanColors.stone }}>
+                                  {abilityDef.requirements.minStat && (
+                                    <li>
+                                      {abilityDef.requirements.minStat.stat} {abilityDef.requirements.minStat.value}+
+                                    </li>
+                                  )}
+                                  {abilityDef.requirements.skill && (
+                                    <li>
+                                      {abilityDef.requirements.skill.id} level {abilityDef.requirements.skill.level}+
+                                    </li>
+                                  )}
+                                  {abilityDef.requirements.species && (
+                                    <li>
+                                      Species: {abilityDef.requirements.species.join(', ')}
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Notes */}
+                            {abilityDef.notes && (
+                              <p
+                                className="text-xs mt-2 italic"
+                                style={{ color: GoreanColors.stone }}
+                              >
+                                {abilityDef.notes}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </GoreanCard>
+          )}
 
           {/* Inventory Card */}
           <GoreanCard className="mb-6">
