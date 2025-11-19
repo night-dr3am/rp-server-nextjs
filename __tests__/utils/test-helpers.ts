@@ -441,7 +441,7 @@ export async function createTestUserWithGoreanStats(testUser: TestUser) {
           speciesVariant: null,
           culture: "ko_ro_ba",
           cultureType: "cityState",
-          status: "freeMan",
+          socialStatus: "freeMan",
           statusSubtype: null,
           casteRole: "warrior",
           casteRoleType: "highCaste",

@@ -259,8 +259,8 @@ export interface GoreanCharacterModel {
   culture?: string;
   cultureType?: CultureType;
 
-  // Step 5: Status
-  status?: string;
+  // Step 5: Social Status
+  socialStatus?: string;
   slaveType?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   statusSubtype?: string;
 
@@ -398,8 +398,8 @@ export interface GoreanStatsDB {
   culture: string;
   cultureType: string;
 
-  // Status
-  status: string;
+  // Social Status
+  socialStatus: string;
   slaveType?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   statusSubtype?: string;
 
@@ -470,7 +470,7 @@ export interface GoreanCharacterCreateRequest {
   culture: string;
   culture_type: string;
 
-  status: string;
+  socialStatus: string;
   slave_type?: string; // Cultural variant (kajira, bondmaid, kajirus, thrall) - only for slave statuses
   status_subtype?: string;
 

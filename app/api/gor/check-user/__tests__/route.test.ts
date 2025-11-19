@@ -103,7 +103,7 @@ describe('POST /api/gor/check-user', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             casteRole: 'warriors',
             strength: 4,
             agility: 3,
@@ -136,7 +136,7 @@ describe('POST /api/gor/check-user', () => {
     expect(data.data.goreanStats.characterName).toBe('Tarl of Ko-ro-ba');
     expect(data.data.goreanStats.species).toBe('human');
     expect(data.data.goreanStats.culture).toBe('southern_cities');
-    expect(data.data.goreanStats.status).toBe('free_man');
+    expect(data.data.goreanStats.socialStatus).toBe('free_man');
     expect(data.data.goreanStats.registrationCompleted).toBe(true);
   });
 
@@ -165,7 +165,7 @@ describe('POST /api/gor/check-user', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             strength: 1,
             agility: 1,
             intellect: 1,
@@ -280,7 +280,7 @@ describe('POST /api/gor/check-user', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             strength: 3,
             agility: 3,
             intellect: 2,
@@ -347,7 +347,7 @@ describe('POST /api/gor/check-user', () => {
               speciesCategory: testCase.speciesCategory,
               culture: testCase.speciesCategory === 'sapient' ? 'southern_cities' : 'wild',
               cultureType: testCase.speciesCategory === 'sapient' ? 'cityState' : 'animal',
-              status: testCase.speciesCategory === 'sapient' ? 'free_man' : 'wild',
+              socialStatus: testCase.speciesCategory === 'sapient' ? 'free_man' : 'wild',
               strength: 3,
               agility: 3,
               intellect: 2,

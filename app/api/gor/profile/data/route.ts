@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
           species: user.goreanStats.species,
           speciesVariant: user.goreanStats.speciesVariant,
           culture: user.goreanStats.culture,
-          status: user.goreanStats.status,
+          socialStatus: user.goreanStats.socialStatus,
           statusSubtype: user.goreanStats.statusSubtype,
           slaveType: user.goreanStats.slaveType,
           casteRole: user.goreanStats.casteRole,

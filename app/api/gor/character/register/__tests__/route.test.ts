@@ -94,7 +94,7 @@ describe('POST /api/gor/character/register', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             casteRole: 'warriors',
             casteRoleType: 'highCaste',
             strength: 4,
@@ -130,7 +130,7 @@ describe('POST /api/gor/character/register', () => {
     expect(data.data.goreanStats.characterName).toBe('Tarl of Ko-ro-ba')
     expect(data.data.goreanStats.species).toBe('human')
     expect(data.data.goreanStats.culture).toBe('southern_cities')
-    expect(data.data.goreanStats.status).toBe('free_man')
+    expect(data.data.goreanStats.socialStatus).toBe('free_man')
     expect(data.data.goreanStats.casteRole).toBe('warriors')
   })
 
@@ -248,7 +248,7 @@ describe('POST /api/gor/character/register', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             strength: 3,
             agility: 3,
             intellect: 2,

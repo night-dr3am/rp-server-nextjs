@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
           characterName: result.goreanStats.characterName,
           species: result.goreanStats.species,
           speciesVariant: result.goreanStats.speciesVariant,
-          status: result.goreanStats.status,
+          socialStatus: result.goreanStats.socialStatus,
           casteRole: result.goreanStats.casteRole
         },
         // Return User fields (title, titleColor)

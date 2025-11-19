@@ -115,7 +115,7 @@ export default function GoreanCharacterCreation() {
       // Reset culture-dependent selections
       culture: undefined,
       cultureType: undefined,
-      status: undefined,
+      socialStatus: undefined,
       statusSubtype: undefined,
       casteRole: undefined,
       casteRoleType: undefined
@@ -128,7 +128,7 @@ export default function GoreanCharacterCreation() {
       culture: culture.id,
       cultureType: culture.type,
       // Reset status and role selections when culture changes
-      status: undefined,
+      socialStatus: undefined,
       statusSubtype: undefined,
       casteRole: undefined,
       casteRoleType: undefined
@@ -138,7 +138,7 @@ export default function GoreanCharacterCreation() {
   const updateStatus = (status: StatusData, subtype?: string) => {
     setCharacterModel(prev => ({
       ...prev,
-      status: status.id,
+      socialStatus: status.id,
       statusSubtype: subtype, // Set subtype if provided
       // Reset slave type and role when status changes
       slaveType: undefined,
@@ -264,12 +264,12 @@ export default function GoreanCharacterCreation() {
       case 3: // Culture
         return !!characterModel.culture;
       case 4: // Status
-        return !!characterModel.status;
+        return !!characterModel.socialStatus;
       case 5: // Caste/Role/Slave Type
         // For slave statuses with slave types, require slave type selection first
-        if (characterModel.status &&
-            isSlaveStatus(characterModel.status) &&
-            statusHasSlaveTypes(characterModel.status)) {
+        if (characterModel.socialStatus &&
+            isSlaveStatus(characterModel.socialStatus) &&
+            statusHasSlaveTypes(characterModel.socialStatus)) {
           // Must have slave type selected before proceeding
           return !!characterModel.slaveType;
         }
@@ -346,7 +346,7 @@ export default function GoreanCharacterCreation() {
         cultureType: culture?.type || '',
 
         // Status
-        status: characterModel.status,
+        socialStatus: characterModel.socialStatus,
         slaveType: characterModel.slaveType || '', // Cultural variant (kajira, bondmaid, etc.)
         statusSubtype: characterModel.statusSubtype || '',
 
@@ -501,7 +501,7 @@ export default function GoreanCharacterCreation() {
   const renderStep4 = () => (
     <StatusSelector
       selectedSpeciesId={characterModel.species}
-      selectedStatus={characterModel.status}
+      selectedStatus={characterModel.socialStatus}
       selectedStatusSubtype={characterModel.statusSubtype}
       onSelectStatus={updateStatus}
     />
@@ -509,16 +509,16 @@ export default function GoreanCharacterCreation() {
 
   const renderStep5 = () => {
     // Check if this is a slave status that requires slave type selection first
-    const needsSlaveTypeSelection = characterModel.status &&
-      isSlaveStatus(characterModel.status) &&
-      statusHasSlaveTypes(characterModel.status) &&
+    const needsSlaveTypeSelection = characterModel.socialStatus &&
+      isSlaveStatus(characterModel.socialStatus) &&
+      statusHasSlaveTypes(characterModel.socialStatus) &&
       !characterModel.slaveType;
 
     if (needsSlaveTypeSelection) {
       // Show slave type selector first (e.g., Kajira vs Bondmaid)
       return (
         <SlaveTypeSelector
-          selectedStatusId={characterModel.status}
+          selectedStatusId={characterModel.socialStatus}
           selectedSlaveType={characterModel.slaveType}
           onSelectSlaveType={updateSlaveType}
         />
@@ -529,7 +529,7 @@ export default function GoreanCharacterCreation() {
     return (
       <CasteSelector
         selectedCultureId={characterModel.culture}
-        selectedStatusId={characterModel.status}
+        selectedStatusId={characterModel.socialStatus}
         selectedSlaveType={characterModel.slaveType}
         selectedCasteOrRole={characterModel.casteRole || characterModel.statusSubtype}
         onSelectCasteOrRole={updateCasteOrRole}
@@ -643,7 +643,7 @@ export default function GoreanCharacterCreation() {
         character={{
           species: speciesData,
           caste: characterModel.casteRole,
-          status: characterModel.status,
+          socialStatus: characterModel.socialStatus,
           skills: characterModel.skills,
           stats: characterModel.stats
         }}

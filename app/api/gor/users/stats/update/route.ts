@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
           speciesVariant: encodeForLSL(updatedStats.speciesVariant),
           culture: encodeForLSL(updatedStats.culture),
           cultureType: encodeForLSL(updatedStats.cultureType),
-          status: encodeForLSL(updatedStats.status),
+          socialStatus: encodeForLSL(updatedStats.socialStatus),
           statusSubtype: encodeForLSL(updatedStats.statusSubtype),
           casteRole: encodeForLSL(updatedStats.casteRole),
           casteRoleType: encodeForLSL(updatedStats.casteRoleType),

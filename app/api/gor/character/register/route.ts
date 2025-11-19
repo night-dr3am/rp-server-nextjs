@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
             characterName: user.goreanStats.characterName,
             species: user.goreanStats.species,
             culture: user.goreanStats.culture,
-            status: user.goreanStats.status,
+            socialStatus: user.goreanStats.socialStatus,
             casteRole: user.goreanStats.casteRole,
             strength: user.goreanStats.strength,
             agility: user.goreanStats.agility,

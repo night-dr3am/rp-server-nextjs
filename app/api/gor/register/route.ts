@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
             agentName: user.goreanStats.agentName,
             species: user.goreanStats.species,
             culture: user.goreanStats.culture,
-            status: user.goreanStats.status,
+            socialStatus: user.goreanStats.socialStatus,
             casteRole: user.goreanStats.casteRole,
             strength: user.goreanStats.strength,
             agility: user.goreanStats.agility,

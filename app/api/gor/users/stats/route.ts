@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
           speciesVariant: encodeForLSL(user.goreanStats.speciesVariant),
           culture: encodeForLSL(user.goreanStats.culture),
           cultureType: encodeForLSL(user.goreanStats.cultureType),
-          status: encodeForLSL(user.goreanStats.status),
+          socialStatus: encodeForLSL(user.goreanStats.socialStatus),
           statusSubtype: encodeForLSL(user.goreanStats.statusSubtype),
           casteRole: encodeForLSL(user.goreanStats.casteRole),
           casteRoleType: encodeForLSL(user.goreanStats.casteRoleType),

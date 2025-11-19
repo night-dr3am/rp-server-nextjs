@@ -736,7 +736,7 @@ export function isAbilityAvailable(
   character: {
     species?: SpeciesData;
     caste?: string;
-    status?: string;
+    socialStatus?: string;
     skills?: CharacterSkill[];
     stats?: GoreanCharacterModel['stats'];
   }
@@ -767,8 +767,8 @@ export function isAbilityAvailable(
   }
 
   // Check status requirement
-  if (req.status && req.status.length > 0 && character.status) {
-    const statusMatch = req.status.some(s => lc(s) === lc(character.status!));
+  if (req.status && req.status.length > 0 && character.socialStatus) {
+    const statusMatch = req.status.some(s => lc(s) === lc(character.socialStatus!));
     if (!statusMatch) {
       return { available: false, reason: 'Status requirement not met' };
     }
@@ -800,7 +800,7 @@ export function isAbilityAvailable(
 export function getAvailableAbilities(character: {
   species?: SpeciesData;
   caste?: string;
-  status?: string;
+  socialStatus?: string;
   skills?: CharacterSkill[];
   stats?: GoreanCharacterModel['stats'];
 }): AbilityData[] {
@@ -921,7 +921,7 @@ export function validateCharacterModel(model: GoreanCharacterModel): { valid: bo
   }
 
   // Status validation
-  if (!model.status) {
+  if (!model.socialStatus) {
     errors.push('Status selection is required');
   }
 

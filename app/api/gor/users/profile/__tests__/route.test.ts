@@ -665,7 +665,7 @@ describe('/api/gor/users/profile', () => {
         expect(data.data.goreanStats).toBeDefined()
         expect(data.data.goreanStats.characterName).toBe(newName)
         expect(data.data.goreanStats.species).toBeDefined()
-        expect(data.data.goreanStats.status).toBeDefined()
+        expect(data.data.goreanStats.socialStatus).toBeDefined()
         expect(data.data.goreanStats.casteRole).toBeDefined()
       })
     })

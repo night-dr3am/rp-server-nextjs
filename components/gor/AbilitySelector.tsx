@@ -26,7 +26,7 @@ interface AbilitySelectorProps {
   character: {
     species?: SpeciesData;
     caste?: string;
-    status?: string;
+    socialStatus?: string;
     skills?: CharacterSkill[];
     stats?: GoreanCharacterModel['stats'];
   };

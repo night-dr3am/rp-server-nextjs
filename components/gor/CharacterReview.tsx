@@ -40,7 +40,7 @@ export function CharacterReview({
 }: CharacterReviewProps) {
   const species = characterModel.species ? getSpeciesById(characterModel.species) : undefined;
   const culture = characterModel.culture ? getCultureById(characterModel.culture) : undefined;
-  const status = characterModel.status ? getStatusById(characterModel.status) : undefined;
+  const status = characterModel.socialStatus ? getStatusById(characterModel.socialStatus) : undefined;
 
   // Get caste or tribal role info
   let casteRoleInfo: { name: string; color?: string } | undefined;

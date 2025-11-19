@@ -54,7 +54,7 @@ describe('GET /api/gor/stats', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             casteRole: 'warriors',
             casteRoleType: 'highCaste',
             region: 'ar',
@@ -121,7 +121,7 @@ describe('GET /api/gor/stats', () => {
     expect(data.data.goreanStats.species).toBe('human');
     expect(data.data.goreanStats.speciesCategory).toBe('sapient');
     expect(data.data.goreanStats.culture).toBe('southern_cities');
-    expect(data.data.goreanStats.status).toBe('free_man');
+    expect(data.data.goreanStats.socialStatus).toBe('free_man');
     expect(data.data.goreanStats.casteRole).toBe('warriors');
     expect(data.data.goreanStats.region).toBe('ar');
     expect(data.data.goreanStats.homeStoneName).toBe('Ko-ro-ba');
@@ -271,7 +271,7 @@ describe('GET /api/gor/stats', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             strength: 3,
             agility: 3,
             intellect: 2,
@@ -332,7 +332,7 @@ describe('GET /api/gor/stats', () => {
             speciesCategory: 'feline',
             culture: 'wild',
             cultureType: 'animal',
-            status: 'wild',
+            socialStatus: 'wild',
             strength: 5,
             agility: 4,
             intellect: 1,
@@ -371,7 +371,7 @@ describe('GET /api/gor/stats', () => {
     expect(data.data.goreanStats.species).toBe('larl');
     expect(data.data.goreanStats.speciesCategory).toBe('feline');
     expect(data.data.goreanStats.culture).toBe('wild');
-    expect(data.data.goreanStats.status).toBe('wild');
+    expect(data.data.goreanStats.socialStatus).toBe('wild');
     expect(data.data.goreanStats.strength).toBe(5);
   });
 
@@ -400,7 +400,7 @@ describe('GET /api/gor/stats', () => {
             speciesCategory: 'sapient',
             culture: 'southern_cities',
             cultureType: 'cityState',
-            status: 'free_man',
+            socialStatus: 'free_man',
             strength: 3,
             agility: 3,
             intellect: 2,

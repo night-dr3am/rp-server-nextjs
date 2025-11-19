@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         const availabilityCheck = isAbilityAvailable(abilityData, {
           species: species,
           caste: characterData.casteRole,
-          status: characterData.status,
+          socialStatus: characterData.socialStatus,
           skills: characterData.skills,
           stats: {
             strength: characterData.strength,
@@ -200,8 +200,8 @@ export async function POST(request: NextRequest) {
       culture: characterData.culture,
       cultureType: characterData.cultureType,
 
-      // Status
-      status: characterData.status,
+      // Social Status
+      socialStatus: characterData.socialStatus,
       slaveType: characterData.slaveType || null, // Cultural variant (kajira, bondmaid, kajirus, thrall)
       statusSubtype: characterData.statusSubtype || null,
 
@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
           species: result.goreanStats.species,
           speciesCategory: result.goreanStats.speciesCategory,
           culture: result.goreanStats.culture,
-          status: result.goreanStats.status,
+          socialStatus: result.goreanStats.socialStatus,
           casteRole: result.goreanStats.casteRole,
           strength: result.goreanStats.strength,
           agility: result.goreanStats.agility,

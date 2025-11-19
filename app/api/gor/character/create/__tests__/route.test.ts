@@ -83,7 +83,7 @@ describe('POST /api/gor/character/create', () => {
       speciesVariant: '',
       culture: 'southern_cities',
       cultureType: 'cityState',
-      status: 'free_man',
+      socialStatus: 'free_man',
       statusSubtype: '',
       casteRole: 'warriors',
       casteRoleType: 'highCaste',
@@ -357,7 +357,7 @@ describe('POST /api/gor/character/create', () => {
         speciesCategory: 'sapient',
         culture: 'southern_cities',
         cultureType: 'cityState',
-        status: 'free_man',
+        socialStatus: 'free_man',
         strength: 2,
         agility: 2,
         intellect: 2,
@@ -425,7 +425,7 @@ describe('POST /api/gor/character/create', () => {
       speciesCategory: 'feline',
       culture: 'wild',
       cultureType: 'animal',
-      status: 'wild',
+      socialStatus: 'wild',
       statusSubtype: '',
       casteRole: '', // Animals don't have castes
       casteRoleType: '',
@@ -452,7 +452,7 @@ describe('POST /api/gor/character/create', () => {
     expect(data.data.goreanStats.species).toBe('larl');
     expect(data.data.goreanStats.speciesCategory).toBe('feline');
     expect(data.data.goreanStats.culture).toBe('wild');
-    expect(data.data.goreanStats.status).toBe('wild');
+    expect(data.data.goreanStats.socialStatus).toBe('wild');
     expect(data.data.goreanStats.casteRole).toBeNull();
   });
 
@@ -485,7 +485,7 @@ describe('POST /api/gor/character/create', () => {
       speciesCategory: 'sapient',
       culture: 'southern_cities',
       cultureType: 'cityState',
-      status: 'free_man',
+      socialStatus: 'free_man',
       strength: 10, // Invalid: exceeds max of 5
       agility: 1,
       intellect: 1,
@@ -530,7 +530,7 @@ describe('POST /api/gor/character/create', () => {
         speciesCategory: 'sapient',
         culture: 'southern_cities',
         cultureType: 'cityState',
-        status: 'free_man',
+        socialStatus: 'free_man',
         strength: 5, // healthMax = 25
         agility: 2,
         intellect: 2,
@@ -645,7 +645,7 @@ describe('POST /api/gor/character/create', () => {
       speciesCategory: 'feline',
       culture: 'wild',
       cultureType: 'animal',
-      status: 'wild',
+      socialStatus: 'wild',
       skills: [
         { skill_id: 'unarmed_combat', skill_name: 'Unarmed Combat', level: 2, xp: 0 }, // Universal skill
         { skill_id: 'hunting', skill_name: 'Hunting', level: 2, xp: 0 }, // Universal skill

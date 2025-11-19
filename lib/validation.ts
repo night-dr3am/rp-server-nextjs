@@ -518,8 +518,8 @@ export const goreanCharacterCreateSchema = Joi.object({
     .valid('cityState', 'northern', 'nomadic', 'marshForestJungle', 'special', 'animal')
     .required(),
 
-  // Status
-  status: Joi.string().required(),
+  // Social Status
+  socialStatus: Joi.string().required(),
   slaveType: Joi.string().max(100).allow('').optional(), // Cultural variant (kajira, bondmaid, kajirus, thrall)
   statusSubtype: Joi.string().max(255).allow('').optional(),
 
