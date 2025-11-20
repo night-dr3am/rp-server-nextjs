@@ -286,6 +286,68 @@ export function getEffectiveStatModifier(
 }
 
 /**
+ * Result of detailed stat calculation for display
+ */
+export interface DetailedStatResult {
+  baseValue: number;
+  tierModifier: number;
+  rollBonus: number;
+  totalModifier: number;
+  formattedString: string;
+  statDisplayName: string;
+}
+
+/**
+ * Get detailed stat calculation breakdown for combat messages
+ * Returns formatted string like: Strength[3](+2) or Strength[3](+2)+Buff(1)
+ */
+export function getDetailedStatCalculation(
+  goreanStats: GoreanStats,
+  liveStats: GorLiveStats | null | undefined,
+  statName: GoreanStatName
+): DetailedStatResult {
+  // Get base stat value
+  const baseValue = goreanStats[statName] as number;
+
+  // Calculate tier modifier from base stat
+  const tierModifier = calculateGoreanStatModifier(baseValue);
+
+  // Get roll bonus if present
+  let rollBonus = 0;
+  if (liveStats) {
+    const capitalizedName = statName.charAt(0).toUpperCase() + statName.slice(1);
+    const rollBonusKey = `${capitalizedName}_rollbonus`;
+    rollBonus = typeof liveStats[rollBonusKey] === 'number'
+      ? (liveStats[rollBonusKey] as number)
+      : 0;
+  }
+
+  const totalModifier = tierModifier + rollBonus;
+
+  // Format stat name for display (capitalize first letter)
+  const statDisplayName = statName.charAt(0).toUpperCase() + statName.slice(1);
+
+  // Build formatted string
+  // Format: StatName[baseValue](tierMod) or StatName[baseValue](tierMod)+bonus if rollBonus exists
+  const tierSign = tierModifier >= 0 ? '+' : '';
+  let formattedString = `${statDisplayName}[${baseValue}](${tierSign}${tierModifier})`;
+
+  if (rollBonus !== 0) {
+    const bonusSign = rollBonus > 0 ? '+' : '';
+    formattedString += `${bonusSign}${rollBonus}`;
+  }
+
+  return {
+    baseValue,
+    tierModifier,
+    rollBonus,
+    totalModifier,
+    formattedString,
+    statDisplayName
+  };
+}
+
+/**
  * Process turn for effects: decrement turns, remove expired, recalculate live stats
  */
 export async function processEffectsTurn(

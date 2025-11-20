@@ -580,4 +580,298 @@ describe('POST /api/gor/combat/attack', () => {
       }
     });
   });
+
+  describe('Contested Roll Mechanics', () => {
+    it('should include both attacker and defender roll totals in response', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 3
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 3
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify contested roll fields exist
+      expect(data.data).toHaveProperty('roll'); // Attacker roll
+      expect(data.data).toHaveProperty('defenderRoll');
+      expect(data.data).toHaveProperty('attackerTotal');
+      expect(data.data).toHaveProperty('defenderTotal');
+
+      // Verify rolls are valid d20 values
+      expect(data.data.roll).toBeGreaterThanOrEqual(1);
+      expect(data.data.roll).toBeLessThanOrEqual(20);
+      expect(data.data.defenderRoll).toBeGreaterThanOrEqual(1);
+      expect(data.data.defenderRoll).toBeLessThanOrEqual(20);
+    });
+
+    it('should include detailed breakdown strings in response', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 3
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 3
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify breakdown strings exist
+      expect(data.data).toHaveProperty('attackerBreakdown');
+      expect(data.data).toHaveProperty('defenderBreakdown');
+
+      // Verify format includes d20 roll
+      expect(data.data.attackerBreakdown).toContain('d20(');
+      expect(data.data.defenderBreakdown).toContain('d20(');
+
+      // Verify format includes stat name
+      expect(data.data.attackerBreakdown).toContain('Strength[');
+      expect(data.data.defenderBreakdown).toContain('Agility[');
+    });
+  });
+
+  describe('Message Format', () => {
+    it('should format message with both player names and rolls', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        characterName: 'Tarl Cabot',
+        strength: 4
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        characterName: 'Marcus',
+        agility: 2
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Message should contain both character names
+      expect(data.data.message).toContain('Tarl Cabot');
+      expect(data.data.message).toContain('Marcus');
+
+      // Message should contain dice roll indicators
+      expect(data.data.message).toContain('d20(');
+
+      // Message should contain 'vs' separator
+      expect(data.data.message).toContain(' vs ');
+
+      // Message should contain result indicator
+      expect(data.data.message).toMatch(/→ (Hit!|Miss!|Critical)/);
+    });
+
+    it('should show damage breakdown when hit succeeds', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 5, // High strength for likely hit
+        skills: [
+          { skill_id: 'unarmed_combat', skill_name: 'Unarmed Combat', level: 2, xp: 0 }
+        ]
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 1 // Low agility for likely hit
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      if (data.data.hit) {
+        // Message should contain Damage: breakdown
+        expect(data.data.message).toContain('Damage:');
+        expect(data.data.message).toMatch(/\d+\+\d+\+\d+=\d+/); // Pattern like 2+6+2=10
+      }
+    });
+  });
+
+  describe('Stat Tier Modifiers', () => {
+    it('should calculate correct tier modifier for strength 1 (-2)', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 1,
+        skills: []
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 2
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.attackModifier).toBe(-2); // Tier -2, no skill bonus
+    });
+
+    it('should calculate correct tier modifier for strength 3 (+2)', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 3,
+        skills: []
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 2
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.attackModifier).toBe(2); // Tier +2, no skill bonus
+    });
+
+    it('should calculate correct tier modifier for strength 5 (+6)', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 5,
+        skills: []
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 2
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.attackModifier).toBe(6); // Tier +6, no skill bonus
+    });
+
+    it('should include skill bonus in attack modifier', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 3,
+        skills: [
+          { skill_id: 'unarmed_combat', skill_name: 'Unarmed Combat', level: 3, xp: 0 }
+        ]
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 2
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.skillBonus).toBe(3);
+      expect(data.data.attackModifier).toBe(5); // Tier +2 + skill 3 = +5
+    });
+  });
+
+  describe('Contested Roll Edge Cases', () => {
+    it('should miss when attacker total equals defender total (tie goes to defender)', async () => {
+      // This is a probabilistic test - we verify the rule is applied correctly
+      // by checking that hit = attackerTotal > defenderTotal (not >=)
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 3
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 3
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Verify the hit logic: attacker wins only if total > defender total
+      if (data.data.attackerTotal === data.data.defenderTotal) {
+        expect(data.data.hit).toBe(false); // Ties go to defender
+      } else if (data.data.attackerTotal > data.data.defenderTotal) {
+        // Should be hit unless critical miss
+        if (data.data.roll !== 1) {
+          expect(data.data.hit).toBe(true);
+        }
+      } else {
+        expect(data.data.hit).toBe(false);
+      }
+    });
+
+    it('should calculate defender total correctly with agility modifier', async () => {
+      const { uuid: attackerUuid } = await createTestGoreanCharacter({
+        strength: 2
+      });
+      const { uuid: targetUuid } = await createTestGoreanCharacter({
+        agility: 4 // Should give +4 tier modifier
+      });
+
+      const body = createAttackBody({
+        attacker_uuid: attackerUuid,
+        target_uuid: targetUuid,
+        attack_type: 'melee_unarmed'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/attack', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.defenseModifier).toBe(4); // Agility 4 = +4 tier modifier
+      // defenderTotal = defenderRoll + defenseModifier
+      expect(data.data.defenderTotal).toBe(data.data.defenderRoll + 4);
+    });
+  });
 });

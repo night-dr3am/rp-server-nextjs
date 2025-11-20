@@ -171,8 +171,7 @@ export async function POST(request: NextRequest) {
       targetActiveEffects
     );
 
-    // Prepend attacker and target names to message
-    attackResult.message = `${attacker.goreanStats.characterName} → ${target.goreanStats.characterName}: ${attackResult.message}`;
+    // Message now includes character names from calculateAttack
 
     // Calculate new target health
     const newTargetHealth = Math.max(0, target.goreanStats.healthCurrent - attackResult.damage);
@@ -255,9 +254,12 @@ export async function POST(request: NextRequest) {
           targetUuid: target_uuid,
           hit: attackResult.hit,
           damage: attackResult.damage,
-          roll: attackResult.roll,
+          attackerRoll: attackResult.roll,
+          defenderRoll: attackResult.defenderRoll,
+          attackerTotal: attackResult.attackerTotal,
+          defenderTotal: attackResult.defenderTotal,
           attackModifier: attackResult.attackModifier,
-          targetNumber: attackResult.targetNumber,
+          defenseModifier: attackResult.defenseModifier,
           isCritical: attackResult.isCritical,
           targetHealthBefore: target.goreanStats.healthCurrent,
           targetHealthAfter: newTargetHealth
@@ -282,6 +284,16 @@ export async function POST(request: NextRequest) {
         damage: attackResult.damage,
         message: attackResult.message,
         lslMessage: encodeForLSL(lslMessage),
+        // Top-level contested roll fields for easy access
+        roll: attackResult.roll,
+        defenderRoll: attackResult.defenderRoll,
+        attackerTotal: attackResult.attackerTotal,
+        defenderTotal: attackResult.defenderTotal,
+        attackModifier: attackResult.attackModifier,
+        skillBonus: attackResult.skillBonus,
+        defenseModifier: attackResult.defenseModifier,
+        attackerBreakdown: attackResult.attackerBreakdown,
+        defenderBreakdown: attackResult.defenderBreakdown,
         attacker: {
           uuid: attacker_uuid,
           name: encodeForLSL(attacker.goreanStats.characterName),
@@ -295,14 +307,6 @@ export async function POST(request: NextRequest) {
           health: newTargetHealth,
           maxHealth: target.goreanStats.healthMax,
           unconscious: newTargetHealth <= 0
-        },
-        roll: {
-          d20: attackResult.roll,
-          modifier: attackResult.attackModifier,
-          skillBonus: attackResult.skillBonus,
-          total: attackResult.roll + attackResult.attackModifier,
-          targetNumber: attackResult.targetNumber,
-          defenseModifier: attackResult.defenseModifier
         },
         damageBreakdown: {
           baseDamage: attackResult.baseDamage,

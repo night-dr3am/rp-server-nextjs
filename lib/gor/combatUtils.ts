@@ -1,7 +1,7 @@
 // Combat utilities for Gor
 // Handles attack calculations, damage, and skill bonuses
 
-import { getEffectiveStatModifier, GorLiveStats, getDamageReduction } from './effectsUtils';
+import { getEffectiveStatModifier, getDetailedStatCalculation, GorLiveStats, getDamageReduction } from './effectsUtils';
 import type { GoreanStatName, CharacterSkill, ActiveEffect } from './types';
 import type { GoreanStats } from '@prisma/client';
 
@@ -24,14 +24,19 @@ export interface AttackResult {
   roll: number;
   attackModifier: number;
   skillBonus: number;
-  targetNumber: number;
+  defenderRoll: number;
   defenseModifier: number;
+  attackerTotal: number;
+  defenderTotal: number;
   damageReduction: number;
   baseDamage: number;
   statDamageBonus: number;
   message: string;
   isCritical?: boolean;
   isCriticalMiss?: boolean;
+  // Detailed breakdown strings for display
+  attackerBreakdown: string;
+  defenderBreakdown: string;
 }
 
 // ============================================================================
@@ -136,10 +141,11 @@ export function getDamageStat(attackType: GorAttackType): GoreanStatName {
 // ============================================================================
 
 /**
- * Calculate a complete attack
+ * Calculate a complete attack with contested rolls
  *
  * Attack Roll: d20 + attackStatMod + skillBonus
- * Target Number: 10 + defenseStatMod
+ * Defense Roll: d20 + defenseStatMod
+ * Hit: attackerTotal > defenderTotal (defender wins ties)
  * Damage: baseDamage + damageStatMod + skillBonus - damageReduction
  */
 export async function calculateAttack(
@@ -158,24 +164,40 @@ export async function calculateAttack(
   const damageStatName = getDamageStat(attackType);
   const skillId = getAttackSkillId(attackType);
 
-  // Calculate attack modifier (stat + skill)
-  const attackStatMod = getEffectiveStatModifier(attacker, attackerLiveStats, attackStatName);
+  // Get detailed stat calculations for display
+  const attackStatDetails = getDetailedStatCalculation(attacker, attackerLiveStats, attackStatName);
+  const defenseStatDetails = getDetailedStatCalculation(target, targetLiveStats, defenseStatName);
+
+  // Calculate attack modifier (stat tier + roll bonus + skill)
   const skills = (attacker.skills as unknown as CharacterSkill[]) || [];
   const skillBonus = getSkillBonus(skills, skillId);
-  const attackModifier = attackStatMod + skillBonus;
+  const attackModifier = attackStatDetails.totalModifier + skillBonus;
 
-  // Calculate defense (target number)
-  const defenseModifier = getEffectiveStatModifier(target, targetLiveStats, defenseStatName);
-  const targetNumber = 10 + defenseModifier;
+  // Calculate defense modifier
+  const defenseModifier = defenseStatDetails.totalModifier;
 
-  // Roll attack
-  const roll = rollD20();
-  const total = roll + attackModifier;
-  const hit = total >= targetNumber;
+  // Roll for both attacker and defender (contested roll)
+  const attackerRoll = rollD20();
+  const defenderRoll = rollD20();
+
+  // Calculate totals
+  const attackerTotal = attackerRoll + attackModifier;
+  const defenderTotal = defenderRoll + defenseModifier;
+
+  // Determine hit (attacker must beat defender; ties go to defender)
+  let hit = attackerTotal > defenderTotal;
 
   // Check for critical hit/miss
-  const isCritical = roll === 20;
-  const isCriticalMiss = roll === 1;
+  const isCritical = attackerRoll === 20;
+  const isCriticalMiss = attackerRoll === 1;
+
+  // Critical hit always hits, critical miss always misses
+  if (isCritical && !isCriticalMiss) {
+    hit = true;
+  }
+  if (isCriticalMiss) {
+    hit = false;
+  }
 
   // Calculate damage if hit
   let damage = 0;
@@ -183,7 +205,7 @@ export async function calculateAttack(
   let statDamageBonus = 0;
   let damageReduction = 0;
 
-  if (hit && !isCriticalMiss) {
+  if (hit) {
     baseDamage = getWeaponBaseDamage(weaponType);
     statDamageBonus = getEffectiveStatModifier(attacker, attackerLiveStats, damageStatName);
 
@@ -202,38 +224,54 @@ export async function calculateAttack(
     }
   }
 
-  // Build message
+  // Build detailed breakdown strings
+  // Format: d20(roll)+StatName[base](tierMod)+skill
+  let attackerBreakdown = `d20(${attackerRoll})+${attackStatDetails.formattedString}`;
+  if (skillBonus > 0) {
+    attackerBreakdown += `+${skillBonus}`;
+  }
+  attackerBreakdown += `=${attackerTotal}`;
+
+  const defenderBreakdown = `d20(${defenderRoll})+${defenseStatDetails.formattedString}=${defenderTotal}`;
+
+  // Build single-line message
+  // Format: AttackerName d20(roll)+Stat[base](mod)+skill=total vs DefenderName d20(roll)+Stat[base](mod)=total → Result! Damage: breakdown
   let message = '';
+
   if (isCriticalMiss) {
-    message = `Critical Miss! ${attacker.characterName} fumbles their attack!`;
+    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Miss!`;
   } else if (isCritical && hit) {
-    message = `CRITICAL HIT! Roll: ${roll}+${attackModifier}=${total} vs TN ${targetNumber}. ` +
-      `Damage: (${baseDamage}+${statDamageBonus}+${skillBonus})×2 = ${damage}`;
+    const damageCalc = `(${baseDamage}+${statDamageBonus}+${skillBonus})×2=${damage}`;
+    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Hit! Damage: ${damageCalc}`;
   } else if (hit) {
-    message = `Hit! Roll: ${roll}+${attackModifier}=${total} vs TN ${targetNumber}. ` +
-      `Damage: ${baseDamage}+${statDamageBonus}+${skillBonus}`;
+    let damageCalc = `${baseDamage}+${statDamageBonus}+${skillBonus}`;
     if (damageReduction > 0) {
-      message += `-${damageReduction}`;
+      damageCalc += `-${damageReduction}`;
     }
-    message += ` = ${damage}`;
+    damageCalc += `=${damage}`;
+    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Hit! Damage: ${damageCalc}`;
   } else {
-    message = `Miss! Roll: ${roll}+${attackModifier}=${total} vs TN ${targetNumber}`;
+    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Miss!`;
   }
 
   return {
-    hit: hit && !isCriticalMiss, // Critical miss is always a miss
+    hit,
     damage,
-    roll,
+    roll: attackerRoll,
     attackModifier,
     skillBonus,
-    targetNumber,
+    defenderRoll,
     defenseModifier,
+    attackerTotal,
+    defenderTotal,
     damageReduction,
     baseDamage,
     statDamageBonus,
     message,
     isCritical,
-    isCriticalMiss
+    isCriticalMiss,
+    attackerBreakdown,
+    defenderBreakdown
   };
 }
 
@@ -251,15 +289,16 @@ export function formatAttackResultForLSL(
   const hitStatus = result.hit ? 'HIT' : 'MISS';
   const critStatus = result.isCritical ? 'CRITICAL' : result.isCriticalMiss ? 'FUMBLE' : '';
 
-  // Format: ATTACK|status|attacker|target|roll|mod|tn|damage|newHP|maxHP|crit
+  // Format: ATTACK|status|attacker|target|attackerRoll|attackerTotal|defenderRoll|defenderTotal|damage|newHP|maxHP|crit
   const parts = [
     'ATTACK',
     hitStatus,
     attackerName,
     targetName,
     result.roll.toString(),
-    result.attackModifier.toString(),
-    result.targetNumber.toString(),
+    result.attackerTotal.toString(),
+    result.defenderRoll.toString(),
+    result.defenderTotal.toString(),
     result.damage.toString(),
     targetNewHealth.toString(),
     targetMaxHealth.toString(),
