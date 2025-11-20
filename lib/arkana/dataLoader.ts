@@ -339,3 +339,5 @@ export function getWorldObjectSuccessScript(scriptId: string): WorldObjectSucces
 export function getAllWorldObjectSuccessScripts(): WorldObjectSuccessScript[] {
   return Array.from(worldObjectSuccessScriptsMap.values());
 }
+// Re-export cache invalidation from unified loader for test convenience
+export { invalidateCache as invalidateArkanaCache } from './unifiedDataLoader';

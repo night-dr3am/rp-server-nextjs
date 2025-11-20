@@ -239,7 +239,7 @@ describe('POST /api/gor/combat/attack', () => {
   });
 
   describe('Combat Mode Validation', () => {
-    it('should reject attack when attacker not in Combat Mode', async () => {
+    it('should reject attack when attacker is not in one of IC modes', async () => {
       // Create attacker in RP Mode (status 3)
       const attackerUuid = crypto.randomUUID();
       await prisma.user.create({
@@ -251,7 +251,7 @@ describe('POST /api/gor/combat/attack', () => {
           stats: {
             create: {
               health: 80,
-              status: 3, // RP Mode - not combat
+              status: 4, // OOC Mode
               hunger: 100,
               thirst: 100
             }
@@ -289,7 +289,7 @@ describe('POST /api/gor/combat/attack', () => {
       const response = await POST(request);
       const data = await parseJsonResponse(response);
 
-      expectError(data, 'Combat Mode');
+      expectError(data, 'Must be in Full, Survival, Combat or RP mode to attack');
     });
   });
 

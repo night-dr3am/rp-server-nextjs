@@ -135,10 +135,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if attacker has required RPG status (Combat mode = 2)
-    if (attacker.stats && attacker.stats.status !== 2) {
+    // Check if attacker has required RPG status
+    if (attacker.stats && attacker.stats.status > 3) {
       return NextResponse.json(
-        { success: false, error: 'Must be in Combat Mode to attack' },
+        { success: false, error: 'Must be in Full, Survival, Combat or RP mode to attack' },
         { status: 400 }
       );
     }

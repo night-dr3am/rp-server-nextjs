@@ -224,12 +224,22 @@ export async function cleanupDatabase(): Promise<void> {
     await prisma.nPCTask.deleteMany()
     await prisma.nPC.deleteMany()
     await prisma.arkanaStats.deleteMany()
+    await prisma.goreanStats.deleteMany()
     await prisma.userStats.deleteMany()
     await prisma.user.deleteMany()
+    // Clean game data tables to prevent cache/DB mismatch
+    await prisma.arkanaData.deleteMany()
+    await prisma.goreanData.deleteMany()
   } catch (error) {
     // Handle any cleanup errors gracefully
     console.warn('Database cleanup warning:', error)
   }
+
+  // Invalidate data loader caches to ensure tests load from JSON files
+  const { invalidateArkanaCache } = await import('@/lib/arkana/dataLoader')
+  const { invalidateGorCache } = await import('@/lib/gor/unifiedDataLoader')
+  invalidateArkanaCache()
+  invalidateGorCache()
 }
 
 // Alias for the new schema structure - NPC tests need this
