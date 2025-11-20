@@ -40,6 +40,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 300,
         cyberneticAugments: [],
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
@@ -96,6 +97,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 500,
         cyberneticAugments: [],
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
@@ -252,6 +254,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 1, // Only 1 XP
         cyberneticAugments: [],
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
@@ -298,6 +301,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 300,
         cyberneticAugments: ['cyber_reflex_boost'], // Already owns this
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
@@ -391,6 +395,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 300,
         cyberneticAugments: [],
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
@@ -436,6 +441,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         perception: 2,
         maxHP: 10,
         xp: 300,
+        cyberneticsSlots: 5,
         registrationCompleted: true
       }
     });
@@ -478,6 +484,7 @@ describe('POST /api/arkana/shop/purchase', () => {
         maxHP: 10,
         xp: 300,
         cyberneticAugments: [],
+        cyberneticsSlots: 5,
         magicSchools: [],
         magicWeaves: [],
         arkanaRole: 'player',
