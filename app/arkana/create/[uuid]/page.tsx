@@ -222,7 +222,7 @@ export default function ArkanaCharacterCreation() {
       // Reset flaws (page 4)
       flaws: new Set<string>(),
 
-      // Reset page 5 choices - all separate Sets
+      // Reset page 6 choices - all separate Sets
       commonPowers: new Set<string>(),
       archetypePowers: new Set<string>(),
       perks: new Set<string>(),
@@ -1350,7 +1350,7 @@ export default function ArkanaCharacterCreation() {
           </p>
         </div>
 
-        {/* Reset Page 5 Choices Button */}
+        {/* Reset Page 6 Choices Button */}
         {(characterModel.commonPowers.size > 0 || characterModel.archetypePowers.size > 0 ||
           characterModel.perks.size > 0 || characterModel.cyberneticAugments.size > 0 ||
           characterModel.magicSchools.size > 0 || characterModel.magicWeaves.size > 0 ||
@@ -1359,7 +1359,7 @@ export default function ArkanaCharacterCreation() {
             <button
               onClick={() => {
                 const confirmed = window.confirm(
-                  'Are you sure you want to reset all your Page 5 choices?\n\n' +
+                  'Are you sure you want to reset all your Page 6 choices?\n\n' +
                   'This will clear:\n' +
                   '• All selected Powers, Perks, and Archetype Powers\n' +
                   '• All Magic Schools and Weaves\n' +
@@ -1385,7 +1385,7 @@ export default function ArkanaCharacterCreation() {
               }}
               className="w-full py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700 transition-colors font-medium"
             >
-              🔄 Reset Page 5 Choices
+              🔄 Reset Page 6 Choices
             </button>
           </div>
         )}

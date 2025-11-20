@@ -13,6 +13,7 @@ interface ShopItemCardProps {
   onToggle: (id: string) => void;
   currentXp: number;
   selectedTotalCost: number;
+  noSlotsAvailable?: boolean; // True when no cybernetic slots are available
 }
 
 export default function ShopItemCard({
@@ -21,6 +22,7 @@ export default function ShopItemCard({
   onToggle,
   currentXp,
   selectedTotalCost,
+  noSlotsAvailable = false,
 }: ShopItemCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -29,7 +31,8 @@ export default function ShopItemCard({
   const canAfford = isSelected ? true : (remainingXp >= item.xpCost);
 
   // Determine if checkbox should be disabled
-  const isDisabled = item.owned || !item.eligible || !canAfford;
+  // Allow deselection (isSelected) even when no slots available
+  const isDisabled = item.owned || !item.eligible || !canAfford || (!isSelected && noSlotsAvailable);
 
   // Determine visual state
   const getCardClasses = () => {
@@ -38,6 +41,9 @@ export default function ShopItemCard({
     }
     if (!item.eligible) {
       return 'bg-gray-800 border-red-500 opacity-60';
+    }
+    if (!isSelected && noSlotsAvailable) {
+      return 'bg-gray-800 border-orange-600 opacity-70';
     }
     if (!canAfford) {
       return 'bg-gray-800 border-yellow-600 opacity-70';
@@ -51,6 +57,7 @@ export default function ShopItemCard({
   const getTooltipText = () => {
     if (item.owned) return 'You already own this item';
     if (!item.eligible) return 'Not eligible for your character';
+    if (!isSelected && noSlotsAvailable) return 'No free slots available - purchase more slots first';
     if (!canAfford) return `Need ${item.xpCost - remainingXp} more XP`;
     return '';
   };
@@ -159,8 +166,15 @@ export default function ShopItemCard({
             </div>
           )}
 
+          {/* Warning message for no slots */}
+          {!item.owned && !isSelected && noSlotsAvailable && (
+            <p className="mt-2 text-xs text-orange-400">
+              🔒 No free slots - purchase slots first
+            </p>
+          )}
+
           {/* Warning message for unaffordable items */}
-          {!item.owned && !canAfford && (
+          {!item.owned && !noSlotsAvailable && !canAfford && (
             <p className="mt-2 text-xs text-yellow-400">
               ⚠ Need {item.xpCost - remainingXp} more XP to afford this item
             </p>

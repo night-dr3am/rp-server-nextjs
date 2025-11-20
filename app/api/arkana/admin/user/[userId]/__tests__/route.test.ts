@@ -706,5 +706,223 @@ describe('GET/PUT /api/arkana/admin/user/[userId]', () => {
       expectSuccess(verifyData);
       expect(verifyData.data.arkanaStats.flaws).toEqual([]);
     });
+
+    it('should update cyberneticsSlots', async () => {
+      const { user: adminUser, token: adminToken } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: adminUser.id,
+          characterName: 'Admin',
+          agentName: 'Admin',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 3,
+          mental: 3,
+          perception: 3,
+          maxHP: 15,
+          arkanaRole: 'admin',
+          registrationCompleted: true
+        }
+      });
+
+      const { user: targetUser } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: targetUser.id,
+          characterName: 'Test User',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Synthral',
+          physical: 2,
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10,
+          cyberneticsSlots: 0,
+          registrationCompleted: true
+        }
+      });
+
+      const updateData = {
+        token: adminToken,
+        cyberneticsSlots: 5
+      };
+
+      const request = createMockPutRequest(
+        `/api/arkana/admin/user/${targetUser.id}`,
+        updateData
+      );
+
+      const params = Promise.resolve({ userId: targetUser.id });
+      const response = await PUT(request, { params });
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.arkanaStats.cyberneticsSlots).toBe(5);
+    });
+
+    it('should update cyberneticsSlots together with cyberneticAugments', async () => {
+      const { user: adminUser, token: adminToken } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: adminUser.id,
+          characterName: 'Admin',
+          agentName: 'Admin',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 3,
+          mental: 3,
+          perception: 3,
+          maxHP: 15,
+          arkanaRole: 'admin',
+          registrationCompleted: true
+        }
+      });
+
+      const { user: targetUser } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: targetUser.id,
+          characterName: 'Cyber User',
+          agentName: 'CyberAgent',
+          race: 'Human',
+          archetype: 'Synthral',
+          physical: 2,
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10,
+          cyberneticsSlots: 2,
+          cyberneticAugments: ['cyber_eye'],
+          registrationCompleted: true
+        }
+      });
+
+      const updateData = {
+        token: adminToken,
+        cyberneticsSlots: 5,
+        cyberneticAugments: ['cyber_eye', 'cyber_arm', 'neural_link']
+      };
+
+      const request = createMockPutRequest(
+        `/api/arkana/admin/user/${targetUser.id}`,
+        updateData
+      );
+
+      const params = Promise.resolve({ userId: targetUser.id });
+      const response = await PUT(request, { params });
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.arkanaStats.cyberneticsSlots).toBe(5);
+      expect(data.data.arkanaStats.cyberneticAugments).toEqual(['cyber_eye', 'cyber_arm', 'neural_link']);
+    });
+
+    it('should return cyberneticsSlots in GET response', async () => {
+      const { user: adminUser, token: adminToken } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: adminUser.id,
+          characterName: 'Admin',
+          agentName: 'Admin',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 3,
+          mental: 3,
+          perception: 3,
+          maxHP: 15,
+          arkanaRole: 'admin',
+          registrationCompleted: true
+        }
+      });
+
+      const { user: targetUser } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: targetUser.id,
+          characterName: 'Slotted User',
+          agentName: 'SlottedAgent',
+          race: 'Human',
+          archetype: 'Synthral',
+          physical: 2,
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10,
+          cyberneticsSlots: 3,
+          cyberneticAugments: ['cyber_eye', 'cyber_arm'],
+          registrationCompleted: true
+        }
+      });
+
+      const request = createMockGetRequest(
+        `/api/arkana/admin/user/${targetUser.id}?token=${adminToken}`
+      );
+
+      const params = Promise.resolve({ userId: targetUser.id });
+      const response = await GET(request, { params });
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.arkanaStats.cyberneticsSlots).toBe(3);
+      expect(data.data.arkanaStats.cyberneticAugments).toEqual(['cyber_eye', 'cyber_arm']);
+    });
+
+    it('should reject cyberneticsSlots exceeding max limit', async () => {
+      const { user: adminUser, token: adminToken } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: adminUser.id,
+          characterName: 'Admin',
+          agentName: 'Admin',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 3,
+          dexterity: 3,
+          mental: 3,
+          perception: 3,
+          maxHP: 15,
+          arkanaRole: 'admin',
+          registrationCompleted: true
+        }
+      });
+
+      const { user: targetUser } = await createTestUser('arkana');
+      await prisma.arkanaStats.create({
+        data: {
+          userId: targetUser.id,
+          characterName: 'Test User',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Synthral',
+          physical: 2,
+          dexterity: 2,
+          mental: 2,
+          perception: 2,
+          maxHP: 10,
+          registrationCompleted: true
+        }
+      });
+
+      const updateData = {
+        token: adminToken,
+        cyberneticsSlots: 100 // Exceeds max of 20
+      };
+
+      const request = createMockPutRequest(
+        `/api/arkana/admin/user/${targetUser.id}`,
+        updateData
+      );
+
+      const params = Promise.resolve({ userId: targetUser.id });
+      const response = await PUT(request, { params });
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(response.status).toBe(400);
+    });
   });
 });

@@ -241,8 +241,9 @@ model ArkanaStats {
   magicWeaves            String[]  @default([]) @map("magic_weaves")
 
   // Cybernetics (JSON for structured data)
-  cybernetics            Json?     // [{type: "Arm", slots: 2, augments: ["Interface"]}]
+  cybernetics            Json?     // Not used currently
   cyberneticAugments     String[]  @default([]) @map("cybernetic_augments")
+  cyberneticsSlots       Int       @default(0) @map("cybernetics_slots")
 
   // Skills System
   skills                 Json?     @default("[]")  // Array of {skill_id: string, skill_name: string, level: number}

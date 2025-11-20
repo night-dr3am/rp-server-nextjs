@@ -770,4 +770,342 @@ describe('POST /api/arkana/shop/purchase', () => {
     // School should NOT be added again
     expect(data.data.addedMagicSchools).toHaveLength(0);
   });
+
+  // Cybernetic Slot Purchase Tests
+  describe('cybernetic slot purchases', () => {
+    it('should successfully purchase cybernetic slots', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 100,
+          cyberneticAugments: [],
+          cyberneticsSlots: 2,
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic_slot',
+            itemId: 'cybernetic_slots',
+            xpCost: 3,
+            quantity: 3
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.updatedXp).toBe(97); // 100 - 3
+      expect(data.data.addedSlots).toBe(3);
+      expect(data.data.totalCost).toBe(3);
+
+      // Verify database update
+      const updatedStats = await prisma.arkanaStats.findUnique({
+        where: { userId: user.id }
+      });
+
+      expect(updatedStats?.xp).toBe(97);
+      expect(updatedStats?.cyberneticsSlots).toBe(5); // 2 + 3
+    });
+
+    it('should purchase slots and cybernetics together', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 200,
+          cyberneticAugments: [],
+          cyberneticsSlots: 1, // Only 1 slot available
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic_slot',
+            itemId: 'cybernetic_slots',
+            xpCost: 2,
+            quantity: 2 // Buy 2 more slots (total will be 3)
+          },
+          {
+            itemType: 'cybernetic',
+            itemId: 'cyber_reflex_boost',
+            xpCost: 2
+          },
+          {
+            itemType: 'cybernetic',
+            itemId: 'cyber_enhanced_vision',
+            xpCost: 2
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      expect(data.data.updatedXp).toBe(194); // 200 - 6
+      expect(data.data.addedSlots).toBe(2);
+      expect(data.data.addedCybernetics).toHaveLength(2);
+      expect(data.data.totalCost).toBe(6);
+
+      // Verify database update
+      const updatedStats = await prisma.arkanaStats.findUnique({
+        where: { userId: user.id }
+      });
+
+      expect(updatedStats?.cyberneticsSlots).toBe(3); // 1 + 2
+      expect(updatedStats?.cyberneticAugments).toHaveLength(2);
+    });
+
+    it('should fail when exceeding max slot limit of 20', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 100,
+          cyberneticAugments: [],
+          cyberneticsSlots: 18, // Already at 18
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic_slot',
+            itemId: 'cybernetic_slots',
+            xpCost: 5,
+            quantity: 5 // Would exceed 20
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(data.error).toContain('Cannot purchase');
+      expect(data.error).toContain('Maximum is 20');
+    });
+
+    it('should fail when cybernetics exceed available slots', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 200,
+          cyberneticAugments: ['cyber_neural_processor'], // 1 already used
+          cyberneticsSlots: 2, // Only 2 slots total
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic',
+            itemId: 'cyber_reflex_boost',
+            xpCost: 2
+          },
+          {
+            itemType: 'cybernetic',
+            itemId: 'cyber_enhanced_vision',
+            xpCost: 2
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(data.error).toContain('Not enough cybernetic slots');
+    });
+
+    it('should fail with invalid slot cost', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 100,
+          cyberneticAugments: [],
+          cyberneticsSlots: 2,
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic_slot',
+            itemId: 'cybernetic_slots',
+            xpCost: 10, // Should be 3 for 3 slots
+            quantity: 3
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectError(data);
+      expect(data.error).toContain('Invalid slot cost');
+    });
+
+    it('should log slot purchase in event', async () => {
+      const { user, token } = await createTestUser('arkana');
+
+      await prisma.arkanaStats.create({
+        data: {
+          userId: user.id,
+          characterName: 'Test Character',
+          agentName: 'TestAgent',
+          race: 'Human',
+          archetype: 'Arcanist',
+          physical: 2,
+          dexterity: 2,
+          mental: 3,
+          perception: 2,
+          maxHP: 10,
+          xp: 100,
+          cyberneticAugments: [],
+          cyberneticsSlots: 2,
+          magicSchools: [],
+          magicWeaves: [],
+          arkanaRole: 'player',
+          registrationCompleted: true
+        }
+      });
+
+      const sessionId = 'test-session-' + Date.now();
+      const request = createMockPostRequest('/api/arkana/shop/purchase', {
+        sl_uuid: user.slUuid,
+        universe: 'arkana',
+        token,
+        sessionId,
+        purchases: [
+          {
+            itemType: 'cybernetic_slot',
+            itemId: 'cybernetic_slots',
+            xpCost: 2,
+            quantity: 2
+          }
+        ]
+      });
+
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+
+      // Check that event was logged with slot info
+      const events = await prisma.event.findMany({
+        where: {
+          userId: user.id,
+          type: 'XP_SHOP_PURCHASE'
+        }
+      });
+
+      expect(events.length).toBe(1);
+      expect(events[0].details).toHaveProperty('addedSlots', 2);
+      expect(events[0].details).toHaveProperty('totalCost', 2);
+    });
+  });
 });

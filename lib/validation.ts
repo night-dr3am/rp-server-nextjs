@@ -956,6 +956,7 @@ export const arkanaAdminUserUpdateSchema = Joi.object({
   // Cybernetics
   cybernetics: Joi.alternatives().try(Joi.array(), Joi.object()).optional(),
   cyberneticAugments: Joi.array().items(Joi.string()).optional(),
+  cyberneticsSlots: Joi.number().integer().min(0).max(20).optional(),
 
   // Economy
   credits: Joi.number().integer().min(0).optional(),
@@ -1097,9 +1098,10 @@ export const arkanaShopPurchaseSchema = Joi.object({
   sessionId: Joi.string().required(),
   purchases: Joi.array().items(
     Joi.object({
-      itemType: Joi.string().valid('cybernetic', 'magic_weave', 'magic_school').required(),
+      itemType: Joi.string().valid('cybernetic', 'magic_weave', 'magic_school', 'cybernetic_slot').required(),
       itemId: Joi.string().required(),
-      xpCost: Joi.number().integer().min(0).required()
+      xpCost: Joi.number().integer().min(0).required(),
+      quantity: Joi.number().integer().min(1).max(20).optional() // For slot purchases
     })
   ).min(1).required()
 });

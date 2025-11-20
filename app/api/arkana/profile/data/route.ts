@@ -161,6 +161,7 @@ export async function GET(request: NextRequest) {
           magicWeaves: user.arkanaStats.magicWeaves,
           cybernetics: user.arkanaStats.cybernetics,
           cyberneticAugments: user.arkanaStats.cyberneticAugments,
+          cyberneticsSlots: user.arkanaStats.cyberneticsSlots,
           skills: user.arkanaStats.skills,
           skillsAllocatedPoints: user.arkanaStats.skillsAllocatedPoints,
           skillsSpentPoints: user.arkanaStats.skillsSpentPoints,

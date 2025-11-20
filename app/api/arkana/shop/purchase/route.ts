@@ -80,6 +80,29 @@ export async function POST(request: NextRequest) {
       // Validate all purchases before processing
       const totalCost = purchases.reduce((sum: number, purchase: { itemType: string; itemId: string; xpCost: number }) => sum + purchase.xpCost, 0);
 
+      // Calculate slots being purchased
+      const slotPurchases = purchases.filter((p: { itemType: string; quantity?: number }) => p.itemType === 'cybernetic_slot');
+      const totalSlotsToPurchase = slotPurchases.reduce((sum: number, p: { quantity?: number }) => sum + (p.quantity || 1), 0);
+
+      // Count cybernetics being purchased
+      const cyberneticsPurchased = purchases.filter((p: { itemType: string }) => p.itemType === 'cybernetic').length;
+
+      // Validate slot limits
+      const currentSlots = arkanaStats.cyberneticsSlots || 0;
+      const usedSlots = arkanaStats.cyberneticAugments.length;
+      const newTotalSlots = currentSlots + totalSlotsToPurchase;
+      const newUsedSlots = usedSlots + cyberneticsPurchased;
+
+      if (newTotalSlots > 20) {
+        throw new Error(`Cannot purchase ${totalSlotsToPurchase} slots. Maximum is 20 slots total. You currently have ${currentSlots}.`);
+      }
+
+      // Validate cybernetics don't exceed available slots
+      if (newUsedSlots > newTotalSlots) {
+        const slotsNeeded = newUsedSlots - newTotalSlots;
+        throw new Error(`Not enough cybernetic slots. You need ${slotsNeeded} more slot(s) to purchase these cybernetics.`);
+      }
+
       // Check XP balance
       if (arkanaStats.xp < totalCost) {
         throw new Error(
@@ -93,6 +116,20 @@ export async function POST(request: NextRequest) {
       const schoolsBeingPurchased: string[] = [];
 
       for (const purchase of purchases) {
+        // Skip validation for slot purchases - they're validated above
+        if (purchase.itemType === 'cybernetic_slot') {
+          // Validate slot cost (1 XP per slot)
+          const expectedCost = (purchase.quantity || 1) * 1;
+          if (purchase.xpCost !== expectedCost) {
+            throw new Error(`Invalid slot cost. Expected ${expectedCost} XP for ${purchase.quantity || 1} slot(s).`);
+          }
+          validatedPurchases.push({
+            ...purchase,
+            actualCost: purchase.xpCost
+          });
+          continue;
+        }
+
         const validation = validatePurchaseItem(
           purchase.itemType,
           purchase.itemId,
@@ -151,20 +188,27 @@ export async function POST(request: NextRequest) {
       }
 
       // Update arkana stats with new items and reduced XP
+      const updateData: Record<string, unknown> = {
+        xp: { decrement: totalCost },
+        cyberneticAugments: {
+          push: newCybernetics
+        },
+        magicWeaves: {
+          push: newMagicWeaves
+        },
+        magicSchools: {
+          push: newMagicSchools
+        }
+      };
+
+      // Add slot increment if slots were purchased
+      if (totalSlotsToPurchase > 0) {
+        updateData.cyberneticsSlots = { increment: totalSlotsToPurchase };
+      }
+
       const updatedArkanaStats = await tx.arkanaStats.update({
         where: { userId: user.id },
-        data: {
-          xp: { decrement: totalCost },
-          cyberneticAugments: {
-            push: newCybernetics
-          },
-          magicWeaves: {
-            push: newMagicWeaves
-          },
-          magicSchools: {
-            push: newMagicSchools
-          }
-        }
+        data: updateData
       });
 
       // Log the purchase event
@@ -173,17 +217,19 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           type: 'XP_SHOP_PURCHASE',
           details: {
-            purchases: purchases.map((p: { itemType: string; itemId: string; xpCost: number }) => ({
+            purchases: purchases.map((p: { itemType: string; itemId: string; xpCost: number; quantity?: number }) => ({
               itemType: p.itemType,
               itemId: p.itemId,
-              xpCost: p.xpCost
+              xpCost: p.xpCost,
+              quantity: p.quantity
             })),
             totalCost,
             xpBefore: arkanaStats.xp,
             xpAfter: updatedArkanaStats.xp,
             addedCybernetics: newCybernetics,
             addedMagicWeaves: newMagicWeaves,
-            addedMagicSchools: newMagicSchools
+            addedMagicSchools: newMagicSchools,
+            addedSlots: totalSlotsToPurchase
           }
         }
       });
@@ -193,6 +239,7 @@ export async function POST(request: NextRequest) {
         addedCybernetics: newCybernetics,
         addedMagicWeaves: newMagicWeaves,
         addedMagicSchools: newMagicSchools,
+        addedSlots: totalSlotsToPurchase,
         totalCost
       };
     });

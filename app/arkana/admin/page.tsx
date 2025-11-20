@@ -91,6 +91,7 @@ interface EditDataForm {
   magicSchools: Set<string>;
   magicWeaves: Set<string>;
   cyberneticAugments: Set<string>;
+  cyberneticsSlots: number;
   credits: number;
   chips: number;
   xp: number;
@@ -127,6 +128,7 @@ interface ArkanaStatsData {
   magicWeaves: string[];
   cybernetics: unknown;
   cyberneticAugments: string[];
+  cyberneticsSlots: number;
   credits: number;
   chips: number;
   xp: number;
@@ -466,6 +468,7 @@ function AdminDashboardContent() {
           magicWeaves: new Set(result.data.arkanaStats.magicWeaves || []),
           // Cybernetics
           cyberneticAugments: new Set(result.data.arkanaStats.cyberneticAugments || []),
+          cyberneticsSlots: result.data.arkanaStats.cyberneticsSlots || 0,
           // Economy
           credits: result.data.arkanaStats.credits,
           chips: result.data.arkanaStats.chips,
@@ -515,7 +518,8 @@ function AdminDashboardContent() {
         perks: Array.from(editData.perks || []),
         magicSchools: Array.from(editData.magicSchools || []),
         magicWeaves: Array.from(editData.magicWeaves || []),
-        cyberneticAugments: Array.from(editData.cyberneticAugments || [])
+        cyberneticAugments: Array.from(editData.cyberneticAugments || []),
+        cyberneticsSlots: editData.cyberneticsSlots || 0
       };
 
       // DEV: Log what we're sending to API
@@ -1023,9 +1027,52 @@ function AdminDashboardContent() {
           {currentTab === 'cybernetics' && (
             <div className="space-y-4">
               <h4 className="text-md font-bold text-cyan-300">Cybernetics</h4>
-              <p className="text-cyan-300 text-sm mb-3">
-                Select cybernetic augmentations for this character. Admins can freely add/remove without slot restrictions.
-              </p>
+
+              {/* Slot Management */}
+              <div className="bg-gray-800 border border-cyan-500 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-cyan-300 font-semibold">Cybernetic Slots</span>
+                    <p className="text-gray-400 text-sm">Adjust available slots for augmentations</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => setEditData(prev => ({ ...prev, cyberneticsSlots: Math.max(0, (prev.cyberneticsSlots || 0) - 1) }))}
+                      className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="text-xl font-bold text-cyan-300 w-12 text-center">
+                      {editData.cyberneticsSlots || 0}
+                    </span>
+                    <button
+                      onClick={() => setEditData(prev => ({ ...prev, cyberneticsSlots: (prev.cyberneticsSlots || 0) + 1 }))}
+                      className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Usage Display */}
+                <div className="mt-3 pt-3 border-t border-gray-600">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">Used Slots:</span>
+                    <span className={`font-bold ${
+                      (editData.cyberneticAugments?.size || 0) > (editData.cyberneticsSlots || 0)
+                        ? 'text-red-400'
+                        : 'text-cyan-300'
+                    }`}>
+                      {editData.cyberneticAugments?.size || 0} / {editData.cyberneticsSlots || 0}
+                    </span>
+                  </div>
+                  {(editData.cyberneticAugments?.size || 0) > (editData.cyberneticsSlots || 0) && (
+                    <p className="text-red-400 text-sm mt-2">
+                      ⚠️ Over slot limit! Character has more augments than available slots.
+                    </p>
+                  )}
+                </div>
+              </div>
 
               {/* Cybernetic Modifications */}
               <div className="space-y-3">

@@ -4,7 +4,8 @@ interface ShopItem {
   id: string;
   name: string;
   xpCost: number;
-  itemType: 'cybernetic' | 'magic_weave' | 'magic_school';
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot';
+  quantity?: number;
 }
 
 interface PurchaseConfirmDialogProps {
@@ -30,6 +31,7 @@ export default function PurchaseConfirmDialog({
   const canAfford = remainingXp >= 0;
 
   // Group items by type for display
+  const cyberneticSlots = selectedItems.filter(item => item.itemType === 'cybernetic_slot');
   const cybernetics = selectedItems.filter(item => item.itemType === 'cybernetic');
   const magicSchools = selectedItems.filter(item => item.itemType === 'magic_school');
   const magicWeaves = selectedItems.filter(item => item.itemType === 'magic_weave');
@@ -47,6 +49,26 @@ export default function PurchaseConfirmDialog({
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {/* Cybernetic Slots Section */}
+          {cyberneticSlots.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-orange-400 mb-3">
+                Cybernetic Slots
+              </h3>
+              <div className="space-y-2">
+                {cyberneticSlots.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-gray-800 rounded border border-orange-700"
+                  >
+                    <span className="text-gray-200">{item.name}</span>
+                    <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Cybernetics Section */}
           {cybernetics.length > 0 && (
             <div>

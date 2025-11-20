@@ -71,6 +71,7 @@ interface ArkanaStats {
   magicWeaves: string[];
   cybernetics: unknown;
   cyberneticAugments: string[];
+  cyberneticsSlots: number;
   credits: number;
   chips: number;
   xp: number;
@@ -159,6 +160,11 @@ export default function ArkanaProfilePage() {
     cybernetics: Record<string, ShopCybernetic[]>;
     magicSchools: ShopMagicSchool[];
     currentXp: number;
+    cyberneticsSlots: {
+      current: number;
+      used: number;
+      costPerSlot: number;
+    };
     characterInfo: {
       race: string;
       archetype: string;
@@ -172,6 +178,7 @@ export default function ArkanaProfilePage() {
   const [selectedCybernetics, setSelectedCybernetics] = useState<Set<string>>(new Set());
   const [selectedWeaves, setSelectedWeaves] = useState<Set<string>>(new Set());
   const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set());
+  const [slotsToPurchase, setSlotsToPurchase] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [purchaseProcessing, setPurchaseProcessing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
@@ -542,7 +549,18 @@ export default function ArkanaProfilePage() {
   const getSelectedItemsWithCosts = () => {
     if (!shopData) return { items: [], totalCost: 0 };
 
-    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' | 'magic_school' }> = [];
+    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot'; quantity?: number }> = [];
+
+    // Add cybernetic slots if purchasing any
+    if (slotsToPurchase > 0) {
+      items.push({
+        id: 'cybernetic_slots',
+        name: `Cybernetic Slot${slotsToPurchase > 1 ? 's' : ''} (×${slotsToPurchase})`,
+        xpCost: slotsToPurchase * shopData.cyberneticsSlots.costPerSlot,
+        itemType: 'cybernetic_slot',
+        quantity: slotsToPurchase
+      });
+    }
 
     // Add selected cybernetics
     Object.values(shopData.cybernetics).forEach(section => {
@@ -601,7 +619,8 @@ export default function ArkanaProfilePage() {
       const purchases = items.map(item => ({
         itemType: item.itemType,
         itemId: item.id,
-        xpCost: item.xpCost
+        xpCost: item.xpCost,
+        ...(item.quantity && { quantity: item.quantity })
       }));
 
       const response = await fetch('/api/arkana/shop/purchase', {
@@ -619,7 +638,7 @@ export default function ArkanaProfilePage() {
       const result = await response.json();
 
       if (result.success) {
-        // Update profile data with new XP
+        // Update profile data with new XP and slots
         if (profileData) {
           setProfileData({
             ...profileData,
@@ -630,6 +649,7 @@ export default function ArkanaProfilePage() {
                 ...profileData.arkanaStats.cyberneticAugments,
                 ...result.data.addedCybernetics
               ],
+              cyberneticsSlots: profileData.arkanaStats.cyberneticsSlots + (result.data.addedSlots || 0),
               magicWeaves: [
                 ...profileData.arkanaStats.magicWeaves,
                 ...result.data.addedMagicWeaves
@@ -645,6 +665,7 @@ export default function ArkanaProfilePage() {
         // Clear selections
         setSelectedCybernetics(new Set());
         setSelectedWeaves(new Set());
+        setSlotsToPurchase(0);
 
         // Refresh shop data
         await fetchShopData();
@@ -1063,9 +1084,12 @@ export default function ArkanaProfilePage() {
           )}
 
           {/* Cybernetics */}
-          {(arkanaStats.cybernetics || arkanaStats.cyberneticAugments.length > 0) && (
+          {(arkanaStats.cybernetics || arkanaStats.cyberneticAugments.length > 0 || arkanaStats.cyberneticsSlots > 0) && (
             <div className="bg-gray-900 border border-orange-500 rounded-lg shadow-lg shadow-orange-500/20 p-6">
-              <h3 className="text-xl font-bold text-orange-400 mb-4">Cybernetics</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-orange-400">Cybernetics</h3>
+                <span className="text-sm text-orange-300">Slots: {arkanaStats.cyberneticsSlots || 0}</span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {arkanaStats.cyberneticAugments.map((cyberId, idx) => (
                   <span key={idx} className="px-3 py-1 bg-orange-900 text-orange-300 rounded text-sm">{getCyberneticName(cyberId)}</span>
@@ -1257,29 +1281,93 @@ export default function ArkanaProfilePage() {
                 />
 
                 {/* Cybernetics Category */}
-                {shopCategory === 'cybernetics' && (
-                  <div className="space-y-6">
-                    {Object.entries(shopData.cybernetics).map(([section, items]) => (
-                      <div key={section}>
-                        <h3 className="text-xl font-bold text-cyan-400 mb-4 pb-2 border-b border-cyan-600">
-                          {section}
-                        </h3>
-                        <div className="space-y-3">
-                          {items.map((cyber) => (
-                            <ShopItemCard
-                              key={cyber.id}
-                              item={cyber}
-                              isSelected={selectedCybernetics.has(cyber.id)}
-                              onToggle={handleCyberneticToggle}
-                              currentXp={shopData.currentXp}
-                              selectedTotalCost={getSelectedItemsWithCosts().totalCost}
-                            />
-                          ))}
+                {shopCategory === 'cybernetics' && (() => {
+                  // Calculate slot availability for use throughout cybernetics section
+                  const totalSlots = shopData.cyberneticsSlots.current + slotsToPurchase;
+                  const usedSlots = shopData.cyberneticsSlots.used + selectedCybernetics.size;
+                  const availableSlots = totalSlots - usedSlots;
+                  const { totalCost } = getSelectedItemsWithCosts();
+                  const remainingXp = shopData.currentXp - totalCost;
+                  const canAddMoreSlots = remainingXp >= shopData.cyberneticsSlots.costPerSlot && totalSlots < 20;
+
+                  return (
+                    <div className="space-y-6">
+                      {/* Slot Management Widget */}
+                      <div className="bg-gray-800 border border-orange-500 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-lg font-semibold text-orange-400">Cybernetic Slots</h4>
+                            <p className="text-sm text-gray-400">
+                              Used: {usedSlots} / {totalSlots}
+                              {slotsToPurchase > 0 && (
+                                <span className="text-green-400 ml-1">(+{slotsToPurchase} in cart)</span>
+                              )}
+                              {availableSlots > 0 && (
+                                <span className="text-cyan-400 ml-2">• {availableSlots} available</span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => setSlotsToPurchase(Math.max(0, slotsToPurchase - 1))}
+                              disabled={slotsToPurchase === 0}
+                              className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              -
+                            </button>
+                            <span className="text-xl font-bold text-orange-400 w-8 text-center">
+                              {slotsToPurchase}
+                            </span>
+                            <button
+                              onClick={() => setSlotsToPurchase(Math.min(20 - shopData.cyberneticsSlots.current, slotsToPurchase + 1))}
+                              disabled={!canAddMoreSlots}
+                              className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={!canAddMoreSlots ? (totalSlots >= 20 ? 'Maximum 20 slots' : `Need ${shopData.cyberneticsSlots.costPerSlot} XP`) : ''}
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
+                        <div className="mt-2 flex items-center justify-between text-sm">
+                          {slotsToPurchase > 0 && (
+                            <span className="text-purple-400">
+                              Cost: {slotsToPurchase * shopData.cyberneticsSlots.costPerSlot} XP
+                            </span>
+                          )}
+                          <span className={`${remainingXp < 0 ? 'text-red-400' : 'text-gray-400'} ml-auto`}>
+                            Remaining XP: {remainingXp}
+                          </span>
+                        </div>
+                        {availableSlots <= 0 && (
+                          <div className="mt-2 text-sm text-orange-400">
+                            🔒 No free slots available. Add more slots to unlock cybernetics selection.
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      {Object.entries(shopData.cybernetics).map(([section, items]) => (
+                        <div key={section}>
+                          <h3 className="text-xl font-bold text-cyan-400 mb-4 pb-2 border-b border-cyan-600">
+                            {section}
+                          </h3>
+                          <div className="space-y-3">
+                            {items.map((cyber) => (
+                              <ShopItemCard
+                                key={cyber.id}
+                                item={cyber}
+                                isSelected={selectedCybernetics.has(cyber.id)}
+                                onToggle={handleCyberneticToggle}
+                                currentXp={shopData.currentXp}
+                                selectedTotalCost={totalCost}
+                                noSlotsAvailable={availableSlots <= 0}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Magic Category */}
                 {shopCategory === 'magic' && (
@@ -1308,7 +1396,7 @@ export default function ArkanaProfilePage() {
                 )}
 
                 {/* Purchase Button (Fixed Bottom Right) */}
-                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0 || selectedSchools.size > 0) && (
+                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0 || selectedSchools.size > 0 || slotsToPurchase > 0) && (
                   <div className="fixed bottom-6 right-6 z-40">
                     <button
                       onClick={() => setShowConfirmDialog(true)}

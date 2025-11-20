@@ -125,6 +125,11 @@ export async function GET(request: NextRequest) {
         cybernetics: groupedCybernetics,
         magicSchools: availableMagic,
         currentXp: currentXp,
+        cyberneticsSlots: {
+          current: arkanaStats.cyberneticsSlots || 0,
+          used: ownedCyberneticIds.length,
+          costPerSlot: 1
+        },
         characterInfo: {
           race: race,
           archetype: archetype,
