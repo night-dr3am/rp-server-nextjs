@@ -171,6 +171,9 @@ export async function POST(request: NextRequest) {
       targetActiveEffects
     );
 
+    // Prepend attacker and target names to message
+    attackResult.message = `${attacker.goreanStats.characterName} → ${target.goreanStats.characterName}: ${attackResult.message}`;
+
     // Calculate new target health
     const newTargetHealth = Math.max(0, target.goreanStats.healthCurrent - attackResult.damage);
 
