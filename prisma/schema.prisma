@@ -191,6 +191,18 @@ model ArkanaData {
   @@map("arkana_data")
 }
 
+// Gorean Data Management - Dynamic content system for Gor universe
+model GoreanData {
+  id          String   @id                         // Globally unique ID (e.g., "buff_strength_3")
+  type        String                               // Type: "effect", "ability"
+  jsonData    Json     @map("json_data")          // Complete object without id field
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([type])                                 // Index for efficient type queries
+  @@map("gorean_data")
+}
+
 // Arkana character creation data
 model ArkanaStats {
   id                     Int       @id @default(autoincrement())

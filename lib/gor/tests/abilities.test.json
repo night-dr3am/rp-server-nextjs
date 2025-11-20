@@ -1,0 +1,109 @@
+[
+  {
+    "id": "tactical_command",
+    "orderNumber": 1,
+    "name": "Tactical Command",
+    "desc": "Shout encouraging commands that make your allies stronger and more confident in battle.",
+    "category": "social",
+    "cost": 2,
+    "range": 10,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_strength_area_3", "buff_all_stats_area_1"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "combat_expertise",
+    "orderNumber": 2,
+    "name": "Combat Expertise",
+    "desc": "Focus your mind and body to fight better. You become much stronger and faster.",
+    "category": "combat",
+    "cost": 2,
+    "range": 0,
+    "targetType": "self",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_strength_5", "buff_agility_5"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "battle_cry",
+    "orderNumber": 3,
+    "name": "Battle Cry",
+    "desc": "Shout a fierce battle cry at your enemy to weaken their strength and confidence.",
+    "category": "combat",
+    "cost": 2,
+    "range": 10,
+    "targetType": "single",
+    "effects": {
+      "ability": ["check_charisma_vs_charisma", "debuff_strength_3", "debuff_all_stats_1"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "second_wind",
+    "orderNumber": 4,
+    "name": "Second Wind",
+    "desc": "Catch your breath and recover. You regain some health.",
+    "category": "survival",
+    "cost": 4,
+    "cooldown": 1800,
+    "range": 0,
+    "targetType": "self",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "heal_self_percentage_maxhp_10"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "capture_throw",
+    "orderNumber": 5,
+    "name": "Capture Throw",
+    "desc": "Tackle and pin your enemy to the ground, leaving them stunned.",
+    "category": "special",
+    "cost": 3,
+    "cooldown": 1800,
+    "range": 0,
+    "targetType": "single",
+    "effects": {
+      "ability": ["check_strength_vs_agility", "control_stun_1", "damage_physical_2"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like", "hooved", "avian", "reptilian", "aquatic", "small"],
+      "minStat": {
+        "stat": "Strength",
+        "value": 3
+      }
+    }
+  }
+]

@@ -607,6 +607,17 @@ export const goreanCharacterCreateSchema = Joi.object({
   return value;
 }, 'Gorean stat, skill, and ability point validation');
 
+// Gorean combat attack schema
+export const gorCombatAttackSchema = Joi.object({
+  attacker_uuid: uuidSchema,
+  target_uuid: uuidSchema,
+  attack_type: Joi.string().valid('melee_unarmed', 'melee_weapon', 'ranged').required(),
+  weapon_type: Joi.string().valid('unarmed', 'light_weapon', 'medium_weapon', 'heavy_weapon', 'bow', 'crossbow').optional().default('unarmed'),
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({
   npcId: Joi.string().min(1).max(255).required(),
