@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
       data: {
         hit: attackResult.hit,
         damage: attackResult.damage,
-        message: attackResult.message,
+        message: encodeForLSL(attackResult.message),
         lslMessage: encodeForLSL(lslMessage),
         // Top-level contested roll fields for easy access
         roll: attackResult.roll,

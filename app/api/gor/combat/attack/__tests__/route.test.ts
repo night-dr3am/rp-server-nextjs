@@ -672,18 +672,21 @@ describe('POST /api/gor/combat/attack', () => {
 
       expectSuccess(data);
 
+      // Decode URL-encoded message for assertion checks
+      const decodedMessage = decodeURIComponent(data.data.message);
+
       // Message should contain both character names
-      expect(data.data.message).toContain('Tarl Cabot');
-      expect(data.data.message).toContain('Marcus');
+      expect(decodedMessage).toContain('Tarl Cabot');
+      expect(decodedMessage).toContain('Marcus');
 
       // Message should contain dice roll indicators
-      expect(data.data.message).toContain('d20(');
+      expect(decodedMessage).toContain('d20(');
 
       // Message should contain 'vs' separator
-      expect(data.data.message).toContain(' vs ');
+      expect(decodedMessage).toContain(' vs ');
 
       // Message should contain result indicator
-      expect(data.data.message).toMatch(/→ (Hit!|Miss!|Critical)/);
+      expect(decodedMessage).toMatch(/→ (Hit!|Miss!|Critical)/);
     });
 
     it('should show damage breakdown when hit succeeds', async () => {
@@ -710,9 +713,13 @@ describe('POST /api/gor/combat/attack', () => {
       expectSuccess(data);
 
       if (data.data.hit) {
+        // Decode URL-encoded message for assertion checks
+        const decodedMessage = decodeURIComponent(data.data.message);
+
         // Message should contain Damage: breakdown
-        expect(data.data.message).toContain('Damage:');
-        expect(data.data.message).toMatch(/\d+\+\d+\+\d+=\d+/); // Pattern like 2+6+2=10
+        expect(decodedMessage).toContain('Damage:');
+        // Pattern like 2+6+2=10 (normal) or (2+6+2)×2=20 (critical)
+        expect(decodedMessage).toMatch(/(\(?\d+\+\d+\+\d+\)?)(×2)?=\d+/);
       }
     });
   });
