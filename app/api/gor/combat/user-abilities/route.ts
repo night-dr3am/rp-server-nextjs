@@ -71,7 +71,8 @@ async function handleRequest(body: Record<string, unknown>) {
     return NextResponse.json({
       success: true,
       data: {
-        abilities: []
+        abilities: [],
+        count: 0
       }
     });
   }
@@ -114,7 +115,8 @@ async function handleRequest(body: Record<string, unknown>) {
   return NextResponse.json({
     success: true,
     data: {
-      abilities
+      abilities,
+      count: abilities.length
     }
   });
 }

@@ -224,6 +224,74 @@ describe('GET/POST /api/gor/combat/user-abilities', () => {
       expect(data.data.abilities[0].id).toBe('combat_expertise');
     });
 
+    it('should return 0 abilities when ability_id has wrong case', async () => {
+      const { uuid } = await createTestCharacter({
+        abilities: [
+          { ability_id: 'Combat_Expertise', ability_name: 'Combat Expertise' },
+          { ability_id: 'Second_Wind', ability_name: 'Second Wind' }
+        ]
+      });
+
+      const body = createRequestBody({
+        player_uuid: uuid,
+        type: 'ability'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/user-abilities', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Abilities won't match because IDs are case-sensitive
+      expect(data.data.abilities.length).toBe(0);
+    });
+
+    it('should return 0 abilities when ability_id uses spaces instead of underscores', async () => {
+      const { uuid } = await createTestCharacter({
+        abilities: [
+          { ability_id: 'combat expertise', ability_name: 'Combat Expertise' },
+          { ability_id: 'second wind', ability_name: 'Second Wind' }
+        ]
+      });
+
+      const body = createRequestBody({
+        player_uuid: uuid,
+        type: 'ability'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/user-abilities', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // Abilities won't match because IDs use spaces instead of underscores
+      expect(data.data.abilities.length).toBe(0);
+    });
+
+    it('should return abilities when data includes extra "uses" field', async () => {
+      // Test with exact production data format that includes "uses" field
+      const { uuid } = await createTestCharacter({
+        abilities: [
+          { uses: 0, ability_id: 'combat_expertise', ability_name: 'Combat Expertise' },
+          { uses: 0, ability_id: 'capture_throw', ability_name: 'Capture Throw' },
+          { uses: 0, ability_id: 'tactical_command', ability_name: 'Tactical Command' }
+        ]
+      });
+
+      const body = createRequestBody({
+        player_uuid: uuid,
+        type: 'ability'
+      });
+
+      const request = createMockPostRequest('/api/gor/combat/user-abilities', body);
+      const response = await POST(request);
+      const data = await parseJsonResponse(response);
+
+      expectSuccess(data);
+      // All 3 abilities have abilityType: ['ability'] so should be returned
+      expect(data.data.abilities.length).toBe(3);
+    });
+
     it('should work with GET request using query params', async () => {
       const { uuid } = await createTestCharacter({
         abilities: [
