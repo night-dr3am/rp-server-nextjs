@@ -13,6 +13,7 @@ import {
   recalculateLiveStats,
   processEffectsTurn,
   getDetailedStatCalculation,
+  formatGorEffectsForLSL,
   type GorLiveStats
 } from '@/lib/gor/effectsUtils';
 import type {
@@ -614,7 +615,8 @@ export async function POST(request: NextRequest) {
           name: encodeForLSL(caster.goreanStats.characterName),
           health: casterNewHealth,
           maxHealth: caster.goreanStats.healthMax,
-          healingApplied: casterHealingFromTurn
+          healingApplied: casterHealingFromTurn,
+          effectsDisplay: encodeForLSL(formatGorEffectsForLSL(casterData.newActiveEffects))
         },
         message: encodeForLSL(message)
       }

@@ -448,3 +448,60 @@ export async function clearSceneEffects(
     liveStats
   };
 }
+
+/**
+ * Format active effects for LSL display
+ * Returns a compact string for floating text display
+ * Format: "✨ Str +5(3t), Agi +5(3t)" or "💤 Stunned(2t)"
+ */
+export function formatGorEffectsForLSL(activeEffects: ActiveEffect[]): string {
+  if (!activeEffects || activeEffects.length === 0) {
+    return '';
+  }
+
+  const statEffects: string[] = [];
+  const controlEffects: string[] = [];
+
+  // Stat name abbreviations for compact display
+  const statAbbrev: Record<string, string> = {
+    'Strength': 'Str',
+    'Agility': 'Agi',
+    'Intellect': 'Int',
+    'Perception': 'Per',
+    'Charisma': 'Cha'
+  };
+
+  for (const effect of activeEffects) {
+    // Format duration
+    let durationStr = '';
+    if (effect.sceneEffect || effect.duration === 'scene') {
+      durationStr = 'scene';
+    } else if (effect.turnsRemaining) {
+      durationStr = `${effect.turnsRemaining}t`;
+    }
+
+    // Handle stat modifiers
+    if (effect.category === 'stat_modifier' && effect.stat && effect.modifier) {
+      const statName = effect.stat === 'all' ? 'All' : (statAbbrev[effect.stat] || effect.stat);
+      const sign = effect.modifier > 0 ? '+' : '';
+      statEffects.push(`${statName} ${sign}${effect.modifier}(${durationStr})`);
+    }
+    // Handle control effects
+    else if (effect.category === 'control' && effect.controlType) {
+      const controlName = effect.controlType.charAt(0).toUpperCase() + effect.controlType.slice(1);
+      controlEffects.push(`${controlName}(${durationStr})`);
+    }
+  }
+
+  const parts: string[] = [];
+
+  if (statEffects.length > 0) {
+    parts.push('✨ ' + statEffects.join(', '));
+  }
+
+  if (controlEffects.length > 0) {
+    parts.push('💤 ' + controlEffects.join(', '));
+  }
+
+  return parts.join(' | ');
+}

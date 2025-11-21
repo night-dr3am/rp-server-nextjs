@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { goreanUpdateStatsSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { formatGorEffectsForLSL } from '@/lib/gor/effectsUtils';
+import type { ActiveEffect } from '@/lib/gor/types';
 
 // POST /api/gor/stats/update - Update Gorean character statistics
 export async function POST(request: NextRequest) {
@@ -215,6 +217,7 @@ export async function POST(request: NextRequest) {
           // Active Effects & Live Stats
           activeEffects: updatedStats.activeEffects,
           liveStats: updatedStats.liveStats,
+          effectsDisplay: encodeForLSL(formatGorEffectsForLSL((updatedStats.activeEffects as unknown as ActiveEffect[]) || [])),
 
           // Point allocations
           skillsAllocatedPoints: updatedStats.skillsAllocatedPoints,

@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { checkUserSchema } from '@/lib/validation';
 import { validateSignature } from '@/lib/signature';
 import { encodeForLSL } from '@/lib/stringUtils';
+import { formatGorEffectsForLSL } from '@/lib/gor/effectsUtils';
+import type { ActiveEffect } from '@/lib/gor/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -144,6 +146,7 @@ export async function GET(request: NextRequest) {
           // Active Effects & Live Stats
           activeEffects: user.goreanStats.activeEffects,
           liveStats: user.goreanStats.liveStats,
+          effectsDisplay: encodeForLSL(formatGorEffectsForLSL((user.goreanStats.activeEffects as unknown as ActiveEffect[]) || [])),
 
           // skills: EXCLUDED (JSON array too large for LSL)
           // abilities: EXCLUDED (JSON array too large for LSL)
@@ -310,6 +313,7 @@ export async function POST(request: NextRequest) {
           // Active Effects & Live Stats
           activeEffects: user.goreanStats.activeEffects,
           liveStats: user.goreanStats.liveStats,
+          effectsDisplay: encodeForLSL(formatGorEffectsForLSL((user.goreanStats.activeEffects as unknown as ActiveEffect[]) || [])),
 
           // skills: EXCLUDED (JSON array too large for LSL)
           // abilities: EXCLUDED (JSON array too large for LSL)

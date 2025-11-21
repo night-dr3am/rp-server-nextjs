@@ -641,7 +641,7 @@ export const gorUseAbilitySchema = Joi.object({
   caster_uuid: uuidSchema,
   ability_id: Joi.string().min(1).max(255).optional(),
   ability_name: Joi.string().min(1).max(255).optional(),
-  target_uuid: Joi.string().guid({ version: 'uuidv4' }).optional(),  // Optional for self/area
+  target_uuid: Joi.string().guid({ version: 'uuidv4' }).allow('').optional(),  // Optional for self/area, allow empty for self-targeting
   nearby_uuids: Joi.array().items(Joi.string().guid({ version: 'uuidv4' })).optional(),  // For area effects
   universe: Joi.string().lowercase().valid('gor').required(),
   timestamp: timestampSchema,
