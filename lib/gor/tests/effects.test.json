@@ -226,6 +226,15 @@
     "duration": "turns:2"
   },
   {
+    "id": "control_sleep",
+    "orderNumber": 26,
+    "category": "control",
+    "controlType": "sleep",
+    "target": "enemy",
+    "duration": "turns:2",
+    "description": "Asleep"
+  },
+  {
     "id": "heal_over_time_2",
     "orderNumber": 26,
     "category": "heal",

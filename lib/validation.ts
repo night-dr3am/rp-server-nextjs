@@ -618,6 +618,36 @@ export const gorCombatAttackSchema = Joi.object({
   signature: signatureSchema
 });
 
+// Gorean ability system schemas
+export const gorUserAbilitiesSchema = Joi.object({
+  player_uuid: uuidSchema,
+  type: Joi.string().valid('attack', 'ability').optional(),  // Filter by ability type
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const gorAbilityInfoSchema = Joi.object({
+  player_uuid: uuidSchema,
+  ability_id: Joi.string().min(1).max(255).optional(),
+  ability_name: Joi.string().min(1).max(255).optional(),
+  use_mode: Joi.string().valid('attack', 'ability', 'all').optional().default('all'),
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+}).or('ability_id', 'ability_name');  // Require at least one
+
+export const gorUseAbilitySchema = Joi.object({
+  caster_uuid: uuidSchema,
+  ability_id: Joi.string().min(1).max(255).optional(),
+  ability_name: Joi.string().min(1).max(255).optional(),
+  target_uuid: Joi.string().guid({ version: 'uuidv4' }).optional(),  // Optional for self/area
+  nearby_uuids: Joi.array().items(Joi.string().guid({ version: 'uuidv4' })).optional(),  // For area effects
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+}).or('ability_id', 'ability_name');  // Require at least one
+
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({
   npcId: Joi.string().min(1).max(255).required(),
