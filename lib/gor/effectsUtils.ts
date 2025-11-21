@@ -432,7 +432,8 @@ export function hasControlEffect(
 }
 
 /**
- * Remove all scene-long effects (for scene end)
+ * Remove all temporary effects (for scene end)
+ * Clears both turn-based and scene-long effects, keeps only permanent effects
  */
 export async function clearSceneEffects(
   activeEffects: ActiveEffect[]
@@ -440,7 +441,8 @@ export async function clearSceneEffects(
   activeEffects: ActiveEffect[];
   liveStats: GorLiveStats;
 }> {
-  const remainingEffects = activeEffects.filter(e => e.duration !== 'scene');
+  // Keep only permanent effects (if any exist in the future)
+  const remainingEffects = activeEffects.filter(e => e.duration === 'permanent');
   const liveStats = await recalculateLiveStats(remainingEffects);
 
   return {

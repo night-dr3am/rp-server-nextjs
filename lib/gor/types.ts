@@ -505,7 +505,7 @@ export type EffectCategory = 'check' | 'damage' | 'heal' | 'stat_modifier' | 'co
 export type DamageType = 'physical' | 'mental';
 export type ControlType = 'stun' | 'fear' | 'daze' | 'charm' | 'sleep';
 export type EffectTarget = 'self' | 'enemy' | 'ally' | 'area' | 'all_enemies' | 'all_allies' | 'all_enemies_and_self' | 'all_allies_and_self';
-export type EffectDuration = 'immediate' | 'scene' | `turns:${number}`;
+export type EffectDuration = 'immediate' | 'scene' | 'permanent' | `turns:${number}`;
 export type ModifierType = 'roll_bonus';  // Simplified: only linear stacking for Gor
 
 export interface EffectData {

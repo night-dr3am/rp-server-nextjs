@@ -648,6 +648,21 @@ export const gorUseAbilitySchema = Joi.object({
   signature: signatureSchema
 }).or('ability_id', 'ability_name');  // Require at least one
 
+// Gorean combat turn management schemas
+export const gorEndTurnSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const gorEndSceneSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({
   npcId: Joi.string().min(1).max(255).required(),
