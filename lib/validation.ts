@@ -1134,6 +1134,42 @@ export const arkanaSearchUsersSchema = Joi.object({
   signature: signatureSchema
 });
 
+// Gor social groups validation schemas
+export const gorGetGroupsSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const gorAddToGroupSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  group_name: Joi.string().min(1).max(50).required(),
+  target_gorean_id: Joi.number().integer().positive().required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const gorRemoveFromGroupSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  group_name: Joi.string().min(1).max(50).required(),
+  target_gorean_id: Joi.number().integer().positive().required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
+export const gorSearchUsersSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().valid('gor').required(),
+  search: Joi.string().max(100).optional().allow(''),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(50).default(20),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // ========================================
 // Arkana XP Shop Validation Schemas
 // ========================================

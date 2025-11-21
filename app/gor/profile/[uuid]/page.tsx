@@ -14,6 +14,8 @@ import {
   GoreanButton
 } from '@/components/gor/GoreanTheme';
 import { HealthBar, HungerBar, ThirstBar } from '@/components/gor/StatBar';
+import UserGroupList, { GroupMember } from '@/components/gor/UserGroupList';
+import UserSearchModal, { SearchUser } from '@/components/gor/UserSearchModal';
 import skillsData from '@/lib/gor/skills.json';
 import abilitiesData from '@/lib/gor/abilities.json';
 
@@ -175,6 +177,18 @@ export default function GoreanProfilePage() {
   const [eventsLimit, setEventsLimit] = useState(20);
   const [sessionId] = useState(() => crypto.randomUUID());
 
+  // Tab navigation state
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'social'>('dashboard');
+
+  // Social groups state
+  interface Groups {
+    [groupName: string]: GroupMember[];
+  }
+  const [groups, setGroups] = useState<Groups>({ Allies: [], Enemies: [] });
+  const [groupsLoading, setGroupsLoading] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [activeGroupName, setActiveGroupName] = useState<string>('');
+
   const fetchProfileData = useCallback(async () => {
     try {
       setLoading(true);
@@ -206,6 +220,119 @@ export default function GoreanProfilePage() {
 
     fetchProfileData();
   }, [uuid, universe, token, eventsPage, eventsLimit, fetchProfileData]);
+
+  // Social groups functions
+  const fetchGroups = useCallback(async () => {
+    if (!uuid || !token) return;
+
+    setGroupsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/gor/social/groups?player_uuid=${uuid}&universe=gor&token=${token}&sessionId=${sessionId}`
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        setGroups(result.data.groups || { Allies: [], Enemies: [] });
+      }
+    } catch (error) {
+      console.error('Failed to fetch groups:', error);
+    } finally {
+      setGroupsLoading(false);
+    }
+  }, [uuid, token, sessionId]);
+
+  const handleRemoveMember = async (groupName: string, goreanId: number) => {
+    if (!uuid || !token) return;
+
+    try {
+      const response = await fetch('/api/gor/social/groups/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_uuid: uuid,
+          universe: 'gor',
+          group_name: groupName,
+          target_gorean_id: goreanId,
+          token,
+          sessionId
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        await fetchGroups();
+      }
+    } catch (error) {
+      console.error('Failed to remove member:', error);
+    }
+  };
+
+  const handleAddMember = async (goreanId: number) => {
+    if (!uuid || !token || !activeGroupName) return;
+
+    try {
+      const response = await fetch('/api/gor/social/groups/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          player_uuid: uuid,
+          universe: 'gor',
+          group_name: activeGroupName,
+          target_gorean_id: goreanId,
+          token,
+          sessionId
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        await fetchGroups();
+      }
+    } catch (error) {
+      console.error('Failed to add member:', error);
+    }
+  };
+
+  const handleSearchUsers = async (searchTerm: string, page: number): Promise<{
+    users: SearchUser[];
+    pagination: {
+      page: number;
+      totalPages: number;
+      totalCount: number;
+      hasMore: boolean;
+    };
+  }> => {
+    if (!uuid || !token) {
+      return { users: [], pagination: { page: 1, totalPages: 1, totalCount: 0, hasMore: false } };
+    }
+
+    const response = await fetch(
+      `/api/gor/social/users/search?player_uuid=${uuid}&universe=gor&search=${encodeURIComponent(searchTerm)}&page=${page}&limit=20&token=${token}&sessionId=${sessionId}`
+    );
+
+    const result = await response.json();
+    if (result.success) {
+      return {
+        users: result.data.users,
+        pagination: result.data.pagination
+      };
+    }
+
+    return { users: [], pagination: { page: 1, totalPages: 1, totalCount: 0, hasMore: false } };
+  };
+
+  const openAddModal = (groupName: string) => {
+    setActiveGroupName(groupName);
+    setSearchModalOpen(true);
+  };
+
+  // Fetch groups when Social tab is activated
+  useEffect(() => {
+    if (activeTab === 'social') {
+      fetchGroups();
+    }
+  }, [activeTab, fetchGroups]);
 
   const formatCurrency = (gold: number, silver: number, copper: number) => {
     const parts = [];
@@ -374,6 +501,42 @@ export default function GoreanProfilePage() {
           <GoreanDivider ornament className="my-4" />
         </div>
 
+        {/* Tab Navigation */}
+        <nav className="flex justify-center space-x-4 mb-6">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`px-6 py-2 font-semibold rounded-md transition-all ${
+              activeTab === 'dashboard'
+                ? 'shadow-md'
+                : 'hover:opacity-80'
+            }`}
+            style={{
+              backgroundColor: activeTab === 'dashboard' ? GoreanColors.bronze : GoreanColors.parchmentDark,
+              color: activeTab === 'dashboard' ? GoreanColors.charcoal : GoreanColors.stone,
+              border: `2px solid ${activeTab === 'dashboard' ? GoreanColors.bronzeDark : GoreanColors.stone}`
+            }}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('social')}
+            className={`px-6 py-2 font-semibold rounded-md transition-all ${
+              activeTab === 'social'
+                ? 'shadow-md'
+                : 'hover:opacity-80'
+            }`}
+            style={{
+              backgroundColor: activeTab === 'social' ? GoreanColors.bronze : GoreanColors.parchmentDark,
+              color: activeTab === 'social' ? GoreanColors.charcoal : GoreanColors.stone,
+              border: `2px solid ${activeTab === 'social' ? GoreanColors.bronzeDark : GoreanColors.stone}`
+            }}
+          >
+            Social
+          </button>
+        </nav>
+
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
         <GoreanScroll>
           {/* Unified Character Overview Card */}
           <GoreanCard className="mb-6">
@@ -902,6 +1065,45 @@ export default function GoreanProfilePage() {
             </div>
           </GoreanCard>
         </GoreanScroll>
+        )}
+
+        {/* Social Tab */}
+        {activeTab === 'social' && (
+          <div className="space-y-6">
+            {groupsLoading ? (
+              <div className="text-center py-8">
+                <GoreanSpinner />
+                <p className="mt-4" style={{ color: GoreanColors.charcoal }}>
+                  Loading social groups...
+                </p>
+              </div>
+            ) : (
+              <>
+                <UserGroupList
+                  groupName="Allies"
+                  members={groups.Allies || []}
+                  onRemove={(goreanId) => handleRemoveMember('Allies', goreanId)}
+                  onAddClick={() => openAddModal('Allies')}
+                />
+                <UserGroupList
+                  groupName="Enemies"
+                  members={groups.Enemies || []}
+                  onRemove={(goreanId) => handleRemoveMember('Enemies', goreanId)}
+                  onAddClick={() => openAddModal('Enemies')}
+                />
+              </>
+            )}
+
+            {/* Search Modal */}
+            <UserSearchModal
+              isOpen={searchModalOpen}
+              groupName={activeGroupName}
+              onClose={() => setSearchModalOpen(false)}
+              onAdd={handleAddMember}
+              onSearch={handleSearchUsers}
+            />
+          </div>
+        )}
 
         {/* Footer */}
         <footer className="text-center text-sm mt-8" style={{ color: GoreanColors.stone }}>
