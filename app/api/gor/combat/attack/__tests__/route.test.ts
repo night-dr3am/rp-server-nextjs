@@ -718,8 +718,8 @@ describe('POST /api/gor/combat/attack', () => {
 
         // Message should contain Damage: breakdown
         expect(decodedMessage).toContain('Damage:');
-        // Pattern like 2+6+2=10 (normal) or (2+6+2)×2=20 (critical)
-        expect(decodedMessage).toMatch(/(\(?\d+\+\d+\+\d+\)?)(×2)?=\d+/);
+        // Pattern like 2(base)+6(str)+2(skill)=10 (normal) or (2(base)+6(str)+2(skill))×2=20 (critical)
+        expect(decodedMessage).toMatch(/\d+\(base\)\+\d+\(\w+\)\+\d+\(skill\).*=\d+/);
       }
     });
   });

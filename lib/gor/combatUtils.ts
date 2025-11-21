@@ -81,6 +81,32 @@ export const DAMAGE_STAT: Record<GorAttackType, GoreanStatName> = {
   ranged: 'perception'
 };
 
+// Display names for attack types
+export const ATTACK_TYPE_DISPLAY: Record<GorAttackType, string> = {
+  melee_unarmed: 'Melee',
+  melee_weapon: 'Melee',
+  ranged: 'Ranged'
+};
+
+// Display names for weapon types
+export const WEAPON_TYPE_DISPLAY: Record<GorWeaponType, string> = {
+  unarmed: 'Fists',
+  light_weapon: 'Light',
+  medium_weapon: 'Sword',
+  heavy_weapon: 'Heavy',
+  bow: 'Bow',
+  crossbow: 'Crossbow'
+};
+
+// Short stat names for damage display
+export const STAT_SHORT_NAME: Record<GoreanStatName, string> = {
+  strength: 'str',
+  agility: 'agi',
+  intellect: 'int',
+  perception: 'per',
+  charisma: 'cha'
+};
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -234,24 +260,30 @@ export async function calculateAttack(
 
   const defenderBreakdown = `d20(${defenderRoll})+${defenseStatDetails.formattedString}=${defenderTotal}`;
 
-  // Build single-line message
-  // Format: AttackerName d20(roll)+Stat[base](mod)+skill=total vs DefenderName d20(roll)+Stat[base](mod)=total → Result! Damage: breakdown
+  // Build single-line message with attack/weapon type prefix and labeled damage
+  // Format: [AttackType/Weapon] AttackerName d20(roll)+Stat[base](mod)+skill=total vs DefenderName d20(roll)+Stat[base](mod)=total → Result! Damage: breakdown
   let message = '';
 
+  // Get display names for attack and weapon types
+  const attackTypeDisplay = ATTACK_TYPE_DISPLAY[attackType];
+  const weaponDisplay = WEAPON_TYPE_DISPLAY[weaponType];
+  const statShortName = STAT_SHORT_NAME[damageStatName];
+  const attackPrefix = `[${attackTypeDisplay}/${weaponDisplay}]`;
+
   if (isCriticalMiss) {
-    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Miss!`;
+    message = `${attackPrefix} ${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Miss!`;
   } else if (isCritical && hit) {
-    const damageCalc = `(${baseDamage}+${statDamageBonus}+${skillBonus})×2=${damage}`;
-    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Hit! Damage: ${damageCalc}`;
+    const damageCalc = `(${baseDamage}(base)+${statDamageBonus}(${statShortName})+${skillBonus}(skill))×2=${damage}`;
+    message = `${attackPrefix} ${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Critical Hit! Damage: ${damageCalc}`;
   } else if (hit) {
-    let damageCalc = `${baseDamage}+${statDamageBonus}+${skillBonus}`;
+    let damageCalc = `${baseDamage}(base)+${statDamageBonus}(${statShortName})+${skillBonus}(skill)`;
     if (damageReduction > 0) {
-      damageCalc += `-${damageReduction}`;
+      damageCalc += `-${damageReduction}(armor)`;
     }
     damageCalc += `=${damage}`;
-    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Hit! Damage: ${damageCalc}`;
+    message = `${attackPrefix} ${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Hit! Damage: ${damageCalc}`;
   } else {
-    message = `${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Miss!`;
+    message = `${attackPrefix} ${attacker.characterName} ${attackerBreakdown} vs ${target.characterName} ${defenderBreakdown} → Miss!`;
   }
 
   return {
