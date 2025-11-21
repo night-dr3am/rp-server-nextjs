@@ -40,7 +40,10 @@ async function handleRequest(body: Record<string, unknown>) {
   const user = await prisma.user.findFirst({
     where: {
       slUuid: player_uuid,
-      universe: 'gor'
+      universe: {
+        equals: universe,
+        mode: 'insensitive'
+      }
     },
     include: {
       goreanStats: true

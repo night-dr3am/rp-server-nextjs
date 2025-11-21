@@ -24,11 +24,14 @@ import type {
 } from '@/lib/gor/types';
 
 // Helper to get user with goreanStats and stats
-async function getUser(uuid: string) {
+async function getUser(uuid: string, universe: string) {
   return prisma.user.findFirst({
     where: {
       slUuid: uuid,
-      universe: 'gor'
+      universe: {
+        equals: universe,
+        mode: 'insensitive'
+      }
     },
     include: {
       goreanStats: true,
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get caster
-    const caster = await getUser(caster_uuid);
+    const caster = await getUser(caster_uuid, universe);
     if (!caster) {
       return NextResponse.json(
         { success: false, error: 'Caster not found' },
@@ -237,7 +240,7 @@ export async function POST(request: NextRequest) {
     let targetActiveEffects: ActiveEffect[] = [];
 
     if (target_uuid) {
-      target = await getUser(target_uuid);
+      target = await getUser(target_uuid, universe);
       if (!target || !target.goreanStats) {
         return NextResponse.json(
           { success: false, error: 'Target not found' },
@@ -378,7 +381,7 @@ export async function POST(request: NextRequest) {
           effectTargetActiveEffects = affectedPlayers.get(caster_uuid)!.newActiveEffects;
         } else if (targetUuid !== target_uuid) {
           // Load nearby player
-          effectTarget = await getUser(targetUuid);
+          effectTarget = await getUser(targetUuid, universe);
           if (!effectTarget?.goreanStats) continue;
 
           effectTargetActiveEffects = (effectTarget.goreanStats.activeEffects as unknown as ActiveEffect[]) || [];
@@ -500,7 +503,7 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Get the target's data
-        const targetUser = uuid === target_uuid ? target : await getUser(uuid);
+        const targetUser = uuid === target_uuid ? target : await getUser(uuid, universe);
         if (!targetUser?.goreanStats) continue;
 
         newHealth = targetUser.goreanStats.healthCurrent - affected.damageDealt + affected.healingReceived;
