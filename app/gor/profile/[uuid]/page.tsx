@@ -1098,6 +1098,8 @@ export default function GoreanProfilePage() {
             <UserSearchModal
               isOpen={searchModalOpen}
               groupName={activeGroupName}
+              allyIds={(groups.Allies || []).map(m => m.goreanId)}
+              enemyIds={(groups.Enemies || []).map(m => m.goreanId)}
               onClose={() => setSearchModalOpen(false)}
               onAdd={handleAddMember}
               onSearch={handleSearchUsers}

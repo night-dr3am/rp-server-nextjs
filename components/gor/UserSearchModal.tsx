@@ -14,6 +14,8 @@ export interface SearchUser {
 interface UserSearchModalProps {
   isOpen: boolean;
   groupName: string;
+  allyIds?: number[]; // IDs of users in Allies group
+  enemyIds?: number[]; // IDs of users in Enemies group
   onClose: () => void;
   onAdd: (goreanId: number) => Promise<void>;
   onSearch: (searchTerm: string, page: number) => Promise<{
@@ -30,6 +32,8 @@ interface UserSearchModalProps {
 export default function UserSearchModal({
   isOpen,
   groupName,
+  allyIds = [],
+  enemyIds = [],
   onClose,
   onAdd,
   onSearch
@@ -291,16 +295,38 @@ export default function UserSearchModal({
                     </p>
                   </div>
 
-                  {/* Add Button */}
-                  <GoreanButton
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleAdd(user)}
-                    disabled={addingId === user.goreanId}
-                    className="ml-4"
-                  >
-                    {addingId === user.goreanId ? 'Adding...' : 'Add'}
-                  </GoreanButton>
+                  {/* Add Button or Group Badge */}
+                  {allyIds.includes(user.goreanId) ? (
+                    <span
+                      className="ml-4 px-3 py-1 text-sm rounded"
+                      style={{
+                        backgroundColor: GoreanColors.forestGreen,
+                        color: 'white'
+                      }}
+                    >
+                      Ally
+                    </span>
+                  ) : enemyIds.includes(user.goreanId) ? (
+                    <span
+                      className="ml-4 px-3 py-1 text-sm rounded"
+                      style={{
+                        backgroundColor: GoreanColors.bloodRed,
+                        color: 'white'
+                      }}
+                    >
+                      Enemy
+                    </span>
+                  ) : (
+                    <GoreanButton
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleAdd(user)}
+                      disabled={addingId === user.goreanId}
+                      className="ml-4"
+                    >
+                      {addingId === user.goreanId ? 'Adding...' : 'Add'}
+                    </GoreanButton>
+                  )}
                 </div>
               ))}
             </div>

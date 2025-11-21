@@ -74,8 +74,21 @@ export async function GET(request: NextRequest) {
       data: { lastActive: new Date() }
     });
 
-    // Build search filter
-    const searchFilter = search ? {
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Build WHERE clause - must properly combine goreanStats filters
+    // When searching, use OR across characterName, username, slUuid while requiring registrationCompleted
+    const whereClause = search ? {
+      universe: 'gor',
+      id: {
+        not: requestingUser.id // Exclude self from results
+      },
+      goreanStats: {
+        is: {
+          registrationCompleted: true // Only completed registrations
+        }
+      },
       OR: [
         {
           goreanStats: {
@@ -98,26 +111,22 @@ export async function GET(request: NextRequest) {
           }
         }
       ]
-    } : {};
-
-    // Calculate pagination
-    const skip = (page - 1) * limit;
+    } : {
+      universe: 'gor',
+      id: {
+        not: requestingUser.id // Exclude self from results
+      },
+      goreanStats: {
+        is: {
+          registrationCompleted: true // Only completed registrations
+        }
+      }
+    };
 
     // Query users with Gorean characters, excluding the requesting user
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
-        where: {
-          universe: 'gor',
-          id: {
-            not: requestingUser.id // Exclude self from results
-          },
-          goreanStats: {
-            is: {
-              registrationCompleted: true // Only completed registrations
-            }
-          },
-          ...searchFilter
-        },
+        where: whereClause,
         include: {
           goreanStats: {
             select: {
@@ -136,18 +145,7 @@ export async function GET(request: NextRequest) {
         take: limit
       }),
       prisma.user.count({
-        where: {
-          universe: 'gor',
-          id: {
-            not: requestingUser.id
-          },
-          goreanStats: {
-            is: {
-              registrationCompleted: true
-            }
-          },
-          ...searchFilter
-        }
+        where: whereClause
       })
     ]);
 
