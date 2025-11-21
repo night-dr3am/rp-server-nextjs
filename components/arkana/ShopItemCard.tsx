@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Cybernetic, MagicSchool } from '@/lib/arkana/types';
+import { Cybernetic, MagicSchool, CommonPower, ArchetypePower, Perk } from '@/lib/arkana/types';
 
 interface ShopItemCardProps {
-  item: (Cybernetic | MagicSchool) & {
+  item: (Cybernetic | MagicSchool | CommonPower | ArchetypePower | Perk) & {
     owned: boolean;
     eligible: boolean;
     xpCost: number;

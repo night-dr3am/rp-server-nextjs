@@ -163,6 +163,18 @@ export async function POST(request: NextRequest) {
             throw new Error(`You already own this magic school`);
           }
           schoolsBeingPurchased.push(purchase.itemId);
+        } else if (purchase.itemType === 'common_power') {
+          if (arkanaStats.commonPowers.includes(purchase.itemId)) {
+            throw new Error(`You already own this common power`);
+          }
+        } else if (purchase.itemType === 'archetype_power') {
+          if (arkanaStats.archetypePowers.includes(purchase.itemId)) {
+            throw new Error(`You already own this archetype power`);
+          }
+        } else if (purchase.itemType === 'perk') {
+          if (arkanaStats.perks.includes(purchase.itemId)) {
+            throw new Error(`You already own this perk`);
+          }
         }
 
         validatedPurchases.push({
@@ -175,6 +187,9 @@ export async function POST(request: NextRequest) {
       const newCybernetics: string[] = [];
       const newMagicWeaves: string[] = [];
       const newMagicSchools: string[] = [];
+      const newCommonPowers: string[] = [];
+      const newArchetypePowers: string[] = [];
+      const newPerks: string[] = [];
 
       // Process each purchase
       for (const purchase of validatedPurchases) {
@@ -184,6 +199,12 @@ export async function POST(request: NextRequest) {
           newMagicWeaves.push(purchase.itemId);
         } else if (purchase.itemType === 'magic_school') {
           newMagicSchools.push(purchase.itemId);
+        } else if (purchase.itemType === 'common_power') {
+          newCommonPowers.push(purchase.itemId);
+        } else if (purchase.itemType === 'archetype_power') {
+          newArchetypePowers.push(purchase.itemId);
+        } else if (purchase.itemType === 'perk') {
+          newPerks.push(purchase.itemId);
         }
       }
 
@@ -198,6 +219,15 @@ export async function POST(request: NextRequest) {
         },
         magicSchools: {
           push: newMagicSchools
+        },
+        commonPowers: {
+          push: newCommonPowers
+        },
+        archetypePowers: {
+          push: newArchetypePowers
+        },
+        perks: {
+          push: newPerks
         }
       };
 
@@ -229,6 +259,9 @@ export async function POST(request: NextRequest) {
             addedCybernetics: newCybernetics,
             addedMagicWeaves: newMagicWeaves,
             addedMagicSchools: newMagicSchools,
+            addedCommonPowers: newCommonPowers,
+            addedArchetypePowers: newArchetypePowers,
+            addedPerks: newPerks,
             addedSlots: totalSlotsToPurchase
           }
         }
@@ -239,6 +272,9 @@ export async function POST(request: NextRequest) {
         addedCybernetics: newCybernetics,
         addedMagicWeaves: newMagicWeaves,
         addedMagicSchools: newMagicSchools,
+        addedCommonPowers: newCommonPowers,
+        addedArchetypePowers: newArchetypePowers,
+        addedPerks: newPerks,
         addedSlots: totalSlotsToPurchase,
         totalCost
       };

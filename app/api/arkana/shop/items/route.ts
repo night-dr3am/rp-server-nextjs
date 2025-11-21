@@ -5,6 +5,9 @@ import { validateProfileTokenForUser, associateTokenWithSession } from '@/lib/pr
 import {
   getAvailableCybernetics,
   getAvailableMagic,
+  getAvailableCommonPowers,
+  getAvailableArchetypePowers,
+  getAvailablePerks,
   groupCyberneticsForShop,
 } from '@/lib/arkana/shopHelpers';
 import { loadAllData } from '@/lib/arkana/dataLoader';
@@ -106,6 +109,9 @@ export async function GET(request: NextRequest) {
     const ownedCyberneticIds = arkanaStats.cyberneticAugments || [];
     const ownedSchoolIds = arkanaStats.magicSchools || [];
     const ownedWeaveIds = arkanaStats.magicWeaves || [];
+    const ownedCommonPowerIds = arkanaStats.commonPowers || [];
+    const ownedArchetypePowerIds = arkanaStats.archetypePowers || [];
+    const ownedPerkIds = arkanaStats.perks || [];
 
     // Get available cybernetics
     const availableCybernetics = getAvailableCybernetics(ownedCyberneticIds);
@@ -119,11 +125,19 @@ export async function GET(request: NextRequest) {
       ownedWeaveIds
     );
 
+    // Get available powers and perks (filtered by race/archetype)
+    const availableCommonPowers = getAvailableCommonPowers(race, ownedCommonPowerIds);
+    const availableArchetypePowers = getAvailableArchetypePowers(race, archetype, ownedArchetypePowerIds);
+    const availablePerks = getAvailablePerks(race, archetype, ownedPerkIds);
+
     return NextResponse.json({
       success: true,
       data: {
         cybernetics: groupedCybernetics,
         magicSchools: availableMagic,
+        commonPowers: availableCommonPowers,
+        archetypePowers: availableArchetypePowers,
+        perks: availablePerks,
         currentXp: currentXp,
         cyberneticsSlots: {
           current: arkanaStats.cyberneticsSlots || 0,

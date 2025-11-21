@@ -4,7 +4,7 @@ interface ShopItem {
   id: string;
   name: string;
   xpCost: number;
-  itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot';
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot' | 'common_power' | 'archetype_power' | 'perk';
   quantity?: number;
 }
 
@@ -35,6 +35,9 @@ export default function PurchaseConfirmDialog({
   const cybernetics = selectedItems.filter(item => item.itemType === 'cybernetic');
   const magicSchools = selectedItems.filter(item => item.itemType === 'magic_school');
   const magicWeaves = selectedItems.filter(item => item.itemType === 'magic_weave');
+  const archetypePowers = selectedItems.filter(item => item.itemType === 'archetype_power');
+  const commonPowers = selectedItems.filter(item => item.itemType === 'common_power');
+  const perks = selectedItems.filter(item => item.itemType === 'perk');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -125,6 +128,66 @@ export default function PurchaseConfirmDialog({
                   <div
                     key={item.id}
                     className="flex items-center justify-between p-3 bg-gray-800 rounded border border-gray-700"
+                  >
+                    <span className="text-gray-200">{item.name}</span>
+                    <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Archetype Powers Section */}
+          {archetypePowers.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-yellow-400 mb-3">
+                Archetype Powers ({archetypePowers.length})
+              </h3>
+              <div className="space-y-2">
+                {archetypePowers.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-gray-800 rounded border border-yellow-700"
+                  >
+                    <span className="text-gray-200">{item.name}</span>
+                    <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Common Powers Section */}
+          {commonPowers.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-green-400 mb-3">
+                Common Powers ({commonPowers.length})
+              </h3>
+              <div className="space-y-2">
+                {commonPowers.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-gray-800 rounded border border-green-700"
+                  >
+                    <span className="text-gray-200">{item.name}</span>
+                    <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Perks Section */}
+          {perks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-pink-400 mb-3">
+                Perks ({perks.length})
+              </h3>
+              <div className="space-y-2">
+                {perks.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-gray-800 rounded border border-pink-700"
                   >
                     <span className="text-gray-200">{item.name}</span>
                     <span className="text-purple-400 font-semibold">{item.xpCost} XP</span>

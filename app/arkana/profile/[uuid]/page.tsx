@@ -14,11 +14,14 @@ import type {
 import {
   type ShopCybernetic,
   type ShopMagicSchool,
+  type ShopCommonPower,
+  type ShopArchetypePower,
+  type ShopPerk,
 } from '@/lib/arkana/shopHelpers';
 import UserGroupList, { type GroupMember } from '@/components/arkana/UserGroupList';
 import UserSearchModal from '@/components/arkana/UserSearchModal';
 import ShopItemCard from '@/components/arkana/ShopItemCard';
-import ShopCategoryTabs from '@/components/arkana/ShopCategoryTabs';
+import ShopCategoryTabs, { type ShopCategory } from '@/components/arkana/ShopCategoryTabs';
 import MagicSchoolSection from '@/components/arkana/MagicSchoolSection';
 import PurchaseConfirmDialog from '@/components/arkana/PurchaseConfirmDialog';
 
@@ -159,6 +162,9 @@ export default function ArkanaProfilePage() {
   interface ShopData {
     cybernetics: Record<string, ShopCybernetic[]>;
     magicSchools: ShopMagicSchool[];
+    commonPowers: ShopCommonPower[];
+    archetypePowers: ShopArchetypePower[];
+    perks: ShopPerk[];
     currentXp: number;
     cyberneticsSlots: {
       current: number;
@@ -174,10 +180,13 @@ export default function ArkanaProfilePage() {
   const [shopData, setShopData] = useState<ShopData | null>(null);
   const [shopLoading, setShopLoading] = useState(false);
   const [shopError, setShopError] = useState<string | null>(null);
-  const [shopCategory, setShopCategory] = useState<'cybernetics' | 'magic'>('cybernetics');
+  const [shopCategory, setShopCategory] = useState<ShopCategory>('cybernetics');
   const [selectedCybernetics, setSelectedCybernetics] = useState<Set<string>>(new Set());
   const [selectedWeaves, setSelectedWeaves] = useState<Set<string>>(new Set());
   const [selectedSchools, setSelectedSchools] = useState<Set<string>>(new Set());
+  const [selectedCommonPowers, setSelectedCommonPowers] = useState<Set<string>>(new Set());
+  const [selectedArchetypePowers, setSelectedArchetypePowers] = useState<Set<string>>(new Set());
+  const [selectedPerks, setSelectedPerks] = useState<Set<string>>(new Set());
   const [slotsToPurchase, setSlotsToPurchase] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [purchaseProcessing, setPurchaseProcessing] = useState(false);
@@ -546,10 +555,46 @@ export default function ArkanaProfilePage() {
     });
   };
 
+  const handleCommonPowerToggle = (powerId: string) => {
+    setSelectedCommonPowers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(powerId)) {
+        newSet.delete(powerId);
+      } else {
+        newSet.add(powerId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleArchetypePowerToggle = (powerId: string) => {
+    setSelectedArchetypePowers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(powerId)) {
+        newSet.delete(powerId);
+      } else {
+        newSet.add(powerId);
+      }
+      return newSet;
+    });
+  };
+
+  const handlePerkToggle = (perkId: string) => {
+    setSelectedPerks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(perkId)) {
+        newSet.delete(perkId);
+      } else {
+        newSet.add(perkId);
+      }
+      return newSet;
+    });
+  };
+
   const getSelectedItemsWithCosts = () => {
     if (!shopData) return { items: [], totalCost: 0 };
 
-    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot'; quantity?: number }> = [];
+    const items: Array<{ id: string; name: string; xpCost: number; itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'cybernetic_slot' | 'common_power' | 'archetype_power' | 'perk'; quantity?: number }> = [];
 
     // Add cybernetic slots if purchasing any
     if (slotsToPurchase > 0) {
@@ -600,6 +645,42 @@ export default function ArkanaProfilePage() {
           });
         }
       });
+    });
+
+    // Add selected common powers
+    shopData.commonPowers.forEach(power => {
+      if (selectedCommonPowers.has(power.id) && !power.owned) {
+        items.push({
+          id: power.id,
+          name: power.name,
+          xpCost: power.xpCost,
+          itemType: 'common_power'
+        });
+      }
+    });
+
+    // Add selected archetype powers
+    shopData.archetypePowers.forEach(power => {
+      if (selectedArchetypePowers.has(power.id) && !power.owned) {
+        items.push({
+          id: power.id,
+          name: power.name,
+          xpCost: power.xpCost,
+          itemType: 'archetype_power'
+        });
+      }
+    });
+
+    // Add selected perks
+    shopData.perks.forEach(perk => {
+      if (selectedPerks.has(perk.id) && !perk.owned) {
+        items.push({
+          id: perk.id,
+          name: perk.name,
+          xpCost: perk.xpCost,
+          itemType: 'perk'
+        });
+      }
     });
 
     const totalCost = items.reduce((sum, item) => sum + item.xpCost, 0);
@@ -657,6 +738,18 @@ export default function ArkanaProfilePage() {
               magicSchools: [
                 ...profileData.arkanaStats.magicSchools,
                 ...result.data.addedMagicSchools
+              ],
+              commonPowers: [
+                ...profileData.arkanaStats.commonPowers,
+                ...result.data.addedCommonPowers
+              ],
+              archetypePowers: [
+                ...profileData.arkanaStats.archetypePowers,
+                ...result.data.addedArchetypePowers
+              ],
+              perks: [
+                ...profileData.arkanaStats.perks,
+                ...result.data.addedPerks
               ]
             }
           });
@@ -665,6 +758,10 @@ export default function ArkanaProfilePage() {
         // Clear selections
         setSelectedCybernetics(new Set());
         setSelectedWeaves(new Set());
+        setSelectedSchools(new Set());
+        setSelectedCommonPowers(new Set());
+        setSelectedArchetypePowers(new Set());
+        setSelectedPerks(new Set());
         setSlotsToPurchase(0);
 
         // Refresh shop data
@@ -1274,7 +1371,10 @@ export default function ArkanaProfilePage() {
                   onCategoryChange={setShopCategory}
                   counts={{
                     cybernetics: selectedCybernetics.size,
-                    magicWeaves: selectedWeaves.size + selectedSchools.size
+                    magicWeaves: selectedWeaves.size + selectedSchools.size,
+                    archetypePowers: selectedArchetypePowers.size,
+                    commonPowers: selectedCommonPowers.size,
+                    perks: selectedPerks.size
                   }}
                   currentXp={shopData.currentXp}
                   selectedTotalCost={getSelectedItemsWithCosts().totalCost}
@@ -1395,8 +1495,86 @@ export default function ArkanaProfilePage() {
                   </div>
                 )}
 
+                {/* Archetype Powers Category */}
+                {shopCategory === 'archetypePowers' && (
+                  <div className="space-y-4">
+                    {shopData.archetypePowers.filter(p => p.eligible).length === 0 ? (
+                      <div className="text-center py-8 bg-gray-800 border border-gray-700 rounded-lg">
+                        <p className="text-gray-400">
+                          No archetype powers available for your race/archetype, or all have been purchased.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {shopData.archetypePowers.filter(p => p.eligible).map((power) => (
+                          <ShopItemCard
+                            key={power.id}
+                            item={power}
+                            isSelected={selectedArchetypePowers.has(power.id)}
+                            onToggle={handleArchetypePowerToggle}
+                            currentXp={shopData.currentXp}
+                            selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Common Powers Category */}
+                {shopCategory === 'commonPowers' && (
+                  <div className="space-y-4">
+                    {shopData.commonPowers.filter(p => p.eligible).length === 0 ? (
+                      <div className="text-center py-8 bg-gray-800 border border-gray-700 rounded-lg">
+                        <p className="text-gray-400">
+                          No common powers available for your race, or all have been purchased.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {shopData.commonPowers.filter(p => p.eligible).map((power) => (
+                          <ShopItemCard
+                            key={power.id}
+                            item={power}
+                            isSelected={selectedCommonPowers.has(power.id)}
+                            onToggle={handleCommonPowerToggle}
+                            currentXp={shopData.currentXp}
+                            selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Perks Category */}
+                {shopCategory === 'perks' && (
+                  <div className="space-y-4">
+                    {shopData.perks.filter(p => p.eligible).length === 0 ? (
+                      <div className="text-center py-8 bg-gray-800 border border-gray-700 rounded-lg">
+                        <p className="text-gray-400">
+                          No perks available for your race/archetype, or all have been purchased.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {shopData.perks.filter(p => p.eligible).map((perk) => (
+                          <ShopItemCard
+                            key={perk.id}
+                            item={perk}
+                            isSelected={selectedPerks.has(perk.id)}
+                            onToggle={handlePerkToggle}
+                            currentXp={shopData.currentXp}
+                            selectedTotalCost={getSelectedItemsWithCosts().totalCost}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Purchase Button (Fixed Bottom Right) */}
-                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0 || selectedSchools.size > 0 || slotsToPurchase > 0) && (
+                {(selectedCybernetics.size > 0 || selectedWeaves.size > 0 || selectedSchools.size > 0 || slotsToPurchase > 0 || selectedArchetypePowers.size > 0 || selectedCommonPowers.size > 0 || selectedPerks.size > 0) && (
                   <div className="fixed bottom-6 right-6 z-40">
                     <button
                       onClick={() => setShowConfirmDialog(true)}

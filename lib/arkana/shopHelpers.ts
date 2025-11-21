@@ -2,10 +2,16 @@
 import {
   Cybernetic,
   MagicSchool,
+  CommonPower,
+  ArchetypePower,
+  Perk,
 } from './types';
 import {
   getAllCybernetics,
   getAllMagicSchools,
+  getAllCommonPowers,
+  getAllArchPowers,
+  getAllPerks,
   canUseMagic,
   groupCyberneticsBySection as groupCyberneticsOriginal,
   groupMagicSchoolsBySection,
@@ -38,6 +44,25 @@ export interface ShopMagicSchool {
   species?: string;
   owned: boolean;
   weaves: ShopMagicWeave[];
+}
+
+// Shop-specific power/perk interfaces
+export interface ShopCommonPower extends CommonPower {
+  owned: boolean;
+  eligible: boolean;
+  xpCost: number;
+}
+
+export interface ShopArchetypePower extends ArchetypePower {
+  owned: boolean;
+  eligible: boolean;
+  xpCost: number;
+}
+
+export interface ShopPerk extends Perk {
+  owned: boolean;
+  eligible: boolean;
+  xpCost: number;
 }
 
 /**
@@ -226,6 +251,144 @@ export function isEligibleForMagicWeave(weaveId: string, race: string, archetype
 }
 
 /**
+ * Get available common powers for the shop, filtered by race
+ * @param race Character's race
+ * @param ownedPowerIds Array of already owned common power IDs
+ * @returns Array of common powers with shop metadata
+ */
+export function getAvailableCommonPowers(
+  race: string,
+  ownedPowerIds: string[]
+): ShopCommonPower[] {
+  const allPowers = getAllCommonPowers();
+  const ownedSet = new Set(ownedPowerIds);
+
+  return allPowers.map(power => {
+    // Check race eligibility
+    const isEligible = !power.species || lc(power.species) === lc(race) || lc(power.species) === 'all';
+
+    return {
+      ...power,
+      owned: ownedSet.has(power.id),
+      eligible: isEligible,
+      xpCost: power.cost,
+    };
+  });
+}
+
+/**
+ * Get available archetype powers for the shop, filtered by race and archetype
+ * @param race Character's race
+ * @param archetype Character's archetype
+ * @param ownedPowerIds Array of already owned archetype power IDs
+ * @returns Array of archetype powers with shop metadata
+ */
+export function getAvailableArchetypePowers(
+  race: string,
+  archetype: string,
+  ownedPowerIds: string[]
+): ShopArchetypePower[] {
+  const allPowers = getAllArchPowers();
+  const ownedSet = new Set(ownedPowerIds);
+
+  return allPowers.map(power => {
+    // Check race and archetype eligibility
+    const raceMatch = !power.species || lc(power.species) === lc(race) || lc(power.species) === 'all';
+    const archMatch = !power.arch || lc(power.arch) === lc(archetype) || lc(power.arch) === 'all';
+    const isEligible = raceMatch && archMatch;
+
+    return {
+      ...power,
+      owned: ownedSet.has(power.id),
+      eligible: isEligible,
+      xpCost: power.cost,
+    };
+  });
+}
+
+/**
+ * Get available perks for the shop, filtered by race and archetype
+ * @param race Character's race
+ * @param archetype Character's archetype
+ * @param ownedPerkIds Array of already owned perk IDs
+ * @returns Array of perks with shop metadata
+ */
+export function getAvailablePerks(
+  race: string,
+  archetype: string,
+  ownedPerkIds: string[]
+): ShopPerk[] {
+  const allPerks = getAllPerks();
+  const ownedSet = new Set(ownedPerkIds);
+
+  return allPerks.map(perk => {
+    // Check race and archetype eligibility (perks have optional filters)
+    const raceMatch = !perk.species || lc(perk.species) === lc(race) || lc(perk.species) === 'all';
+    const archMatch = !perk.arch || lc(perk.arch) === lc(archetype) || lc(perk.arch) === 'all';
+    const isEligible = raceMatch && archMatch;
+
+    return {
+      ...perk,
+      owned: ownedSet.has(perk.id),
+      eligible: isEligible,
+      xpCost: perk.cost,
+    };
+  });
+}
+
+/**
+ * Get common power by ID
+ */
+export function getCommonPowerById(powerId: string): CommonPower | undefined {
+  return getAllCommonPowers().find(p => p.id === powerId);
+}
+
+/**
+ * Get archetype power by ID
+ */
+export function getArchetypePowerById(powerId: string): ArchetypePower | undefined {
+  return getAllArchPowers().find(p => p.id === powerId);
+}
+
+/**
+ * Get perk by ID
+ */
+export function getPerkById(perkId: string): Perk | undefined {
+  return getAllPerks().find(p => p.id === perkId);
+}
+
+/**
+ * Check if a character is eligible for a common power
+ */
+export function isEligibleForCommonPower(powerId: string, race: string): boolean {
+  const power = getCommonPowerById(powerId);
+  if (!power) return false;
+  return !power.species || lc(power.species) === lc(race) || lc(power.species) === 'all';
+}
+
+/**
+ * Check if a character is eligible for an archetype power
+ */
+export function isEligibleForArchetypePower(powerId: string, race: string, archetype: string): boolean {
+  const power = getArchetypePowerById(powerId);
+  if (!power) return false;
+  const raceMatch = !power.species || lc(power.species) === lc(race) || lc(power.species) === 'all';
+  const archMatch = !power.arch || lc(power.arch) === lc(archetype) || lc(power.arch) === 'all';
+  return raceMatch && archMatch;
+}
+
+/**
+ * Check if a character is eligible for a perk
+ */
+export function isEligibleForPerk(perkId: string, race: string, archetype: string): boolean {
+  const perk = getPerkById(perkId);
+  if (!perk) return false;
+  const raceMatch = !perk.species || lc(perk.species) === lc(race) || lc(perk.species) === 'all';
+  const archMatch = !perk.arch || lc(perk.arch) === lc(archetype) || lc(perk.arch) === 'all';
+  return raceMatch && archMatch;
+}
+
+/**
  * Validate a purchase request
  * @param itemType Type of item being purchased
  * @param itemId Item ID
@@ -235,7 +398,7 @@ export function isEligibleForMagicWeave(weaveId: string, race: string, archetype
  * @returns Validation result with error message if invalid
  */
 export function validatePurchaseItem(
-  itemType: 'cybernetic' | 'magic_weave' | 'magic_school',
+  itemType: 'cybernetic' | 'magic_weave' | 'magic_school' | 'common_power' | 'archetype_power' | 'perk',
   itemId: string,
   xpCost: number,
   race: string,
@@ -283,6 +446,48 @@ export function validatePurchaseItem(
       return { valid: false, error: `Invalid XP cost for ${school.name}. Expected ${school.cost}, got ${xpCost}`, actualCost: school.cost };
     }
     return { valid: true, actualCost: school.cost };
+  }
+
+  if (itemType === 'common_power') {
+    const power = getCommonPowerById(itemId);
+    if (!power) {
+      return { valid: false, error: `Common power not found: ${itemId}` };
+    }
+    if (!isEligibleForCommonPower(itemId, race)) {
+      return { valid: false, error: `You are not eligible to purchase ${power.name}` };
+    }
+    if (power.cost !== xpCost) {
+      return { valid: false, error: `Invalid XP cost for ${power.name}. Expected ${power.cost}, got ${xpCost}`, actualCost: power.cost };
+    }
+    return { valid: true, actualCost: power.cost };
+  }
+
+  if (itemType === 'archetype_power') {
+    const power = getArchetypePowerById(itemId);
+    if (!power) {
+      return { valid: false, error: `Archetype power not found: ${itemId}` };
+    }
+    if (!isEligibleForArchetypePower(itemId, race, archetype)) {
+      return { valid: false, error: `You are not eligible to purchase ${power.name}` };
+    }
+    if (power.cost !== xpCost) {
+      return { valid: false, error: `Invalid XP cost for ${power.name}. Expected ${power.cost}, got ${xpCost}`, actualCost: power.cost };
+    }
+    return { valid: true, actualCost: power.cost };
+  }
+
+  if (itemType === 'perk') {
+    const perk = getPerkById(itemId);
+    if (!perk) {
+      return { valid: false, error: `Perk not found: ${itemId}` };
+    }
+    if (!isEligibleForPerk(itemId, race, archetype)) {
+      return { valid: false, error: `You are not eligible to purchase ${perk.name}` };
+    }
+    if (perk.cost !== xpCost) {
+      return { valid: false, error: `Invalid XP cost for ${perk.name}. Expected ${perk.cost}, got ${xpCost}`, actualCost: perk.cost };
+    }
+    return { valid: true, actualCost: perk.cost };
   }
 
   return { valid: false, error: `Invalid item type: ${itemType}` };

@@ -1109,7 +1109,7 @@ export const arkanaShopPurchaseSchema = Joi.object({
   sessionId: Joi.string().required(),
   purchases: Joi.array().items(
     Joi.object({
-      itemType: Joi.string().valid('cybernetic', 'magic_weave', 'magic_school', 'cybernetic_slot').required(),
+      itemType: Joi.string().valid('cybernetic', 'magic_weave', 'magic_school', 'cybernetic_slot', 'common_power', 'archetype_power', 'perk').required(),
       itemId: Joi.string().required(),
       xpCost: Joi.number().integer().min(0).required(),
       quantity: Joi.number().integer().min(1).max(20).optional() // For slot purchases
