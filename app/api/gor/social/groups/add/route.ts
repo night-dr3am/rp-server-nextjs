@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { gorAddToGroupSchema } from '@/lib/validation';
-import { validateSignature } from '@/lib/signature';
-import { validateProfileTokenForUser } from '@/lib/profileTokenUtils';
+import {
+  authenticateRequest,
+  authErrorResponse,
+  findUserInUniverse,
+  parseUserGroups
+} from '@/lib/socialUtils';
 
 // POST /api/gor/social/groups/add - Add a user to a social group
 export async function POST(request: NextRequest) {
@@ -10,39 +14,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { player_uuid, universe, group_name, target_gorean_id, timestamp, signature, token, sessionId } = body;
 
-    // Support both token-based (web) and signature-based (LSL) authentication
-    if (token) {
-      // Web-based authentication using JWT token with session validation
-      const tokenValidation = await validateProfileTokenForUser(token, player_uuid || '', universe || 'gor', sessionId || undefined);
-      if (!tokenValidation.valid) {
-        return NextResponse.json(
-          { success: false, error: tokenValidation.error || 'Invalid token' },
-          { status: 401 }
-        );
-      }
-    } else {
-      // LSL-based authentication using signature
-      const { error, value } = gorAddToGroupSchema.validate({ player_uuid, universe, group_name, target_gorean_id, timestamp, signature });
-      if (error) {
-        return NextResponse.json(
-          { success: false, error: error.details[0].message },
-          { status: 400 }
-        );
-      }
+    // Authenticate request (supports both token and signature)
+    const authResult = await authenticateRequest(
+      { player_uuid, universe: universe || 'gor', timestamp, signature, token, sessionId, group_name, target_gorean_id },
+      gorAddToGroupSchema
+    );
 
-      const signatureValidation = validateSignature(value.timestamp, value.signature, value.universe);
-      if (!signatureValidation.valid) {
-        return NextResponse.json(
-          { success: false, error: signatureValidation.error || 'Unauthorized' },
-          { status: 401 }
-        );
-      }
+    if (!authResult.success) {
+      return authErrorResponse(authResult);
     }
 
-    // Find the requesting user (case-insensitive)
-    const user = await prisma.user.findFirst({
-      where: { slUuid: player_uuid, universe: { equals: 'gor', mode: 'insensitive' } }
-    });
+    // Find the requesting user
+    const user = await findUserInUniverse(player_uuid, 'gor');
 
     if (!user) {
       return NextResponse.json(
@@ -88,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse current groups
-    const groups = (user.groups as Record<string, number[]>) || {};
+    const groups = parseUserGroups(user.groups);
 
     // Initialize group if it doesn't exist
     if (!groups[group_name]) {

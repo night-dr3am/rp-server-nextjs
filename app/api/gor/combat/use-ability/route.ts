@@ -24,7 +24,7 @@ import type {
   EffectTarget
 } from '@/lib/gor/types';
 
-// Helper to get user with goreanStats and stats
+// Helper to get user with goreanStats, stats, and groups
 async function getUser(uuid: string, universe: string) {
   return prisma.user.findFirst({
     where: {
@@ -39,6 +39,33 @@ async function getUser(uuid: string, universe: string) {
       stats: true
     }
   });
+}
+
+// Filter users by social group membership
+function filterUsersByGroup<T extends { goreanStats: { id: number } | null }>(
+  casterGroups: unknown,
+  users: T[],
+  groupType: 'Allies' | 'Enemies'
+): T[] {
+  // Safely parse groups JSON
+  let groups: Record<string, number[]> = {};
+  try {
+    if (casterGroups && typeof casterGroups === 'object') {
+      groups = casterGroups as Record<string, number[]>;
+    }
+  } catch (e) {
+    console.warn('Failed to parse caster groups:', e);
+    return [];
+  }
+
+  // Get gorean IDs for the specified group
+  const groupMembers = groups[groupType] || [];
+  if (groupMembers.length === 0) return [];
+
+  // Filter users whose goreanStats.id is in the group
+  return users.filter(user =>
+    user.goreanStats && groupMembers.includes(user.goreanStats.id)
+  );
 }
 
 // Check if caster can perform action (not stunned/feared/etc)
@@ -58,12 +85,21 @@ function canPerformAction(liveStats: GorLiveStats | null): { can: boolean; reaso
   return { can: true };
 }
 
+// Type for nearby user with goreanStats for group filtering
+type NearbyUser = {
+  slUuid: string;
+  goreanStats: { id: number } | null;
+};
+
 // Determine which targets should receive an effect based on target type
+// Now supports social group filtering for all_allies/all_enemies target types
 function getEffectTargets(
   effectTarget: EffectTarget | undefined,
   casterUuid: string,
   targetUuid: string | undefined,
-  nearbyUuids: string[]
+  nearbyUuids: string[],
+  casterGroups?: unknown,
+  nearbyUsers?: NearbyUser[]
 ): string[] {
   if (!effectTarget) return [];
 
@@ -75,11 +111,32 @@ function getEffectTargets(
     case 'ally':
       return targetUuid ? [targetUuid] : [];
     case 'all_enemies':
+      // Filter by Enemies social group if available
+      if (casterGroups && nearbyUsers) {
+        const enemies = filterUsersByGroup(casterGroups, nearbyUsers, 'Enemies');
+        return enemies.map(u => u.slUuid);
+      }
       return nearbyUuids.filter(uuid => uuid !== casterUuid);
     case 'all_allies':
+      // Filter by Allies social group if available
+      if (casterGroups && nearbyUsers) {
+        const allies = filterUsersByGroup(casterGroups, nearbyUsers, 'Allies');
+        return allies.map(u => u.slUuid);
+      }
       return nearbyUuids.filter(uuid => uuid !== casterUuid);
     case 'all_enemies_and_self':
+      // Include self + filter by Enemies social group
+      if (casterGroups && nearbyUsers) {
+        const enemies = filterUsersByGroup(casterGroups, nearbyUsers, 'Enemies');
+        return [casterUuid, ...enemies.map(u => u.slUuid)];
+      }
+      return nearbyUuids;
     case 'all_allies_and_self':
+      // Include self + filter by Allies social group
+      if (casterGroups && nearbyUsers) {
+        const allies = filterUsersByGroup(casterGroups, nearbyUsers, 'Allies');
+        return [casterUuid, ...allies.map(u => u.slUuid)];
+      }
       return nearbyUuids;
     case 'area':
       return nearbyUuids;
@@ -279,6 +336,20 @@ export async function POST(request: NextRequest) {
       allNearbyUuids.push(caster_uuid);
     }
 
+    // Fetch nearby users for social group filtering (needed for all_allies/all_enemies)
+    const nearbyUsers = await prisma.user.findMany({
+      where: {
+        slUuid: { in: allNearbyUuids },
+        universe: { equals: universe, mode: 'insensitive' }
+      },
+      select: {
+        slUuid: true,
+        goreanStats: {
+          select: { id: true }
+        }
+      }
+    });
+
     // Track results
     let activationSuccess = true;
     let rollInfo = '';
@@ -361,12 +432,14 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      // Determine targets for this effect
+      // Determine targets for this effect (with social group filtering)
       const effectTargets = getEffectTargets(
         effectDef.target,
         caster_uuid,
         target_uuid,
-        allNearbyUuids
+        allNearbyUuids,
+        caster.groups,
+        nearbyUsers
       );
 
       // Process effect for each target
@@ -590,12 +663,14 @@ export async function POST(request: NextRequest) {
       message += ' → Failed!';
     }
 
-    // Build response
-    const affected = Array.from(affectedPlayers.values()).map(p => ({
-      uuid: p.uuid,
-      name: encodeForLSL(p.name),
-      effects: p.effects
-    }));
+    // Build response - only include players who were actually affected
+    const affected = Array.from(affectedPlayers.values())
+      .filter(p => p.effects.length > 0 || p.damageDealt > 0 || p.healingReceived > 0)
+      .map(p => ({
+        uuid: p.uuid,
+        name: encodeForLSL(p.name),
+        effects: p.effects
+      }));
 
     const casterData = affectedPlayers.get(caster_uuid)!;
     const casterNewHealth = Math.max(0, Math.min(

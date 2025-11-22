@@ -249,5 +249,42 @@
     "damageReduction": 3,
     "target": "self",
     "duration": "turns:2"
+  },
+  {
+    "id": "buff_allies_strength_2",
+    "orderNumber": 28,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": 2,
+    "modifierType": "roll_bonus",
+    "target": "all_allies",
+    "duration": "turns:3"
+  },
+  {
+    "id": "debuff_enemies_strength_2",
+    "orderNumber": 29,
+    "category": "stat_modifier",
+    "stat": "Strength",
+    "modifier": -2,
+    "modifierType": "roll_bonus",
+    "target": "all_enemies",
+    "duration": "turns:3"
+  },
+  {
+    "id": "buff_enemies_and_self_1",
+    "orderNumber": 30,
+    "category": "stat_modifier",
+    "stat": "Charisma",
+    "modifier": 1,
+    "modifierType": "roll_bonus",
+    "target": "all_enemies_and_self",
+    "duration": "turns:3"
+  },
+  {
+    "id": "heal_allies_and_self_5",
+    "orderNumber": 31,
+    "category": "heal",
+    "healFormula": "5",
+    "target": "all_allies_and_self"
   }
 ]

@@ -105,5 +105,89 @@
         "value": 3
       }
     }
+  },
+  {
+    "id": "rally_allies",
+    "orderNumber": 6,
+    "name": "Rally Allies",
+    "desc": "Shout an inspiring rally cry that strengthens your nearby allies.",
+    "category": "social",
+    "cost": 2,
+    "range": 20,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_allies_strength_2"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "intimidate_enemies",
+    "orderNumber": 7,
+    "name": "Intimidate Enemies",
+    "desc": "Unleash a fearsome roar that weakens all nearby enemies.",
+    "category": "combat",
+    "cost": 2,
+    "range": 20,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "debuff_enemies_strength_2"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "group_heal",
+    "orderNumber": 8,
+    "name": "Group Heal",
+    "desc": "Channel healing energy to yourself and all nearby allies.",
+    "category": "survival",
+    "cost": 4,
+    "range": 20,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "heal_allies_and_self_5"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient"],
+      "minStat": {
+        "stat": "Intellect",
+        "value": 2
+      }
+    }
+  },
+  {
+    "id": "war_cry",
+    "orderNumber": 9,
+    "name": "War Cry",
+    "desc": "A battle cry that affects you and your enemies with increased aggression.",
+    "category": "combat",
+    "cost": 2,
+    "range": 20,
+    "targetType": "area",
+    "effects": {
+      "ability": ["check_d20_vs_tn10", "buff_enemies_and_self_1"]
+    },
+    "abilityType": ["ability"],
+    "requirements": {
+      "species": ["sapient", "feline", "canine_like"],
+      "minStat": {
+        "stat": "Charisma",
+        "value": 2
+      }
+    }
   }
 ]
