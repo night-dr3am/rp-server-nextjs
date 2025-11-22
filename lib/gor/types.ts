@@ -448,6 +448,7 @@ export interface GoreanStatsDB {
   // Metadata
   registrationCompleted: boolean;
   gorRole: string;
+  gorAdministrativeRole: string;
   createdAt: Date;
   updatedAt: Date;
 }

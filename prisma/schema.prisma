@@ -355,6 +355,7 @@ model GoreanStats {
   // Metadata
   registrationCompleted Boolean   @default(false) @map("registration_completed")
   gorRole               String    @default("player") @map("gor_role")  // "player" or "admin"
+  gorAdministrativeRole String    @default("player") @map("gor_administrative_role")  // "player", "global_admin", or "region_admin"
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
