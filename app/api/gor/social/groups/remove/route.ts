@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Find the requesting user
+    // Find the requesting user (case-insensitive)
     const user = await prisma.user.findFirst({
-      where: { slUuid: player_uuid, universe: 'gor' }
+      where: { slUuid: player_uuid, universe: { equals: 'gor', mode: 'insensitive' } }
     });
 
     if (!user) {

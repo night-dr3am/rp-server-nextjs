@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify target user is in Arkana universe
-    if (targetArkanaStats.user.universe !== 'arkana') {
+    // Verify target user is in Arkana universe (case-insensitive)
+    if (targetArkanaStats.user.universe?.toLowerCase() !== 'arkana') {
       return NextResponse.json(
         { success: false, error: 'Target user is not in Arkana universe' },
         { status: 400 }

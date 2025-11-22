@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Find the requesting user
+    // Find the requesting user (case-insensitive)
     const user = await prisma.user.findFirst({
-      where: { slUuid: player_uuid, universe: 'gor' }
+      where: { slUuid: player_uuid, universe: { equals: 'gor', mode: 'insensitive' } }
     });
 
     if (!user) {
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify target user is in Gor universe
-    if (targetGoreanStats.user.universe !== 'gor') {
+    // Verify target user is in Gor universe (case-insensitive)
+    if (targetGoreanStats.user.universe?.toLowerCase() !== 'gor') {
       return NextResponse.json(
         { success: false, error: 'Target user is not in Gor universe' },
         { status: 400 }

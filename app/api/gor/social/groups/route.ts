@@ -56,9 +56,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user in Gor universe
+    // Find user in Gor universe (case-insensitive)
     const user = await prisma.user.findFirst({
-      where: { slUuid: player_uuid!, universe: 'gor' }
+      where: { slUuid: player_uuid!, universe: { equals: 'gor', mode: 'insensitive' } }
     });
 
     if (!user) {

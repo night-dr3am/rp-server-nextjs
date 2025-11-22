@@ -58,7 +58,13 @@ export async function GET(request: NextRequest) {
 
     // Verify requesting user exists
     const requestingUser = await prisma.user.findFirst({
-      where: { slUuid: player_uuid || '', universe: 'gor' }
+      where: {
+        slUuid: player_uuid || '',
+        universe: {
+          equals: 'gor',
+          mode: 'insensitive'
+        }
+      }
     });
 
     if (!requestingUser) {
@@ -77,18 +83,8 @@ export async function GET(request: NextRequest) {
     // Calculate pagination
     const skip = (page - 1) * limit;
 
-    // Build WHERE clause - must properly combine goreanStats filters
-    // When searching, use OR across characterName, username, slUuid while requiring registrationCompleted
-    const whereClause = search ? {
-      universe: 'gor',
-      id: {
-        not: requestingUser.id // Exclude self from results
-      },
-      goreanStats: {
-        is: {
-          registrationCompleted: true // Only completed registrations
-        }
-      },
+    // Build optional search filter separately (spread pattern like Arkana)
+    const searchFilter = search ? {
       OR: [
         {
           goreanStats: {
@@ -111,8 +107,14 @@ export async function GET(request: NextRequest) {
           }
         }
       ]
-    } : {
-      universe: 'gor',
+    } : {};
+
+    // Combine required filters with optional search filter
+    const whereClause = {
+      universe: {
+        equals: 'gor',
+        mode: 'insensitive' as const
+      },
       id: {
         not: requestingUser.id // Exclude self from results
       },
@@ -120,7 +122,8 @@ export async function GET(request: NextRequest) {
         is: {
           registrationCompleted: true // Only completed registrations
         }
-      }
+      },
+      ...searchFilter // Spread optional OR conditions
     };
 
     // Query users with Gorean characters, excluding the requesting user

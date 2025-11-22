@@ -56,9 +56,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find user in Arkana universe
+    // Find user in Arkana universe (case-insensitive)
     const user = await prisma.user.findFirst({
-      where: { slUuid: player_uuid!, universe: 'arkana' }
+      where: { slUuid: player_uuid!, universe: { equals: 'arkana', mode: 'insensitive' } }
     });
 
     if (!user) {

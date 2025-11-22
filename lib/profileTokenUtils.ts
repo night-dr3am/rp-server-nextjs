@@ -129,7 +129,7 @@ export async function validateProfileTokenForUser(token: string, requestedUuid: 
     select: { universe: true }
   });
 
-  if (userWithUniverse?.universe !== requestedUniverse) {
+  if (userWithUniverse?.universe?.toLowerCase() !== requestedUniverse?.toLowerCase()) {
     return { valid: false, error: 'Token does not match requested universe' };
   }
 
