@@ -183,7 +183,9 @@ export function applyActiveEffect(
 
   const newEffect: ActiveEffect = {
     effectId: effectDef.id,
-    name: effectDef.description || effectDef.id,
+    name: effectDef.description || (effectDef.controlType
+      ? effectDef.controlType.charAt(0).toUpperCase() + effectDef.controlType.slice(1)
+      : effectDef.id),
     category: effectDef.category,
     turnsRemaining: turnsLeft,
     sceneEffect: effectDef.duration === 'scene',
@@ -488,10 +490,23 @@ export function formatGorEffectsForLSL(activeEffects: ActiveEffect[]): string {
       const sign = effect.modifier > 0 ? '+' : '';
       statEffects.push(`${statName} ${sign}${effect.modifier}(${durationStr})`);
     }
-    // Handle control effects
+    // Handle control effects with detailed display (similar to Arkana)
     else if (effect.category === 'control' && effect.controlType) {
-      const controlName = effect.controlType.charAt(0).toUpperCase() + effect.controlType.slice(1);
-      controlEffects.push(`${controlName}(${durationStr})`);
+      // Use effect name instead of just controlType for more context
+      const effectName = effect.name || effect.controlType.charAt(0).toUpperCase() + effect.controlType.slice(1);
+      const caster = effect.appliedBy || 'Unknown';
+
+      // More detailed duration format
+      let detailedDuration = '';
+      if (effect.sceneEffect || effect.duration === 'scene') {
+        detailedDuration = 'scene';
+      } else if (effect.turnsRemaining === 1) {
+        detailedDuration = '1 turn left';
+      } else if (effect.turnsRemaining) {
+        detailedDuration = `${effect.turnsRemaining} turns left`;
+      }
+
+      controlEffects.push(`${effectName} by ${caster}(${detailedDuration})`);
     }
   }
 
@@ -502,8 +517,8 @@ export function formatGorEffectsForLSL(activeEffects: ActiveEffect[]): string {
   }
 
   if (controlEffects.length > 0) {
-    parts.push('💤 ' + controlEffects.join(', '));
+    parts.push('💤 Control: ' + controlEffects.join(', '));
   }
 
-  return parts.join(' | ');
+  return parts.join('\n');
 }

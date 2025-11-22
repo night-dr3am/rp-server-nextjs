@@ -8,6 +8,7 @@ import {
   expectError,
   cleanupTestData
 } from '@/__tests__/utils/test-helpers';
+import type { ActiveEffect } from '@/lib/gor/types';
 
 // Helper to create test body with signature
 function createRequestBody(data: Record<string, unknown>) {
@@ -1024,6 +1025,145 @@ describe('POST /api/gor/combat/use-ability', () => {
       } else {
         expect(data.data.affected.length).toBe(0);
       }
+    });
+  });
+
+  describe('Control Effects Display Formatting', () => {
+    it('should format control effects with caster name and turns left', async () => {
+      const { formatGorEffectsForLSL } = await import('@/lib/gor/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_stun_1',
+          name: 'Stunning Blow',
+          category: 'control',
+          controlType: 'stun',
+          turnsRemaining: 1,
+          sceneEffect: false,
+          appliedBy: 'Tarl',
+          appliedAt: new Date().toISOString()
+        },
+        {
+          effectId: 'control_fear',
+          name: 'Fearsome Presence',
+          category: 'control',
+          controlType: 'fear',
+          turnsRemaining: 2,
+          sceneEffect: false,
+          appliedBy: 'Vella',
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const formatted = formatGorEffectsForLSL(activeEffects);
+
+      expect(formatted).toContain('💤 Control:');
+      expect(formatted).toContain('Stunning Blow by Tarl(1 turn left)');
+      expect(formatted).toContain('Fearsome Presence by Vella(2 turns left)');
+    });
+
+    it('should format control effects with scene duration', async () => {
+      const { formatGorEffectsForLSL } = await import('@/lib/gor/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_daze',
+          name: 'Mind Fog',
+          category: 'control',
+          controlType: 'daze',
+          turnsRemaining: 0,
+          sceneEffect: true,
+          duration: 'scene',
+          appliedBy: 'Wizard',
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const formatted = formatGorEffectsForLSL(activeEffects);
+
+      expect(formatted).toContain('💤 Control:');
+      expect(formatted).toContain('Mind Fog by Wizard(scene)');
+    });
+
+    it('should show "Unknown" caster when appliedBy is missing', async () => {
+      const { formatGorEffectsForLSL } = await import('@/lib/gor/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_stun_2',
+          name: 'Thunder Strike',
+          category: 'control',
+          controlType: 'stun',
+          turnsRemaining: 2,
+          sceneEffect: false,
+          appliedAt: new Date().toISOString()
+          // appliedBy is intentionally missing
+        }
+      ];
+
+      const formatted = formatGorEffectsForLSL(activeEffects);
+
+      expect(formatted).toContain('💤 Control:');
+      expect(formatted).toContain('Thunder Strike by Unknown(2 turns left)');
+    });
+
+    it('should combine stat effects and control effects correctly', async () => {
+      const { formatGorEffectsForLSL } = await import('@/lib/gor/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'buff_strength_3',
+          name: 'Strength Boost',
+          category: 'stat_modifier',
+          stat: 'Strength',
+          modifier: 3,
+          turnsRemaining: 3,
+          sceneEffect: false,
+          appliedBy: 'Ally',
+          appliedAt: new Date().toISOString()
+        },
+        {
+          effectId: 'control_stun_1',
+          name: 'Stunning Blow',
+          category: 'control',
+          controlType: 'stun',
+          turnsRemaining: 1,
+          sceneEffect: false,
+          appliedBy: 'Enemy',
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const formatted = formatGorEffectsForLSL(activeEffects);
+
+      // Should have both sections separated by newline
+      expect(formatted).toContain('✨ Str +3(3t)');
+      expect(formatted).toContain('\n');
+      expect(formatted).toContain('💤 Control:');
+      expect(formatted).toContain('Stunning Blow by Enemy(1 turn left)');
+    });
+
+    it('should fallback to controlType name when effect name is missing', async () => {
+      const { formatGorEffectsForLSL } = await import('@/lib/gor/effectsUtils');
+
+      const activeEffects: ActiveEffect[] = [
+        {
+          effectId: 'control_charm',
+          // name is intentionally missing
+          category: 'control',
+          controlType: 'charm',
+          turnsRemaining: 3,
+          sceneEffect: false,
+          appliedBy: 'Sorcerer',
+          appliedAt: new Date().toISOString()
+        }
+      ];
+
+      const formatted = formatGorEffectsForLSL(activeEffects);
+
+      expect(formatted).toContain('💤 Control:');
+      // Should capitalize the controlType: "charm" -> "Charm"
+      expect(formatted).toContain('Charm by Sorcerer(3 turns left)');
     });
   });
 });
