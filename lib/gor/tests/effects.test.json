@@ -286,5 +286,16 @@
     "category": "heal",
     "healFormula": "5",
     "target": "all_allies_and_self"
+  },
+  {
+    "id": "buff_defense_all_5",
+    "orderNumber": 32,
+    "category": "stat_modifier",
+    "stat": "all",
+    "modifier": 5,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:1",
+    "description": "Defensive Stance"
   }
 ]

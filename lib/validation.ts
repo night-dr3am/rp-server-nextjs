@@ -663,6 +663,13 @@ export const gorEndSceneSchema = Joi.object({
   signature: signatureSchema
 });
 
+export const gorDefendSchema = Joi.object({
+  player_uuid: uuidSchema,
+  universe: Joi.string().lowercase().valid('gor').required(),
+  timestamp: timestampSchema,
+  signature: signatureSchema
+});
+
 // NPC validation schemas
 export const npcRegistrationSchema = Joi.object({
   npcId: Joi.string().min(1).max(255).required(),

@@ -434,6 +434,28 @@ export function hasControlEffect(
 }
 
 /**
+ * Check if player can perform combat actions (attack, ability, defend)
+ * Returns false with reason if affected by disabling control effects
+ */
+export function canPerformCombatAction(
+  liveStats: GorLiveStats | null | undefined
+): { can: boolean; reason?: string } {
+  if (!liveStats) return { can: true };
+
+  if (liveStats.stun) {
+    return { can: false, reason: 'Cannot perform actions while stunned' };
+  }
+  if (liveStats.sleep) {
+    return { can: false, reason: 'Cannot perform actions while asleep' };
+  }
+  if (liveStats.daze) {
+    return { can: false, reason: 'Cannot perform actions while dazed' };
+  }
+
+  return { can: true };
+}
+
+/**
  * Remove all temporary effects (for scene end)
  * Clears both turn-based and scene-long effects, keeps only permanent effects
  */

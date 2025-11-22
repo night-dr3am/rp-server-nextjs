@@ -405,5 +405,16 @@
     "healFormula": "maxHP * 0.1",
     "target": "self",
     "duration": "immediate"
+  },
+  {
+    "id": "buff_defense_all_5",
+    "orderNumber": 46,
+    "category": "stat_modifier",
+    "stat": "all",
+    "modifier": 5,
+    "modifierType": "roll_bonus",
+    "target": "self",
+    "duration": "turns:1",
+    "description": "Defensive Stance"
   }
 ]

@@ -14,6 +14,7 @@ import {
   processEffectsTurn,
   getDetailedStatCalculation,
   formatGorEffectsForLSL,
+  canPerformCombatAction,
   type GorLiveStats
 } from '@/lib/gor/effectsUtils';
 import type {
@@ -68,22 +69,6 @@ function filterUsersByGroup<T extends { goreanStats: { id: number } | null }>(
   );
 }
 
-// Check if caster can perform action (not stunned/feared/etc)
-function canPerformAction(liveStats: GorLiveStats | null): { can: boolean; reason?: string } {
-  if (!liveStats) return { can: true };
-
-  if (liveStats.stun) {
-    return { can: false, reason: 'Cannot use abilities while stunned' };
-  }
-  if (liveStats.sleep) {
-    return { can: false, reason: 'Cannot use abilities while asleep' };
-  }
-  if (liveStats.daze) {
-    return { can: false, reason: 'Cannot use abilities while dazed' };
-  }
-
-  return { can: true };
-}
 
 // Type for nearby user with goreanStats for group filtering
 type NearbyUser = {
@@ -284,7 +269,7 @@ export async function POST(request: NextRequest) {
     const casterActiveEffects = (caster.goreanStats.activeEffects as unknown as ActiveEffect[]) || [];
     const casterLiveStats = await recalculateLiveStats(casterActiveEffects);
 
-    const actionCheck = canPerformAction(casterLiveStats);
+    const actionCheck = canPerformCombatAction(casterLiveStats);
     if (!actionCheck.can) {
       return NextResponse.json(
         { success: false, error: actionCheck.reason },

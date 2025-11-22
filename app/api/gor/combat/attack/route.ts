@@ -12,7 +12,8 @@ import {
 } from '@/lib/gor/combatUtils';
 import {
   recalculateLiveStats,
-  processEffectsTurn
+  processEffectsTurn,
+  canPerformCombatAction
 } from '@/lib/gor/effectsUtils';
 import type { ActiveEffect } from '@/lib/gor/types';
 
@@ -150,10 +151,11 @@ export async function POST(request: NextRequest) {
     const attackerLiveStats = await recalculateLiveStats(attackerActiveEffects);
     const targetLiveStats = await recalculateLiveStats(targetActiveEffects);
 
-    // Check if attacker is stunned
-    if (attackerLiveStats.stun) {
+    // Check if attacker can perform combat actions (not stunned/asleep/dazed)
+    const actionCheck = canPerformCombatAction(attackerLiveStats);
+    if (!actionCheck.can) {
       return NextResponse.json(
-        { success: false, error: 'Cannot attack while stunned' },
+        { success: false, error: actionCheck.reason },
         { status: 400 }
       );
     }
