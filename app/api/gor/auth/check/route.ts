@@ -154,8 +154,6 @@ export async function GET(request: NextRequest) {
           // Point allocations (for display)
           skillsAllocatedPoints: user.goreanStats.skillsAllocatedPoints,
           skillsSpentPoints: user.goreanStats.skillsSpentPoints,
-          abilitiesAllocatedPoints: user.goreanStats.abilitiesAllocatedPoints,
-          abilitiesSpentPoints: user.goreanStats.abilitiesSpentPoints,
 
           // Metadata
           registrationCompleted: user.goreanStats.registrationCompleted,
@@ -321,8 +319,6 @@ export async function POST(request: NextRequest) {
           // Point allocations (for display)
           skillsAllocatedPoints: user.goreanStats.skillsAllocatedPoints,
           skillsSpentPoints: user.goreanStats.skillsSpentPoints,
-          abilitiesAllocatedPoints: user.goreanStats.abilitiesAllocatedPoints,
-          abilitiesSpentPoints: user.goreanStats.abilitiesSpentPoints,
 
           // Metadata
           registrationCompleted: user.goreanStats.registrationCompleted,
