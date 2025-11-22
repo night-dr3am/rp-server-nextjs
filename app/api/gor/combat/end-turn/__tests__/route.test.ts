@@ -154,7 +154,7 @@ describe('POST /api/gor/combat/end-turn', () => {
 
       expectSuccess(data);
       expect(data.data.effectsRemaining).toBe(0);
-      expect(data.data.healingApplied).toBe(0);
+      expect(data.data).toHaveProperty('displayMessage');
     });
 
     it('should decrement turn-based effect duration', async () => {
@@ -328,8 +328,10 @@ describe('POST /api/gor/combat/end-turn', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      // Healing should be applied (exact amount depends on effect definition)
-      expect(data.data.currentHP).toBeGreaterThanOrEqual(50);
+      // Verify response has displayMessage with turn ended info
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('ended turn');
+      expect(message).toContain('HP:');
     });
 
     it('should cap healing at healthMax', async () => {
@@ -356,8 +358,10 @@ describe('POST /api/gor/combat/end-turn', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.currentHP).toBeLessThanOrEqual(100);
-      expect(data.data.maxHP).toBe(100);
+      // HP in message should show capped value
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('HP:');
+      expect(message).toContain('/100');
     });
 
     it('should not apply healing when no heal effects', async () => {
@@ -386,8 +390,10 @@ describe('POST /api/gor/combat/end-turn', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.healingApplied).toBe(0);
-      expect(data.data.currentHP).toBe(50);
+      // No healing mentioned in message
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).not.toContain('healed');
+      expect(message).toContain('HP: 50/100');
     });
   });
 
@@ -409,13 +415,9 @@ describe('POST /api/gor/combat/end-turn', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data).toHaveProperty('playerName');
+      expect(data.data).toHaveProperty('displayMessage');
       expect(data.data).toHaveProperty('effectsRemaining');
-      expect(data.data).toHaveProperty('healingApplied');
-      expect(data.data).toHaveProperty('currentHP');
-      expect(data.data).toHaveProperty('maxHP');
       expect(data.data).toHaveProperty('effectsDisplay');
-      expect(data.data).toHaveProperty('message');
     });
 
     it('should include effectsDisplay in response', async () => {

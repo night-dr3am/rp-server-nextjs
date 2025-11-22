@@ -85,17 +85,24 @@ export async function POST(request: NextRequest) {
     // Calculate effects removed
     const effectsRemoved = effectsCount - sceneResult.activeEffects.length;
 
-    // Build response message
-    const message = `Scene ended. ${effectsRemoved} temporary effects cleared.`;
+    // Build complete display message with character name
+    const displayParts: string[] = [];
+    displayParts.push(`⏳ ${goreanStats.characterName} ended scene.`);
+
+    if (effectsRemoved > 0) {
+      displayParts.push(`${effectsRemoved} effects cleared.`);
+    } else {
+      displayParts.push(`No effects to clear.`);
+    }
+
+    const displayMessage = displayParts.join(' ');
 
     return NextResponse.json({
       success: true,
       data: {
-        playerName: encodeForLSL(goreanStats.characterName),
-        effectsRemoved,
+        displayMessage: encodeForLSL(displayMessage),
         effectsRemaining: sceneResult.activeEffects.length,
-        effectsDisplay: encodeForLSL(formatGorEffectsForLSL(sceneResult.activeEffects)),
-        message: encodeForLSL(message)
+        effectsDisplay: encodeForLSL(formatGorEffectsForLSL(sceneResult.activeEffects))
       }
     });
   } catch (error) {

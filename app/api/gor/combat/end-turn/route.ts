@@ -95,27 +95,30 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Build response message
-    const messageParts: string[] = [];
-    messageParts.push(`Turn ended. ${turnResult.activeEffects.length} effects remaining.`);
+    // Build complete display message with character name
+    const displayParts: string[] = [];
+    displayParts.push(`⏳ ${goreanStats.characterName} ended turn.`);
 
     if (turnResult.healingApplied > 0) {
-      const healNames = turnResult.healEffectNames.join(', ');
-      messageParts.push(`Healed ${turnResult.healingApplied} HP from: ${healNames}.`);
+      displayParts.push(`+${turnResult.healingApplied} HP healed.`);
     }
 
-    const message = messageParts.join(' ');
+    displayParts.push(`HP: ${newHealth}/${goreanStats.healthMax}.`);
+
+    if (turnResult.activeEffects.length > 0) {
+      displayParts.push(`${turnResult.activeEffects.length} effects remaining.`);
+    } else {
+      displayParts.push(`No active effects.`);
+    }
+
+    const displayMessage = displayParts.join(' ');
 
     return NextResponse.json({
       success: true,
       data: {
-        playerName: encodeForLSL(goreanStats.characterName),
+        displayMessage: encodeForLSL(displayMessage),
         effectsRemaining: turnResult.activeEffects.length,
-        healingApplied: turnResult.healingApplied,
-        currentHP: newHealth,
-        maxHP: goreanStats.healthMax,
-        effectsDisplay: encodeForLSL(formatGorEffectsForLSL(turnResult.activeEffects)),
-        message: encodeForLSL(message)
+        effectsDisplay: encodeForLSL(formatGorEffectsForLSL(turnResult.activeEffects))
       }
     });
   } catch (error) {

@@ -153,8 +153,8 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.effectsRemoved).toBe(0);
       expect(data.data.effectsRemaining).toBe(0);
+      expect(data.data).toHaveProperty('displayMessage');
     });
 
     it('should clear all turn-based effects', async () => {
@@ -190,8 +190,10 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.effectsRemoved).toBe(2);
       expect(data.data.effectsRemaining).toBe(0);
+      // Check message mentions effects cleared
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('2 effects cleared');
 
       // Verify in database
       const updatedUser = await prisma.user.findFirst({
@@ -227,8 +229,9 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.effectsRemoved).toBe(1);
       expect(data.data.effectsRemaining).toBe(0);
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('1 effects cleared');
     });
 
     it('should clear mixed turn-based and scene effects', async () => {
@@ -273,8 +276,9 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.effectsRemoved).toBe(3);
       expect(data.data.effectsRemaining).toBe(0);
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('3 effects cleared');
     });
 
     it('should clear liveStats when all effects removed', async () => {
@@ -331,11 +335,9 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data).toHaveProperty('playerName');
-      expect(data.data).toHaveProperty('effectsRemoved');
+      expect(data.data).toHaveProperty('displayMessage');
       expect(data.data).toHaveProperty('effectsRemaining');
       expect(data.data).toHaveProperty('effectsDisplay');
-      expect(data.data).toHaveProperty('message');
     });
 
     it('should return empty effectsDisplay after clearing', async () => {
@@ -398,7 +400,7 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      const message = decodeURIComponent(data.data.message);
+      const message = decodeURIComponent(data.data.displayMessage);
       expect(message).toContain('2');
       expect(message).toContain('cleared');
     });
@@ -440,8 +442,9 @@ describe('POST /api/gor/combat/end-scene', () => {
       const data = await parseJsonResponse(response);
 
       expectSuccess(data);
-      expect(data.data.effectsRemoved).toBe(2);
       expect(data.data.effectsRemaining).toBe(0);
+      const message = decodeURIComponent(data.data.displayMessage);
+      expect(message).toContain('2 effects cleared');
 
       // Verify control effects cleared from liveStats
       const updatedUser = await prisma.user.findFirst({
